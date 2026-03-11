@@ -1,0 +1,33 @@
+name: Regenerate Client
+
+on:
+  repository_dispatch:
+    types: [openapi-updated]
+  workflow_dispatch:
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch merged OpenAPI spec
+        run: |
+          curl -sL https://raw.githubusercontent.com/hotdata-dev/www.hotdata.dev/main/api/openapi.yaml \
+            -o openapi.yaml
+
+      - name: Generate client
+        run: |
+          npx @openapitools/openapi-generator-cli generate \
+            -i openapi.yaml \
+            -g python \
+            -o generated/ \
+            --additional-properties=packageName=hotdata,projectName=hotdata
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore: regenerate client from updated OpenAPI spec"
+          branch: openapi-update
+          commit-message: "chore: regenerate client from OpenAPI spec"
+          body: "Auto-generated from updated HotData OpenAPI spec."
