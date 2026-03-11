@@ -16,12 +16,15 @@ jobs:
           curl -sL https://raw.githubusercontent.com/hotdata-dev/www.hotdata.dev/main/api/openapi.yaml \
             -o openapi.yaml
 
+      - name: Clean existing source
+        run: rm -rf src/
+
       - name: Generate client
         run: |
           npx @openapitools/openapi-generator-cli generate \
             -i openapi.yaml \
             -g python \
-            -o generated/ \
+            -o . \
             --additional-properties=packageName=hotdata,projectName=hotdata
 
       - name: Create PR
