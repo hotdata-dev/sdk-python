@@ -1,0 +1,33 @@
+# DatasetSource
+
+Dataset source specification
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**columns** | [**Dict[str, ColumnDefinition]**](ColumnDefinition.md) | Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred. | [optional] 
+**format** | **object** |  | [optional] 
+**upload_id** | **str** |  | 
+**inline** | [**InlineData**](InlineData.md) |  | 
+
+## Example
+
+```python
+from hotdata.models.dataset_source import DatasetSource
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of DatasetSource from a JSON string
+dataset_source_instance = DatasetSource.from_json(json)
+# print the JSON string representation of the object
+print(DatasetSource.to_json())
+
+# convert the object into a dict
+dataset_source_dict = dataset_source_instance.to_dict()
+# create an instance of DatasetSource from a dict
+dataset_source_from_dict = DatasetSource.from_dict(dataset_source_dict)
+```
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
