@@ -62,8 +62,8 @@ __all__ = [
     "CreateSavedQueryRequest",
     "CreateSecretRequest",
     "CreateSecretResponse",
-    "CreateWorkspace201Response",
     "CreateWorkspaceRequest",
+    "CreateWorkspaceResponse",
     "DatasetSource",
     "DatasetSourceOneOf",
     "DatasetSourceOneOf1",
@@ -85,7 +85,7 @@ __all__ = [
     "ListSavedQueryVersionsResponse",
     "ListSecretsResponse",
     "ListUploadsResponse",
-    "ListWorkspaces200Response",
+    "ListWorkspacesResponse",
     "QueryRequest",
     "QueryResponse",
     "QueryRunInfo",
@@ -162,8 +162,8 @@ from hotdata.models.create_dataset_response import CreateDatasetResponse as Crea
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest as CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
-from hotdata.models.create_workspace201_response import CreateWorkspace201Response as CreateWorkspace201Response
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
+from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource as DatasetSource
 from hotdata.models.dataset_source_one_of import DatasetSourceOneOf as DatasetSourceOneOf
 from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1 as DatasetSourceOneOf1
@@ -185,7 +185,7 @@ from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse 
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse as ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse as ListSecretsResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse as ListUploadsResponse
-from hotdata.models.list_workspaces200_response import ListWorkspaces200Response as ListWorkspaces200Response
+from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo as QueryRunInfo

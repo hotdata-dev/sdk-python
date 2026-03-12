@@ -7,7 +7,7 @@ Summary of a persisted query result for listing
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **created_at** | **datetime** |  | 
-**error_message** | **object** |  | [optional] 
+**error_message** | **str** |  | [optional] 
 **id** | **str** |  | 
 **status** | **str** |  | 
 

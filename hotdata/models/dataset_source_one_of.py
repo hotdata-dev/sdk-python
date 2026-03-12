@@ -28,7 +28,7 @@ class DatasetSourceOneOf(BaseModel):
     Create from a previously uploaded file
     """ # noqa: E501
     columns: Optional[Dict[str, ColumnDefinition]] = Field(default=None, description="Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred.")
-    format: Optional[Any] = None
+    format: Optional[StrictStr] = None
     upload_id: StrictStr
     __properties: ClassVar[List[str]] = ["columns", "format", "upload_id"]
 

@@ -31,7 +31,7 @@ class ColumnDefinition(BaseModel):
     # data type: str
     oneof_schema_1_validator: Optional[StrictStr] = Field(default=None, description="Simple type name (e.g., \"VARCHAR\", \"INT\", \"DATE\")")
     # data type: ColumnTypeSpec
-    oneof_schema_2_validator: Optional[ColumnTypeSpec] = None
+    oneof_schema_2_validator: Optional[ColumnTypeSpec] = Field(default=None, description="Detailed specification with type and optional properties")
     actual_instance: Optional[Union[ColumnTypeSpec, str]] = None
     one_of_schemas: Set[str] = { "ColumnTypeSpec", "str" }
 

@@ -29,7 +29,7 @@ class TableInfo(BaseModel):
     """ # noqa: E501
     columns: Optional[List[ColumnInfo]] = None
     connection: StrictStr
-    last_sync: Optional[Any] = None
+    last_sync: Optional[StrictStr] = None
     var_schema: StrictStr = Field(alias="schema")
     synced: StrictBool
     table: StrictStr
@@ -81,6 +81,11 @@ class TableInfo(BaseModel):
                 if _item_columns:
                     _items.append(_item_columns.to_dict())
             _dict['columns'] = _items
+        # set to None if columns (nullable) is None
+        # and model_fields_set contains the field
+        if self.columns is None and "columns" in self.model_fields_set:
+            _dict['columns'] = None
+
         # set to None if last_sync (nullable) is None
         # and model_fields_set contains the field
         if self.last_sync is None and "last_sync" in self.model_fields_set:

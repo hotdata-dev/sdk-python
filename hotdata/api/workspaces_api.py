@@ -18,9 +18,9 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr
 from typing import Optional
 from typing_extensions import Annotated
-from hotdata.models.create_workspace201_response import CreateWorkspace201Response
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
-from hotdata.models.list_workspaces200_response import ListWorkspaces200Response
+from hotdata.models.create_workspace_response import CreateWorkspaceResponse
+from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 
 from hotdata.api_client import ApiClient, RequestSerialized
 from hotdata.api_response import ApiResponse
@@ -56,7 +56,7 @@ class WorkspacesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> CreateWorkspace201Response:
+    ) -> CreateWorkspaceResponse:
         """Create a workspace
 
         Creates a new workspace in the specified organization.
@@ -94,7 +94,7 @@ class WorkspacesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "CreateWorkspace201Response",
+            '201': "CreateWorkspaceResponse",
             '400': "Error",
             '401': "Error",
             '403': "Error",
@@ -128,7 +128,7 @@ class WorkspacesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[CreateWorkspace201Response]:
+    ) -> ApiResponse[CreateWorkspaceResponse]:
         """Create a workspace
 
         Creates a new workspace in the specified organization.
@@ -166,7 +166,7 @@ class WorkspacesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "CreateWorkspace201Response",
+            '201': "CreateWorkspaceResponse",
             '400': "Error",
             '401': "Error",
             '403': "Error",
@@ -238,7 +238,7 @@ class WorkspacesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "CreateWorkspace201Response",
+            '201': "CreateWorkspaceResponse",
             '400': "Error",
             '401': "Error",
             '403': "Error",
@@ -345,7 +345,7 @@ class WorkspacesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ListWorkspaces200Response:
+    ) -> ListWorkspacesResponse:
         """List workspaces
 
         Lists all workspaces in the user's organization.
@@ -383,7 +383,7 @@ class WorkspacesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListWorkspaces200Response",
+            '200': "ListWorkspacesResponse",
             '401': "Error",
             '403': "Error",
             '404': "Error",
@@ -415,7 +415,7 @@ class WorkspacesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[ListWorkspaces200Response]:
+    ) -> ApiResponse[ListWorkspacesResponse]:
         """List workspaces
 
         Lists all workspaces in the user's organization.
@@ -453,7 +453,7 @@ class WorkspacesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListWorkspaces200Response",
+            '200': "ListWorkspacesResponse",
             '401': "Error",
             '403': "Error",
             '404': "Error",
@@ -523,7 +523,7 @@ class WorkspacesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListWorkspaces200Response",
+            '200': "ListWorkspacesResponse",
             '401': "Error",
             '403': "Error",
             '404': "Error",

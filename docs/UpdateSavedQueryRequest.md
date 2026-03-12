@@ -6,11 +6,11 @@ Request body for PUT /v1/queries/{id}
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**category_override** | **object** | Override the auto-detected category. Send &#x60;null&#x60; to clear (revert to auto). | [optional] 
-**description** | **object** |  | [optional] 
-**name** | **object** | Optional new name. When omitted the existing name is preserved. | [optional] 
-**sql** | **object** | Optional new SQL. When omitted the existing SQL is preserved. | [optional] 
-**table_size_override** | **object** | User annotation for table size. Send &#x60;null&#x60; to clear. | [optional] 
+**category_override** | **str** | Override the auto-detected category. Send &#x60;null&#x60; to clear (revert to auto). | [optional] 
+**description** | **str** |  | [optional] 
+**name** | **str** | Optional new name. When omitted the existing name is preserved. | [optional] 
+**sql** | **str** | Optional new SQL. When omitted the existing SQL is preserved. | [optional] 
+**table_size_override** | **str** | User annotation for table size. Send &#x60;null&#x60; to clear. | [optional] 
 **tags** | **List[str]** |  | [optional] 
 
 ## Example

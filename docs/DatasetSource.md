@@ -7,7 +7,7 @@ Dataset source specification
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **columns** | [**Dict[str, ColumnDefinition]**](ColumnDefinition.md) | Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred. | [optional] 
-**format** | **object** |  | [optional] 
+**format** | **str** |  | [optional] 
 **upload_id** | **str** |  | 
 **inline** | [**InlineData**](InlineData.md) |  | 
 

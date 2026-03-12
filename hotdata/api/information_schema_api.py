@@ -39,7 +39,7 @@ class InformationSchemaApi:
 
 
     @validate_call
-    def information_schema_handler(
+    def information_schema(
         self,
         connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name (supports % wildcards)")] = None,
@@ -98,7 +98,7 @@ class InformationSchemaApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._information_schema_handler_serialize(
+        _param = self._information_schema_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -127,7 +127,7 @@ class InformationSchemaApi:
 
 
     @validate_call
-    def information_schema_handler_with_http_info(
+    def information_schema_with_http_info(
         self,
         connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name (supports % wildcards)")] = None,
@@ -186,7 +186,7 @@ class InformationSchemaApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._information_schema_handler_serialize(
+        _param = self._information_schema_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -215,7 +215,7 @@ class InformationSchemaApi:
 
 
     @validate_call
-    def information_schema_handler_without_preload_content(
+    def information_schema_without_preload_content(
         self,
         connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name (supports % wildcards)")] = None,
@@ -274,7 +274,7 @@ class InformationSchemaApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._information_schema_handler_serialize(
+        _param = self._information_schema_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -298,7 +298,7 @@ class InformationSchemaApi:
         return response_data.response
 
 
-    def _information_schema_handler_serialize(
+    def _information_schema_serialize(
         self,
         connection_id,
         var_schema,
@@ -368,6 +368,7 @@ class InformationSchemaApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(

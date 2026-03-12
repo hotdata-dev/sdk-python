@@ -31,10 +31,10 @@ class QueryResponse(BaseModel):
     execution_time_ms: Annotated[int, Field(strict=True, ge=0)]
     nullable: List[StrictBool] = Field(description="Nullable flags for each column (parallel to columns vec). True if the column allows NULL values, false if NOT NULL.")
     query_run_id: StrictStr = Field(description="Unique identifier for the query run record (qrun...).")
-    result_id: Optional[Any] = Field(default=None, description="Unique identifier for retrieving this result via GET /results/{id}. Null if catalog registration failed (see `warning` field for details). When non-null, the result is being persisted asynchronously.")
+    result_id: Optional[StrictStr] = Field(default=None, description="Unique identifier for retrieving this result via GET /results/{id}. Null if catalog registration failed (see `warning` field for details). When non-null, the result is being persisted asynchronously.")
     row_count: Annotated[int, Field(strict=True, ge=0)]
-    rows: List[List[Any]]
-    warning: Optional[Any] = Field(default=None, description="Warning message if result persistence could not be initiated. When present, `result_id` will be null and the result cannot be retrieved later. The query results are still returned in this response.")
+    rows: List[List[StrictStr]] = Field(description="Array of rows, where each row is an array of column values. Values can be strings, numbers, booleans, or null.")
+    warning: Optional[StrictStr] = Field(default=None, description="Warning message if result persistence could not be initiated. When present, `result_id` will be null and the result cannot be retrieved later. The query results are still returned in this response.")
     __properties: ClassVar[List[str]] = ["columns", "execution_time_ms", "nullable", "query_run_id", "result_id", "row_count", "rows", "warning"]
 
     model_config = ConfigDict(

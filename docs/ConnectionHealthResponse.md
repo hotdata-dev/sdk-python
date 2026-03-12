@@ -7,7 +7,7 @@ Response body for GET /connections/{connection_id}/health
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **connection_id** | **str** |  | 
-**error** | **object** |  | [optional] 
+**error** | **str** |  | [optional] 
 **healthy** | **bool** |  | 
 **latency_ms** | **int** |  | 
 

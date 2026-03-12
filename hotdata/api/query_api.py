@@ -37,7 +37,7 @@ class QueryApi:
 
 
     @validate_call
-    def query_handler(
+    def query(
         self,
         query_request: QueryRequest,
         _request_timeout: Union[
@@ -81,7 +81,7 @@ class QueryApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._query_handler_serialize(
+        _param = self._query_serialize(
             query_request=query_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -106,7 +106,7 @@ class QueryApi:
 
 
     @validate_call
-    def query_handler_with_http_info(
+    def query_with_http_info(
         self,
         query_request: QueryRequest,
         _request_timeout: Union[
@@ -150,7 +150,7 @@ class QueryApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._query_handler_serialize(
+        _param = self._query_serialize(
             query_request=query_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -175,7 +175,7 @@ class QueryApi:
 
 
     @validate_call
-    def query_handler_without_preload_content(
+    def query_without_preload_content(
         self,
         query_request: QueryRequest,
         _request_timeout: Union[
@@ -219,7 +219,7 @@ class QueryApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._query_handler_serialize(
+        _param = self._query_serialize(
             query_request=query_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -239,7 +239,7 @@ class QueryApi:
         return response_data.response
 
 
-    def _query_handler_serialize(
+    def _query_serialize(
         self,
         query_request,
         _request_auth,
@@ -295,6 +295,7 @@ class QueryApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(

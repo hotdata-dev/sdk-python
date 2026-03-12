@@ -28,7 +28,7 @@ class CreateConnectionResponse(BaseModel):
     """
     Response body for POST /connections
     """ # noqa: E501
-    discovery_error: Optional[Any] = None
+    discovery_error: Optional[StrictStr] = None
     discovery_status: DiscoveryStatus
     id: StrictStr
     name: StrictStr

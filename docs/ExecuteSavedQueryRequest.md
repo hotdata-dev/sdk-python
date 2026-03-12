@@ -6,7 +6,7 @@ Request body for POST /v1/queries/{id}/execute
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**version** | **object** |  | [optional] 
+**version** | **int** |  | [optional] 
 
 ## Example
 

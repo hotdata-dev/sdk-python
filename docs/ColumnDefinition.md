@@ -6,10 +6,10 @@ Column type specification - either a simple type string or detailed spec with pr
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**geometry_type** | **object** | Geometry type for GEOMETRY/GEOGRAPHY columns. E.g., \&quot;Point\&quot;, \&quot;LineString\&quot;, \&quot;Polygon\&quot;, \&quot;MultiPoint\&quot;, \&quot;MultiLineString\&quot;, \&quot;MultiPolygon\&quot;, \&quot;GeometryCollection\&quot;, or \&quot;Geometry\&quot; (any). | [optional] 
-**precision** | **object** | Precision for DECIMAL type (1-38) | [optional] 
-**scale** | **object** | Scale for DECIMAL type | [optional] 
-**srid** | **object** | Spatial Reference System Identifier for GEOMETRY/GEOGRAPHY types. Common values: 4326 (WGS84), 3857 (Web Mercator). | [optional] 
+**geometry_type** | **str** | Geometry type for GEOMETRY/GEOGRAPHY columns. E.g., \&quot;Point\&quot;, \&quot;LineString\&quot;, \&quot;Polygon\&quot;, \&quot;MultiPoint\&quot;, \&quot;MultiLineString\&quot;, \&quot;MultiPolygon\&quot;, \&quot;GeometryCollection\&quot;, or \&quot;Geometry\&quot; (any). | [optional] 
+**precision** | **int** | Precision for DECIMAL type (1-38) | [optional] 
+**scale** | **int** | Scale for DECIMAL type | [optional] 
+**srid** | **int** | Spatial Reference System Identifier for GEOMETRY/GEOGRAPHY types. Common values: 4326 (WGS84), 3857 (Web Mercator). | [optional] 
 **type** | **str** | The data type name (e.g., \&quot;DECIMAL\&quot;, \&quot;TIMESTAMP\&quot;, \&quot;GEOMETRY\&quot;) | 
 
 ## Example

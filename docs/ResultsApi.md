@@ -4,12 +4,12 @@ All URIs are relative to *https://app.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_result_handler**](ResultsApi.md#get_result_handler) | **GET** /v1/results/{id} | Get result
-[**list_results_handler**](ResultsApi.md#list_results_handler) | **GET** /v1/results | List results
+[**get_result**](ResultsApi.md#get_result) | **GET** /v1/results/{id} | Get result
+[**list_results**](ResultsApi.md#list_results) | **GET** /v1/results | List results
 
 
-# **get_result_handler**
-> GetResultResponse get_result_handler(id)
+# **get_result**
+> GetResultResponse get_result(id)
 
 Get result
 
@@ -17,6 +17,7 @@ Retrieve a persisted query result by ID. If the result is still being processed,
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -30,6 +31,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -39,11 +49,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Get result
-        api_response = api_instance.get_result_handler(id)
-        print("The response of ResultsApi->get_result_handler:\n")
+        api_response = api_instance.get_result(id)
+        print("The response of ResultsApi->get_result:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ResultsApi->get_result_handler: %s\n" % e)
+        print("Exception when calling ResultsApi->get_result: %s\n" % e)
 ```
 
 
@@ -61,7 +71,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -77,13 +87,14 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **list_results_handler**
-> ListResultsResponse list_results_handler(limit=limit, offset=offset)
+# **list_results**
+> ListResultsResponse list_results(limit=limit, offset=offset)
 
 List results
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -97,6 +108,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -107,11 +127,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # List results
-        api_response = api_instance.list_results_handler(limit=limit, offset=offset)
-        print("The response of ResultsApi->list_results_handler:\n")
+        api_response = api_instance.list_results(limit=limit, offset=offset)
+        print("The response of ResultsApi->list_results:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ResultsApi->list_results_handler: %s\n" % e)
+        print("Exception when calling ResultsApi->list_results: %s\n" % e)
 ```
 
 
@@ -130,7 +150,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
