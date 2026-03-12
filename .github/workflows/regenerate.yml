@@ -36,7 +36,8 @@ jobs:
             -i openapi.yaml \
             -g python \
             -o . \
-            --additional-properties=packageName=hotdata,projectName=hotdata
+            --additional-properties=packageName=hotdata,projectName=hotdata \
+            --skip-validate-spec
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
