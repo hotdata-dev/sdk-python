@@ -41,6 +41,9 @@ jobs:
             --additional-properties=packageName=hotdata,projectName=hotdata \
             --skip-validate-spec
 
+      - name: Remove generated workflow files
+        run: rm -rf .github/workflows/python.yml
+
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
