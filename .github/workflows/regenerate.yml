@@ -46,11 +46,20 @@ jobs:
           rm -f openapi.yaml
           rm -f .github/workflows/python.yml
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify generated client imports
+        run: |
+          pip install -r requirements.txt
+          python -c "import hotdata"
+
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.app-token.outputs.token }}
           title: "chore: regenerate client from updated OpenAPI spec"
-          branch: openapi-update
+          branch: openapi-update-${{ github.run_id }}
           commit-message: "chore: regenerate client from OpenAPI spec"
           body: "Auto-generated from updated HotData OpenAPI spec."
