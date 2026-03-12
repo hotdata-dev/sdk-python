@@ -7,11 +7,11 @@ Response body for GET /results/{id} Returns status and optionally the result dat
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **columns** | **List[str]** |  | [optional] 
-**error_message** | **object** |  | [optional] 
+**error_message** | **str** |  | [optional] 
 **nullable** | **List[bool]** |  | [optional] 
 **result_id** | **str** |  | 
-**row_count** | **object** |  | [optional] 
-**rows** | **List[List[object]]** |  | [optional] 
+**row_count** | **int** |  | [optional] 
+**rows** | **List[List[str]]** | Array of rows, where each row is an array of column values. | [optional] 
 **status** | **str** |  | 
 
 ## Example

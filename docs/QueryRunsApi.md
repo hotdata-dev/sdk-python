@@ -4,16 +4,17 @@ All URIs are relative to *https://app.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**list_query_runs_handler**](QueryRunsApi.md#list_query_runs_handler) | **GET** /v1/query-runs | List query runs
+[**list_query_runs**](QueryRunsApi.md#list_query_runs) | **GET** /v1/query-runs | List query runs
 
 
-# **list_query_runs_handler**
-> ListQueryRunsResponse list_query_runs_handler(limit=limit, cursor=cursor)
+# **list_query_runs**
+> ListQueryRunsResponse list_query_runs(limit=limit, cursor=cursor)
 
 List query runs
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -27,6 +28,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -37,11 +47,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # List query runs
-        api_response = api_instance.list_query_runs_handler(limit=limit, cursor=cursor)
-        print("The response of QueryRunsApi->list_query_runs_handler:\n")
+        api_response = api_instance.list_query_runs(limit=limit, cursor=cursor)
+        print("The response of QueryRunsApi->list_query_runs:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling QueryRunsApi->list_query_runs_handler: %s\n" % e)
+        print("Exception when calling QueryRunsApi->list_query_runs: %s\n" % e)
 ```
 
 
@@ -60,7 +70,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

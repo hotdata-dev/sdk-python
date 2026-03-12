@@ -19,7 +19,6 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from hotdata.models.column_definition import ColumnDefinition
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,7 +26,7 @@ class InlineData(BaseModel):
     """
     Inline data specification
     """ # noqa: E501
-    columns: Optional[Dict[str, ColumnDefinition]] = Field(default=None, description="Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred.")
+    columns: Optional[Dict[str, StrictStr]] = Field(default=None, description="Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred.")
     content: StrictStr
     format: StrictStr
     __properties: ClassVar[List[str]] = ["columns", "content", "format"]
@@ -71,13 +70,6 @@ class InlineData(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each value in columns (dict)
-        _field_dict = {}
-        if self.columns:
-            for _key_columns in self.columns:
-                if self.columns[_key_columns]:
-                    _field_dict[_key_columns] = self.columns[_key_columns].to_dict()
-            _dict['columns'] = _field_dict
         return _dict
 
     @classmethod
@@ -90,12 +82,7 @@ class InlineData(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "columns": dict(
-                (_k, ColumnDefinition.from_dict(_v))
-                for _k, _v in obj["columns"].items()
-            )
-            if obj.get("columns") is not None
-            else None,
+            "columns": obj.get("columns"),
             "content": obj.get("content"),
             "format": obj.get("format")
         })

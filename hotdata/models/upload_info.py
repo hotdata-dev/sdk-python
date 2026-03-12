@@ -27,7 +27,7 @@ class UploadInfo(BaseModel):
     """
     Single upload info for listing
     """ # noqa: E501
-    content_type: Optional[Any] = None
+    content_type: Optional[StrictStr] = None
     created_at: datetime
     id: StrictStr
     size_bytes: StrictInt

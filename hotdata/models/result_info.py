@@ -28,7 +28,7 @@ class ResultInfo(BaseModel):
     Summary of a persisted query result for listing
     """ # noqa: E501
     created_at: datetime
-    error_message: Optional[Any] = None
+    error_message: Optional[StrictStr] = None
     id: StrictStr
     status: StrictStr
     __properties: ClassVar[List[str]] = ["created_at", "error_message", "id", "status"]

@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **count** | **int** |  | 
 **has_more** | **bool** |  | 
 **limit** | **int** |  | 
-**next_cursor** | **object** |  | [optional] 
+**next_cursor** | **str** |  | [optional] 
 **tables** | [**List[TableInfo]**](TableInfo.md) |  | 
 
 ## Example

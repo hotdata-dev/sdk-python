@@ -27,8 +27,8 @@ class RefreshWarning(BaseModel):
     Non-fatal warning that occurred during a refresh operation. Used to report issues like failed deletion scheduling that don't prevent the refresh from succeeding.
     """ # noqa: E501
     message: StrictStr
-    schema_name: Optional[Any] = None
-    table_name: Optional[Any] = None
+    schema_name: Optional[StrictStr] = None
+    table_name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["message", "schema_name", "table_name"]
 
     model_config = ConfigDict(

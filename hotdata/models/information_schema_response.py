@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
 from hotdata.models.table_info import TableInfo
@@ -31,7 +31,7 @@ class InformationSchemaResponse(BaseModel):
     count: Annotated[int, Field(strict=True, ge=0)]
     has_more: StrictBool
     limit: Annotated[int, Field(strict=True, ge=0)]
-    next_cursor: Optional[Any] = None
+    next_cursor: Optional[StrictStr] = None
     tables: List[TableInfo]
     __properties: ClassVar[List[str]] = ["count", "has_more", "limit", "next_cursor", "tables"]
 

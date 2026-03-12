@@ -4,15 +4,15 @@ All URIs are relative to *https://app.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**create_secret_handler**](SecretsApi.md#create_secret_handler) | **POST** /v1/secrets | Create secret
-[**delete_secret_handler**](SecretsApi.md#delete_secret_handler) | **DELETE** /v1/secrets/{name} | Delete secret
-[**get_secret_handler**](SecretsApi.md#get_secret_handler) | **GET** /v1/secrets/{name} | Get secret
-[**list_secrets_handler**](SecretsApi.md#list_secrets_handler) | **GET** /v1/secrets | List secrets
-[**update_secret_handler**](SecretsApi.md#update_secret_handler) | **PUT** /v1/secrets/{name} | Update secret
+[**create_secret**](SecretsApi.md#create_secret) | **POST** /v1/secrets | Create secret
+[**delete_secret**](SecretsApi.md#delete_secret) | **DELETE** /v1/secrets/{name} | Delete secret
+[**get_secret**](SecretsApi.md#get_secret) | **GET** /v1/secrets/{name} | Get secret
+[**list_secrets**](SecretsApi.md#list_secrets) | **GET** /v1/secrets | List secrets
+[**update_secret**](SecretsApi.md#update_secret) | **PUT** /v1/secrets/{name} | Update secret
 
 
-# **create_secret_handler**
-> CreateSecretResponse create_secret_handler(create_secret_request)
+# **create_secret**
+> CreateSecretResponse create_secret(create_secret_request)
 
 Create secret
 
@@ -20,6 +20,7 @@ Store a new named secret. The value is encrypted at rest and can be referenced b
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -34,6 +35,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -43,11 +53,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Create secret
-        api_response = api_instance.create_secret_handler(create_secret_request)
-        print("The response of SecretsApi->create_secret_handler:\n")
+        api_response = api_instance.create_secret(create_secret_request)
+        print("The response of SecretsApi->create_secret:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->create_secret_handler: %s\n" % e)
+        print("Exception when calling SecretsApi->create_secret: %s\n" % e)
 ```
 
 
@@ -65,7 +75,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -81,13 +91,14 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **delete_secret_handler**
-> delete_secret_handler(name)
+# **delete_secret**
+> delete_secret(name)
 
 Delete secret
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -100,6 +111,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -109,9 +129,9 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Delete secret
-        api_instance.delete_secret_handler(name)
+        api_instance.delete_secret(name)
     except Exception as e:
-        print("Exception when calling SecretsApi->delete_secret_handler: %s\n" % e)
+        print("Exception when calling SecretsApi->delete_secret: %s\n" % e)
 ```
 
 
@@ -129,7 +149,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -145,8 +165,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **get_secret_handler**
-> GetSecretResponse get_secret_handler(name)
+# **get_secret**
+> GetSecretResponse get_secret(name)
 
 Get secret
 
@@ -154,6 +174,7 @@ Get metadata for a secret. The secret value is never returned.
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -167,6 +188,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -176,11 +206,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Get secret
-        api_response = api_instance.get_secret_handler(name)
-        print("The response of SecretsApi->get_secret_handler:\n")
+        api_response = api_instance.get_secret(name)
+        print("The response of SecretsApi->get_secret:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->get_secret_handler: %s\n" % e)
+        print("Exception when calling SecretsApi->get_secret: %s\n" % e)
 ```
 
 
@@ -198,7 +228,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -214,8 +244,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **list_secrets_handler**
-> ListSecretsResponse list_secrets_handler()
+# **list_secrets**
+> ListSecretsResponse list_secrets()
 
 List secrets
 
@@ -223,6 +253,7 @@ List all stored secrets. Only metadata (name, timestamps) is returned — secret
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -236,6 +267,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -244,11 +284,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # List secrets
-        api_response = api_instance.list_secrets_handler()
-        print("The response of SecretsApi->list_secrets_handler:\n")
+        api_response = api_instance.list_secrets()
+        print("The response of SecretsApi->list_secrets:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->list_secrets_handler: %s\n" % e)
+        print("Exception when calling SecretsApi->list_secrets: %s\n" % e)
 ```
 
 
@@ -263,7 +303,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -278,13 +318,14 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **update_secret_handler**
-> UpdateSecretResponse update_secret_handler(name, update_secret_request)
+# **update_secret**
+> UpdateSecretResponse update_secret(name, update_secret_request)
 
 Update secret
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -299,6 +340,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -309,11 +359,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Update secret
-        api_response = api_instance.update_secret_handler(name, update_secret_request)
-        print("The response of SecretsApi->update_secret_handler:\n")
+        api_response = api_instance.update_secret(name, update_secret_request)
+        print("The response of SecretsApi->update_secret:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->update_secret_handler: %s\n" % e)
+        print("Exception when calling SecretsApi->update_secret: %s\n" % e)
 ```
 
 
@@ -332,7 +382,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

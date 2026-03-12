@@ -7,7 +7,7 @@ A distinct value with its frequency count, used in categorical profiles.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **count** | **int** | Number of occurrences | 
-**value** | **object** | The distinct value (as a string, or null) | 
+**value** | **str** | The distinct value (as a string, or null) | [optional] 
 
 ## Example
 

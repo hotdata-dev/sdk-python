@@ -16,7 +16,6 @@
 from hotdata.models.api_error_detail import ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse
 from hotdata.models.category_value_info import CategoryValueInfo
-from hotdata.models.column_definition import ColumnDefinition
 from hotdata.models.column_info import ColumnInfo
 from hotdata.models.column_profile_detail import ColumnProfileDetail
 from hotdata.models.column_profile_detail_one_of import ColumnProfileDetailOneOf
@@ -37,8 +36,8 @@ from hotdata.models.create_dataset_response import CreateDatasetResponse
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse
-from hotdata.models.create_workspace201_response import CreateWorkspace201Response
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
+from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource
 from hotdata.models.dataset_source_one_of import DatasetSourceOneOf
 from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1
@@ -60,7 +59,7 @@ from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse
-from hotdata.models.list_workspaces200_response import ListWorkspaces200Response
+from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo

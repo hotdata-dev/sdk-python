@@ -6,8 +6,8 @@ Request body for PUT /v1/datasets/{id}
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**label** | **object** |  | [optional] 
-**table_name** | **object** |  | [optional] 
+**label** | **str** |  | [optional] 
+**table_name** | **str** |  | [optional] 
 
 ## Example
 

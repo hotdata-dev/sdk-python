@@ -17,8 +17,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,10 +27,10 @@ class ColumnTypeSpec(BaseModel):
     """
     Detailed column type specification with optional properties.
     """ # noqa: E501
-    geometry_type: Optional[Any] = Field(default=None, description="Geometry type for GEOMETRY/GEOGRAPHY columns. E.g., \"Point\", \"LineString\", \"Polygon\", \"MultiPoint\", \"MultiLineString\", \"MultiPolygon\", \"GeometryCollection\", or \"Geometry\" (any).")
-    precision: Optional[Any] = Field(default=None, description="Precision for DECIMAL type (1-38)")
-    scale: Optional[Any] = Field(default=None, description="Scale for DECIMAL type")
-    srid: Optional[Any] = Field(default=None, description="Spatial Reference System Identifier for GEOMETRY/GEOGRAPHY types. Common values: 4326 (WGS84), 3857 (Web Mercator).")
+    geometry_type: Optional[StrictStr] = Field(default=None, description="Geometry type for GEOMETRY/GEOGRAPHY columns. E.g., \"Point\", \"LineString\", \"Polygon\", \"MultiPoint\", \"MultiLineString\", \"MultiPolygon\", \"GeometryCollection\", or \"Geometry\" (any).")
+    precision: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Precision for DECIMAL type (1-38)")
+    scale: Optional[StrictInt] = Field(default=None, description="Scale for DECIMAL type")
+    srid: Optional[StrictInt] = Field(default=None, description="Spatial Reference System Identifier for GEOMETRY/GEOGRAPHY types. Common values: 4326 (WGS84), 3857 (Web Mercator).")
     type: StrictStr = Field(description="The data type name (e.g., \"DECIMAL\", \"TIMESTAMP\", \"GEOMETRY\")")
     __properties: ClassVar[List[str]] = ["geometry_type", "precision", "scale", "srid", "type"]
 
