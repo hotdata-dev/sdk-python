@@ -41,6 +41,11 @@ jobs:
             --additional-properties=packageName=hotdata,projectName=hotdata \
             --skip-validate-spec
 
+      - name: Clean up generated artifacts
+        run: |
+          rm -f openapi.yaml
+          rm -f .github/workflows/python.yml
+
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
