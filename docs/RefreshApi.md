@@ -1,0 +1,85 @@
+# hotdata.RefreshApi
+
+All URIs are relative to *https://app.hotdata.dev*
+
+Method | HTTP request | Description
+------------- | ------------- | -------------
+[**refresh_handler**](RefreshApi.md#refresh_handler) | **POST** /v1/refresh | Refresh connection data
+
+
+# **refresh_handler**
+> RefreshResponse refresh_handler(refresh_request)
+
+Refresh connection data
+
+Refresh schema metadata or table data. The behavior depends on the request fields:
+
+- **Schema refresh (all)**: omit all fields — re-discovers tables for every connection.
+- **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection.
+- **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`.
+- **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet.
+
+### Example
+
+
+```python
+import hotdata
+from hotdata.models.refresh_request import RefreshRequest
+from hotdata.models.refresh_response import RefreshResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://app.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://app.hotdata.dev"
+)
+
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.RefreshApi(api_client)
+    refresh_request = hotdata.RefreshRequest() # RefreshRequest | 
+
+    try:
+        # Refresh connection data
+        api_response = api_instance.refresh_handler(refresh_request)
+        print("The response of RefreshApi->refresh_handler:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RefreshApi->refresh_handler: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **refresh_request** | [**RefreshRequest**](RefreshRequest.md)|  | 
+
+### Return type
+
+[**RefreshResponse**](RefreshResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Refresh completed |  -  |
+**400** | Invalid request |  -  |
+**404** | Connection not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
