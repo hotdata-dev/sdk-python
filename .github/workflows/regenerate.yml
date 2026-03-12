@@ -1,8 +1,6 @@
 name: Regenerate Client
 
 on:
-  repository_dispatch:
-    types: [openapi-updated]
   workflow_dispatch:
 
 jobs:
@@ -11,9 +9,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: 3060111
+          private-key: ${{ secrets.HOTDATA_AUTOMATION_PRIVATE_KEY }}
+          owner: hotdata-dev
+
       - name: Fetch merged OpenAPI spec
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          curl -sL https://raw.githubusercontent.com/hotdata-dev/www.hotdata.dev/main/api/openapi.yaml \
+          curl -sS -f -L \
+            -H "Accept: application/vnd.github.v3.raw" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/hotdata-dev/www.hotdata.dev/contents/api/openapi.yaml \
             -o openapi.yaml
 
       - name: Clean existing source
