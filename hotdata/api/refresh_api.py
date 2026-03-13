@@ -37,7 +37,7 @@ class RefreshApi:
 
 
     @validate_call
-    def refresh_handler(
+    def refresh(
         self,
         refresh_request: RefreshRequest,
         _request_timeout: Union[
@@ -81,7 +81,7 @@ class RefreshApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._refresh_handler_serialize(
+        _param = self._refresh_serialize(
             refresh_request=refresh_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -106,7 +106,7 @@ class RefreshApi:
 
 
     @validate_call
-    def refresh_handler_with_http_info(
+    def refresh_with_http_info(
         self,
         refresh_request: RefreshRequest,
         _request_timeout: Union[
@@ -150,7 +150,7 @@ class RefreshApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._refresh_handler_serialize(
+        _param = self._refresh_serialize(
             refresh_request=refresh_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -175,7 +175,7 @@ class RefreshApi:
 
 
     @validate_call
-    def refresh_handler_without_preload_content(
+    def refresh_without_preload_content(
         self,
         refresh_request: RefreshRequest,
         _request_timeout: Union[
@@ -219,7 +219,7 @@ class RefreshApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._refresh_handler_serialize(
+        _param = self._refresh_serialize(
             refresh_request=refresh_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -239,7 +239,7 @@ class RefreshApi:
         return response_data.response
 
 
-    def _refresh_handler_serialize(
+    def _refresh_serialize(
         self,
         refresh_request,
         _request_auth,
@@ -295,6 +295,7 @@ class RefreshApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(

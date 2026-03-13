@@ -1,6 +1,5 @@
 # ColumnProfileDetailOneOf4
 
-Boolean column.
 
 ## Properties
 

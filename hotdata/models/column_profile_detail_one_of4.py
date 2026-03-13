@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class ColumnProfileDetailOneOf4(BaseModel):
     """
-    Boolean column.
+    ColumnProfileDetailOneOf4
     """ # noqa: E501
     false_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of false values")
     true_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of true values")

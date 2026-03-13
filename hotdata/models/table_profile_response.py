@@ -32,7 +32,7 @@ class TableProfileResponse(BaseModel):
     connection: StrictStr = Field(description="Connection name")
     row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Total number of rows in the table")
     var_schema: StrictStr = Field(description="Schema name", alias="schema")
-    synced_at: Optional[Any] = Field(default=None, description="When the table was last synced")
+    synced_at: Optional[StrictStr] = Field(default=None, description="When the table was last synced")
     table: StrictStr = Field(description="Table name")
     __properties: ClassVar[List[str]] = ["columns", "connection", "row_count", "schema", "synced_at", "table"]
 

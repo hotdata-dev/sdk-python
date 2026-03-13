@@ -6,22 +6,22 @@ Saved query detail (includes latest version's SQL)
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**category** | **object** |  | [optional] 
+**category** | **str** |  | [optional] 
 **created_at** | **datetime** |  | 
 **description** | **str** |  | 
-**has_aggregation** | **object** |  | [optional] 
-**has_group_by** | **object** |  | [optional] 
-**has_join** | **object** |  | [optional] 
-**has_limit** | **object** |  | [optional] 
-**has_order_by** | **object** |  | [optional] 
-**has_predicate** | **object** |  | [optional] 
+**has_aggregation** | **bool** |  | [optional] 
+**has_group_by** | **bool** |  | [optional] 
+**has_join** | **bool** |  | [optional] 
+**has_limit** | **bool** |  | [optional] 
+**has_order_by** | **bool** |  | [optional] 
+**has_predicate** | **bool** |  | [optional] 
 **id** | **str** |  | 
 **latest_version** | **int** |  | 
 **name** | **str** |  | 
-**num_tables** | **object** |  | [optional] 
+**num_tables** | **int** |  | [optional] 
 **sql** | **str** |  | 
 **sql_hash** | **str** |  | 
-**table_size** | **object** |  | [optional] 
+**table_size** | **str** |  | [optional] 
 **tags** | **List[str]** |  | 
 **updated_at** | **datetime** |  | 
 

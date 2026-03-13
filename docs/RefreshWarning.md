@@ -7,8 +7,8 @@ Non-fatal warning that occurred during a refresh operation. Used to report issue
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **message** | **str** |  | 
-**schema_name** | **object** |  | [optional] 
-**table_name** | **object** |  | [optional] 
+**schema_name** | **str** |  | [optional] 
+**table_name** | **str** |  | [optional] 
 
 ## Example
 

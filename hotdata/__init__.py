@@ -40,8 +40,9 @@ __all__ = [
     "ApiException",
     "ApiErrorDetail",
     "ApiErrorResponse",
+    "BooleanProfileDetail",
+    "CategoricalProfileDetail",
     "CategoryValueInfo",
-    "ColumnDefinition",
     "ColumnInfo",
     "ColumnProfileDetail",
     "ColumnProfileDetailOneOf",
@@ -62,11 +63,9 @@ __all__ = [
     "CreateSavedQueryRequest",
     "CreateSecretRequest",
     "CreateSecretResponse",
-    "CreateWorkspace201Response",
     "CreateWorkspaceRequest",
+    "CreateWorkspaceResponse",
     "DatasetSource",
-    "DatasetSourceOneOf",
-    "DatasetSourceOneOf1",
     "DatasetSummary",
     "DiscoveryStatus",
     "Error",
@@ -77,6 +76,7 @@ __all__ = [
     "GetSecretResponse",
     "InformationSchemaResponse",
     "InlineData",
+    "InlineDatasetSource",
     "ListConnectionsResponse",
     "ListDatasetsResponse",
     "ListQueryRunsResponse",
@@ -85,7 +85,8 @@ __all__ = [
     "ListSavedQueryVersionsResponse",
     "ListSecretsResponse",
     "ListUploadsResponse",
-    "ListWorkspaces200Response",
+    "ListWorkspacesResponse",
+    "NumericProfileDetail",
     "QueryRequest",
     "QueryResponse",
     "QueryRunInfo",
@@ -102,11 +103,14 @@ __all__ = [
     "TableProfileResponse",
     "TableRefreshError",
     "TableRefreshResult",
+    "TemporalProfileDetail",
+    "TextProfileDetail",
     "UpdateDatasetRequest",
     "UpdateDatasetResponse",
     "UpdateSavedQueryRequest",
     "UpdateSecretRequest",
     "UpdateSecretResponse",
+    "UploadDatasetSource",
     "UploadInfo",
     "UploadResponse",
     "WorkspaceDetail",
@@ -140,8 +144,9 @@ from hotdata.exceptions import ApiException as ApiException
 # import models into sdk package
 from hotdata.models.api_error_detail import ApiErrorDetail as ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse as ApiErrorResponse
+from hotdata.models.boolean_profile_detail import BooleanProfileDetail as BooleanProfileDetail
+from hotdata.models.categorical_profile_detail import CategoricalProfileDetail as CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo as CategoryValueInfo
-from hotdata.models.column_definition import ColumnDefinition as ColumnDefinition
 from hotdata.models.column_info import ColumnInfo as ColumnInfo
 from hotdata.models.column_profile_detail import ColumnProfileDetail as ColumnProfileDetail
 from hotdata.models.column_profile_detail_one_of import ColumnProfileDetailOneOf as ColumnProfileDetailOneOf
@@ -162,11 +167,9 @@ from hotdata.models.create_dataset_response import CreateDatasetResponse as Crea
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest as CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
-from hotdata.models.create_workspace201_response import CreateWorkspace201Response as CreateWorkspace201Response
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
+from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource as DatasetSource
-from hotdata.models.dataset_source_one_of import DatasetSourceOneOf as DatasetSourceOneOf
-from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1 as DatasetSourceOneOf1
 from hotdata.models.dataset_summary import DatasetSummary as DatasetSummary
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.error import Error as Error
@@ -177,6 +180,7 @@ from hotdata.models.get_result_response import GetResultResponse as GetResultRes
 from hotdata.models.get_secret_response import GetSecretResponse as GetSecretResponse
 from hotdata.models.information_schema_response import InformationSchemaResponse as InformationSchemaResponse
 from hotdata.models.inline_data import InlineData as InlineData
+from hotdata.models.inline_dataset_source import InlineDatasetSource as InlineDatasetSource
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse as ListDatasetsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse as ListQueryRunsResponse
@@ -185,7 +189,8 @@ from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse 
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse as ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse as ListSecretsResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse as ListUploadsResponse
-from hotdata.models.list_workspaces200_response import ListWorkspaces200Response as ListWorkspaces200Response
+from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
+from hotdata.models.numeric_profile_detail import NumericProfileDetail as NumericProfileDetail
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo as QueryRunInfo
@@ -202,11 +207,14 @@ from hotdata.models.table_info import TableInfo as TableInfo
 from hotdata.models.table_profile_response import TableProfileResponse as TableProfileResponse
 from hotdata.models.table_refresh_error import TableRefreshError as TableRefreshError
 from hotdata.models.table_refresh_result import TableRefreshResult as TableRefreshResult
+from hotdata.models.temporal_profile_detail import TemporalProfileDetail as TemporalProfileDetail
+from hotdata.models.text_profile_detail import TextProfileDetail as TextProfileDetail
 from hotdata.models.update_dataset_request import UpdateDatasetRequest as UpdateDatasetRequest
 from hotdata.models.update_dataset_response import UpdateDatasetResponse as UpdateDatasetResponse
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest as UpdateSavedQueryRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest as UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse as UpdateSecretResponse
+from hotdata.models.upload_dataset_source import UploadDatasetSource as UploadDatasetSource
 from hotdata.models.upload_info import UploadInfo as UploadInfo
 from hotdata.models.upload_response import UploadResponse as UploadResponse
 from hotdata.models.workspace_detail import WorkspaceDetail as WorkspaceDetail

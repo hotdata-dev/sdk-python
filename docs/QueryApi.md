@@ -4,11 +4,11 @@ All URIs are relative to *https://app.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**query_handler**](QueryApi.md#query_handler) | **POST** /v1/query | Execute SQL query
+[**query**](QueryApi.md#query) | **POST** /v1/query | Execute SQL query
 
 
-# **query_handler**
-> QueryResponse query_handler(query_request)
+# **query**
+> QueryResponse query(query_request)
 
 Execute SQL query
 
@@ -16,6 +16,7 @@ Execute a SQL query against all registered connections and datasets. Use standar
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -30,6 +31,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -39,11 +49,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Execute SQL query
-        api_response = api_instance.query_handler(query_request)
-        print("The response of QueryApi->query_handler:\n")
+        api_response = api_instance.query(query_request)
+        print("The response of QueryApi->query:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling QueryApi->query_handler: %s\n" % e)
+        print("Exception when calling QueryApi->query: %s\n" % e)
 ```
 
 
@@ -61,7 +71,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

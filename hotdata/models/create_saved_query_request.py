@@ -26,7 +26,7 @@ class CreateSavedQueryRequest(BaseModel):
     """
     Request body for POST /v1/queries
     """ # noqa: E501
-    description: Optional[Any] = None
+    description: Optional[StrictStr] = None
     name: StrictStr
     sql: StrictStr
     tags: Optional[List[StrictStr]] = None
@@ -75,6 +75,11 @@ class CreateSavedQueryRequest(BaseModel):
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
             _dict['description'] = None
+
+        # set to None if tags (nullable) is None
+        # and model_fields_set contains the field
+        if self.tags is None and "tags" in self.model_fields_set:
+            _dict['tags'] = None
 
         return _dict
 

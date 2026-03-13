@@ -39,7 +39,7 @@ class QueryRunsApi:
 
 
     @validate_call
-    def list_query_runs_handler(
+    def list_query_runs(
         self,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
@@ -85,7 +85,7 @@ class QueryRunsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_query_runs_handler_serialize(
+        _param = self._list_query_runs_serialize(
             limit=limit,
             cursor=cursor,
             _request_auth=_request_auth,
@@ -109,7 +109,7 @@ class QueryRunsApi:
 
 
     @validate_call
-    def list_query_runs_handler_with_http_info(
+    def list_query_runs_with_http_info(
         self,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
@@ -155,7 +155,7 @@ class QueryRunsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_query_runs_handler_serialize(
+        _param = self._list_query_runs_serialize(
             limit=limit,
             cursor=cursor,
             _request_auth=_request_auth,
@@ -179,7 +179,7 @@ class QueryRunsApi:
 
 
     @validate_call
-    def list_query_runs_handler_without_preload_content(
+    def list_query_runs_without_preload_content(
         self,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
@@ -225,7 +225,7 @@ class QueryRunsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_query_runs_handler_serialize(
+        _param = self._list_query_runs_serialize(
             limit=limit,
             cursor=cursor,
             _request_auth=_request_auth,
@@ -244,7 +244,7 @@ class QueryRunsApi:
         return response_data.response
 
 
-    def _list_query_runs_handler_serialize(
+    def _list_query_runs_serialize(
         self,
         limit,
         cursor,
@@ -294,6 +294,7 @@ class QueryRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(

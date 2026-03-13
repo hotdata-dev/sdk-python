@@ -24,7 +24,7 @@ from typing_extensions import Self
 
 class ColumnProfileDetailOneOf3(BaseModel):
     """
-    Date or timestamp column.
+    ColumnProfileDetailOneOf3
     """ # noqa: E501
     max: StrictStr = Field(description="Latest value as ISO-8601 string")
     min: StrictStr = Field(description="Earliest value as ISO-8601 string")

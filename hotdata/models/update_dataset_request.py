@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -26,8 +26,8 @@ class UpdateDatasetRequest(BaseModel):
     """
     Request body for PUT /v1/datasets/{id}
     """ # noqa: E501
-    label: Optional[Any] = None
-    table_name: Optional[Any] = None
+    label: Optional[StrictStr] = None
+    table_name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["label", "table_name"]
 
     model_config = ConfigDict(

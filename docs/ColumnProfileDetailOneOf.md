@@ -1,13 +1,12 @@
 # ColumnProfileDetailOneOf
 
-Low-cardinality column (≤200 distinct values). Applies to text and numeric columns. Values are sorted by frequency descending.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **str** |  | 
 **values** | [**List[CategoryValueInfo]**](CategoryValueInfo.md) | Distinct values with their counts, ordered by count descending | 
+**type** | **str** |  | 
 
 ## Example
 

@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,22 +27,22 @@ class SavedQueryDetail(BaseModel):
     """
     Saved query detail (includes latest version's SQL)
     """ # noqa: E501
-    category: Optional[Any] = None
+    category: Optional[StrictStr] = None
     created_at: datetime
     description: StrictStr
-    has_aggregation: Optional[Any] = None
-    has_group_by: Optional[Any] = None
-    has_join: Optional[Any] = None
-    has_limit: Optional[Any] = None
-    has_order_by: Optional[Any] = None
-    has_predicate: Optional[Any] = None
+    has_aggregation: Optional[StrictBool] = None
+    has_group_by: Optional[StrictBool] = None
+    has_join: Optional[StrictBool] = None
+    has_limit: Optional[StrictBool] = None
+    has_order_by: Optional[StrictBool] = None
+    has_predicate: Optional[StrictBool] = None
     id: StrictStr
     latest_version: StrictInt
     name: StrictStr
-    num_tables: Optional[Any] = None
+    num_tables: Optional[StrictInt] = None
     sql: StrictStr
     sql_hash: StrictStr
-    table_size: Optional[Any] = None
+    table_size: Optional[StrictStr] = None
     tags: List[StrictStr]
     updated_at: datetime
     __properties: ClassVar[List[str]] = ["category", "created_at", "description", "has_aggregation", "has_group_by", "has_join", "has_limit", "has_order_by", "has_predicate", "id", "latest_version", "name", "num_tables", "sql", "sql_hash", "table_size", "tags", "updated_at"]

@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -26,11 +26,11 @@ class RefreshRequest(BaseModel):
     """
     Request body for POST /refresh
     """ # noqa: E501
-    connection_id: Optional[Any] = None
+    connection_id: Optional[StrictStr] = None
     data: Optional[StrictBool] = None
     include_uncached: Optional[StrictBool] = Field(default=None, description="Controls whether uncached tables are included in connection-wide data refresh.  - `false` (default): Only refresh tables that already have cached data.   This is the common case for keeping existing data up-to-date. - `true`: Also sync tables that haven't been cached yet, essentially performing   an initial sync for any new tables discovered since the connection was created.  This field only applies to connection-wide data refresh (when `data=true` and `table_name` is not specified). It has no effect on single-table refresh or schema refresh operations.")
-    schema_name: Optional[Any] = None
-    table_name: Optional[Any] = None
+    schema_name: Optional[StrictStr] = None
+    table_name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["connection_id", "data", "include_uncached", "schema_name", "table_name"]
 
     model_config = ConfigDict(

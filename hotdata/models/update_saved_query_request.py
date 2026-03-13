@@ -26,11 +26,11 @@ class UpdateSavedQueryRequest(BaseModel):
     """
     Request body for PUT /v1/queries/{id}
     """ # noqa: E501
-    category_override: Optional[Any] = Field(default=None, description="Override the auto-detected category. Send `null` to clear (revert to auto).")
-    description: Optional[Any] = None
-    name: Optional[Any] = Field(default=None, description="Optional new name. When omitted the existing name is preserved.")
-    sql: Optional[Any] = Field(default=None, description="Optional new SQL. When omitted the existing SQL is preserved.")
-    table_size_override: Optional[Any] = Field(default=None, description="User annotation for table size. Send `null` to clear.")
+    category_override: Optional[StrictStr] = Field(default=None, description="Override the auto-detected category. Send `null` to clear (revert to auto).")
+    description: Optional[StrictStr] = None
+    name: Optional[StrictStr] = Field(default=None, description="Optional new name. When omitted the existing name is preserved.")
+    sql: Optional[StrictStr] = Field(default=None, description="Optional new SQL. When omitted the existing SQL is preserved.")
+    table_size_override: Optional[StrictStr] = Field(default=None, description="User annotation for table size. Send `null` to clear.")
     tags: Optional[List[StrictStr]] = None
     __properties: ClassVar[List[str]] = ["category_override", "description", "name", "sql", "table_size_override", "tags"]
 
@@ -97,6 +97,11 @@ class UpdateSavedQueryRequest(BaseModel):
         # and model_fields_set contains the field
         if self.table_size_override is None and "table_size_override" in self.model_fields_set:
             _dict['table_size_override'] = None
+
+        # set to None if tags (nullable) is None
+        # and model_fields_set contains the field
+        if self.tags is None and "tags" in self.model_fields_set:
+            _dict['tags'] = None
 
         return _dict
 

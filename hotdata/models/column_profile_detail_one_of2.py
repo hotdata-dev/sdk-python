@@ -24,7 +24,7 @@ from typing_extensions import Self
 
 class ColumnProfileDetailOneOf2(BaseModel):
     """
-    High-cardinality numeric column (>200 distinct values).
+    ColumnProfileDetailOneOf2
     """ # noqa: E501
     max: StrictStr = Field(description="Maximum value (string to preserve precision for large integers and decimals)")
     mean: Union[StrictFloat, StrictInt] = Field(description="Arithmetic mean")

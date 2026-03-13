@@ -43,7 +43,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def check_connection_health_handler(
+    def check_connection_health(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -87,7 +87,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._check_connection_health_handler_serialize(
+        _param = self._check_connection_health_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -111,7 +111,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def check_connection_health_handler_with_http_info(
+    def check_connection_health_with_http_info(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -155,7 +155,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._check_connection_health_handler_serialize(
+        _param = self._check_connection_health_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -179,7 +179,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def check_connection_health_handler_without_preload_content(
+    def check_connection_health_without_preload_content(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -223,7 +223,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._check_connection_health_handler_serialize(
+        _param = self._check_connection_health_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -242,7 +242,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _check_connection_health_handler_serialize(
+    def _check_connection_health_serialize(
         self,
         connection_id,
         _request_auth,
@@ -285,6 +285,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -306,7 +307,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def create_connection_handler(
+    def create_connection(
         self,
         create_connection_request: CreateConnectionRequest,
         _request_timeout: Union[
@@ -350,7 +351,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_connection_handler_serialize(
+        _param = self._create_connection_serialize(
             create_connection_request=create_connection_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -375,7 +376,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def create_connection_handler_with_http_info(
+    def create_connection_with_http_info(
         self,
         create_connection_request: CreateConnectionRequest,
         _request_timeout: Union[
@@ -419,7 +420,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_connection_handler_serialize(
+        _param = self._create_connection_serialize(
             create_connection_request=create_connection_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -444,7 +445,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def create_connection_handler_without_preload_content(
+    def create_connection_without_preload_content(
         self,
         create_connection_request: CreateConnectionRequest,
         _request_timeout: Union[
@@ -488,7 +489,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_connection_handler_serialize(
+        _param = self._create_connection_serialize(
             create_connection_request=create_connection_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -508,7 +509,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _create_connection_handler_serialize(
+    def _create_connection_serialize(
         self,
         create_connection_request,
         _request_auth,
@@ -564,6 +565,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -585,7 +587,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def delete_connection_handler(
+    def delete_connection(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -629,7 +631,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_connection_handler_serialize(
+        _param = self._delete_connection_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -653,7 +655,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def delete_connection_handler_with_http_info(
+    def delete_connection_with_http_info(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -697,7 +699,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_connection_handler_serialize(
+        _param = self._delete_connection_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -721,7 +723,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def delete_connection_handler_without_preload_content(
+    def delete_connection_without_preload_content(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -765,7 +767,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_connection_handler_serialize(
+        _param = self._delete_connection_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -784,7 +786,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _delete_connection_handler_serialize(
+    def _delete_connection_serialize(
         self,
         connection_id,
         _request_auth,
@@ -827,6 +829,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -848,7 +851,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def get_connection_handler(
+    def get_connection(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -892,7 +895,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_connection_handler_serialize(
+        _param = self._get_connection_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -916,7 +919,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def get_connection_handler_with_http_info(
+    def get_connection_with_http_info(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -960,7 +963,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_connection_handler_serialize(
+        _param = self._get_connection_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -984,7 +987,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def get_connection_handler_without_preload_content(
+    def get_connection_without_preload_content(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -1028,7 +1031,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_connection_handler_serialize(
+        _param = self._get_connection_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1047,7 +1050,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _get_connection_handler_serialize(
+    def _get_connection_serialize(
         self,
         connection_id,
         _request_auth,
@@ -1090,6 +1093,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -1111,7 +1115,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def get_table_profile_handler(
+    def get_table_profile(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
@@ -1161,7 +1165,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_table_profile_handler_serialize(
+        _param = self._get_table_profile_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -1187,7 +1191,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def get_table_profile_handler_with_http_info(
+    def get_table_profile_with_http_info(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
@@ -1237,7 +1241,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_table_profile_handler_serialize(
+        _param = self._get_table_profile_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -1263,7 +1267,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def get_table_profile_handler_without_preload_content(
+    def get_table_profile_without_preload_content(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
@@ -1313,7 +1317,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_table_profile_handler_serialize(
+        _param = self._get_table_profile_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -1334,7 +1338,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _get_table_profile_handler_serialize(
+    def _get_table_profile_serialize(
         self,
         connection_id,
         var_schema,
@@ -1383,6 +1387,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -1404,7 +1409,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def list_connections_handler(
+    def list_connections(
         self,
         _request_timeout: Union[
             None,
@@ -1445,7 +1450,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_connections_handler_serialize(
+        _param = self._list_connections_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1467,7 +1472,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def list_connections_handler_with_http_info(
+    def list_connections_with_http_info(
         self,
         _request_timeout: Union[
             None,
@@ -1508,7 +1513,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_connections_handler_serialize(
+        _param = self._list_connections_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1530,7 +1535,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def list_connections_handler_without_preload_content(
+    def list_connections_without_preload_content(
         self,
         _request_timeout: Union[
             None,
@@ -1571,7 +1576,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_connections_handler_serialize(
+        _param = self._list_connections_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1588,7 +1593,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _list_connections_handler_serialize(
+    def _list_connections_serialize(
         self,
         _request_auth,
         _content_type,
@@ -1628,6 +1633,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -1649,7 +1655,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_connection_cache_handler(
+    def purge_connection_cache(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -1693,7 +1699,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_connection_cache_handler_serialize(
+        _param = self._purge_connection_cache_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1717,7 +1723,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_connection_cache_handler_with_http_info(
+    def purge_connection_cache_with_http_info(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -1761,7 +1767,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_connection_cache_handler_serialize(
+        _param = self._purge_connection_cache_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1785,7 +1791,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_connection_cache_handler_without_preload_content(
+    def purge_connection_cache_without_preload_content(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         _request_timeout: Union[
@@ -1829,7 +1835,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_connection_cache_handler_serialize(
+        _param = self._purge_connection_cache_serialize(
             connection_id=connection_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1848,7 +1854,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _purge_connection_cache_handler_serialize(
+    def _purge_connection_cache_serialize(
         self,
         connection_id,
         _request_auth,
@@ -1891,6 +1897,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -1912,7 +1919,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_table_cache_handler(
+    def purge_table_cache(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
@@ -1962,7 +1969,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_table_cache_handler_serialize(
+        _param = self._purge_table_cache_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -1988,7 +1995,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_table_cache_handler_with_http_info(
+    def purge_table_cache_with_http_info(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
@@ -2038,7 +2045,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_table_cache_handler_serialize(
+        _param = self._purge_table_cache_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -2064,7 +2071,7 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_table_cache_handler_without_preload_content(
+    def purge_table_cache_without_preload_content(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
@@ -2114,7 +2121,7 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_table_cache_handler_serialize(
+        _param = self._purge_table_cache_serialize(
             connection_id=connection_id,
             var_schema=var_schema,
             table=table,
@@ -2135,7 +2142,7 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _purge_table_cache_handler_serialize(
+    def _purge_table_cache_serialize(
         self,
         connection_id,
         var_schema,
@@ -2184,6 +2191,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(

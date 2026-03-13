@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **label** | **str** |  | 
 **source** | [**DatasetSource**](DatasetSource.md) |  | 
-**table_name** | **object** | Optional table_name - if not provided, derived from label | [optional] 
+**table_name** | **str** | Optional table_name - if not provided, derived from label | [optional] 
 
 ## Example
 

@@ -25,11 +25,11 @@ from typing_extensions import Self
 
 class ColumnProfileDetailOneOf(BaseModel):
     """
-    Low-cardinality column (≤200 distinct values). Applies to text and numeric columns. Values are sorted by frequency descending.
+    ColumnProfileDetailOneOf
     """ # noqa: E501
-    type: StrictStr
     values: List[CategoryValueInfo] = Field(description="Distinct values with their counts, ordered by count descending")
-    __properties: ClassVar[List[str]] = ["type", "values"]
+    type: StrictStr
+    __properties: ClassVar[List[str]] = ["values", "type"]
 
     @field_validator('type')
     def type_validate_enum(cls, value):
@@ -96,8 +96,8 @@ class ColumnProfileDetailOneOf(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "type": obj.get("type"),
-            "values": [CategoryValueInfo.from_dict(_item) for _item in obj["values"]] if obj.get("values") is not None else None
+            "values": [CategoryValueInfo.from_dict(_item) for _item in obj["values"]] if obj.get("values") is not None else None,
+            "type": obj.get("type")
         })
         return _obj
 

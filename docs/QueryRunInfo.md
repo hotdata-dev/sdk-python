@@ -6,21 +6,21 @@ Single query run for listing
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**completed_at** | **object** |  | [optional] 
+**completed_at** | **datetime** |  | [optional] 
 **created_at** | **datetime** |  | 
-**error_message** | **object** |  | [optional] 
-**execution_time_ms** | **object** |  | [optional] 
+**error_message** | **str** |  | [optional] 
+**execution_time_ms** | **int** |  | [optional] 
 **id** | **str** |  | 
-**result_id** | **object** |  | [optional] 
-**row_count** | **object** |  | [optional] 
-**saved_query_id** | **object** |  | [optional] 
-**saved_query_version** | **object** |  | [optional] 
+**result_id** | **str** |  | [optional] 
+**row_count** | **int** |  | [optional] 
+**saved_query_id** | **str** |  | [optional] 
+**saved_query_version** | **int** |  | [optional] 
 **snapshot_id** | **str** |  | 
 **sql_hash** | **str** |  | 
 **sql_text** | **str** |  | 
 **status** | **str** |  | 
-**trace_id** | **object** |  | [optional] 
-**warning_message** | **object** |  | [optional] 
+**trace_id** | **str** |  | [optional] 
+**warning_message** | **str** |  | [optional] 
 
 ## Example
 

@@ -29,7 +29,7 @@ class CreateDatasetRequest(BaseModel):
     """ # noqa: E501
     label: StrictStr
     source: DatasetSource
-    table_name: Optional[Any] = Field(default=None, description="Optional table_name - if not provided, derived from label")
+    table_name: Optional[StrictStr] = Field(default=None, description="Optional table_name - if not provided, derived from label")
     __properties: ClassVar[List[str]] = ["label", "source", "table_name"]
 
     model_config = ConfigDict(

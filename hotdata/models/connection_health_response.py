@@ -28,7 +28,7 @@ class ConnectionHealthResponse(BaseModel):
     Response body for GET /connections/{connection_id}/health
     """ # noqa: E501
     connection_id: StrictStr
-    error: Optional[Any] = None
+    error: Optional[StrictStr] = None
     healthy: StrictBool
     latency_ms: Annotated[int, Field(strict=True, ge=0)]
     __properties: ClassVar[List[str]] = ["connection_id", "error", "healthy", "latency_ms"]

@@ -43,7 +43,7 @@ class SecretsApi:
 
 
     @validate_call
-    def create_secret_handler(
+    def create_secret(
         self,
         create_secret_request: CreateSecretRequest,
         _request_timeout: Union[
@@ -87,7 +87,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_secret_handler_serialize(
+        _param = self._create_secret_serialize(
             create_secret_request=create_secret_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -111,7 +111,7 @@ class SecretsApi:
 
 
     @validate_call
-    def create_secret_handler_with_http_info(
+    def create_secret_with_http_info(
         self,
         create_secret_request: CreateSecretRequest,
         _request_timeout: Union[
@@ -155,7 +155,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_secret_handler_serialize(
+        _param = self._create_secret_serialize(
             create_secret_request=create_secret_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -179,7 +179,7 @@ class SecretsApi:
 
 
     @validate_call
-    def create_secret_handler_without_preload_content(
+    def create_secret_without_preload_content(
         self,
         create_secret_request: CreateSecretRequest,
         _request_timeout: Union[
@@ -223,7 +223,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_secret_handler_serialize(
+        _param = self._create_secret_serialize(
             create_secret_request=create_secret_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -242,7 +242,7 @@ class SecretsApi:
         return response_data.response
 
 
-    def _create_secret_handler_serialize(
+    def _create_secret_serialize(
         self,
         create_secret_request,
         _request_auth,
@@ -298,6 +298,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -319,7 +320,7 @@ class SecretsApi:
 
 
     @validate_call
-    def delete_secret_handler(
+    def delete_secret(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         _request_timeout: Union[
@@ -362,7 +363,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_secret_handler_serialize(
+        _param = self._delete_secret_serialize(
             name=name,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -386,7 +387,7 @@ class SecretsApi:
 
 
     @validate_call
-    def delete_secret_handler_with_http_info(
+    def delete_secret_with_http_info(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         _request_timeout: Union[
@@ -429,7 +430,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_secret_handler_serialize(
+        _param = self._delete_secret_serialize(
             name=name,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -453,7 +454,7 @@ class SecretsApi:
 
 
     @validate_call
-    def delete_secret_handler_without_preload_content(
+    def delete_secret_without_preload_content(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         _request_timeout: Union[
@@ -496,7 +497,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_secret_handler_serialize(
+        _param = self._delete_secret_serialize(
             name=name,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -515,7 +516,7 @@ class SecretsApi:
         return response_data.response
 
 
-    def _delete_secret_handler_serialize(
+    def _delete_secret_serialize(
         self,
         name,
         _request_auth,
@@ -558,6 +559,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -579,7 +581,7 @@ class SecretsApi:
 
 
     @validate_call
-    def get_secret_handler(
+    def get_secret(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         _request_timeout: Union[
@@ -623,7 +625,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_secret_handler_serialize(
+        _param = self._get_secret_serialize(
             name=name,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -647,7 +649,7 @@ class SecretsApi:
 
 
     @validate_call
-    def get_secret_handler_with_http_info(
+    def get_secret_with_http_info(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         _request_timeout: Union[
@@ -691,7 +693,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_secret_handler_serialize(
+        _param = self._get_secret_serialize(
             name=name,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -715,7 +717,7 @@ class SecretsApi:
 
 
     @validate_call
-    def get_secret_handler_without_preload_content(
+    def get_secret_without_preload_content(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         _request_timeout: Union[
@@ -759,7 +761,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_secret_handler_serialize(
+        _param = self._get_secret_serialize(
             name=name,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -778,7 +780,7 @@ class SecretsApi:
         return response_data.response
 
 
-    def _get_secret_handler_serialize(
+    def _get_secret_serialize(
         self,
         name,
         _request_auth,
@@ -821,6 +823,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -842,7 +845,7 @@ class SecretsApi:
 
 
     @validate_call
-    def list_secrets_handler(
+    def list_secrets(
         self,
         _request_timeout: Union[
             None,
@@ -883,7 +886,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_secrets_handler_serialize(
+        _param = self._list_secrets_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -905,7 +908,7 @@ class SecretsApi:
 
 
     @validate_call
-    def list_secrets_handler_with_http_info(
+    def list_secrets_with_http_info(
         self,
         _request_timeout: Union[
             None,
@@ -946,7 +949,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_secrets_handler_serialize(
+        _param = self._list_secrets_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -968,7 +971,7 @@ class SecretsApi:
 
 
     @validate_call
-    def list_secrets_handler_without_preload_content(
+    def list_secrets_without_preload_content(
         self,
         _request_timeout: Union[
             None,
@@ -1009,7 +1012,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_secrets_handler_serialize(
+        _param = self._list_secrets_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1026,7 +1029,7 @@ class SecretsApi:
         return response_data.response
 
 
-    def _list_secrets_handler_serialize(
+    def _list_secrets_serialize(
         self,
         _request_auth,
         _content_type,
@@ -1066,6 +1069,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
@@ -1087,7 +1091,7 @@ class SecretsApi:
 
 
     @validate_call
-    def update_secret_handler(
+    def update_secret(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         update_secret_request: UpdateSecretRequest,
@@ -1133,7 +1137,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_secret_handler_serialize(
+        _param = self._update_secret_serialize(
             name=name,
             update_secret_request=update_secret_request,
             _request_auth=_request_auth,
@@ -1158,7 +1162,7 @@ class SecretsApi:
 
 
     @validate_call
-    def update_secret_handler_with_http_info(
+    def update_secret_with_http_info(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         update_secret_request: UpdateSecretRequest,
@@ -1204,7 +1208,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_secret_handler_serialize(
+        _param = self._update_secret_serialize(
             name=name,
             update_secret_request=update_secret_request,
             _request_auth=_request_auth,
@@ -1229,7 +1233,7 @@ class SecretsApi:
 
 
     @validate_call
-    def update_secret_handler_without_preload_content(
+    def update_secret_without_preload_content(
         self,
         name: Annotated[StrictStr, Field(description="Secret name")],
         update_secret_request: UpdateSecretRequest,
@@ -1275,7 +1279,7 @@ class SecretsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_secret_handler_serialize(
+        _param = self._update_secret_serialize(
             name=name,
             update_secret_request=update_secret_request,
             _request_auth=_request_auth,
@@ -1295,7 +1299,7 @@ class SecretsApi:
         return response_data.response
 
 
-    def _update_secret_handler_serialize(
+    def _update_secret_serialize(
         self,
         name,
         update_secret_request,
@@ -1354,6 +1358,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'BearerAuth'
         ]
 
         return self.api_client.param_serialize(
