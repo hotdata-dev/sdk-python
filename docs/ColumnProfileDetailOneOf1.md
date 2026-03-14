@@ -1,6 +1,5 @@
 # ColumnProfileDetailOneOf1
 
-High-cardinality text column (>200 distinct values).
 
 ## Properties
 

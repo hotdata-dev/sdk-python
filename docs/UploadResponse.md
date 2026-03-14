@@ -6,7 +6,7 @@ Response body for POST /v1/files
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**content_type** | **object** |  | [optional] 
+**content_type** | **str** |  | [optional] 
 **created_at** | **datetime** |  | 
 **id** | **str** |  | 
 **size_bytes** | **int** |  | 

@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **create_workspace**
-> CreateWorkspace201Response create_workspace(create_workspace_request)
+> CreateWorkspaceResponse create_workspace(create_workspace_request)
 
 Create a workspace
 
@@ -21,8 +21,8 @@ Creates a new workspace in the specified organization.
 
 ```python
 import hotdata
-from hotdata.models.create_workspace201_response import CreateWorkspace201Response
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
+from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -68,7 +68,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**CreateWorkspace201Response**](CreateWorkspace201Response.md)
+[**CreateWorkspaceResponse**](CreateWorkspaceResponse.md)
 
 ### Authorization
 
@@ -93,7 +93,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_workspaces**
-> ListWorkspaces200Response list_workspaces(organization_public_id=organization_public_id)
+> ListWorkspacesResponse list_workspaces(organization_public_id=organization_public_id)
 
 List workspaces
 
@@ -105,7 +105,7 @@ Lists all workspaces in the user's organization.
 
 ```python
 import hotdata
-from hotdata.models.list_workspaces200_response import ListWorkspaces200Response
+from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -151,7 +151,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ListWorkspaces200Response**](ListWorkspaces200Response.md)
+[**ListWorkspacesResponse**](ListWorkspacesResponse.md)
 
 ### Authorization
 

@@ -6,10 +6,10 @@ Request body for POST /connections
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**config** | **object** |  | 
+**config** | **Dict[str, object]** | Connection configuration object. Fields vary by source type (host, port, database, etc.). | 
 **name** | **str** |  | 
-**secret_id** | **object** | Optional reference to a secret by ID (e.g., \&quot;secr_abc123\&quot;). If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_name&#x60;. | [optional] 
-**secret_name** | **object** | Optional reference to a secret by name. If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_id&#x60;. | [optional] 
+**secret_id** | **str** | Optional reference to a secret by ID (e.g., \&quot;secr_abc123\&quot;). If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_name&#x60;. | [optional] 
+**secret_name** | **str** | Optional reference to a secret by name. If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_id&#x60;. | [optional] 
 **source_type** | **str** |  | 
 
 ## Example

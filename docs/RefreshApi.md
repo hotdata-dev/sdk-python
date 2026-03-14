@@ -4,11 +4,11 @@ All URIs are relative to *https://app.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**refresh_handler**](RefreshApi.md#refresh_handler) | **POST** /v1/refresh | Refresh connection data
+[**refresh**](RefreshApi.md#refresh) | **POST** /v1/refresh | Refresh connection data
 
 
-# **refresh_handler**
-> RefreshResponse refresh_handler(refresh_request)
+# **refresh**
+> RefreshResponse refresh(refresh_request)
 
 Refresh connection data
 
@@ -21,6 +21,7 @@ Refresh schema metadata or table data. The behavior depends on the request field
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -35,6 +36,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -44,11 +54,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Refresh connection data
-        api_response = api_instance.refresh_handler(refresh_request)
-        print("The response of RefreshApi->refresh_handler:\n")
+        api_response = api_instance.refresh(refresh_request)
+        print("The response of RefreshApi->refresh:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling RefreshApi->refresh_handler: %s\n" % e)
+        print("Exception when calling RefreshApi->refresh: %s\n" % e)
 ```
 
 
@@ -66,7 +76,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

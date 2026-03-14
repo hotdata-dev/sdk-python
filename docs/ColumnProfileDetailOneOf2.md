@@ -1,6 +1,5 @@
 # ColumnProfileDetailOneOf2
 
-High-cardinality numeric column (>200 distinct values).
 
 ## Properties
 

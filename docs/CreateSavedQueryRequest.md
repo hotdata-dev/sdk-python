@@ -6,7 +6,7 @@ Request body for POST /v1/queries
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**description** | **object** |  | [optional] 
+**description** | **str** |  | [optional] 
 **name** | **str** |  | 
 **sql** | **str** |  | 
 **tags** | **List[str]** |  | [optional] 
