@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **name** | **str** | Column name | 
 **null_count** | **int** | Number of null values | 
 **null_percentage** | **float** | Percentage of null values (0.0 to 100.0) | 
-**profile** | [**ColumnProfileDetail**](ColumnProfileDetail.md) |  | [optional] 
+**profile** | [**ColumnProfileDetail**](ColumnProfileDetail.md) | Type-specific profile detail. Null when the column is all-null or has an unsupported type. | [optional] 
 
 ## Example
 

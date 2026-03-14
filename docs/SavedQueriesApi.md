@@ -22,6 +22,7 @@ Save a named SQL query. The SQL is stored as version 1 and automatically analyze
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -36,6 +37,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -67,7 +77,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -90,6 +100,7 @@ Delete saved query
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -102,6 +113,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -131,7 +151,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -156,6 +176,7 @@ Execute a saved query. By default runs the latest version. Optionally specify a 
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -170,6 +191,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -203,7 +233,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -226,6 +256,7 @@ Get saved query
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -239,6 +270,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -270,7 +310,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -293,6 +333,7 @@ List saved queries
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -306,6 +347,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -339,7 +389,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -361,6 +411,7 @@ List saved query versions
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -374,6 +425,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -409,7 +469,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -434,6 +494,7 @@ Update a saved query. If the SQL changes, a new version is created (previous ver
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -448,6 +509,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -481,7 +551,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

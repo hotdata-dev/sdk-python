@@ -4,18 +4,18 @@ All URIs are relative to *https://app.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**check_connection_health_handler**](ConnectionsApi.md#check_connection_health_handler) | **GET** /v1/connections/{connection_id}/health | Check connection health
-[**create_connection_handler**](ConnectionsApi.md#create_connection_handler) | **POST** /v1/connections | Create connection
-[**delete_connection_handler**](ConnectionsApi.md#delete_connection_handler) | **DELETE** /v1/connections/{connection_id} | Delete connection
-[**get_connection_handler**](ConnectionsApi.md#get_connection_handler) | **GET** /v1/connections/{connection_id} | Get connection
-[**get_table_profile_handler**](ConnectionsApi.md#get_table_profile_handler) | **GET** /v1/connections/{connection_id}/tables/{schema}/{table}/profile | Get table profile
-[**list_connections_handler**](ConnectionsApi.md#list_connections_handler) | **GET** /v1/connections | List connections
-[**purge_connection_cache_handler**](ConnectionsApi.md#purge_connection_cache_handler) | **DELETE** /v1/connections/{connection_id}/cache | Purge connection cache
-[**purge_table_cache_handler**](ConnectionsApi.md#purge_table_cache_handler) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/cache | Purge table cache
+[**check_connection_health**](ConnectionsApi.md#check_connection_health) | **GET** /v1/connections/{connection_id}/health | Check connection health
+[**create_connection**](ConnectionsApi.md#create_connection) | **POST** /v1/connections | Create connection
+[**delete_connection**](ConnectionsApi.md#delete_connection) | **DELETE** /v1/connections/{connection_id} | Delete connection
+[**get_connection**](ConnectionsApi.md#get_connection) | **GET** /v1/connections/{connection_id} | Get connection
+[**get_table_profile**](ConnectionsApi.md#get_table_profile) | **GET** /v1/connections/{connection_id}/tables/{schema}/{table}/profile | Get table profile
+[**list_connections**](ConnectionsApi.md#list_connections) | **GET** /v1/connections | List connections
+[**purge_connection_cache**](ConnectionsApi.md#purge_connection_cache) | **DELETE** /v1/connections/{connection_id}/cache | Purge connection cache
+[**purge_table_cache**](ConnectionsApi.md#purge_table_cache) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/cache | Purge table cache
 
 
-# **check_connection_health_handler**
-> ConnectionHealthResponse check_connection_health_handler(connection_id)
+# **check_connection_health**
+> ConnectionHealthResponse check_connection_health(connection_id)
 
 Check connection health
 
@@ -23,6 +23,7 @@ Test connectivity to the remote database. Returns health status and latency.
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -36,6 +37,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -45,11 +55,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Check connection health
-        api_response = api_instance.check_connection_health_handler(connection_id)
-        print("The response of ConnectionsApi->check_connection_health_handler:\n")
+        api_response = api_instance.check_connection_health(connection_id)
+        print("The response of ConnectionsApi->check_connection_health:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->check_connection_health_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->check_connection_health: %s\n" % e)
 ```
 
 
@@ -67,7 +77,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -83,8 +93,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **create_connection_handler**
-> CreateConnectionResponse create_connection_handler(create_connection_request)
+# **create_connection**
+> CreateConnectionResponse create_connection(create_connection_request)
 
 Create connection
 
@@ -92,6 +102,7 @@ Register a new database connection. Provide the source type and connection confi
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -106,6 +117,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -115,11 +135,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Create connection
-        api_response = api_instance.create_connection_handler(create_connection_request)
-        print("The response of ConnectionsApi->create_connection_handler:\n")
+        api_response = api_instance.create_connection(create_connection_request)
+        print("The response of ConnectionsApi->create_connection:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->create_connection_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->create_connection: %s\n" % e)
 ```
 
 
@@ -137,7 +157,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -154,8 +174,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **delete_connection_handler**
-> delete_connection_handler(connection_id)
+# **delete_connection**
+> delete_connection(connection_id)
 
 Delete connection
 
@@ -163,6 +183,7 @@ Delete a connection and its cached data.
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -175,6 +196,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -184,9 +214,9 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Delete connection
-        api_instance.delete_connection_handler(connection_id)
+        api_instance.delete_connection(connection_id)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->delete_connection_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->delete_connection: %s\n" % e)
 ```
 
 
@@ -204,7 +234,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -220,8 +250,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **get_connection_handler**
-> GetConnectionResponse get_connection_handler(connection_id)
+# **get_connection**
+> GetConnectionResponse get_connection(connection_id)
 
 Get connection
 
@@ -229,6 +259,7 @@ Get details for a specific connection, including table and sync counts.
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -242,6 +273,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -251,11 +291,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Get connection
-        api_response = api_instance.get_connection_handler(connection_id)
-        print("The response of ConnectionsApi->get_connection_handler:\n")
+        api_response = api_instance.get_connection(connection_id)
+        print("The response of ConnectionsApi->get_connection:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->get_connection_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->get_connection: %s\n" % e)
 ```
 
 
@@ -273,7 +313,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -289,8 +329,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **get_table_profile_handler**
-> TableProfileResponse get_table_profile_handler(connection_id, var_schema, table)
+# **get_table_profile**
+> TableProfileResponse get_table_profile(connection_id, var_schema, table)
 
 Get table profile
 
@@ -298,6 +338,7 @@ Get column-level statistics for a synced table. Returns per-column profiles incl
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -311,6 +352,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -322,11 +372,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Get table profile
-        api_response = api_instance.get_table_profile_handler(connection_id, var_schema, table)
-        print("The response of ConnectionsApi->get_table_profile_handler:\n")
+        api_response = api_instance.get_table_profile(connection_id, var_schema, table)
+        print("The response of ConnectionsApi->get_table_profile:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->get_table_profile_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->get_table_profile: %s\n" % e)
 ```
 
 
@@ -346,7 +396,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -362,8 +412,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **list_connections_handler**
-> ListConnectionsResponse list_connections_handler()
+# **list_connections**
+> ListConnectionsResponse list_connections()
 
 List connections
 
@@ -371,6 +421,7 @@ List all registered database connections.
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -384,6 +435,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -392,11 +452,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # List connections
-        api_response = api_instance.list_connections_handler()
-        print("The response of ConnectionsApi->list_connections_handler:\n")
+        api_response = api_instance.list_connections()
+        print("The response of ConnectionsApi->list_connections:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->list_connections_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->list_connections: %s\n" % e)
 ```
 
 
@@ -411,7 +471,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -426,8 +486,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **purge_connection_cache_handler**
-> purge_connection_cache_handler(connection_id)
+# **purge_connection_cache**
+> purge_connection_cache(connection_id)
 
 Purge connection cache
 
@@ -435,6 +495,7 @@ Purge all cached data for a connection. The next query against these tables will
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -447,6 +508,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -456,9 +526,9 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Purge connection cache
-        api_instance.purge_connection_cache_handler(connection_id)
+        api_instance.purge_connection_cache(connection_id)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->purge_connection_cache_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->purge_connection_cache: %s\n" % e)
 ```
 
 
@@ -476,7 +546,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -492,8 +562,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **purge_table_cache_handler**
-> purge_table_cache_handler(connection_id, var_schema, table)
+# **purge_table_cache**
+> purge_table_cache(connection_id, var_schema, table)
 
 Purge table cache
 
@@ -501,6 +571,7 @@ Purge the cached data for a single table. The next query will trigger a fresh sy
 
 ### Example
 
+* Bearer Authentication (BearerAuth):
 
 ```python
 import hotdata
@@ -513,6 +584,15 @@ configuration = hotdata.Configuration(
     host = "https://app.hotdata.dev"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
@@ -524,9 +604,9 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # Purge table cache
-        api_instance.purge_table_cache_handler(connection_id, var_schema, table)
+        api_instance.purge_table_cache(connection_id, var_schema, table)
     except Exception as e:
-        print("Exception when calling ConnectionsApi->purge_table_cache_handler: %s\n" % e)
+        print("Exception when calling ConnectionsApi->purge_table_cache: %s\n" % e)
 ```
 
 
@@ -546,7 +626,7 @@ void (empty response body)
 
 ### Authorization
 
-No authorization required
+[BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

@@ -1,6 +1,5 @@
 # ColumnProfileDetailOneOf3
 
-Date or timestamp column.
 
 ## Properties
 

@@ -10,10 +10,10 @@ Name | Type | Description | Notes
 **execution_time_ms** | **int** |  | 
 **nullable** | **List[bool]** | Nullable flags for each column (parallel to columns vec). True if the column allows NULL values, false if NOT NULL. | 
 **query_run_id** | **str** | Unique identifier for the query run record (qrun...). | 
-**result_id** | **object** | Unique identifier for retrieving this result via GET /results/{id}. Null if catalog registration failed (see &#x60;warning&#x60; field for details). When non-null, the result is being persisted asynchronously. | [optional] 
+**result_id** | **str** | Unique identifier for retrieving this result via GET /results/{id}. Null if catalog registration failed (see &#x60;warning&#x60; field for details). When non-null, the result is being persisted asynchronously. | [optional] 
 **row_count** | **int** |  | 
-**rows** | **List[List[object]]** |  | 
-**warning** | **object** | Warning message if result persistence could not be initiated. When present, &#x60;result_id&#x60; will be null and the result cannot be retrieved later. The query results are still returned in this response. | [optional] 
+**rows** | **List[List[object]]** | Array of rows, where each row is an array of column values. Values can be strings, numbers, booleans, or null. | 
+**warning** | **str** | Warning message if result persistence could not be initiated. When present, &#x60;result_id&#x60; will be null and the result cannot be retrieved later. The query results are still returned in this response. | [optional] 
 
 ## Example
 

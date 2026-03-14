@@ -6,7 +6,7 @@ Response body for POST /connections
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**discovery_error** | **object** |  | [optional] 
+**discovery_error** | **str** |  | [optional] 
 **discovery_status** | [**DiscoveryStatus**](DiscoveryStatus.md) |  | 
 **id** | **str** |  | 
 **name** | **str** |  | 

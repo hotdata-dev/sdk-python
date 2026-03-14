@@ -3,8 +3,9 @@ name = "hotdata"
 version = "1.0.0"
 description = "HotData API"
 authors = [
-  {name = "OpenAPI Generator Community",email = "team@openapitools.org"},
+  {name = "HotData",email = "developers@hotdata.dev"},
 ]
+license = { text = "MIT" }
 readme = "README.md"
 keywords = ["OpenAPI", "OpenAPI-Generator", "HotData API"]
 requires-python = ">=3.9"

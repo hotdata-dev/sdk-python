@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **columns** | [**List[ColumnInfo]**](ColumnInfo.md) |  | [optional] 
 **connection** | **str** |  | 
-**last_sync** | **object** |  | [optional] 
+**last_sync** | **str** |  | [optional] 
 **var_schema** | **str** |  | 
 **synced** | **bool** |  | 
 **table** | **str** |  | 

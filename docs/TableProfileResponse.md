@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **connection** | **str** | Connection name | 
 **row_count** | **int** | Total number of rows in the table | 
 **var_schema** | **str** | Schema name | 
-**synced_at** | **object** | When the table was last synced | [optional] 
+**synced_at** | **str** | When the table was last synced | [optional] 
 **table** | **str** | Table name | 
 
 ## Example
