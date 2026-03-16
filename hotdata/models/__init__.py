@@ -32,6 +32,8 @@ from hotdata.models.connection_health_response import ConnectionHealthResponse
 from hotdata.models.connection_info import ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult
 from hotdata.models.connection_schema_error import ConnectionSchemaError
+from hotdata.models.connection_type_detail import ConnectionTypeDetail
+from hotdata.models.connection_type_summary import ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse
 from hotdata.models.create_dataset_request import CreateDatasetRequest
@@ -53,6 +55,7 @@ from hotdata.models.get_secret_response import GetSecretResponse
 from hotdata.models.information_schema_response import InformationSchemaResponse
 from hotdata.models.inline_data import InlineData
 from hotdata.models.inline_dataset_source import InlineDatasetSource
+from hotdata.models.list_connection_types_response import ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse
