@@ -19,6 +19,9 @@ docs/ConnectionHealthResponse.md
 docs/ConnectionInfo.md
 docs/ConnectionRefreshResult.md
 docs/ConnectionSchemaError.md
+docs/ConnectionTypeDetail.md
+docs/ConnectionTypeSummary.md
+docs/ConnectionTypesApi.md
 docs/ConnectionsApi.md
 docs/CreateConnectionRequest.md
 docs/CreateConnectionResponse.md
@@ -43,6 +46,7 @@ docs/InformationSchemaApi.md
 docs/InformationSchemaResponse.md
 docs/InlineData.md
 docs/InlineDatasetSource.md
+docs/ListConnectionTypesResponse.md
 docs/ListConnectionsResponse.md
 docs/ListDatasetsResponse.md
 docs/ListQueryRunsResponse.md
@@ -91,6 +95,7 @@ docs/WorkspaceListItem.md
 docs/WorkspacesApi.md
 hotdata/__init__.py
 hotdata/api/__init__.py
+hotdata/api/connection_types_api.py
 hotdata/api/connections_api.py
 hotdata/api/datasets_api.py
 hotdata/api/information_schema_api.py
@@ -125,6 +130,8 @@ hotdata/models/connection_health_response.py
 hotdata/models/connection_info.py
 hotdata/models/connection_refresh_result.py
 hotdata/models/connection_schema_error.py
+hotdata/models/connection_type_detail.py
+hotdata/models/connection_type_summary.py
 hotdata/models/create_connection_request.py
 hotdata/models/create_connection_response.py
 hotdata/models/create_dataset_request.py
@@ -146,6 +153,7 @@ hotdata/models/get_secret_response.py
 hotdata/models/information_schema_response.py
 hotdata/models/inline_data.py
 hotdata/models/inline_dataset_source.py
+hotdata/models/list_connection_types_response.py
 hotdata/models/list_connections_response.py
 hotdata/models/list_datasets_response.py
 hotdata/models/list_query_runs_response.py
@@ -192,13 +200,8 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_boolean_profile_detail.py
-test/test_categorical_profile_detail.py
-test/test_create_workspace_response.py
-test/test_inline_dataset_source.py
-test/test_list_workspaces_response.py
-test/test_numeric_profile_detail.py
-test/test_temporal_profile_detail.py
-test/test_text_profile_detail.py
-test/test_upload_dataset_source.py
+test/test_connection_type_detail.py
+test/test_connection_type_summary.py
+test/test_connection_types_api.py
+test/test_list_connection_types_response.py
 tox.ini
