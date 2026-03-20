@@ -1,13 +1,13 @@
 [project]
 name = "hotdata"
 version = "1.0.0"
-description = "HotData API"
+description = "Hotdata API"
 authors = [
-  {name = "HotData",email = "developers@hotdata.dev"},
+  {name = "Hotdata",email = "developers@hotdata.dev"},
 ]
 license = { text = "MIT" }
 readme = "README.md"
-keywords = ["OpenAPI", "OpenAPI-Generator", "HotData API"]
+keywords = ["OpenAPI", "OpenAPI-Generator", "Hotdata API"]
 requires-python = ">=3.9"
 
 dependencies = [
