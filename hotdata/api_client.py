@@ -554,6 +554,8 @@ class ApiClient:
         params = []
         for k, v in files.items():
             if isinstance(v, str):
+                if '..' in v:
+                    raise Exception('Invalid file path')
                 with open(v, 'rb') as f:
                     filename = os.path.basename(f.name)
                     filedata = f.read()
