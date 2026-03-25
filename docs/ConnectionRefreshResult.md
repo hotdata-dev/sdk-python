@@ -1,6 +1,6 @@
 # ConnectionRefreshResult
 
-Response for connection-wide data refresh
+Result payload for a `data_refresh_connection` job.
 
 ## Properties
 
@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **connection_id** | **str** |  | 
 **duration_ms** | **int** |  | 
-**errors** | [**List[TableRefreshError]**](TableRefreshError.md) |  | 
+**errors** | [**List[TableRefreshError]**](TableRefreshError.md) |  | [optional] 
 **tables_failed** | **int** |  | 
 **tables_refreshed** | **int** |  | 
 **total_rows** | **int** |  | 
