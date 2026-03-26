@@ -21,6 +21,10 @@ Name | Type | Description | Notes
 **tables_failed** | **int** |  | 
 **tables_refreshed** | **int** |  | 
 **total_rows** | **int** |  | 
+**created_at** | **datetime** |  | 
+**id** | **str** |  | 
+**status** | **str** |  | 
+**version** | **int** |  | 
 
 ## Example
 

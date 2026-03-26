@@ -9,6 +9,8 @@ Name | Type | Description | Notes
 **created_at** | **datetime** |  | 
 **id** | **str** |  | 
 **label** | **str** |  | 
+**latest_version** | **int** |  | 
+**pinned_version** | **int** |  | [optional] 
 **table_name** | **str** |  | 
 **updated_at** | **datetime** |  | 
 
