@@ -3,7 +3,7 @@
 # flake8: noqa
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -19,8 +19,10 @@ __version__ = "1.0.0"
 
 # Define package exports
 __all__ = [
+    "ConnectionTypesApi",
     "ConnectionsApi",
     "DatasetsApi",
+    "IndexesApi",
     "InformationSchemaApi",
     "QueryApi",
     "QueryRunsApi",
@@ -57,10 +59,13 @@ __all__ = [
     "ConnectionInfo",
     "ConnectionRefreshResult",
     "ConnectionSchemaError",
+    "ConnectionTypeDetail",
+    "ConnectionTypeSummary",
     "CreateConnectionRequest",
     "CreateConnectionResponse",
     "CreateDatasetRequest",
     "CreateDatasetResponse",
+    "CreateIndexRequest",
     "CreateSavedQueryRequest",
     "CreateSecretRequest",
     "CreateSecretResponse",
@@ -68,6 +73,7 @@ __all__ = [
     "CreateWorkspaceResponse",
     "DatasetSource",
     "DatasetSummary",
+    "DatasetVersionSummary",
     "DiscoveryStatus",
     "Error",
     "ExecuteSavedQueryRequest",
@@ -75,11 +81,16 @@ __all__ = [
     "GetDatasetResponse",
     "GetResultResponse",
     "GetSecretResponse",
+    "IndexInfoResponse",
+    "IndexStatus",
     "InformationSchemaResponse",
     "InlineData",
     "InlineDatasetSource",
+    "ListConnectionTypesResponse",
     "ListConnectionsResponse",
+    "ListDatasetVersionsResponse",
     "ListDatasetsResponse",
+    "ListIndexesResponse",
     "ListQueryRunsResponse",
     "ListResultsResponse",
     "ListSavedQueriesResponse",
@@ -119,8 +130,10 @@ __all__ = [
 ]
 
 # import apis into sdk package
+from hotdata.api.connection_types_api import ConnectionTypesApi as ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi as ConnectionsApi
 from hotdata.api.datasets_api import DatasetsApi as DatasetsApi
+from hotdata.api.indexes_api import IndexesApi as IndexesApi
 from hotdata.api.information_schema_api import InformationSchemaApi as InformationSchemaApi
 from hotdata.api.query_api import QueryApi as QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi as QueryRunsApi
@@ -161,10 +174,13 @@ from hotdata.models.connection_health_response import ConnectionHealthResponse a
 from hotdata.models.connection_info import ConnectionInfo as ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult as ConnectionRefreshResult
 from hotdata.models.connection_schema_error import ConnectionSchemaError as ConnectionSchemaError
+from hotdata.models.connection_type_detail import ConnectionTypeDetail as ConnectionTypeDetail
+from hotdata.models.connection_type_summary import ConnectionTypeSummary as ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest as CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse as CreateConnectionResponse
 from hotdata.models.create_dataset_request import CreateDatasetRequest as CreateDatasetRequest
 from hotdata.models.create_dataset_response import CreateDatasetResponse as CreateDatasetResponse
+from hotdata.models.create_index_request import CreateIndexRequest as CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest as CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
@@ -172,6 +188,7 @@ from hotdata.models.create_workspace_request import CreateWorkspaceRequest as Cr
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource as DatasetSource
 from hotdata.models.dataset_summary import DatasetSummary as DatasetSummary
+from hotdata.models.dataset_version_summary import DatasetVersionSummary as DatasetVersionSummary
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.error import Error as Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest as ExecuteSavedQueryRequest
@@ -179,11 +196,16 @@ from hotdata.models.get_connection_response import GetConnectionResponse as GetC
 from hotdata.models.get_dataset_response import GetDatasetResponse as GetDatasetResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
 from hotdata.models.get_secret_response import GetSecretResponse as GetSecretResponse
+from hotdata.models.index_info_response import IndexInfoResponse as IndexInfoResponse
+from hotdata.models.index_status import IndexStatus as IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse as InformationSchemaResponse
 from hotdata.models.inline_data import InlineData as InlineData
 from hotdata.models.inline_dataset_source import InlineDatasetSource as InlineDatasetSource
+from hotdata.models.list_connection_types_response import ListConnectionTypesResponse as ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
+from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse as ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse as ListDatasetsResponse
+from hotdata.models.list_indexes_response import ListIndexesResponse as ListIndexesResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse as ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse as ListResultsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse as ListSavedQueriesResponse

@@ -7,6 +7,7 @@ Request body for PUT /v1/datasets/{id}
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **label** | **str** |  | [optional] 
+**pinned_version** | **int** | Pin to a specific version, or send null to unpin. Omit the field entirely to leave pinning unchanged. | [optional] 
 **table_name** | **str** |  | [optional] 
 
 ## Example
