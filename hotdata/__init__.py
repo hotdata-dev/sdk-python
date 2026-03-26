@@ -3,7 +3,7 @@
 # flake8: noqa
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -19,6 +19,7 @@ __version__ = "1.0.0"
 
 # Define package exports
 __all__ = [
+    "ConnectionTypesApi",
     "ConnectionsApi",
     "DatasetsApi",
     "InformationSchemaApi",
@@ -57,6 +58,8 @@ __all__ = [
     "ConnectionInfo",
     "ConnectionRefreshResult",
     "ConnectionSchemaError",
+    "ConnectionTypeDetail",
+    "ConnectionTypeSummary",
     "CreateConnectionRequest",
     "CreateConnectionResponse",
     "CreateDatasetRequest",
@@ -78,6 +81,7 @@ __all__ = [
     "InformationSchemaResponse",
     "InlineData",
     "InlineDatasetSource",
+    "ListConnectionTypesResponse",
     "ListConnectionsResponse",
     "ListDatasetsResponse",
     "ListQueryRunsResponse",
@@ -119,6 +123,7 @@ __all__ = [
 ]
 
 # import apis into sdk package
+from hotdata.api.connection_types_api import ConnectionTypesApi as ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi as ConnectionsApi
 from hotdata.api.datasets_api import DatasetsApi as DatasetsApi
 from hotdata.api.information_schema_api import InformationSchemaApi as InformationSchemaApi
@@ -161,6 +166,8 @@ from hotdata.models.connection_health_response import ConnectionHealthResponse a
 from hotdata.models.connection_info import ConnectionInfo as ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult as ConnectionRefreshResult
 from hotdata.models.connection_schema_error import ConnectionSchemaError as ConnectionSchemaError
+from hotdata.models.connection_type_detail import ConnectionTypeDetail as ConnectionTypeDetail
+from hotdata.models.connection_type_summary import ConnectionTypeSummary as ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest as CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse as CreateConnectionResponse
 from hotdata.models.create_dataset_request import CreateDatasetRequest as CreateDatasetRequest
@@ -182,6 +189,7 @@ from hotdata.models.get_secret_response import GetSecretResponse as GetSecretRes
 from hotdata.models.information_schema_response import InformationSchemaResponse as InformationSchemaResponse
 from hotdata.models.inline_data import InlineData as InlineData
 from hotdata.models.inline_dataset_source import InlineDatasetSource as InlineDatasetSource
+from hotdata.models.list_connection_types_response import ListConnectionTypesResponse as ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse as ListDatasetsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse as ListQueryRunsResponse
