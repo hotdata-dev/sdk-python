@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -29,10 +29,11 @@ class RefreshRequest(BaseModel):
     """ # noqa: E501
     connection_id: Optional[StrictStr] = None
     data: Optional[StrictBool] = None
+    dataset_id: Optional[StrictStr] = None
     include_uncached: Optional[StrictBool] = Field(default=None, description="Controls whether uncached tables are included in connection-wide data refresh.  - `false` (default): Only refresh tables that already have cached data.   This is the common case for keeping existing data up-to-date. - `true`: Also sync tables that haven't been cached yet, essentially performing   an initial sync for any new tables discovered since the connection was created.  This field only applies to connection-wide data refresh (when `data=true` and `table_name` is not specified). It has no effect on single-table refresh or schema refresh operations.")
     schema_name: Optional[StrictStr] = None
     table_name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["connection_id", "data", "include_uncached", "schema_name", "table_name"]
+    __properties: ClassVar[List[str]] = ["connection_id", "data", "dataset_id", "include_uncached", "schema_name", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -78,6 +79,11 @@ class RefreshRequest(BaseModel):
         if self.connection_id is None and "connection_id" in self.model_fields_set:
             _dict['connection_id'] = None
 
+        # set to None if dataset_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.dataset_id is None and "dataset_id" in self.model_fields_set:
+            _dict['dataset_id'] = None
+
         # set to None if schema_name (nullable) is None
         # and model_fields_set contains the field
         if self.schema_name is None and "schema_name" in self.model_fields_set:
@@ -102,6 +108,7 @@ class RefreshRequest(BaseModel):
         _obj = cls.model_validate({
             "connection_id": obj.get("connection_id"),
             "data": obj.get("data"),
+            "dataset_id": obj.get("dataset_id"),
             "include_uncached": obj.get("include_uncached"),
             "schema_name": obj.get("schema_name"),
             "table_name": obj.get("table_name")

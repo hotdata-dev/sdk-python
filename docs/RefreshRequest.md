@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **connection_id** | **str** |  | [optional] 
 **data** | **bool** |  | [optional] 
+**dataset_id** | **str** |  | [optional] 
 **include_uncached** | **bool** | Controls whether uncached tables are included in connection-wide data refresh.  - &#x60;false&#x60; (default): Only refresh tables that already have cached data.   This is the common case for keeping existing data up-to-date. - &#x60;true&#x60;: Also sync tables that haven&#39;t been cached yet, essentially performing   an initial sync for any new tables discovered since the connection was created.  This field only applies to connection-wide data refresh (when &#x60;data&#x3D;true&#x60; and &#x60;table_name&#x60; is not specified). It has no effect on single-table refresh or schema refresh operations. | [optional] 
 **schema_name** | **str** |  | [optional] 
 **table_name** | **str** |  | [optional] 
