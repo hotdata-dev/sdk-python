@@ -1,5 +1,5 @@
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -32,11 +32,11 @@ REQUIRES = [
 setup(
     name=NAME,
     version=VERSION,
-    description="HotData API",
-    author="HotData",
+    description="Hotdata API",
+    author="Hotdata",
     author_email="developers@hotdata.dev",
     url="",
-    keywords=["OpenAPI", "OpenAPI-Generator", "HotData API"],
+    keywords=["OpenAPI", "OpenAPI-Generator", "Hotdata API"],
     install_requires=REQUIRES,
     packages=find_packages(exclude=["test", "tests"]),
     include_package_data=True,

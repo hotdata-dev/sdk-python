@@ -6,9 +6,15 @@ Dataset source specification
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**columns** | **Dict[str, str]** | Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred. | [optional] 
+**columns** | **Dict[str, str]** | Optional explicit column definitions. Keys are column names, values are type specs. | [optional] 
 **format** | **str** |  | [optional] 
 **upload_id** | **str** |  | 
+**saved_query_id** | **str** |  | 
+**version** | **int** |  | [optional] 
+**description** | **str** | Optional description for the auto-created saved query. | [optional] 
+**name** | **str** | Optional name for the auto-created saved query. Defaults to the dataset label. | [optional] 
+**sql** | **str** |  | 
+**url** | **str** |  | 
 **inline** | [**InlineData**](InlineData.md) |  | 
 
 ## Example

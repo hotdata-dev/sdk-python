@@ -21,6 +21,11 @@ Name | Type | Description | Notes
 **tables_failed** | **int** |  | 
 **tables_refreshed** | **int** |  | 
 **total_rows** | **int** |  | 
+**created_at** | **datetime** |  | 
+**id** | **str** | Job ID for status polling. | 
+**status** | **str** | Current status: \&quot;pending\&quot; or \&quot;running\&quot;. | 
+**version** | **int** |  | 
+**status_url** | **str** | URL to poll for job status. | 
 
 ## Example
 
