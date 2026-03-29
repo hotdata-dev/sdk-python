@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -18,8 +18,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,8 +28,10 @@ class QueryRequest(BaseModel):
     """
     Request body for POST /query
     """ # noqa: E501
+    var_async: Optional[StrictBool] = Field(default=None, description="When true, execute the query asynchronously and return a query run ID for polling via GET /query-runs/{id}. The query results can be retrieved via GET /results/{id} once the query run status is \"succeeded\".", alias="async")
+    async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set with async=true, wait up to this many milliseconds for the query to complete synchronously before returning an async response. Minimum 1000ms. Ignored if async is false.")
     sql: StrictStr
-    __properties: ClassVar[List[str]] = ["sql"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "sql"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -69,6 +72,11 @@ class QueryRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if async_after_ms (nullable) is None
+        # and model_fields_set contains the field
+        if self.async_after_ms is None and "async_after_ms" in self.model_fields_set:
+            _dict['async_after_ms'] = None
+
         return _dict
 
     @classmethod
@@ -81,6 +89,8 @@ class QueryRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "async": obj.get("async"),
+            "async_after_ms": obj.get("async_after_ms"),
             "sql": obj.get("sql")
         })
         return _obj

@@ -6,6 +6,8 @@ Request body for POST /query
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**var_async** | **bool** | When true, execute the query asynchronously and return a query run ID for polling via GET /query-runs/{id}. The query results can be retrieved via GET /results/{id} once the query run status is \&quot;succeeded\&quot;. | [optional] 
+**async_after_ms** | **int** | If set with async&#x3D;true, wait up to this many milliseconds for the query to complete synchronously before returning an async response. Minimum 1000ms. Ignored if async is false. | [optional] 
 **sql** | **str** |  | 
 
 ## Example

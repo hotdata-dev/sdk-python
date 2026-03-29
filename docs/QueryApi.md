@@ -14,6 +14,8 @@ Execute SQL query
 
 Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.
 
+Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
+
 ### Example
 
 * Bearer Authentication (BearerAuth):
@@ -83,6 +85,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Query executed successfully |  -  |
+**202** | Query submitted asynchronously |  -  |
 **400** | Invalid request |  -  |
 **500** | Internal server error |  -  |
 
