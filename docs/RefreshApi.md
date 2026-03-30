@@ -19,6 +19,8 @@ Refresh schema metadata or table data. The behavior depends on the request field
 - **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`.
 - **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet.
 
+Set `async: true` on data refresh operations to run in the background and return a job ID for polling.
+
 ### Example
 
 * Bearer Authentication (BearerAuth):

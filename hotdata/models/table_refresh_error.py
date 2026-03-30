@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class TableRefreshError(BaseModel):
     """
-    Error details for a failed table refresh
+    Error details for a failed table refresh.
     """ # noqa: E501
     error: StrictStr
     schema_name: StrictStr

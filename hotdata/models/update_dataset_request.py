@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,8 +28,9 @@ class UpdateDatasetRequest(BaseModel):
     Request body for PUT /v1/datasets/{id}
     """ # noqa: E501
     label: Optional[StrictStr] = None
+    pinned_version: Optional[StrictInt] = Field(default=None, description="Pin to a specific version, or send null to unpin. Omit the field entirely to leave pinning unchanged.")
     table_name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["label", "table_name"]
+    __properties: ClassVar[List[str]] = ["label", "pinned_version", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -75,6 +76,11 @@ class UpdateDatasetRequest(BaseModel):
         if self.label is None and "label" in self.model_fields_set:
             _dict['label'] = None
 
+        # set to None if pinned_version (nullable) is None
+        # and model_fields_set contains the field
+        if self.pinned_version is None and "pinned_version" in self.model_fields_set:
+            _dict['pinned_version'] = None
+
         # set to None if table_name (nullable) is None
         # and model_fields_set contains the field
         if self.table_name is None and "table_name" in self.model_fields_set:
@@ -93,6 +99,7 @@ class UpdateDatasetRequest(BaseModel):
 
         _obj = cls.model_validate({
             "label": obj.get("label"),
+            "pinned_version": obj.get("pinned_version"),
             "table_name": obj.get("table_name")
         })
         return _obj

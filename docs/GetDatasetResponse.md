@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 **created_at** | **datetime** |  | 
 **id** | **str** |  | 
 **label** | **str** |  | 
+**latest_version** | **int** |  | 
+**pinned_version** | **int** |  | [optional] 
 **schema_name** | **str** |  | 
 **source_type** | **str** |  | 
 **table_name** | **str** |  | 

@@ -1,6 +1,6 @@
 # TableRefreshResult
 
-Response for single table data refresh
+Result payload for a `data_refresh_table` job.
 
 ## Properties
 
