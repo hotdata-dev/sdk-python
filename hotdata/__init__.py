@@ -3,7 +3,7 @@
 # flake8: noqa
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -19,9 +19,12 @@ __version__ = "1.0.0"
 
 # Define package exports
 __all__ = [
+    "ConnectionTypesApi",
     "ConnectionsApi",
     "DatasetsApi",
+    "IndexesApi",
     "InformationSchemaApi",
+    "JobsApi",
     "QueryApi",
     "QueryRunsApi",
     "RefreshApi",
@@ -41,6 +44,7 @@ __all__ = [
     "ApiException",
     "ApiErrorDetail",
     "ApiErrorResponse",
+    "AsyncQueryResponse",
     "BooleanProfileDetail",
     "CategoricalProfileDetail",
     "CategoryValueInfo",
@@ -57,10 +61,13 @@ __all__ = [
     "ConnectionInfo",
     "ConnectionRefreshResult",
     "ConnectionSchemaError",
+    "ConnectionTypeDetail",
+    "ConnectionTypeSummary",
     "CreateConnectionRequest",
     "CreateConnectionResponse",
     "CreateDatasetRequest",
     "CreateDatasetResponse",
+    "CreateIndexRequest",
     "CreateSavedQueryRequest",
     "CreateSecretRequest",
     "CreateSecretResponse",
@@ -68,6 +75,7 @@ __all__ = [
     "CreateWorkspaceResponse",
     "DatasetSource",
     "DatasetSummary",
+    "DatasetVersionSummary",
     "DiscoveryStatus",
     "Error",
     "ExecuteSavedQueryRequest",
@@ -75,11 +83,21 @@ __all__ = [
     "GetDatasetResponse",
     "GetResultResponse",
     "GetSecretResponse",
+    "IndexInfoResponse",
+    "IndexStatus",
     "InformationSchemaResponse",
     "InlineData",
     "InlineDatasetSource",
+    "JobResult",
+    "JobStatus",
+    "JobStatusResponse",
+    "JobType",
+    "ListConnectionTypesResponse",
     "ListConnectionsResponse",
+    "ListDatasetVersionsResponse",
     "ListDatasetsResponse",
+    "ListIndexesResponse",
+    "ListJobsResponse",
     "ListQueryRunsResponse",
     "ListResultsResponse",
     "ListSavedQueriesResponse",
@@ -91,15 +109,19 @@ __all__ = [
     "QueryRequest",
     "QueryResponse",
     "QueryRunInfo",
+    "RefreshDatasetResponse",
     "RefreshRequest",
     "RefreshResponse",
     "RefreshWarning",
     "ResultInfo",
+    "SavedQueryDatasetSource",
     "SavedQueryDetail",
     "SavedQuerySummary",
     "SavedQueryVersionInfo",
     "SchemaRefreshResult",
     "SecretMetadataResponse",
+    "SqlQueryDatasetSource",
+    "SubmitJobResponse",
     "TableInfo",
     "TableProfileResponse",
     "TableRefreshError",
@@ -114,14 +136,18 @@ __all__ = [
     "UploadDatasetSource",
     "UploadInfo",
     "UploadResponse",
+    "UrlDatasetSource",
     "WorkspaceDetail",
     "WorkspaceListItem",
 ]
 
 # import apis into sdk package
+from hotdata.api.connection_types_api import ConnectionTypesApi as ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi as ConnectionsApi
 from hotdata.api.datasets_api import DatasetsApi as DatasetsApi
+from hotdata.api.indexes_api import IndexesApi as IndexesApi
 from hotdata.api.information_schema_api import InformationSchemaApi as InformationSchemaApi
+from hotdata.api.jobs_api import JobsApi as JobsApi
 from hotdata.api.query_api import QueryApi as QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi as QueryRunsApi
 from hotdata.api.refresh_api import RefreshApi as RefreshApi
@@ -145,6 +171,7 @@ from hotdata.exceptions import ApiException as ApiException
 # import models into sdk package
 from hotdata.models.api_error_detail import ApiErrorDetail as ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse as ApiErrorResponse
+from hotdata.models.async_query_response import AsyncQueryResponse as AsyncQueryResponse
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail as BooleanProfileDetail
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail as CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo as CategoryValueInfo
@@ -161,10 +188,13 @@ from hotdata.models.connection_health_response import ConnectionHealthResponse a
 from hotdata.models.connection_info import ConnectionInfo as ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult as ConnectionRefreshResult
 from hotdata.models.connection_schema_error import ConnectionSchemaError as ConnectionSchemaError
+from hotdata.models.connection_type_detail import ConnectionTypeDetail as ConnectionTypeDetail
+from hotdata.models.connection_type_summary import ConnectionTypeSummary as ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest as CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse as CreateConnectionResponse
 from hotdata.models.create_dataset_request import CreateDatasetRequest as CreateDatasetRequest
 from hotdata.models.create_dataset_response import CreateDatasetResponse as CreateDatasetResponse
+from hotdata.models.create_index_request import CreateIndexRequest as CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest as CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
@@ -172,6 +202,7 @@ from hotdata.models.create_workspace_request import CreateWorkspaceRequest as Cr
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource as DatasetSource
 from hotdata.models.dataset_summary import DatasetSummary as DatasetSummary
+from hotdata.models.dataset_version_summary import DatasetVersionSummary as DatasetVersionSummary
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.error import Error as Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest as ExecuteSavedQueryRequest
@@ -179,11 +210,21 @@ from hotdata.models.get_connection_response import GetConnectionResponse as GetC
 from hotdata.models.get_dataset_response import GetDatasetResponse as GetDatasetResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
 from hotdata.models.get_secret_response import GetSecretResponse as GetSecretResponse
+from hotdata.models.index_info_response import IndexInfoResponse as IndexInfoResponse
+from hotdata.models.index_status import IndexStatus as IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse as InformationSchemaResponse
 from hotdata.models.inline_data import InlineData as InlineData
 from hotdata.models.inline_dataset_source import InlineDatasetSource as InlineDatasetSource
+from hotdata.models.job_result import JobResult as JobResult
+from hotdata.models.job_status import JobStatus as JobStatus
+from hotdata.models.job_status_response import JobStatusResponse as JobStatusResponse
+from hotdata.models.job_type import JobType as JobType
+from hotdata.models.list_connection_types_response import ListConnectionTypesResponse as ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
+from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse as ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse as ListDatasetsResponse
+from hotdata.models.list_indexes_response import ListIndexesResponse as ListIndexesResponse
+from hotdata.models.list_jobs_response import ListJobsResponse as ListJobsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse as ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse as ListResultsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse as ListSavedQueriesResponse
@@ -195,15 +236,19 @@ from hotdata.models.numeric_profile_detail import NumericProfileDetail as Numeri
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo as QueryRunInfo
+from hotdata.models.refresh_dataset_response import RefreshDatasetResponse as RefreshDatasetResponse
 from hotdata.models.refresh_request import RefreshRequest as RefreshRequest
 from hotdata.models.refresh_response import RefreshResponse as RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning as RefreshWarning
 from hotdata.models.result_info import ResultInfo as ResultInfo
+from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource as SavedQueryDatasetSource
 from hotdata.models.saved_query_detail import SavedQueryDetail as SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary as SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo as SavedQueryVersionInfo
 from hotdata.models.schema_refresh_result import SchemaRefreshResult as SchemaRefreshResult
 from hotdata.models.secret_metadata_response import SecretMetadataResponse as SecretMetadataResponse
+from hotdata.models.sql_query_dataset_source import SqlQueryDatasetSource as SqlQueryDatasetSource
+from hotdata.models.submit_job_response import SubmitJobResponse as SubmitJobResponse
 from hotdata.models.table_info import TableInfo as TableInfo
 from hotdata.models.table_profile_response import TableProfileResponse as TableProfileResponse
 from hotdata.models.table_refresh_error import TableRefreshError as TableRefreshError
@@ -218,6 +263,7 @@ from hotdata.models.update_secret_response import UpdateSecretResponse as Update
 from hotdata.models.upload_dataset_source import UploadDatasetSource as UploadDatasetSource
 from hotdata.models.upload_info import UploadInfo as UploadInfo
 from hotdata.models.upload_response import UploadResponse as UploadResponse
+from hotdata.models.url_dataset_source import UrlDatasetSource as UrlDatasetSource
 from hotdata.models.workspace_detail import WorkspaceDetail as WorkspaceDetail
 from hotdata.models.workspace_list_item import WorkspaceListItem as WorkspaceListItem
 
