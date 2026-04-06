@@ -2,7 +2,7 @@
 
 # flake8: noqa
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -16,6 +16,7 @@
 # import models into model package
 from hotdata.models.api_error_detail import ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse
+from hotdata.models.async_query_response import AsyncQueryResponse
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo
@@ -32,10 +33,15 @@ from hotdata.models.connection_health_response import ConnectionHealthResponse
 from hotdata.models.connection_info import ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult
 from hotdata.models.connection_schema_error import ConnectionSchemaError
+from hotdata.models.connection_type_detail import ConnectionTypeDetail
+from hotdata.models.connection_type_summary import ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse
 from hotdata.models.create_dataset_request import CreateDatasetRequest
 from hotdata.models.create_dataset_response import CreateDatasetResponse
+from hotdata.models.create_embedding_provider_request import CreateEmbeddingProviderRequest
+from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse
+from hotdata.models.create_index_request import CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse
@@ -43,18 +49,31 @@ from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource
 from hotdata.models.dataset_summary import DatasetSummary
+from hotdata.models.dataset_version_summary import DatasetVersionSummary
 from hotdata.models.discovery_status import DiscoveryStatus
+from hotdata.models.embedding_provider_response import EmbeddingProviderResponse
 from hotdata.models.error import Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest
 from hotdata.models.get_connection_response import GetConnectionResponse
 from hotdata.models.get_dataset_response import GetDatasetResponse
 from hotdata.models.get_result_response import GetResultResponse
 from hotdata.models.get_secret_response import GetSecretResponse
+from hotdata.models.index_info_response import IndexInfoResponse
+from hotdata.models.index_status import IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse
 from hotdata.models.inline_data import InlineData
 from hotdata.models.inline_dataset_source import InlineDatasetSource
+from hotdata.models.job_result import JobResult
+from hotdata.models.job_status import JobStatus
+from hotdata.models.job_status_response import JobStatusResponse
+from hotdata.models.job_type import JobType
+from hotdata.models.list_connection_types_response import ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse
+from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse
+from hotdata.models.list_embedding_providers_response import ListEmbeddingProvidersResponse
+from hotdata.models.list_indexes_response import ListIndexesResponse
+from hotdata.models.list_jobs_response import ListJobsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse
@@ -66,15 +85,19 @@ from hotdata.models.numeric_profile_detail import NumericProfileDetail
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo
+from hotdata.models.refresh_dataset_response import RefreshDatasetResponse
 from hotdata.models.refresh_request import RefreshRequest
 from hotdata.models.refresh_response import RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning
 from hotdata.models.result_info import ResultInfo
+from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource
 from hotdata.models.saved_query_detail import SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo
 from hotdata.models.schema_refresh_result import SchemaRefreshResult
 from hotdata.models.secret_metadata_response import SecretMetadataResponse
+from hotdata.models.sql_query_dataset_source import SqlQueryDatasetSource
+from hotdata.models.submit_job_response import SubmitJobResponse
 from hotdata.models.table_info import TableInfo
 from hotdata.models.table_profile_response import TableProfileResponse
 from hotdata.models.table_refresh_error import TableRefreshError
@@ -83,12 +106,15 @@ from hotdata.models.temporal_profile_detail import TemporalProfileDetail
 from hotdata.models.text_profile_detail import TextProfileDetail
 from hotdata.models.update_dataset_request import UpdateDatasetRequest
 from hotdata.models.update_dataset_response import UpdateDatasetResponse
+from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest
+from hotdata.models.update_embedding_provider_response import UpdateEmbeddingProviderResponse
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse
 from hotdata.models.upload_dataset_source import UploadDatasetSource
 from hotdata.models.upload_info import UploadInfo
 from hotdata.models.upload_response import UploadResponse
+from hotdata.models.url_dataset_source import UrlDatasetSource
 from hotdata.models.workspace_detail import WorkspaceDetail
 from hotdata.models.workspace_list_item import WorkspaceListItem
 
