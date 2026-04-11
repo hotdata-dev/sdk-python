@@ -1,5 +1,5 @@
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -56,7 +56,7 @@ class QueryApi:
     ) -> QueryResponse:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.
+        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
 
         :param query_request: (required)
         :type query_request: QueryRequest
@@ -92,6 +92,7 @@ class QueryApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryResponse",
+            '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
@@ -125,7 +126,7 @@ class QueryApi:
     ) -> ApiResponse[QueryResponse]:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.
+        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
 
         :param query_request: (required)
         :type query_request: QueryRequest
@@ -161,6 +162,7 @@ class QueryApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryResponse",
+            '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
@@ -194,7 +196,7 @@ class QueryApi:
     ) -> RESTResponseType:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.
+        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
 
         :param query_request: (required)
         :type query_request: QueryRequest
@@ -230,6 +232,7 @@ class QueryApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryResponse",
+            '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
