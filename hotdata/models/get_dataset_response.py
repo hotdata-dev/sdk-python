@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from hotdata.models.column_info import ColumnInfo
 from typing import Optional, Set
 from typing_extensions import Self
@@ -33,11 +33,13 @@ class GetDatasetResponse(BaseModel):
     created_at: datetime
     id: StrictStr
     label: StrictStr
+    latest_version: StrictInt
+    pinned_version: Optional[StrictInt] = None
     schema_name: StrictStr
     source_type: StrictStr
     table_name: StrictStr
     updated_at: datetime
-    __properties: ClassVar[List[str]] = ["columns", "created_at", "id", "label", "schema_name", "source_type", "table_name", "updated_at"]
+    __properties: ClassVar[List[str]] = ["columns", "created_at", "id", "label", "latest_version", "pinned_version", "schema_name", "source_type", "table_name", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,6 +87,11 @@ class GetDatasetResponse(BaseModel):
                 if _item_columns:
                     _items.append(_item_columns.to_dict())
             _dict['columns'] = _items
+        # set to None if pinned_version (nullable) is None
+        # and model_fields_set contains the field
+        if self.pinned_version is None and "pinned_version" in self.model_fields_set:
+            _dict['pinned_version'] = None
+
         return _dict
 
     @classmethod
@@ -101,6 +108,8 @@ class GetDatasetResponse(BaseModel):
             "created_at": obj.get("created_at"),
             "id": obj.get("id"),
             "label": obj.get("label"),
+            "latest_version": obj.get("latest_version"),
+            "pinned_version": obj.get("pinned_version"),
             "schema_name": obj.get("schema_name"),
             "source_type": obj.get("source_type"),
             "table_name": obj.get("table_name"),

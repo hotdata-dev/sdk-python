@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **connections_failed** | **int** |  | 
 **connections_refreshed** | **int** |  | 
-**errors** | [**List[TableRefreshError]**](TableRefreshError.md) |  | 
+**errors** | [**List[TableRefreshError]**](TableRefreshError.md) |  | [optional] 
 **tables_added** | **int** |  | 
 **tables_discovered** | **int** |  | 
 **tables_modified** | **int** |  | 
@@ -21,6 +21,11 @@ Name | Type | Description | Notes
 **tables_failed** | **int** |  | 
 **tables_refreshed** | **int** |  | 
 **total_rows** | **int** |  | 
+**created_at** | **datetime** |  | 
+**id** | **str** | Job ID for status polling. | 
+**status** | [**JobStatus**](JobStatus.md) | Current status of the submitted job. | 
+**version** | **int** |  | 
+**status_url** | **str** | URL to poll for job status. | 
 
 ## Example
 

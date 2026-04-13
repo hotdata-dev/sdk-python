@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,9 +31,12 @@ class DatasetSummary(BaseModel):
     created_at: datetime
     id: StrictStr
     label: StrictStr
+    latest_version: StrictInt
+    pinned_version: Optional[StrictInt] = None
+    schema_name: StrictStr
     table_name: StrictStr
     updated_at: datetime
-    __properties: ClassVar[List[str]] = ["created_at", "id", "label", "table_name", "updated_at"]
+    __properties: ClassVar[List[str]] = ["created_at", "id", "label", "latest_version", "pinned_version", "schema_name", "table_name", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -74,6 +77,11 @@ class DatasetSummary(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if pinned_version (nullable) is None
+        # and model_fields_set contains the field
+        if self.pinned_version is None and "pinned_version" in self.model_fields_set:
+            _dict['pinned_version'] = None
+
         return _dict
 
     @classmethod
@@ -89,6 +97,9 @@ class DatasetSummary(BaseModel):
             "created_at": obj.get("created_at"),
             "id": obj.get("id"),
             "label": obj.get("label"),
+            "latest_version": obj.get("latest_version"),
+            "pinned_version": obj.get("pinned_version"),
+            "schema_name": obj.get("schema_name"),
             "table_name": obj.get("table_name"),
             "updated_at": obj.get("updated_at")
         })
