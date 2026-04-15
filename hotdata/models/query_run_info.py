@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -37,13 +37,15 @@ class QueryRunInfo(BaseModel):
     row_count: Optional[StrictInt] = None
     saved_query_id: Optional[StrictStr] = None
     saved_query_version: Optional[StrictInt] = None
+    server_processing_ms: Optional[StrictInt] = Field(default=None, description="Total server-side processing time for this query (milliseconds). Measured from query start to result ready. Includes SQL execution, task spawning, and result preparation. Does not include network transit. Populated for all completed query runs (sync and async).")
     snapshot_id: StrictStr
     sql_hash: StrictStr
     sql_text: StrictStr
     status: StrictStr
     trace_id: Optional[StrictStr] = None
+    user_public_id: Optional[StrictStr] = Field(default=None, description="Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: `user_{first_10_hex_chars}`. Mirrors the webapp's `user_public_id_from_auth_header`.")
     warning_message: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["completed_at", "created_at", "error_message", "execution_time_ms", "id", "result_id", "row_count", "saved_query_id", "saved_query_version", "snapshot_id", "sql_hash", "sql_text", "status", "trace_id", "warning_message"]
+    __properties: ClassVar[List[str]] = ["completed_at", "created_at", "error_message", "execution_time_ms", "id", "result_id", "row_count", "saved_query_id", "saved_query_version", "server_processing_ms", "snapshot_id", "sql_hash", "sql_text", "status", "trace_id", "user_public_id", "warning_message"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -119,10 +121,20 @@ class QueryRunInfo(BaseModel):
         if self.saved_query_version is None and "saved_query_version" in self.model_fields_set:
             _dict['saved_query_version'] = None
 
+        # set to None if server_processing_ms (nullable) is None
+        # and model_fields_set contains the field
+        if self.server_processing_ms is None and "server_processing_ms" in self.model_fields_set:
+            _dict['server_processing_ms'] = None
+
         # set to None if trace_id (nullable) is None
         # and model_fields_set contains the field
         if self.trace_id is None and "trace_id" in self.model_fields_set:
             _dict['trace_id'] = None
+
+        # set to None if user_public_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.user_public_id is None and "user_public_id" in self.model_fields_set:
+            _dict['user_public_id'] = None
 
         # set to None if warning_message (nullable) is None
         # and model_fields_set contains the field
@@ -150,11 +162,13 @@ class QueryRunInfo(BaseModel):
             "row_count": obj.get("row_count"),
             "saved_query_id": obj.get("saved_query_id"),
             "saved_query_version": obj.get("saved_query_version"),
+            "server_processing_ms": obj.get("server_processing_ms"),
             "snapshot_id": obj.get("snapshot_id"),
             "sql_hash": obj.get("sql_hash"),
             "sql_text": obj.get("sql_text"),
             "status": obj.get("status"),
             "trace_id": obj.get("trace_id"),
+            "user_public_id": obj.get("user_public_id"),
             "warning_message": obj.get("warning_message")
         })
         return _obj

@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **name** | **str** |  | 
 **secret_id** | **str** | Optional reference to a secret by ID (e.g., \&quot;secr_abc123\&quot;). If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_name&#x60;. | [optional] 
 **secret_name** | **str** | Optional reference to a secret by name. If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_id&#x60;. | [optional] 
+**skip_discovery** | **bool** | If true, skip automatic schema discovery after registering the connection. The connection will be created but no tables will be discovered. You can run discovery later via the refresh endpoint. | [optional] 
 **source_type** | **str** |  | 
 
 ## Example
