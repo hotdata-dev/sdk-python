@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -31,9 +31,10 @@ class CreateDatasetResponse(BaseModel):
     created_at: datetime
     id: StrictStr
     label: StrictStr
+    schema_name: StrictStr
     status: StrictStr
     table_name: StrictStr
-    __properties: ClassVar[List[str]] = ["created_at", "id", "label", "status", "table_name"]
+    __properties: ClassVar[List[str]] = ["created_at", "id", "label", "schema_name", "status", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,6 +90,7 @@ class CreateDatasetResponse(BaseModel):
             "created_at": obj.get("created_at"),
             "id": obj.get("id"),
             "label": obj.get("label"),
+            "schema_name": obj.get("schema_name"),
             "status": obj.get("status"),
             "table_name": obj.get("table_name")
         })

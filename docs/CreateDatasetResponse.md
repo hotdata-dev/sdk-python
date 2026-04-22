@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **created_at** | **datetime** |  | 
 **id** | **str** |  | 
 **label** | **str** |  | 
+**schema_name** | **str** |  | 
 **status** | **str** |  | 
 **table_name** | **str** |  | 
 
