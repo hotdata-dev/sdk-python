@@ -17,8 +17,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
-from typing_extensions import Annotated
-from hotdata.models.connection_type_detail import ConnectionTypeDetail
 from hotdata.models.list_connection_types_response import ListConnectionTypesResponse
 
 from hotdata.api_client import ApiClient, RequestSerialized
