@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -19,13 +19,15 @@ import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
 from typing import Any, List, Optional
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult
+from hotdata.models.refresh_dataset_response import RefreshDatasetResponse
 from hotdata.models.schema_refresh_result import SchemaRefreshResult
+from hotdata.models.submit_job_response import SubmitJobResponse
 from hotdata.models.table_refresh_result import TableRefreshResult
 from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self
 
-REFRESHRESPONSE_ONE_OF_SCHEMAS = ["ConnectionRefreshResult", "SchemaRefreshResult", "TableRefreshResult"]
+REFRESHRESPONSE_ONE_OF_SCHEMAS = ["ConnectionRefreshResult", "RefreshDatasetResponse", "SchemaRefreshResult", "SubmitJobResponse", "TableRefreshResult"]
 
 class RefreshResponse(BaseModel):
     """
@@ -37,8 +39,12 @@ class RefreshResponse(BaseModel):
     oneof_schema_2_validator: Optional[TableRefreshResult] = None
     # data type: ConnectionRefreshResult
     oneof_schema_3_validator: Optional[ConnectionRefreshResult] = None
-    actual_instance: Optional[Union[ConnectionRefreshResult, SchemaRefreshResult, TableRefreshResult]] = None
-    one_of_schemas: Set[str] = { "ConnectionRefreshResult", "SchemaRefreshResult", "TableRefreshResult" }
+    # data type: RefreshDatasetResponse
+    oneof_schema_4_validator: Optional[RefreshDatasetResponse] = None
+    # data type: SubmitJobResponse
+    oneof_schema_5_validator: Optional[SubmitJobResponse] = None
+    actual_instance: Optional[Union[ConnectionRefreshResult, RefreshDatasetResponse, SchemaRefreshResult, SubmitJobResponse, TableRefreshResult]] = None
+    one_of_schemas: Set[str] = { "ConnectionRefreshResult", "RefreshDatasetResponse", "SchemaRefreshResult", "SubmitJobResponse", "TableRefreshResult" }
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -76,12 +82,22 @@ class RefreshResponse(BaseModel):
             error_messages.append(f"Error! Input type `{type(v)}` is not `ConnectionRefreshResult`")
         else:
             match += 1
+        # validate data type: RefreshDatasetResponse
+        if not isinstance(v, RefreshDatasetResponse):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `RefreshDatasetResponse`")
+        else:
+            match += 1
+        # validate data type: SubmitJobResponse
+        if not isinstance(v, SubmitJobResponse):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `SubmitJobResponse`")
+        else:
+            match += 1
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in RefreshResponse with oneOf schemas: ConnectionRefreshResult, SchemaRefreshResult, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when setting `actual_instance` in RefreshResponse with oneOf schemas: ConnectionRefreshResult, RefreshDatasetResponse, SchemaRefreshResult, SubmitJobResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in RefreshResponse with oneOf schemas: ConnectionRefreshResult, SchemaRefreshResult, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when setting `actual_instance` in RefreshResponse with oneOf schemas: ConnectionRefreshResult, RefreshDatasetResponse, SchemaRefreshResult, SubmitJobResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         else:
             return v
 
@@ -114,13 +130,25 @@ class RefreshResponse(BaseModel):
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
+        # deserialize data into RefreshDatasetResponse
+        try:
+            instance.actual_instance = RefreshDatasetResponse.from_json(json_str)
+            match += 1
+        except (ValidationError, ValueError) as e:
+            error_messages.append(str(e))
+        # deserialize data into SubmitJobResponse
+        try:
+            instance.actual_instance = SubmitJobResponse.from_json(json_str)
+            match += 1
+        except (ValidationError, ValueError) as e:
+            error_messages.append(str(e))
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into RefreshResponse with oneOf schemas: ConnectionRefreshResult, SchemaRefreshResult, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when deserializing the JSON string into RefreshResponse with oneOf schemas: ConnectionRefreshResult, RefreshDatasetResponse, SchemaRefreshResult, SubmitJobResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into RefreshResponse with oneOf schemas: ConnectionRefreshResult, SchemaRefreshResult, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when deserializing the JSON string into RefreshResponse with oneOf schemas: ConnectionRefreshResult, RefreshDatasetResponse, SchemaRefreshResult, SubmitJobResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         else:
             return instance
 
@@ -134,7 +162,7 @@ class RefreshResponse(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Optional[Union[Dict[str, Any], ConnectionRefreshResult, SchemaRefreshResult, TableRefreshResult]]:
+    def to_dict(self) -> Optional[Union[Dict[str, Any], ConnectionRefreshResult, RefreshDatasetResponse, SchemaRefreshResult, SubmitJobResponse, TableRefreshResult]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return None

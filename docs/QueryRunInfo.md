@@ -15,11 +15,13 @@ Name | Type | Description | Notes
 **row_count** | **int** |  | [optional] 
 **saved_query_id** | **str** |  | [optional] 
 **saved_query_version** | **int** |  | [optional] 
+**server_processing_ms** | **int** | Total server-side processing time for this query (milliseconds). Measured from query start to result ready. Includes SQL execution, task spawning, and result preparation. Does not include network transit. Populated for all completed query runs (sync and async). | [optional] 
 **snapshot_id** | **str** |  | 
 **sql_hash** | **str** |  | 
 **sql_text** | **str** |  | 
 **status** | **str** |  | 
 **trace_id** | **str** |  | [optional] 
+**user_public_id** | **str** | Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: &#x60;user_{first_10_hex_chars}&#x60;. Mirrors the webapp&#39;s &#x60;user_public_id_from_auth_header&#x60;. | [optional] 
 **warning_message** | **str** |  | [optional] 
 
 ## Example

@@ -85,11 +85,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **upload_file**
-> UploadResponse upload_file(request_body)
+> UploadResponse upload_file(request_body, streaming=streaming)
 
 Upload file
 
-Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table.
+Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table. Add `?streaming=true` for large files (up to 20GB) — streams to disk instead of loading into memory.
 
 ### Example
 
@@ -122,10 +122,11 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.UploadsApi(api_client)
     request_body = [56] # List[int] | 
+    streaming = True # bool | Stream upload to disk for large files (up to 20GB) (optional)
 
     try:
         # Upload file
-        api_response = api_instance.upload_file(request_body)
+        api_response = api_instance.upload_file(request_body, streaming=streaming)
         print("The response of UploadsApi->upload_file:\n")
         pprint(api_response)
     except Exception as e:
@@ -140,6 +141,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **request_body** | [**List[int]**](int.md)|  | 
+ **streaming** | **bool**| Stream upload to disk for large files (up to 20GB) | [optional] 
 
 ### Return type
 
