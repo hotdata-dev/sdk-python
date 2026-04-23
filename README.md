@@ -2,7 +2,7 @@
 
 Official Python client for the [Hotdata](https://app.hotdata.dev) HTTP API: workspaces, connections, datasets, SQL queries, results, secrets, uploads, indexes, jobs, embedding providers, and workspace context.
 
-The package is produced with [OpenAPI Generator](https://openapi-generator.tech) from the Hotdata OpenAPI spec. Regenerate via the **Regenerate Client** workflow in this repository when the API changes.
+The package is produced with [OpenAPI Generator](https://openapi-generator.tech) from the Hotdata OpenAPI spec. 
 
 ## Requirements
 
@@ -62,7 +62,7 @@ with hotdata.ApiClient(configuration) as api_client:
         print(f"API error: {e.status} {e.reason}\n{e.body}")
 ```
 
-Each `*Api` class groups endpoints by resource. Construct the client, then call the typed methods you need.
+Each `Api` class groups endpoints by resource. Construct the client, then call the typed methods you need.
 
 ## API reference
 
