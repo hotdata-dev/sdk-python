@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -28,11 +28,11 @@ from typing_extensions import Self
 
 class ConnectionRefreshResult(BaseModel):
     """
-    Response for connection-wide data refresh
+    Result payload for a `data_refresh_connection` job.
     """ # noqa: E501
     connection_id: StrictStr
     duration_ms: Annotated[int, Field(strict=True, ge=0)]
-    errors: List[TableRefreshError]
+    errors: Optional[List[TableRefreshError]] = None
     tables_failed: Annotated[int, Field(strict=True, ge=0)]
     tables_refreshed: Annotated[int, Field(strict=True, ge=0)]
     total_rows: Annotated[int, Field(strict=True, ge=0)]

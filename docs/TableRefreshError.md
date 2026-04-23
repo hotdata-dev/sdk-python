@@ -1,6 +1,6 @@
 # TableRefreshError
 
-Error details for a failed table refresh
+Error details for a failed table refresh.
 
 ## Properties
 
