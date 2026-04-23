@@ -1,13 +1,13 @@
 [project]
 name = "hotdata"
 version = "1.0.0"
-description = "Hotdata API"
+description = "Official Python client for the Hotdata API"
 authors = [
   {name = "Hotdata",email = "developers@hotdata.dev"},
 ]
 license = { text = "MIT" }
 readme = "README.md"
-keywords = ["OpenAPI", "OpenAPI-Generator", "Hotdata API"]
+keywords = ["hotdata", "api-client", "data-platform"]
 requires-python = ">=3.9"
 
 dependencies = [
@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/GIT_USER_ID/GIT_REPO_ID"
+Repository = "https://github.com/hotdata-dev/sdk-python"
 
 [tool.poetry]
 requires-poetry = ">=2.0"
