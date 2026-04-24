@@ -28,7 +28,7 @@ class UpsertWorkspaceContextRequest(BaseModel):
     Request body for POST `/v1/context`.
     """ # noqa: E501
     content: StrictStr
-    name: StrictStr = Field(description="Unique name in the catalog (upsert key). Same field as in list/get responses.")
+    name: StrictStr = Field(description="Upsert key in the catalog. Validated with dataset table-name rules (preserves case): ASCII letter or `_` first; then alphanumeric or `_` only; 1–128 chars; not a SQL reserved word.")
     __properties: ClassVar[List[str]] = ["content", "name"]
 
     model_config = ConfigDict(

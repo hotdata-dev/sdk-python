@@ -44,7 +44,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.WorkspaceContextApi(api_client)
-    name = 'name_example' # str | Name of the context (unique within the catalog)
+    name = 'name_example' # str | Context key: same character rules as a dataset table name (letter or underscore first; no hyphens)
 
     try:
         # Get one workspace context
@@ -62,7 +62,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **name** | **str**| Name of the context (unique within the catalog) | 
+ **name** | **str**| Context key: same character rules as a dataset table name (letter or underscore first; no hyphens) | 
 
 ### Return type
 
