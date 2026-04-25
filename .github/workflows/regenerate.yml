@@ -49,7 +49,7 @@ jobs:
             -g python \
             -o . \
             -t .openapi-generator-templates \
-            --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }} \
+            --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }},gitUserId=hotdata-dev,gitRepoId=sdk-python \
             --skip-validate-spec
 
       - name: Patch generated __version__ to read from package metadata
@@ -69,6 +69,24 @@ jobs:
           new, n = re.subn(r'^__version__ = "[^"]*"\n', replacement, src, count=1, flags=re.MULTILINE)
           if n != 1:
               sys.exit("Failed to patch __version__ line in hotdata/__init__.py")
+          p.write_text(new)
+          PY
+
+      - name: Patch generated pyproject.toml keywords
+        run: |
+          python3 - <<'PY'
+          import re, pathlib, sys
+          p = pathlib.Path("pyproject.toml")
+          src = p.read_text()
+          new, n = re.subn(
+              r'^keywords = \[.*\]$',
+              'keywords = ["hotdata", "api-client", "data-platform"]',
+              src,
+              count=1,
+              flags=re.MULTILINE,
+          )
+          if n != 1:
+              sys.exit("Failed to patch keywords line in pyproject.toml")
           p.write_text(new)
           PY
 
