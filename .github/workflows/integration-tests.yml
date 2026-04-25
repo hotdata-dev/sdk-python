@@ -46,12 +46,10 @@ jobs:
           PY
 
   # Integration tests run against production. Skipped automatically by the
-  # conftest if HOTDATA_TEST_API_KEY / HOTDATA_TEST_WORKSPACE_ID aren't set
-  # (e.g. PRs from forks where secrets aren't injected). Don't run on PRs by
-  # default — they're slower and hit real infra.
+  # conftest if HOTDATA_SDK_TEST_API_KEY / HOTDATA_SDK_TEST_WORKSPACE_ID aren't
+  # set (e.g. PRs from forks where secrets aren't injected).
   integration:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
