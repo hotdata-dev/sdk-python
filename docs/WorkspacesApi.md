@@ -1,6 +1,6 @@
 # hotdata.WorkspacesApi
 
-All URIs are relative to *https://app.hotdata.dev*
+All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -26,10 +26,10 @@ from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -109,10 +109,10 @@ from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters

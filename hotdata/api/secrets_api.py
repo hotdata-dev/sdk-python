@@ -299,6 +299,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -560,6 +561,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -824,6 +826,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -1070,6 +1073,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -1359,6 +1363,7 @@ class SecretsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 

@@ -282,6 +282,7 @@ class ConnectionTypesApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -528,6 +529,7 @@ class ConnectionTypesApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 

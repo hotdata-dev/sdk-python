@@ -12,6 +12,7 @@ from hotdata.api.query_api import QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi
 from hotdata.api.refresh_api import RefreshApi
 from hotdata.api.results_api import ResultsApi
+from hotdata.api.sandboxes_api import SandboxesApi
 from hotdata.api.saved_queries_api import SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi
 from hotdata.api.uploads_api import UploadsApi

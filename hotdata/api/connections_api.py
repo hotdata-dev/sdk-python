@@ -286,6 +286,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -566,6 +567,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -830,6 +832,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -1094,6 +1097,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -1388,6 +1392,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -1634,6 +1639,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -1898,6 +1904,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -2192,6 +2199,7 @@ class ConnectionsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 

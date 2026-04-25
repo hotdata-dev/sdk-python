@@ -7,7 +7,7 @@ Request body for POST `/v1/context`.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **content** | **str** |  | 
-**name** | **str** | Unique name in the catalog (upsert key). Same field as in list/get responses. | 
+**name** | **str** | Upsert key in the catalog. Validated with dataset table-name rules (preserves case): ASCII letter or &#x60;_&#x60; first; then alphanumeric or &#x60;_&#x60; only; 1–128 chars; not a SQL reserved word. | 
 
 ## Example
 

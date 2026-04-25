@@ -1,22 +1,22 @@
-# hotdata.SecretsApi
+# hotdata.SandboxesApi
 
 All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**create_secret**](SecretsApi.md#create_secret) | **POST** /v1/secrets | Create secret
-[**delete_secret**](SecretsApi.md#delete_secret) | **DELETE** /v1/secrets/{name} | Delete secret
-[**get_secret**](SecretsApi.md#get_secret) | **GET** /v1/secrets/{name} | Get secret
-[**list_secrets**](SecretsApi.md#list_secrets) | **GET** /v1/secrets | List secrets
-[**update_secret**](SecretsApi.md#update_secret) | **PUT** /v1/secrets/{name} | Update secret
+[**create_sandbox**](SandboxesApi.md#create_sandbox) | **POST** /v1/sandboxes | Create a sandbox
+[**delete_sandbox**](SandboxesApi.md#delete_sandbox) | **DELETE** /v1/sandboxes/{public_id} | Delete sandbox
+[**get_sandbox**](SandboxesApi.md#get_sandbox) | **GET** /v1/sandboxes/{public_id} | Get sandbox
+[**list_sandboxes**](SandboxesApi.md#list_sandboxes) | **GET** /v1/sandboxes | List sandboxes
+[**update_sandbox**](SandboxesApi.md#update_sandbox) | **PATCH** /v1/sandboxes/{public_id} | Update sandbox
 
 
-# **create_secret**
-> CreateSecretResponse create_secret(create_secret_request)
+# **create_sandbox**
+> SandboxResponse create_sandbox(create_sandbox_request)
 
-Create secret
+Create a sandbox
 
-Store a new named secret. The value is encrypted at rest and can be referenced by connections for authentication. Secret names must be unique.
+Creates a sandbox in the requested workspace. The returned `public_id` is the value to pass as `X-Session-Id` on scoped ops.
 
 ### Example
 
@@ -25,8 +25,8 @@ Store a new named secret. The value is encrypted at rest and can be referenced b
 
 ```python
 import hotdata
-from hotdata.models.create_secret_request import CreateSecretRequest
-from hotdata.models.create_secret_response import CreateSecretResponse
+from hotdata.models.create_sandbox_request import CreateSandboxRequest
+from hotdata.models.sandbox_response import SandboxResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -55,16 +55,16 @@ configuration = hotdata.Configuration(
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = hotdata.SecretsApi(api_client)
-    create_secret_request = hotdata.CreateSecretRequest() # CreateSecretRequest | 
+    api_instance = hotdata.SandboxesApi(api_client)
+    create_sandbox_request = hotdata.CreateSandboxRequest() # CreateSandboxRequest | 
 
     try:
-        # Create secret
-        api_response = api_instance.create_secret(create_secret_request)
-        print("The response of SecretsApi->create_secret:\n")
+        # Create a sandbox
+        api_response = api_instance.create_sandbox(create_sandbox_request)
+        print("The response of SandboxesApi->create_sandbox:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->create_secret: %s\n" % e)
+        print("Exception when calling SandboxesApi->create_sandbox: %s\n" % e)
 ```
 
 
@@ -74,11 +74,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **create_secret_request** | [**CreateSecretRequest**](CreateSecretRequest.md)|  | 
+ **create_sandbox_request** | [**CreateSandboxRequest**](CreateSandboxRequest.md)|  | 
 
 ### Return type
 
-[**CreateSecretResponse**](CreateSecretResponse.md)
+[**SandboxResponse**](SandboxResponse.md)
 
 ### Authorization
 
@@ -93,15 +93,18 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**201** | Secret created |  -  |
-**409** | Secret already exists |  -  |
+**201** | Sandbox created |  -  |
+**400** | Invalid JSON body or missing X-Workspace-Id header |  -  |
+**401** | Missing or invalid authorization |  -  |
+**403** | Not a member of the target workspace&#39;s organization |  -  |
+**404** | Workspace not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **delete_secret**
-> delete_secret(name)
+# **delete_sandbox**
+> DeleteSandboxResponse delete_sandbox(public_id)
 
-Delete secret
+Delete sandbox
 
 ### Example
 
@@ -110,6 +113,7 @@ Delete secret
 
 ```python
 import hotdata
+from hotdata.models.delete_sandbox_response import DeleteSandboxResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -138,14 +142,16 @@ configuration = hotdata.Configuration(
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = hotdata.SecretsApi(api_client)
-    name = 'name_example' # str | Secret name
+    api_instance = hotdata.SandboxesApi(api_client)
+    public_id = 'public_id_example' # str | Public id of the sandbox.
 
     try:
-        # Delete secret
-        api_instance.delete_secret(name)
+        # Delete sandbox
+        api_response = api_instance.delete_sandbox(public_id)
+        print("The response of SandboxesApi->delete_sandbox:\n")
+        pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->delete_secret: %s\n" % e)
+        print("Exception when calling SandboxesApi->delete_sandbox: %s\n" % e)
 ```
 
 
@@ -155,11 +161,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **name** | **str**| Secret name | 
+ **public_id** | **str**| Public id of the sandbox. | 
 
 ### Return type
 
-void (empty response body)
+[**DeleteSandboxResponse**](DeleteSandboxResponse.md)
 
 ### Authorization
 
@@ -174,17 +180,17 @@ void (empty response body)
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**204** | Secret deleted |  -  |
-**404** | Secret not found |  -  |
+**200** | Sandbox deleted |  -  |
+**401** | Missing or invalid authorization |  -  |
+**403** | Not a member of the target workspace&#39;s organization |  -  |
+**404** | Sandbox not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **get_secret**
-> GetSecretResponse get_secret(name)
+# **get_sandbox**
+> SandboxResponse get_sandbox(public_id)
 
-Get secret
-
-Get metadata for a secret. The secret value is never returned.
+Get sandbox
 
 ### Example
 
@@ -193,7 +199,7 @@ Get metadata for a secret. The secret value is never returned.
 
 ```python
 import hotdata
-from hotdata.models.get_secret_response import GetSecretResponse
+from hotdata.models.sandbox_response import SandboxResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -222,16 +228,16 @@ configuration = hotdata.Configuration(
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = hotdata.SecretsApi(api_client)
-    name = 'name_example' # str | Secret name
+    api_instance = hotdata.SandboxesApi(api_client)
+    public_id = 'public_id_example' # str | Public id of the sandbox.
 
     try:
-        # Get secret
-        api_response = api_instance.get_secret(name)
-        print("The response of SecretsApi->get_secret:\n")
+        # Get sandbox
+        api_response = api_instance.get_sandbox(public_id)
+        print("The response of SandboxesApi->get_sandbox:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->get_secret: %s\n" % e)
+        print("Exception when calling SandboxesApi->get_sandbox: %s\n" % e)
 ```
 
 
@@ -241,11 +247,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **name** | **str**| Secret name | 
+ **public_id** | **str**| Public id of the sandbox. | 
 
 ### Return type
 
-[**GetSecretResponse**](GetSecretResponse.md)
+[**SandboxResponse**](SandboxResponse.md)
 
 ### Authorization
 
@@ -260,17 +266,19 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Secret metadata |  -  |
-**404** | Secret not found |  -  |
+**200** | Successful response |  -  |
+**401** | Missing or invalid authorization |  -  |
+**403** | Not a member of the target workspace&#39;s organization |  -  |
+**404** | Sandbox not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **list_secrets**
-> ListSecretsResponse list_secrets()
+# **list_sandboxes**
+> ListSandboxesResponse list_sandboxes()
 
-List secrets
+List sandboxes
 
-List all stored secrets. Only metadata (name, timestamps) is returned — secret values are never exposed.
+Lists sandboxes for the caller in the requested workspace.
 
 ### Example
 
@@ -279,7 +287,7 @@ List all stored secrets. Only metadata (name, timestamps) is returned — secret
 
 ```python
 import hotdata
-from hotdata.models.list_secrets_response import ListSecretsResponse
+from hotdata.models.list_sandboxes_response import ListSandboxesResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -308,15 +316,15 @@ configuration = hotdata.Configuration(
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = hotdata.SecretsApi(api_client)
+    api_instance = hotdata.SandboxesApi(api_client)
 
     try:
-        # List secrets
-        api_response = api_instance.list_secrets()
-        print("The response of SecretsApi->list_secrets:\n")
+        # List sandboxes
+        api_response = api_instance.list_sandboxes()
+        print("The response of SandboxesApi->list_sandboxes:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->list_secrets: %s\n" % e)
+        print("Exception when calling SandboxesApi->list_sandboxes: %s\n" % e)
 ```
 
 
@@ -327,7 +335,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**ListSecretsResponse**](ListSecretsResponse.md)
+[**ListSandboxesResponse**](ListSandboxesResponse.md)
 
 ### Authorization
 
@@ -342,14 +350,20 @@ This endpoint does not need any parameter.
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | List of secrets |  -  |
+**200** | Successful response |  -  |
+**400** | Missing or invalid X-Workspace-Id header |  -  |
+**401** | Missing or invalid authorization |  -  |
+**403** | Not a member of the target workspace&#39;s organization |  -  |
+**404** | Workspace not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **update_secret**
-> UpdateSecretResponse update_secret(name, update_secret_request)
+# **update_sandbox**
+> SandboxResponse update_sandbox(public_id, update_sandbox_request)
 
-Update secret
+Update sandbox
+
+Partial update. Only the provided fields are changed.
 
 ### Example
 
@@ -358,8 +372,8 @@ Update secret
 
 ```python
 import hotdata
-from hotdata.models.update_secret_request import UpdateSecretRequest
-from hotdata.models.update_secret_response import UpdateSecretResponse
+from hotdata.models.sandbox_response import SandboxResponse
+from hotdata.models.update_sandbox_request import UpdateSandboxRequest
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -388,17 +402,17 @@ configuration = hotdata.Configuration(
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = hotdata.SecretsApi(api_client)
-    name = 'name_example' # str | Secret name
-    update_secret_request = hotdata.UpdateSecretRequest() # UpdateSecretRequest | 
+    api_instance = hotdata.SandboxesApi(api_client)
+    public_id = 'public_id_example' # str | Public id of the sandbox.
+    update_sandbox_request = hotdata.UpdateSandboxRequest() # UpdateSandboxRequest | 
 
     try:
-        # Update secret
-        api_response = api_instance.update_secret(name, update_secret_request)
-        print("The response of SecretsApi->update_secret:\n")
+        # Update sandbox
+        api_response = api_instance.update_sandbox(public_id, update_sandbox_request)
+        print("The response of SandboxesApi->update_sandbox:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling SecretsApi->update_secret: %s\n" % e)
+        print("Exception when calling SandboxesApi->update_sandbox: %s\n" % e)
 ```
 
 
@@ -408,12 +422,12 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **name** | **str**| Secret name | 
- **update_secret_request** | [**UpdateSecretRequest**](UpdateSecretRequest.md)|  | 
+ **public_id** | **str**| Public id of the sandbox. | 
+ **update_sandbox_request** | [**UpdateSandboxRequest**](UpdateSandboxRequest.md)|  | 
 
 ### Return type
 
-[**UpdateSecretResponse**](UpdateSecretResponse.md)
+[**SandboxResponse**](SandboxResponse.md)
 
 ### Authorization
 
@@ -428,8 +442,11 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Secret updated |  -  |
-**404** | Secret not found |  -  |
+**200** | Sandbox updated |  -  |
+**400** | Invalid JSON body |  -  |
+**401** | Missing or invalid authorization |  -  |
+**403** | Not a member of the target workspace&#39;s organization |  -  |
+**404** | Sandbox not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

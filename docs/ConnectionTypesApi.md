@@ -1,6 +1,6 @@
 # hotdata.ConnectionTypesApi
 
-All URIs are relative to *https://app.hotdata.dev*
+All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -17,6 +17,7 @@ Get configuration schema and authentication requirements for a specific connecti
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -25,16 +26,22 @@ from hotdata.models.connection_type_detail import ConnectionTypeDetail
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -71,7 +78,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -96,6 +103,7 @@ List all available connection types, including native sources and FlightDLT serv
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -104,16 +112,22 @@ from hotdata.models.list_connection_types_response import ListConnectionTypesRes
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -146,7 +160,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

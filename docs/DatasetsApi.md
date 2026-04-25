@@ -1,6 +1,6 @@
 # hotdata.DatasetsApi
 
-All URIs are relative to *https://app.hotdata.dev*
+All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -21,6 +21,8 @@ Create a new dataset from an uploaded file or inline data. The dataset becomes a
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -30,16 +32,28 @@ from hotdata.models.create_dataset_response import CreateDatasetResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -76,7 +90,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -100,6 +114,8 @@ Delete dataset
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -107,16 +123,28 @@ import hotdata
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -151,7 +179,7 @@ void (empty response body)
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -174,6 +202,7 @@ Get dataset
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -182,16 +211,22 @@ from hotdata.models.get_dataset_response import GetDatasetResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -228,7 +263,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -251,6 +286,7 @@ List dataset versions
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -259,16 +295,22 @@ from hotdata.models.list_dataset_versions_response import ListDatasetVersionsRes
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -309,7 +351,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -332,6 +374,8 @@ List datasets
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -340,16 +384,28 @@ from hotdata.models.list_datasets_response import ListDatasetsResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -388,7 +444,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -410,6 +466,8 @@ Update dataset
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -419,16 +477,28 @@ from hotdata.models.update_dataset_response import UpdateDatasetResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -467,7 +537,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

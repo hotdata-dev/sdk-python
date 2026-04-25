@@ -44,7 +44,7 @@ class WorkspaceContextApi:
     @validate_call
     def get_workspace_context(
         self,
-        name: Annotated[StrictStr, Field(description="Name of the context (unique within the catalog)")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name (letter or underscore first; no hyphens)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -61,7 +61,7 @@ class WorkspaceContextApi:
         """Get one workspace context
 
 
-        :param name: Name of the context (unique within the catalog) (required)
+        :param name: Context key: same character rules as a dataset table name (letter or underscore first; no hyphens) (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -112,7 +112,7 @@ class WorkspaceContextApi:
     @validate_call
     def get_workspace_context_with_http_info(
         self,
-        name: Annotated[StrictStr, Field(description="Name of the context (unique within the catalog)")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name (letter or underscore first; no hyphens)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -129,7 +129,7 @@ class WorkspaceContextApi:
         """Get one workspace context
 
 
-        :param name: Name of the context (unique within the catalog) (required)
+        :param name: Context key: same character rules as a dataset table name (letter or underscore first; no hyphens) (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -180,7 +180,7 @@ class WorkspaceContextApi:
     @validate_call
     def get_workspace_context_without_preload_content(
         self,
-        name: Annotated[StrictStr, Field(description="Name of the context (unique within the catalog)")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name (letter or underscore first; no hyphens)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -197,7 +197,7 @@ class WorkspaceContextApi:
         """Get one workspace context
 
 
-        :param name: Name of the context (unique within the catalog) (required)
+        :param name: Context key: same character rules as a dataset table name (letter or underscore first; no hyphens) (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -284,6 +284,7 @@ class WorkspaceContextApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -530,6 +531,7 @@ class WorkspaceContextApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -807,6 +809,7 @@ class WorkspaceContextApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 

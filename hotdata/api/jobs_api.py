@@ -284,6 +284,7 @@ class JobsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -598,6 +599,7 @@ class JobsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 

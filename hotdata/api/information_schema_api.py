@@ -369,6 +369,7 @@ class InformationSchemaApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 

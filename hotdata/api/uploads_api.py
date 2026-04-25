@@ -16,8 +16,8 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictStr
-from typing import List, Optional
+from pydantic import Field, StrictBool, StrictBytes, StrictStr
+from typing import Optional, Tuple, Union
 from typing_extensions import Annotated
 from hotdata.models.list_uploads_response import ListUploadsResponse
 from hotdata.models.upload_response import UploadResponse
@@ -279,6 +279,7 @@ class UploadsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
@@ -303,7 +304,7 @@ class UploadsApi:
     @validate_call
     def upload_file(
         self,
-        request_body: List[Annotated[int, Field(strict=True, ge=0)]],
+        body: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         streaming: Annotated[Optional[StrictBool], Field(description="Stream upload to disk for large files (up to 20GB)")] = None,
         _request_timeout: Union[
             None,
@@ -322,8 +323,8 @@ class UploadsApi:
 
         Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table. Add `?streaming=true` for large files (up to 20GB) — streams to disk instead of loading into memory.
 
-        :param request_body: (required)
-        :type request_body: List[int]
+        :param body: (required)
+        :type body: bytearray
         :param streaming: Stream upload to disk for large files (up to 20GB)
         :type streaming: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -349,7 +350,7 @@ class UploadsApi:
         """ # noqa: E501
 
         _param = self._upload_file_serialize(
-            request_body=request_body,
+            body=body,
             streaming=streaming,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -375,7 +376,7 @@ class UploadsApi:
     @validate_call
     def upload_file_with_http_info(
         self,
-        request_body: List[Annotated[int, Field(strict=True, ge=0)]],
+        body: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         streaming: Annotated[Optional[StrictBool], Field(description="Stream upload to disk for large files (up to 20GB)")] = None,
         _request_timeout: Union[
             None,
@@ -394,8 +395,8 @@ class UploadsApi:
 
         Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table. Add `?streaming=true` for large files (up to 20GB) — streams to disk instead of loading into memory.
 
-        :param request_body: (required)
-        :type request_body: List[int]
+        :param body: (required)
+        :type body: bytearray
         :param streaming: Stream upload to disk for large files (up to 20GB)
         :type streaming: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -421,7 +422,7 @@ class UploadsApi:
         """ # noqa: E501
 
         _param = self._upload_file_serialize(
-            request_body=request_body,
+            body=body,
             streaming=streaming,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -447,7 +448,7 @@ class UploadsApi:
     @validate_call
     def upload_file_without_preload_content(
         self,
-        request_body: List[Annotated[int, Field(strict=True, ge=0)]],
+        body: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         streaming: Annotated[Optional[StrictBool], Field(description="Stream upload to disk for large files (up to 20GB)")] = None,
         _request_timeout: Union[
             None,
@@ -466,8 +467,8 @@ class UploadsApi:
 
         Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table. Add `?streaming=true` for large files (up to 20GB) — streams to disk instead of loading into memory.
 
-        :param request_body: (required)
-        :type request_body: List[int]
+        :param body: (required)
+        :type body: bytearray
         :param streaming: Stream upload to disk for large files (up to 20GB)
         :type streaming: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -493,7 +494,7 @@ class UploadsApi:
         """ # noqa: E501
 
         _param = self._upload_file_serialize(
-            request_body=request_body,
+            body=body,
             streaming=streaming,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -514,7 +515,7 @@ class UploadsApi:
 
     def _upload_file_serialize(
         self,
-        request_body,
+        body,
         streaming,
         _request_auth,
         _content_type,
@@ -525,7 +526,6 @@ class UploadsApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
-            'request_body': '',
         }
 
         _path_params: Dict[str, str] = {}
@@ -546,8 +546,16 @@ class UploadsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if request_body is not None:
-            _body_params = request_body
+        if body is not None:
+            # convert to byte array if the input is a file name (str)
+            if isinstance(body, str):
+                with open(body, "rb") as _fp:
+                    _body_params = _fp.read()
+            elif isinstance(body, tuple):
+                # drop the filename from the tuple
+                _body_params = body[1]
+            else:
+                _body_params = body
 
 
         # set the HTTP header `Accept`
@@ -574,6 +582,7 @@ class UploadsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
             'BearerAuth'
         ]
 
