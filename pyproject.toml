@@ -18,6 +18,7 @@ dependencies = [
 ]
 
 [project.urls]
+Homepage = "https://www.hotdata.dev"
 Repository = "https://github.com/hotdata-dev/sdk-python"
 
 [tool.poetry]
