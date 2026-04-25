@@ -32,13 +32,19 @@ jobs:
       - name: Clean existing source
         run: rm -rf src/
 
+      - name: Read package version from pyproject.toml
+        id: pkg
+        run: |
+          version=$(python3 -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - name: Generate client
         run: |
           npx @openapitools/openapi-generator-cli generate \
             -i openapi.yaml \
             -g python \
             -o . \
-            --additional-properties=packageName=hotdata,projectName=hotdata \
+            --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }} \
             --skip-validate-spec
 
       - name: Clean up generated artifacts
