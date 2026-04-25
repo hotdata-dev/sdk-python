@@ -18,18 +18,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool
 from typing import Any, ClassVar, Dict, List
+from hotdata.models.sandbox import Sandbox
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpsertWorkspaceContextRequest(BaseModel):
+class ListSandboxesResponse(BaseModel):
     """
-    Request body for POST `/v1/context`.
+    ListSandboxesResponse
     """ # noqa: E501
-    content: StrictStr
-    name: StrictStr = Field(description="Upsert key in the catalog. Validated with dataset table-name rules (preserves case): ASCII letter or `_` first; then alphanumeric or `_` only; 1–128 chars; not a SQL reserved word.")
-    __properties: ClassVar[List[str]] = ["content", "name"]
+    ok: StrictBool
+    sandboxes: List[Sandbox]
+    __properties: ClassVar[List[str]] = ["ok", "sandboxes"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +50,7 @@ class UpsertWorkspaceContextRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpsertWorkspaceContextRequest from a JSON string"""
+        """Create an instance of ListSandboxesResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,11 +71,18 @@ class UpsertWorkspaceContextRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in sandboxes (list)
+        _items = []
+        if self.sandboxes:
+            for _item_sandboxes in self.sandboxes:
+                if _item_sandboxes:
+                    _items.append(_item_sandboxes.to_dict())
+            _dict['sandboxes'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpsertWorkspaceContextRequest from a dict"""
+        """Create an instance of ListSandboxesResponse from a dict"""
         if obj is None:
             return None
 
@@ -82,8 +90,8 @@ class UpsertWorkspaceContextRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "content": obj.get("content"),
-            "name": obj.get("name")
+            "ok": obj.get("ok"),
+            "sandboxes": [Sandbox.from_dict(_item) for _item in obj["sandboxes"]] if obj.get("sandboxes") is not None else None
         })
         return _obj
 

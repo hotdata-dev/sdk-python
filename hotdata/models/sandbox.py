@@ -18,18 +18,22 @@ import pprint
 import re  # noqa: F401
 import json
 
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpsertWorkspaceContextRequest(BaseModel):
+class Sandbox(BaseModel):
     """
-    Request body for POST `/v1/context`.
+    Sandbox
     """ # noqa: E501
-    content: StrictStr
-    name: StrictStr = Field(description="Upsert key in the catalog. Validated with dataset table-name rules (preserves case): ASCII letter or `_` first; then alphanumeric or `_` only; 1–128 chars; not a SQL reserved word.")
-    __properties: ClassVar[List[str]] = ["content", "name"]
+    public_id: StrictStr
+    name: StrictStr
+    markdown: StrictStr = Field(description="Freeform markdown notes attached to the sandbox.")
+    created_at: datetime
+    updated_at: datetime
+    __properties: ClassVar[List[str]] = ["public_id", "name", "markdown", "created_at", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +53,7 @@ class UpsertWorkspaceContextRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpsertWorkspaceContextRequest from a JSON string"""
+        """Create an instance of Sandbox from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,7 +78,7 @@ class UpsertWorkspaceContextRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpsertWorkspaceContextRequest from a dict"""
+        """Create an instance of Sandbox from a dict"""
         if obj is None:
             return None
 
@@ -82,8 +86,11 @@ class UpsertWorkspaceContextRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "content": obj.get("content"),
-            "name": obj.get("name")
+            "public_id": obj.get("public_id"),
+            "name": obj.get("name"),
+            "markdown": obj.get("markdown"),
+            "created_at": obj.get("created_at"),
+            "updated_at": obj.get("updated_at")
         })
         return _obj
 

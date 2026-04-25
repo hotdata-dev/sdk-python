@@ -299,6 +299,8 @@ class QueryApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'SessionId', 
             'BearerAuth'
         ]
 

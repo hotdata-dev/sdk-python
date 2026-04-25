@@ -1,6 +1,6 @@
 # hotdata.ResultsApi
 
-All URIs are relative to *https://app.hotdata.dev*
+All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -17,6 +17,8 @@ Retrieve a persisted query result by ID. If the result is still being processed,
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -25,16 +27,28 @@ from hotdata.models.get_result_response import GetResultResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -71,7 +85,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -94,6 +108,8 @@ List results
 
 ### Example
 
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -102,16 +118,28 @@ from hotdata.models.list_results_response import ListResultsResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.hotdata.dev
+# Defining the host is optional and defaults to https://api.hotdata.dev
 # See configuration.py for a list of all supported configuration parameters.
 configuration = hotdata.Configuration(
-    host = "https://app.hotdata.dev"
+    host = "https://api.hotdata.dev"
 )
 
 # The client must configure the authentication and authorization parameters
 # in accordance with the API server security policy.
 # Examples for each auth method are provided below, use the example that
 # satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -150,7 +178,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

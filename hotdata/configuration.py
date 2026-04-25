@@ -114,6 +114,7 @@ AuthSettings = TypedDict(
     {
         "BearerAuth": BearerAuthSetting,
         "WorkspaceId": APIKeyAuthSetting,
+        "SessionId": APIKeyAuthSetting,
     },
     total=False,
 )
@@ -138,16 +139,19 @@ class Configuration:
     :param ignore_operation_servers
       Boolean to ignore operation servers for the API client.
       Config will use `host` as the base url regardless of the operation servers.
-    :param api_key: Dict to store API key(s).
-      Each entry in the dict specifies an API key.
-      The dict key is the name of the security scheme in the OAS specification.
-      The dict value is the API key secret.
+    :param api_key: Hotdata API key, sent as `Authorization: Bearer <key>`.
+    :param workspace_id: Public id of the target workspace, sent as
+      `X-Workspace-Id`.
+    :param session_id: Public id of an active sandbox, sent as `X-Session-Id`.
+      Scopes reads and writes to the sandbox for per-run isolation. Obtain
+      one by calling `SandboxesApi.create_sandbox`.
+    :param api_keys: Escape hatch for raw apiKey-scheme values, keyed by
+      security scheme name. Prefer `workspace_id` / `session_id`.
     :param api_key_prefix: Dict to store API prefix (e.g. Bearer).
       The dict key is the name of the security scheme in the OAS specification.
       The dict value is an API key prefix when generating the auth data.
     :param username: Username for HTTP basic authentication.
     :param password: Password for HTTP basic authentication.
-    :param access_token: Access token.
     :param server_index: Index to servers configuration.
     :param server_variables: Mapping with string values to replace variables in
       templated server configuration. The validation of enums is performed for
@@ -168,24 +172,13 @@ class Configuration:
 
     :Example:
 
-    API Key Authentication Example.
-    Given the following security scheme in the OpenAPI specification:
-      components:
-        securitySchemes:
-          cookieAuth:         # name for the security scheme
-            type: apiKey
-            in: cookie
-            name: JSESSIONID  # cookie name
-
-    You can programmatically set the cookie:
+    Workspace / sandbox scoping example:
 
 conf = hotdata.Configuration(
-    api_key={'cookieAuth': 'abc123'}
-    api_key_prefix={'cookieAuth': 'JSESSIONID'}
+    api_key='sk_live_...',
+    workspace_id='ws_abc',
+    session_id='sb_xyz',
 )
-
-    The following cookie will be added to the HTTP request:
-       Cookie: JSESSIONID abc123
     """
 
     _default: ClassVar[Optional[Self]] = None
@@ -193,11 +186,13 @@ conf = hotdata.Configuration(
     def __init__(
         self,
         host: Optional[str]=None,
-        api_key: Optional[Dict[str, str]]=None,
+        api_key: Optional[str]=None,
+        workspace_id: Optional[str]=None,
+        session_id: Optional[str]=None,
+        api_keys: Optional[Dict[str, str]]=None,
         api_key_prefix: Optional[Dict[str, str]]=None,
         username: Optional[str]=None,
         password: Optional[str]=None,
-        access_token: Optional[str]=None,
         server_index: Optional[int]=None,
         server_variables: Optional[ServerVariablesT]=None,
         server_operation_index: Optional[Dict[int, int]]=None,
@@ -213,7 +208,7 @@ conf = hotdata.Configuration(
     ) -> None:
         """Constructor
         """
-        self._base_path = "https://app.hotdata.dev" if host is None else host
+        self._base_path = "https://api.hotdata.dev" if host is None else host
         """Default Base url
         """
         self.server_index = 0 if server_index is None and host is None else server_index
@@ -230,12 +225,15 @@ conf = hotdata.Configuration(
         self.temp_folder_path = None
         """Temp file folder for downloading files
         """
-        # Authentication Settings
-        self.api_key = {}
-        if api_key:
-            self.api_key = api_key
-        """dict to store API key(s)
-        """
+        self.api_key = api_key
+        """Hotdata API key, sent as `Authorization: Bearer <key>`."""
+        # apiKey-security values (X-Workspace-Id, X-Session-Id), keyed by
+        # scheme name. Read by the generated `auth_settings()` below.
+        self.api_keys = dict(api_keys) if api_keys else {}
+        if workspace_id is not None:
+            self.api_keys["WorkspaceId"] = workspace_id
+        if session_id is not None:
+            self.api_keys["SessionId"] = session_id
         self.api_key_prefix = {}
         if api_key_prefix:
             self.api_key_prefix = api_key_prefix
@@ -249,9 +247,6 @@ conf = hotdata.Configuration(
         """
         self.password = password
         """Password for HTTP basic authentication
-        """
-        self.access_token = access_token
-        """Access token
         """
         self.logger = {}
         """Logging Settings
@@ -484,7 +479,7 @@ conf = hotdata.Configuration(
         """
         if self.refresh_api_key_hook is not None:
             self.refresh_api_key_hook(self)
-        key = self.api_key.get(identifier, self.api_key.get(alias) if alias is not None else None)
+        key = self.api_keys.get(identifier, self.api_keys.get(alias) if alias is not None else None)
         if key:
             prefix = self.api_key_prefix.get(identifier)
             if prefix:
@@ -493,6 +488,34 @@ conf = hotdata.Configuration(
                 return key
 
         return None
+
+    @property
+    def workspace_id(self) -> Optional[str]:
+        """Public id of the target workspace (sent as `X-Workspace-Id`)."""
+        return self.api_keys.get("WorkspaceId")
+
+    @workspace_id.setter
+    def workspace_id(self, value: Optional[str]) -> None:
+        if value is None:
+            self.api_keys.pop("WorkspaceId", None)
+        else:
+            self.api_keys["WorkspaceId"] = value
+
+    @property
+    def session_id(self) -> Optional[str]:
+        """Public id of the active sandbox (sent as `X-Session-Id`).
+
+        Scopes reads and writes to the sandbox for per-run isolation.
+        Obtain a sandbox id by calling `SandboxesApi.create_sandbox`.
+        """
+        return self.api_keys.get("SessionId")
+
+    @session_id.setter
+    def session_id(self, value: Optional[str]) -> None:
+        if value is None:
+            self.api_keys.pop("SessionId", None)
+        else:
+            self.api_keys["SessionId"] = value
 
     def get_basic_auth_token(self) -> Optional[str]:
         """Gets HTTP basic authentication header (string).
@@ -516,20 +539,29 @@ conf = hotdata.Configuration(
         :return: The Auth Settings information dict.
         """
         auth: AuthSettings = {}
-        if self.access_token is not None:
+        if self.api_key is not None:
             auth['BearerAuth'] = {
                 'type': 'bearer',
                 'in': 'header',
                 'key': 'Authorization',
-                'value': 'Bearer ' + self.access_token
+                'value': 'Bearer ' + self.api_key
             }
-        if 'WorkspaceId' in self.api_key:
+        if 'WorkspaceId' in self.api_keys:
             auth['WorkspaceId'] = {
                 'type': 'api_key',
                 'in': 'header',
                 'key': 'X-Workspace-Id',
                 'value': self.get_api_key_with_prefix(
                     'WorkspaceId',
+                ),
+            }
+        if 'SessionId' in self.api_keys:
+            auth['SessionId'] = {
+                'type': 'api_key',
+                'in': 'header',
+                'key': 'X-Session-Id',
+                'value': self.get_api_key_with_prefix(
+                    'SessionId',
                 ),
             }
         return auth
@@ -553,7 +585,7 @@ conf = hotdata.Configuration(
         """
         return [
             {
-                'url': "https://app.hotdata.dev",
+                'url': "https://api.hotdata.dev",
                 'description': "Production",
             }
         ]

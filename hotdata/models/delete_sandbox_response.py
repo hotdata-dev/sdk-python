@@ -18,18 +18,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpsertWorkspaceContextRequest(BaseModel):
+class DeleteSandboxResponse(BaseModel):
     """
-    Request body for POST `/v1/context`.
+    DeleteSandboxResponse
     """ # noqa: E501
-    content: StrictStr
-    name: StrictStr = Field(description="Upsert key in the catalog. Validated with dataset table-name rules (preserves case): ASCII letter or `_` first; then alphanumeric or `_` only; 1–128 chars; not a SQL reserved word.")
-    __properties: ClassVar[List[str]] = ["content", "name"]
+    ok: StrictBool
+    deleted: StrictBool
+    __properties: ClassVar[List[str]] = ["ok", "deleted"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +49,7 @@ class UpsertWorkspaceContextRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpsertWorkspaceContextRequest from a JSON string"""
+        """Create an instance of DeleteSandboxResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,7 +74,7 @@ class UpsertWorkspaceContextRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpsertWorkspaceContextRequest from a dict"""
+        """Create an instance of DeleteSandboxResponse from a dict"""
         if obj is None:
             return None
 
@@ -82,8 +82,8 @@ class UpsertWorkspaceContextRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "content": obj.get("content"),
-            "name": obj.get("name")
+            "ok": obj.get("ok"),
+            "deleted": obj.get("deleted")
         })
         return _obj
 

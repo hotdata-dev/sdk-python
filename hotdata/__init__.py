@@ -30,6 +30,7 @@ __all__ = [
     "QueryRunsApi",
     "RefreshApi",
     "ResultsApi",
+    "SandboxesApi",
     "SavedQueriesApi",
     "SecretsApi",
     "UploadsApi",
@@ -72,6 +73,7 @@ __all__ = [
     "CreateEmbeddingProviderRequest",
     "CreateEmbeddingProviderResponse",
     "CreateIndexRequest",
+    "CreateSandboxRequest",
     "CreateSavedQueryRequest",
     "CreateSecretRequest",
     "CreateSecretResponse",
@@ -80,6 +82,7 @@ __all__ = [
     "DatasetSource",
     "DatasetSummary",
     "DatasetVersionSummary",
+    "DeleteSandboxResponse",
     "DiscoveryStatus",
     "EmbeddingProviderResponse",
     "Error",
@@ -107,6 +110,7 @@ __all__ = [
     "ListJobsResponse",
     "ListQueryRunsResponse",
     "ListResultsResponse",
+    "ListSandboxesResponse",
     "ListSavedQueriesResponse",
     "ListSavedQueryVersionsResponse",
     "ListSecretsResponse",
@@ -122,6 +126,8 @@ __all__ = [
     "RefreshResponse",
     "RefreshWarning",
     "ResultInfo",
+    "Sandbox",
+    "SandboxResponse",
     "SavedQueryDatasetSource",
     "SavedQueryDetail",
     "SavedQuerySummary",
@@ -140,6 +146,7 @@ __all__ = [
     "UpdateDatasetResponse",
     "UpdateEmbeddingProviderRequest",
     "UpdateEmbeddingProviderResponse",
+    "UpdateSandboxRequest",
     "UpdateSavedQueryRequest",
     "UpdateSecretRequest",
     "UpdateSecretResponse",
@@ -166,6 +173,7 @@ from hotdata.api.query_api import QueryApi as QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi as QueryRunsApi
 from hotdata.api.refresh_api import RefreshApi as RefreshApi
 from hotdata.api.results_api import ResultsApi as ResultsApi
+from hotdata.api.sandboxes_api import SandboxesApi as SandboxesApi
 from hotdata.api.saved_queries_api import SavedQueriesApi as SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi as SecretsApi
 from hotdata.api.uploads_api import UploadsApi as UploadsApi
@@ -212,6 +220,7 @@ from hotdata.models.create_dataset_response import CreateDatasetResponse as Crea
 from hotdata.models.create_embedding_provider_request import CreateEmbeddingProviderRequest as CreateEmbeddingProviderRequest
 from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse as CreateEmbeddingProviderResponse
 from hotdata.models.create_index_request import CreateIndexRequest as CreateIndexRequest
+from hotdata.models.create_sandbox_request import CreateSandboxRequest as CreateSandboxRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest as CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
@@ -220,6 +229,7 @@ from hotdata.models.create_workspace_response import CreateWorkspaceResponse as 
 from hotdata.models.dataset_source import DatasetSource as DatasetSource
 from hotdata.models.dataset_summary import DatasetSummary as DatasetSummary
 from hotdata.models.dataset_version_summary import DatasetVersionSummary as DatasetVersionSummary
+from hotdata.models.delete_sandbox_response import DeleteSandboxResponse as DeleteSandboxResponse
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse as EmbeddingProviderResponse
 from hotdata.models.error import Error as Error
@@ -247,6 +257,7 @@ from hotdata.models.list_indexes_response import ListIndexesResponse as ListInde
 from hotdata.models.list_jobs_response import ListJobsResponse as ListJobsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse as ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse as ListResultsResponse
+from hotdata.models.list_sandboxes_response import ListSandboxesResponse as ListSandboxesResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse as ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse as ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse as ListSecretsResponse
@@ -262,6 +273,8 @@ from hotdata.models.refresh_request import RefreshRequest as RefreshRequest
 from hotdata.models.refresh_response import RefreshResponse as RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning as RefreshWarning
 from hotdata.models.result_info import ResultInfo as ResultInfo
+from hotdata.models.sandbox import Sandbox as Sandbox
+from hotdata.models.sandbox_response import SandboxResponse as SandboxResponse
 from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource as SavedQueryDatasetSource
 from hotdata.models.saved_query_detail import SavedQueryDetail as SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary as SavedQuerySummary
@@ -280,6 +293,7 @@ from hotdata.models.update_dataset_request import UpdateDatasetRequest as Update
 from hotdata.models.update_dataset_response import UpdateDatasetResponse as UpdateDatasetResponse
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest as UpdateEmbeddingProviderRequest
 from hotdata.models.update_embedding_provider_response import UpdateEmbeddingProviderResponse as UpdateEmbeddingProviderResponse
+from hotdata.models.update_sandbox_request import UpdateSandboxRequest as UpdateSandboxRequest
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest as UpdateSavedQueryRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest as UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse as UpdateSecretResponse
