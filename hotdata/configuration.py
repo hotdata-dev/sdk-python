@@ -17,6 +17,7 @@ import logging
 from logging import FileHandler
 import multiprocessing
 import sys
+from importlib.metadata import PackageNotFoundError, version as _pkg_version
 from typing import Any, ClassVar, Dict, List, Literal, Optional, TypedDict, Union
 from typing_extensions import NotRequired, Self
 
@@ -539,12 +540,16 @@ conf = hotdata.Configuration(
 
         :return: The report for debugging.
         """
+        try:
+            sdk_version = _pkg_version("hotdata")
+        except PackageNotFoundError:
+            sdk_version = "unknown"
         return "Python SDK Debug Report:\n"\
                "OS: {env}\n"\
                "Python Version: {pyversion}\n"\
                "Version of the API: 1.0.0\n"\
-               "SDK Package Version: 0.0.1".\
-               format(env=sys.platform, pyversion=sys.version)
+               "SDK Package Version: {sdk_version}".\
+               format(env=sys.platform, pyversion=sys.version, sdk_version=sdk_version)
 
     def get_host_settings(self) -> List[HostSetting]:
         """Gets an array of host settings
