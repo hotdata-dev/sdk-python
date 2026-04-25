@@ -543,7 +543,7 @@ conf = hotdata.Configuration(
         try:
             sdk_version = _pkg_version("hotdata")
         except PackageNotFoundError:
-            sdk_version = "unknown"
+            sdk_version = "0.0.0+unknown"
         return "Python SDK Debug Report:\n"\
                "OS: {env}\n"\
                "Python Version: {pyversion}\n"\

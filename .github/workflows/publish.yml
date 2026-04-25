@@ -20,6 +20,11 @@ jobs:
 
       - name: Verify tag matches pyproject version
         run: |
+          # Release tags must start with `v` followed by a PEP 440 version (e.g. v1.2.3, v1.2.3a1).
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9] ]]; then
+            echo "Release tag '$GITHUB_REF_NAME' must start with 'v' followed by a digit (e.g. v1.0.0)" >&2
+            exit 1
+          fi
           tag="${GITHUB_REF_NAME#v}"
           pkg_version=$(python -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
           if [ "$tag" != "$pkg_version" ]; then

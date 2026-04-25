@@ -19,6 +19,10 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+
       - name: Fetch merged OpenAPI spec
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -72,10 +76,6 @@ jobs:
         run: |
           rm -f openapi.yaml
           rm -f .github/workflows/python.yml
-
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
-        with:
-          python-version: '3.12'
 
       - name: Verify generated client imports
         run: |
