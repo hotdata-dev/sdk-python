@@ -48,6 +48,26 @@ jobs:
             --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }} \
             --skip-validate-spec
 
+      - name: Patch generated __version__ to read from package metadata
+        run: |
+          python3 - <<'PY'
+          import re, pathlib, sys
+          p = pathlib.Path("hotdata/__init__.py")
+          src = p.read_text()
+          replacement = (
+              'from importlib.metadata import PackageNotFoundError, version as _pkg_version\n'
+              '\n'
+              'try:\n'
+              '    __version__ = _pkg_version("hotdata")\n'
+              'except PackageNotFoundError:  # running from a source checkout without install\n'
+              '    __version__ = "0.0.0+unknown"\n'
+          )
+          new, n = re.subn(r'^__version__ = "[^"]*"\n', replacement, src, count=1, flags=re.MULTILINE)
+          if n != 1:
+              sys.exit("Failed to patch __version__ line in hotdata/__init__.py")
+          p.write_text(new)
+          PY
+
       - name: Clean up generated artifacts
         run: |
           rm -f openapi.yaml
