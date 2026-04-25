@@ -3,9 +3,10 @@
 Two Hotdata-specific DX tweaks applied to the Python `configuration.mustache`:
 
 1. **`api_key` is the bearer token** — matching Hotdata's docs and CLI
-   (`--api-key`, `HOTDATA_API_KEY`). Stock openapi-generator calls this
-   `access_token`; our `api_key` is an alias that stores into the same
-   `self.access_token` attribute so `auth_settings()` keeps working.
+   (`--api-key`, `HOTDATA_API_KEY`). Stock openapi-generator calls the
+   bearer token `access_token`; we drop that name entirely and replace it
+   with `api_key`. Internal `auth_settings()` is patched to read
+   `self.api_key`.
 
 2. **`workspace_id` and `session_id` are first-class kwargs and
    attributes.** Stock openapi-generator exposes apiKey security schemes
@@ -30,8 +31,9 @@ cfg = hotdata.Configuration(
 The regenerate workflow runs `import hotdata` and relies on
 `openapi-generator` 7.20.0 (pinned in `openapitools.json`). If a future
 release renames the mustache vars our patch references (`authMethods`,
-`isApiKey`, `name`, `keyParamName`), the import will fail and the regen PR
-will be obviously broken rather than shipping subtly wrong code.
+`isApiKey`, `isBasicBearer`, `isOAuth`, `name`, `keyParamName`), the
+import will fail and the regen PR will be obviously broken rather than
+shipping subtly wrong code.
 
 Bumping the pinned generator version should include a diff of this
 template against upstream's
