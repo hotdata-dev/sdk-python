@@ -1,8 +1,6 @@
 # hotdata
 
-Official Python client for the [Hotdata](https://app.hotdata.dev) HTTP API: workspaces, connections, datasets, SQL queries, results, secrets, uploads, indexes, jobs, embedding providers, and workspace context.
-
-The package is produced with [OpenAPI Generator](https://openapi-generator.tech) from the Hotdata OpenAPI spec. 
+Official Python client for the [Hotdata](https://www.hotdata.dev) HTTP API: workspaces, connections, datasets, SQL queries, results, secrets, uploads, indexes, jobs, embedding providers, and workspace context.
 
 ## Requirements
 
@@ -10,7 +8,11 @@ Python 3.9+
 
 ## Install
 
-From the repository:
+```sh
+pip install hotdata
+```
+
+For an unreleased revision:
 
 ```sh
 pip install "git+https://github.com/hotdata-dev/sdk-python.git"
@@ -22,26 +24,20 @@ From a local checkout (editable):
 pip install -e .
 ```
 
-## Tests
-
-```sh
-pytest
-```
-
 ## Authentication
 
-The API uses **Bearer** JWTs and an **`X-Workspace-Id`** header on requests that are scoped to a workspace.
+The API uses an **API key** sent as `Authorization: Bearer <key>`, plus an **`X-Workspace-Id`** header on requests scoped to a workspace.
 
 ```python
 import hotdata
 
 configuration = hotdata.Configuration(
-    access_token="YOUR_ACCESS_TOKEN",
-    api_key={"WorkspaceId": "YOUR_WORKSPACE_ID"},
+    api_key="YOUR_API_KEY",
+    workspace_id="YOUR_WORKSPACE_ID",
 )
 ```
 
-`host` defaults to `https://app.hotdata.dev`. Override it if you target another environment.
+`host` defaults to `https://api.hotdata.dev`. Override it if you target another environment.
 
 ## Usage
 
@@ -50,8 +46,8 @@ import hotdata
 from hotdata.rest import ApiException
 
 configuration = hotdata.Configuration(
-    access_token="YOUR_ACCESS_TOKEN",
-    api_key={"WorkspaceId": "YOUR_WORKSPACE_ID"},
+    api_key="YOUR_API_KEY",
+    workspace_id="YOUR_WORKSPACE_ID",
 )
 
 with hotdata.ApiClient(configuration) as api_client:
@@ -66,12 +62,10 @@ Each `Api` class groups endpoints by resource. Construct the client, then call t
 
 ## API reference
 
-Generated Markdown for every operation and model is in [`docs/`](docs/):
+Generated Markdown for every operation and model is in [`docs/`](https://github.com/hotdata-dev/sdk-python/tree/main/docs):
 
-- Resource APIs: `docs/*Api.md` (for example [`docs/QueryApi.md`](docs/QueryApi.md))
+- Resource APIs: `docs/*Api.md` (for example [`QueryApi.md`](https://github.com/hotdata-dev/sdk-python/blob/main/docs/QueryApi.md))
 - Request and response models: `docs/<ModelName>.md`
-
-Use your editor or GitHub file search there instead of duplicating large tables in this file.
 
 ## Support
 

@@ -49,7 +49,7 @@ jobs:
             -g python \
             -o . \
             -t .openapi-generator-templates \
-            --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }} \
+            --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }},gitUserId=hotdata-dev,gitRepoId=sdk-python \
             --skip-validate-spec
 
       - name: Patch generated __version__ to read from package metadata
@@ -70,6 +70,31 @@ jobs:
           if n != 1:
               sys.exit("Failed to patch __version__ line in hotdata/__init__.py")
           p.write_text(new)
+          PY
+
+      - name: Patch generated pyproject.toml metadata
+        run: |
+          python3 - <<'PY'
+          import re, pathlib, sys
+          p = pathlib.Path("pyproject.toml")
+          src = p.read_text()
+          patches = [
+              (
+                  r'^keywords = \[.*\]$',
+                  'keywords = ["hotdata", "api-client", "data-platform"]',
+                  re.MULTILINE,
+              ),
+              (
+                  r'\[project\.urls\]\nRepository = "[^"]*"\n',
+                  '[project.urls]\nHomepage = "https://www.hotdata.dev"\nRepository = "https://github.com/hotdata-dev/sdk-python"\n',
+                  0,
+              ),
+          ]
+          for pattern, replacement, flags in patches:
+              src, n = re.subn(pattern, replacement, src, count=1, flags=flags)
+              if n != 1:
+                  sys.exit(f"Failed to patch pyproject.toml: pattern {pattern!r}")
+          p.write_text(src)
           PY
 
       - name: Clean up generated artifacts
