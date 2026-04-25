@@ -67,8 +67,6 @@ Generated Markdown for every operation and model is in [`docs/`](https://github.
 - Resource APIs: `docs/*Api.md` (for example [`QueryApi.md`](https://github.com/hotdata-dev/sdk-python/blob/main/docs/QueryApi.md))
 - Request and response models: `docs/<ModelName>.md`
 
-Use your editor or GitHub file search there instead of duplicating large tables in this file.
-
 ## Support
 
 Questions and issues: [github.com/hotdata-dev/sdk-python](https://github.com/hotdata-dev/sdk-python).
