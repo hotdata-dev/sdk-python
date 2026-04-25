@@ -81,7 +81,9 @@ def test_query_async_polling(
             assert result.row_count == 1
             assert result.rows == [[1]]
 
+        # ResultInfo (list_results) exposes the id as `id`, not `result_id` —
+        # only GetResultResponse uses `result_id`.
         results_listing = results_api.list_results(limit=50)
-        assert any(r.result_id == run.result_id for r in results_listing.results), (
+        assert any(r.id == run.result_id for r in results_listing.results), (
             f"result {run.result_id} not surfaced by list_results"
         )

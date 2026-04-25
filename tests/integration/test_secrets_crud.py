@@ -18,13 +18,9 @@ from hotdata.models.create_secret_request import CreateSecretRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest
 
 
-def _name_for(scenario_name: str) -> str:
-    # Secret names are uppercase + underscores by convention.
-    return scenario_name.replace("-", "_").upper()
-
-
 def test_secrets_crud(secrets_api: SecretsApi, sdkci_name) -> None:
-    secret_name = _name_for(sdkci_name("secrets-crud"))
+    # Server normalizes secret names — pass through whatever sdkci_name returns.
+    secret_name = sdkci_name("secrets-crud").replace("-", "_")
     initial_value = "INITIAL_PLAINTEXT_VALUE_DO_NOT_LEAK"
     updated_value = "UPDATED_PLAINTEXT_VALUE_DO_NOT_LEAK"
     created = False
