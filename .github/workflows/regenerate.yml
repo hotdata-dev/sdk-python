@@ -38,6 +38,7 @@ jobs:
             -i openapi.yaml \
             -g python \
             -o . \
+            -t .openapi-generator-templates \
             --additional-properties=packageName=hotdata,projectName=hotdata \
             --skip-validate-spec
 
