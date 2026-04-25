@@ -19,6 +19,10 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+
       - name: Fetch merged OpenAPI spec
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -32,6 +36,12 @@ jobs:
       - name: Clean existing source
         run: rm -rf src/
 
+      - name: Read package version from pyproject.toml
+        id: pkg
+        run: |
+          version=$(python3 -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - name: Generate client
         run: |
           npx @openapitools/openapi-generator-cli generate \
@@ -39,22 +49,41 @@ jobs:
             -g python \
             -o . \
             -t .openapi-generator-templates \
-            --additional-properties=packageName=hotdata,projectName=hotdata \
+            --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }} \
             --skip-validate-spec
+
+      - name: Patch generated __version__ to read from package metadata
+        run: |
+          python3 - <<'PY'
+          import re, pathlib, sys
+          p = pathlib.Path("hotdata/__init__.py")
+          src = p.read_text()
+          replacement = (
+              'from importlib.metadata import PackageNotFoundError, version as _pkg_version\n'
+              '\n'
+              'try:\n'
+              '    __version__ = _pkg_version("hotdata")\n'
+              'except PackageNotFoundError:  # running from a source checkout without install\n'
+              '    __version__ = "0.0.0+unknown"\n'
+          )
+          new, n = re.subn(r'^__version__ = "[^"]*"\n', replacement, src, count=1, flags=re.MULTILINE)
+          if n != 1:
+              sys.exit("Failed to patch __version__ line in hotdata/__init__.py")
+          p.write_text(new)
+          PY
 
       - name: Clean up generated artifacts
         run: |
           rm -f openapi.yaml
           rm -f .github/workflows/python.yml
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
-        with:
-          python-version: '3.12'
-
-      - name: Verify generated client imports
+      - name: Verify built wheel installs and imports
         run: |
-          pip install -r requirements.txt
-          python -c "import hotdata"
+          python -m pip install --upgrade build
+          python -m build
+          python -m pip install dist/*.whl
+          # cd away from the source tree so the import resolves against the installed wheel.
+          cd /tmp && python -c "import hotdata; print(hotdata.__version__)"
 
       - name: Create PR
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
