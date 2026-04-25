@@ -30,18 +30,18 @@ pytest
 
 ## Authentication
 
-The API uses **Bearer** JWTs and an **`X-Workspace-Id`** header on requests that are scoped to a workspace.
+The API uses an **API key** sent as `Authorization: Bearer <key>`, plus an **`X-Workspace-Id`** header on requests scoped to a workspace.
 
 ```python
 import hotdata
 
 configuration = hotdata.Configuration(
-    access_token="YOUR_ACCESS_TOKEN",
-    api_key={"WorkspaceId": "YOUR_WORKSPACE_ID"},
+    api_key="YOUR_API_KEY",
+    workspace_id="YOUR_WORKSPACE_ID",
 )
 ```
 
-`host` defaults to `https://app.hotdata.dev`. Override it if you target another environment.
+`host` defaults to `https://api.hotdata.dev`. Override it if you target another environment.
 
 ## Usage
 
@@ -50,8 +50,8 @@ import hotdata
 from hotdata.rest import ApiException
 
 configuration = hotdata.Configuration(
-    access_token="YOUR_ACCESS_TOKEN",
-    api_key={"WorkspaceId": "YOUR_WORKSPACE_ID"},
+    api_key="YOUR_API_KEY",
+    workspace_id="YOUR_WORKSPACE_ID",
 )
 
 with hotdata.ApiClient(configuration) as api_client:
