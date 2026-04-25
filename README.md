@@ -2,15 +2,17 @@
 
 Official Python client for the [Hotdata](https://app.hotdata.dev) HTTP API: workspaces, connections, datasets, SQL queries, results, secrets, uploads, indexes, jobs, embedding providers, and workspace context.
 
-The package is produced with [OpenAPI Generator](https://openapi-generator.tech) from the Hotdata OpenAPI spec. 
-
 ## Requirements
 
 Python 3.9+
 
 ## Install
 
-From the repository:
+```sh
+pip install hotdata
+```
+
+For an unreleased revision:
 
 ```sh
 pip install "git+https://github.com/hotdata-dev/sdk-python.git"
@@ -66,9 +68,9 @@ Each `Api` class groups endpoints by resource. Construct the client, then call t
 
 ## API reference
 
-Generated Markdown for every operation and model is in [`docs/`](docs/):
+Generated Markdown for every operation and model is in [`docs/`](https://github.com/hotdata-dev/sdk-python/tree/main/docs):
 
-- Resource APIs: `docs/*Api.md` (for example [`docs/QueryApi.md`](docs/QueryApi.md))
+- Resource APIs: `docs/*Api.md` (for example [`QueryApi.md`](https://github.com/hotdata-dev/sdk-python/blob/main/docs/QueryApi.md))
 - Request and response models: `docs/<ModelName>.md`
 
 Use your editor or GitHub file search there instead of duplicating large tables in this file.
