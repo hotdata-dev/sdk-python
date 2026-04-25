@@ -1,0 +1,70 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  SCENARIOS_URL: https://raw.githubusercontent.com/hotdata-dev/www.hotdata.dev/main/api/test-scenarios.yaml
+
+jobs:
+  # Parity check runs on every PR and push: confirms every scenario in
+  # www.hotdata.dev/api/test-scenarios.yaml has a matching test file in this
+  # repo. Cheap, no secrets needed.
+  scenario-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+      - name: Fetch scenarios manifest
+        run: curl -sS -f -L "$SCENARIOS_URL" -o test-scenarios.yaml
+      - name: Check parity
+        run: |
+          python3 - <<'PY'
+          import sys, pathlib, yaml
+          scenarios = yaml.safe_load(pathlib.Path("test-scenarios.yaml").read_text())["scenarios"]
+          missing = []
+          for s in scenarios:
+              if "python" in (s.get("optional_for") or []):
+                  continue
+              expected = pathlib.Path("tests/integration") / f"test_{s['name']}.py"
+              if not expected.exists():
+                  missing.append(str(expected))
+          if missing:
+              print(f"::error::sdk-python is missing tests for {len(missing)} scenarios:")
+              for m in missing:
+                  print(f"  - {m}")
+              sys.exit(1)
+          print(f"All {len(scenarios)} scenarios have corresponding test files.")
+          PY
+
+  # Integration tests run against production. Skipped automatically by the
+  # conftest if HOTDATA_TEST_API_KEY / HOTDATA_TEST_WORKSPACE_ID aren't set
+  # (e.g. PRs from forks where secrets aren't injected). Don't run on PRs by
+  # default — they're slower and hit real infra.
+  integration:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+      - name: Install package and test deps
+        run: |
+          pip install --quiet -r requirements.txt -r test-requirements.txt
+          pip install --quiet -e .
+      - name: Run integration tests
+        env:
+          HOTDATA_SDK_TEST_API_URL: ${{ vars.HOTDATA_SDK_TEST_API_URL }}
+          HOTDATA_SDK_TEST_API_KEY: ${{ secrets.HOTDATA_SDK_TEST_API_KEY }}
+          HOTDATA_SDK_TEST_WORKSPACE_ID: ${{ vars.HOTDATA_SDK_TEST_WORKSPACE_ID }}
+          HOTDATA_SDK_TEST_CONNECTION_ID: ${{ vars.HOTDATA_SDK_TEST_CONNECTION_ID }}
+        run: pytest tests/integration -v
