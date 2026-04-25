@@ -36,6 +36,13 @@ mypy = ">= 1.5"
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+include = ["hotdata*"]
+exclude = ["test*", "tests*", "docs*"]
+
+[tool.setuptools.package-data]
+hotdata = ["py.typed"]
+
 [tool.pylint.'MESSAGES CONTROL']
 extension-pkg-whitelist = "pydantic"
 

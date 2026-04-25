@@ -15,7 +15,12 @@
 """  # noqa: E501
 
 
-__version__ = "0.0.1"
+from importlib.metadata import PackageNotFoundError, version as _pkg_version
+
+try:
+    __version__ = _pkg_version("hotdata")
+except PackageNotFoundError:  # running from a source checkout without install
+    __version__ = "0.0.0+unknown"
 
 # Define package exports
 __all__ = [
