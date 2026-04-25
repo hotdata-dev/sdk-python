@@ -110,6 +110,35 @@ jobs:
           # cd away from the source tree so the import resolves against the installed wheel.
           cd /tmp && python -c "import hotdata; print(hotdata.__version__)"
 
+      - name: Check integration test scenario parity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          curl -sS -f -L \
+            -H "Accept: application/vnd.github.v3.raw" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/hotdata-dev/www.hotdata.dev/contents/api/test-scenarios.yaml \
+            -o test-scenarios.yaml
+          pip install --quiet pyyaml
+          python3 - <<'PY'
+          import sys, pathlib, yaml
+          scenarios = yaml.safe_load(pathlib.Path("test-scenarios.yaml").read_text())["scenarios"]
+          missing = []
+          for s in scenarios:
+              if "python" in (s.get("optional_for") or []):
+                  continue
+              expected = pathlib.Path("tests/integration") / f"test_{s['name']}.py"
+              if not expected.exists():
+                  missing.append(str(expected))
+          if missing:
+              print(f"::warning::sdk-python is missing tests for {len(missing)} scenarios after regen:")
+              for m in missing:
+                  print(f"  - {m}")
+          else:
+              print(f"All {len(scenarios)} scenarios have corresponding test files.")
+          PY
+          rm -f test-scenarios.yaml
+
       - name: Create PR
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
