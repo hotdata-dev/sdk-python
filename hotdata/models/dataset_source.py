@@ -18,33 +18,33 @@ import json
 import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
 from typing import Any, List, Optional
-from hotdata.models.inline_dataset_source import InlineDatasetSource
-from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource
-from hotdata.models.sql_query_dataset_source import SqlQueryDatasetSource
-from hotdata.models.upload_dataset_source import UploadDatasetSource
-from hotdata.models.url_dataset_source import UrlDatasetSource
+from hotdata.models.dataset_source_one_of import DatasetSourceOneOf
+from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1
+from hotdata.models.dataset_source_one_of2 import DatasetSourceOneOf2
+from hotdata.models.dataset_source_one_of3 import DatasetSourceOneOf3
+from hotdata.models.dataset_source_one_of4 import DatasetSourceOneOf4
 from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self
 
-DATASETSOURCE_ONE_OF_SCHEMAS = ["InlineDatasetSource", "SavedQueryDatasetSource", "SqlQueryDatasetSource", "UploadDatasetSource", "UrlDatasetSource"]
+DATASETSOURCE_ONE_OF_SCHEMAS = ["DatasetSourceOneOf", "DatasetSourceOneOf1", "DatasetSourceOneOf2", "DatasetSourceOneOf3", "DatasetSourceOneOf4"]
 
 class DatasetSource(BaseModel):
     """
-    Dataset source specification
+    Dataset source specification.  Internally tagged on `type`, e.g. `{\"type\": \"upload\", \"upload_id\": \"...\"}`. Discriminator values: `upload`, `saved_query`, `sql_query`, `url`, `inline`.
     """
-    # data type: UploadDatasetSource
-    oneof_schema_1_validator: Optional[UploadDatasetSource] = None
-    # data type: SavedQueryDatasetSource
-    oneof_schema_2_validator: Optional[SavedQueryDatasetSource] = None
-    # data type: SqlQueryDatasetSource
-    oneof_schema_3_validator: Optional[SqlQueryDatasetSource] = None
-    # data type: UrlDatasetSource
-    oneof_schema_4_validator: Optional[UrlDatasetSource] = None
-    # data type: InlineDatasetSource
-    oneof_schema_5_validator: Optional[InlineDatasetSource] = None
-    actual_instance: Optional[Union[InlineDatasetSource, SavedQueryDatasetSource, SqlQueryDatasetSource, UploadDatasetSource, UrlDatasetSource]] = None
-    one_of_schemas: Set[str] = { "InlineDatasetSource", "SavedQueryDatasetSource", "SqlQueryDatasetSource", "UploadDatasetSource", "UrlDatasetSource" }
+    # data type: DatasetSourceOneOf
+    oneof_schema_1_validator: Optional[DatasetSourceOneOf] = None
+    # data type: DatasetSourceOneOf1
+    oneof_schema_2_validator: Optional[DatasetSourceOneOf1] = None
+    # data type: DatasetSourceOneOf2
+    oneof_schema_3_validator: Optional[DatasetSourceOneOf2] = None
+    # data type: DatasetSourceOneOf3
+    oneof_schema_4_validator: Optional[DatasetSourceOneOf3] = None
+    # data type: DatasetSourceOneOf4
+    oneof_schema_5_validator: Optional[DatasetSourceOneOf4] = None
+    actual_instance: Optional[Union[DatasetSourceOneOf, DatasetSourceOneOf1, DatasetSourceOneOf2, DatasetSourceOneOf3, DatasetSourceOneOf4]] = None
+    one_of_schemas: Set[str] = { "DatasetSourceOneOf", "DatasetSourceOneOf1", "DatasetSourceOneOf2", "DatasetSourceOneOf3", "DatasetSourceOneOf4" }
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -67,37 +67,37 @@ class DatasetSource(BaseModel):
         instance = DatasetSource.model_construct()
         error_messages = []
         match = 0
-        # validate data type: UploadDatasetSource
-        if not isinstance(v, UploadDatasetSource):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `UploadDatasetSource`")
+        # validate data type: DatasetSourceOneOf
+        if not isinstance(v, DatasetSourceOneOf):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `DatasetSourceOneOf`")
         else:
             match += 1
-        # validate data type: SavedQueryDatasetSource
-        if not isinstance(v, SavedQueryDatasetSource):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `SavedQueryDatasetSource`")
+        # validate data type: DatasetSourceOneOf1
+        if not isinstance(v, DatasetSourceOneOf1):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `DatasetSourceOneOf1`")
         else:
             match += 1
-        # validate data type: SqlQueryDatasetSource
-        if not isinstance(v, SqlQueryDatasetSource):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `SqlQueryDatasetSource`")
+        # validate data type: DatasetSourceOneOf2
+        if not isinstance(v, DatasetSourceOneOf2):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `DatasetSourceOneOf2`")
         else:
             match += 1
-        # validate data type: UrlDatasetSource
-        if not isinstance(v, UrlDatasetSource):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `UrlDatasetSource`")
+        # validate data type: DatasetSourceOneOf3
+        if not isinstance(v, DatasetSourceOneOf3):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `DatasetSourceOneOf3`")
         else:
             match += 1
-        # validate data type: InlineDatasetSource
-        if not isinstance(v, InlineDatasetSource):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `InlineDatasetSource`")
+        # validate data type: DatasetSourceOneOf4
+        if not isinstance(v, DatasetSourceOneOf4):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `DatasetSourceOneOf4`")
         else:
             match += 1
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in DatasetSource with oneOf schemas: InlineDatasetSource, SavedQueryDatasetSource, SqlQueryDatasetSource, UploadDatasetSource, UrlDatasetSource. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when setting `actual_instance` in DatasetSource with oneOf schemas: DatasetSourceOneOf, DatasetSourceOneOf1, DatasetSourceOneOf2, DatasetSourceOneOf3, DatasetSourceOneOf4. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in DatasetSource with oneOf schemas: InlineDatasetSource, SavedQueryDatasetSource, SqlQueryDatasetSource, UploadDatasetSource, UrlDatasetSource. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when setting `actual_instance` in DatasetSource with oneOf schemas: DatasetSourceOneOf, DatasetSourceOneOf1, DatasetSourceOneOf2, DatasetSourceOneOf3, DatasetSourceOneOf4. Details: " + ", ".join(error_messages))
         else:
             return v
 
@@ -112,43 +112,43 @@ class DatasetSource(BaseModel):
         error_messages = []
         match = 0
 
-        # deserialize data into UploadDatasetSource
+        # deserialize data into DatasetSourceOneOf
         try:
-            instance.actual_instance = UploadDatasetSource.from_json(json_str)
+            instance.actual_instance = DatasetSourceOneOf.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into SavedQueryDatasetSource
+        # deserialize data into DatasetSourceOneOf1
         try:
-            instance.actual_instance = SavedQueryDatasetSource.from_json(json_str)
+            instance.actual_instance = DatasetSourceOneOf1.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into SqlQueryDatasetSource
+        # deserialize data into DatasetSourceOneOf2
         try:
-            instance.actual_instance = SqlQueryDatasetSource.from_json(json_str)
+            instance.actual_instance = DatasetSourceOneOf2.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into UrlDatasetSource
+        # deserialize data into DatasetSourceOneOf3
         try:
-            instance.actual_instance = UrlDatasetSource.from_json(json_str)
+            instance.actual_instance = DatasetSourceOneOf3.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into InlineDatasetSource
+        # deserialize data into DatasetSourceOneOf4
         try:
-            instance.actual_instance = InlineDatasetSource.from_json(json_str)
+            instance.actual_instance = DatasetSourceOneOf4.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into DatasetSource with oneOf schemas: InlineDatasetSource, SavedQueryDatasetSource, SqlQueryDatasetSource, UploadDatasetSource, UrlDatasetSource. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when deserializing the JSON string into DatasetSource with oneOf schemas: DatasetSourceOneOf, DatasetSourceOneOf1, DatasetSourceOneOf2, DatasetSourceOneOf3, DatasetSourceOneOf4. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into DatasetSource with oneOf schemas: InlineDatasetSource, SavedQueryDatasetSource, SqlQueryDatasetSource, UploadDatasetSource, UrlDatasetSource. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when deserializing the JSON string into DatasetSource with oneOf schemas: DatasetSourceOneOf, DatasetSourceOneOf1, DatasetSourceOneOf2, DatasetSourceOneOf3, DatasetSourceOneOf4. Details: " + ", ".join(error_messages))
         else:
             return instance
 
@@ -162,7 +162,7 @@ class DatasetSource(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Optional[Union[Dict[str, Any], InlineDatasetSource, SavedQueryDatasetSource, SqlQueryDatasetSource, UploadDatasetSource, UrlDatasetSource]]:
+    def to_dict(self) -> Optional[Union[Dict[str, Any], DatasetSourceOneOf, DatasetSourceOneOf1, DatasetSourceOneOf2, DatasetSourceOneOf3, DatasetSourceOneOf4]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return None

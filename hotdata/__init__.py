@@ -85,6 +85,11 @@ __all__ = [
     "CreateWorkspaceRequest",
     "CreateWorkspaceResponse",
     "DatasetSource",
+    "DatasetSourceOneOf",
+    "DatasetSourceOneOf1",
+    "DatasetSourceOneOf2",
+    "DatasetSourceOneOf3",
+    "DatasetSourceOneOf4",
     "DatasetSummary",
     "DatasetVersionSummary",
     "DeleteSandboxResponse",
@@ -232,6 +237,11 @@ from hotdata.models.create_secret_response import CreateSecretResponse as Create
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource as DatasetSource
+from hotdata.models.dataset_source_one_of import DatasetSourceOneOf as DatasetSourceOneOf
+from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1 as DatasetSourceOneOf1
+from hotdata.models.dataset_source_one_of2 import DatasetSourceOneOf2 as DatasetSourceOneOf2
+from hotdata.models.dataset_source_one_of3 import DatasetSourceOneOf3 as DatasetSourceOneOf3
+from hotdata.models.dataset_source_one_of4 import DatasetSourceOneOf4 as DatasetSourceOneOf4
 from hotdata.models.dataset_summary import DatasetSummary as DatasetSummary
 from hotdata.models.dataset_version_summary import DatasetVersionSummary as DatasetVersionSummary
 from hotdata.models.delete_sandbox_response import DeleteSandboxResponse as DeleteSandboxResponse

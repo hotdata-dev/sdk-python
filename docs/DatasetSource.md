@@ -1,6 +1,6 @@
 # DatasetSource
 
-Dataset source specification
+Dataset source specification.  Internally tagged on `type`, e.g. `{\"type\": \"upload\", \"upload_id\": \"...\"}`. Discriminator values: `upload`, `saved_query`, `sql_query`, `url`, `inline`.
 
 ## Properties
 
@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **columns** | **Dict[str, str]** | Optional explicit column definitions. Keys are column names, values are type specs. | [optional] 
 **format** | **str** |  | [optional] 
 **upload_id** | **str** |  | 
+**type** | **str** |  | 
 **saved_query_id** | **str** |  | 
 **version** | **int** |  | [optional] 
 **description** | **str** | Optional description for the auto-created saved query. | [optional] 

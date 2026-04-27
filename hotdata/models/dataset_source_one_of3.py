@@ -23,21 +23,21 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class DatasetSourceOneOf(BaseModel):
+class DatasetSourceOneOf3(BaseModel):
     """
-    DatasetSourceOneOf
+    DatasetSourceOneOf3
     """ # noqa: E501
-    columns: Optional[Dict[str, StrictStr]] = Field(default=None, description="Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred.")
+    columns: Optional[Dict[str, StrictStr]] = Field(default=None, description="Optional explicit column definitions. Keys are column names, values are type specs.")
     format: Optional[StrictStr] = None
-    upload_id: StrictStr
+    url: StrictStr
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["columns", "format", "upload_id", "type"]
+    __properties: ClassVar[List[str]] = ["columns", "format", "url", "type"]
 
     @field_validator('type')
     def type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['upload']):
-            raise ValueError("must be one of enum values ('upload')")
+        if value not in set(['url']):
+            raise ValueError("must be one of enum values ('url')")
         return value
 
     model_config = ConfigDict(
@@ -58,7 +58,7 @@ class DatasetSourceOneOf(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of DatasetSourceOneOf from a JSON string"""
+        """Create an instance of DatasetSourceOneOf3 from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -83,7 +83,7 @@ class DatasetSourceOneOf(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of DatasetSourceOneOf from a dict"""
+        """Create an instance of DatasetSourceOneOf3 from a dict"""
         if obj is None:
             return None
 
@@ -93,7 +93,7 @@ class DatasetSourceOneOf(BaseModel):
         _obj = cls.model_validate({
             "columns": obj.get("columns"),
             "format": obj.get("format"),
-            "upload_id": obj.get("upload_id"),
+            "url": obj.get("url"),
             "type": obj.get("type")
         })
         return _obj
