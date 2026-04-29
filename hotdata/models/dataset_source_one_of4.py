@@ -18,26 +18,25 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List
+from hotdata.models.inline_data import InlineData
 from typing import Optional, Set
 from typing_extensions import Self
 
-class DatasetSourceOneOf(BaseModel):
+class DatasetSourceOneOf4(BaseModel):
     """
-    DatasetSourceOneOf
+    DatasetSourceOneOf4
     """ # noqa: E501
-    columns: Optional[Dict[str, StrictStr]] = Field(default=None, description="Optional explicit column definitions. Keys are column names, values are type specs. When provided, the schema is built from these definitions instead of being inferred.")
-    format: Optional[StrictStr] = None
-    upload_id: StrictStr
+    inline: InlineData
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["columns", "format", "upload_id", "type"]
+    __properties: ClassVar[List[str]] = ["inline", "type"]
 
     @field_validator('type')
     def type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['upload']):
-            raise ValueError("must be one of enum values ('upload')")
+        if value not in set(['inline']):
+            raise ValueError("must be one of enum values ('inline')")
         return value
 
     model_config = ConfigDict(
@@ -58,7 +57,7 @@ class DatasetSourceOneOf(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of DatasetSourceOneOf from a JSON string"""
+        """Create an instance of DatasetSourceOneOf4 from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -79,11 +78,14 @@ class DatasetSourceOneOf(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of inline
+        if self.inline:
+            _dict['inline'] = self.inline.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of DatasetSourceOneOf from a dict"""
+        """Create an instance of DatasetSourceOneOf4 from a dict"""
         if obj is None:
             return None
 
@@ -91,9 +93,7 @@ class DatasetSourceOneOf(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "columns": obj.get("columns"),
-            "format": obj.get("format"),
-            "upload_id": obj.get("upload_id"),
+            "inline": InlineData.from_dict(obj["inline"]) if obj.get("inline") is not None else None,
             "type": obj.get("type")
         })
         return _obj

@@ -1,7 +1,7 @@
 [project]
 name = "hotdata"
 version = "0.1.0"
-description = "Official Python client for the Hotdata API"
+description = "Hotdata API"
 authors = [
   {name = "Hotdata",email = "developers@hotdata.dev"},
 ]
@@ -36,13 +36,6 @@ mypy = ">= 1.5"
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-include = ["hotdata*"]
-exclude = ["test*", "tests*", "docs*"]
-
-[tool.setuptools.package-data]
-hotdata = ["py.typed"]
 
 [tool.pylint.'MESSAGES CONTROL']
 extension-pkg-whitelist = "pydantic"

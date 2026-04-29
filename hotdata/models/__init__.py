@@ -49,6 +49,11 @@ from hotdata.models.create_secret_response import CreateSecretResponse
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.models.dataset_source import DatasetSource
+from hotdata.models.dataset_source_one_of import DatasetSourceOneOf
+from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1
+from hotdata.models.dataset_source_one_of2 import DatasetSourceOneOf2
+from hotdata.models.dataset_source_one_of3 import DatasetSourceOneOf3
+from hotdata.models.dataset_source_one_of4 import DatasetSourceOneOf4
 from hotdata.models.dataset_summary import DatasetSummary
 from hotdata.models.dataset_version_summary import DatasetVersionSummary
 from hotdata.models.delete_sandbox_response import DeleteSandboxResponse

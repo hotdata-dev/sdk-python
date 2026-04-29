@@ -16,12 +16,14 @@ Name | Type | Description | Notes
 **tables_failed** | **int** |  | 
 **tables_refreshed** | **int** |  | 
 **total_rows** | **int** |  | 
-**columns** | **List[str]** |  | 
 **created_at** | **datetime** |  | 
+**id** | **str** |  | 
+**status** | [**IndexStatus**](IndexStatus.md) |  | 
+**version** | **int** |  | 
+**columns** | **List[str]** |  | 
 **index_name** | **str** |  | 
 **index_type** | **str** |  | 
 **metric** | **str** | Distance metric this index was built with. Only present for vector indexes. | [optional] 
-**status** | [**IndexStatus**](IndexStatus.md) |  | 
 **updated_at** | **datetime** |  | 
 
 ## Example
