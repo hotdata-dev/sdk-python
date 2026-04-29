@@ -12,18 +12,19 @@ from hotdata.api.datasets_api import DatasetsApi
 from hotdata.exceptions import ApiException
 from hotdata.models.create_dataset_request import CreateDatasetRequest
 from hotdata.models.dataset_source import DatasetSource
+from hotdata.models.dataset_source_one_of4 import DatasetSourceOneOf4
 from hotdata.models.inline_data import InlineData
-from hotdata.models.inline_dataset_source import InlineDatasetSource
 from hotdata.models.update_dataset_request import UpdateDatasetRequest
 
 
 def _inline_csv_source() -> DatasetSource:
     return DatasetSource(
-        InlineDatasetSource(
+        DatasetSourceOneOf4(
+            type="inline",
             inline=InlineData(
                 content="a,b\n1,2\n3,4\n",
                 format="csv",
-            )
+            ),
         )
     )
 
