@@ -1,12 +1,13 @@
 # DatasetSourceOneOf1
 
-Create from inline data (small payloads)
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**inline** | [**InlineData**](InlineData.md) |  | 
+**saved_query_id** | **str** |  | 
+**version** | **int** |  | [optional] 
+**type** | **str** |  | 
 
 ## Example
 

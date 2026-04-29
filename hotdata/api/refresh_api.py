@@ -56,7 +56,7 @@ class RefreshApi:
     ) -> RefreshResponse:
         """Refresh connection data
 
-        Refresh schema metadata or table data. The behavior depends on the request fields:  - **Schema refresh (all)**: omit all fields — re-discovers tables for every connection. - **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection. - **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`. - **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet.  Set `async: true` on data refresh operations to run in the background and return a job ID for polling.
+        Refresh schema metadata, table data, or dataset data. The behavior depends on the request fields:  - **Schema refresh (all)**: omit all fields — re-discovers tables for every connection. - **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection. - **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`. - **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet. - **Dataset refresh**: set `dataset_id` — re-runs the dataset's source (URL fetch or saved query) and creates a new version. Mutually exclusive with `connection_id`.  Set `async: true` on data or dataset refresh operations to run in the background and return a job ID for polling.
 
         :param refresh_request: (required)
         :type refresh_request: RefreshRequest
@@ -125,7 +125,7 @@ class RefreshApi:
     ) -> ApiResponse[RefreshResponse]:
         """Refresh connection data
 
-        Refresh schema metadata or table data. The behavior depends on the request fields:  - **Schema refresh (all)**: omit all fields — re-discovers tables for every connection. - **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection. - **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`. - **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet.  Set `async: true` on data refresh operations to run in the background and return a job ID for polling.
+        Refresh schema metadata, table data, or dataset data. The behavior depends on the request fields:  - **Schema refresh (all)**: omit all fields — re-discovers tables for every connection. - **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection. - **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`. - **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet. - **Dataset refresh**: set `dataset_id` — re-runs the dataset's source (URL fetch or saved query) and creates a new version. Mutually exclusive with `connection_id`.  Set `async: true` on data or dataset refresh operations to run in the background and return a job ID for polling.
 
         :param refresh_request: (required)
         :type refresh_request: RefreshRequest
@@ -194,7 +194,7 @@ class RefreshApi:
     ) -> RESTResponseType:
         """Refresh connection data
 
-        Refresh schema metadata or table data. The behavior depends on the request fields:  - **Schema refresh (all)**: omit all fields — re-discovers tables for every connection. - **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection. - **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`. - **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet.  Set `async: true` on data refresh operations to run in the background and return a job ID for polling.
+        Refresh schema metadata, table data, or dataset data. The behavior depends on the request fields:  - **Schema refresh (all)**: omit all fields — re-discovers tables for every connection. - **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection. - **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`. - **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet. - **Dataset refresh**: set `dataset_id` — re-runs the dataset's source (URL fetch or saved query) and creates a new version. Mutually exclusive with `connection_id`.  Set `async: true` on data or dataset refresh operations to run in the background and return a job ID for polling.
 
         :param refresh_request: (required)
         :type refresh_request: RefreshRequest

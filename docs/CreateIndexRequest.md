@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **var_async** | **bool** | When true, create the index as a background job and return a job ID for polling. | [optional] 
 **columns** | **List[str]** | Columns to index. Required for all index types. | 
 **description** | **str** | User-facing description of the embedding (e.g., \&quot;product descriptions\&quot;). | [optional] 
-**dimensions** | **int** | Output vector dimensions. Some models support multiple dimension sizes (e.g., OpenAI text-embedding-3-small supports 512 or 1536). If omitted, the model&#39;s default dimensions are used. | [optional] 
+**dimensions** | **int** | Output vector dimensions. Some models support multiple dimension sizes (e.g., OpenAI text-embedding-3-small supports 512 or 1536). If omitted, the model&#39;s default dimensions are used | [optional] 
 **embedding_provider_id** | **str** | Embedding provider ID. When set for a vector index, the source column is treated as text and embeddings are generated automatically. The vector index is then built on the generated embedding column (&#x60;{column}_embedding&#x60; by default). | [optional] 
 **index_name** | **str** |  | 
 **index_type** | **str** | Index type: \&quot;sorted\&quot; (default), \&quot;bm25\&quot;, or \&quot;vector\&quot; | [optional] 

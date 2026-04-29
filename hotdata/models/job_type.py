@@ -30,7 +30,9 @@ class JobType(str, Enum):
     NOOP = 'noop'
     DATA_REFRESH_TABLE = 'data_refresh_table'
     DATA_REFRESH_CONNECTION = 'data_refresh_connection'
+    DATASET_REFRESH = 'dataset_refresh'
     CREATE_INDEX = 'create_index'
+    CREATE_DATASET_INDEX = 'create_dataset_index'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
