@@ -31,7 +31,7 @@ class CreateIndexRequest(BaseModel):
     var_async: Optional[StrictBool] = Field(default=None, description="When true, create the index as a background job and return a job ID for polling.", alias="async")
     columns: List[StrictStr] = Field(description="Columns to index. Required for all index types.")
     description: Optional[StrictStr] = Field(default=None, description="User-facing description of the embedding (e.g., \"product descriptions\").")
-    dimensions: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Output vector dimensions. Some models support multiple dimension sizes (e.g., OpenAI text-embedding-3-small supports 512 or 1536). If omitted, the model's default dimensions are used.")
+    dimensions: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Output vector dimensions. Some models support multiple dimension sizes (e.g., OpenAI text-embedding-3-small supports 512 or 1536). If omitted, the model's default dimensions are used")
     embedding_provider_id: Optional[StrictStr] = Field(default=None, description="Embedding provider ID. When set for a vector index, the source column is treated as text and embeddings are generated automatically. The vector index is then built on the generated embedding column (`{column}_embedding` by default).")
     index_name: StrictStr
     index_type: Optional[StrictStr] = Field(default=None, description="Index type: \"sorted\" (default), \"bm25\", or \"vector\"")

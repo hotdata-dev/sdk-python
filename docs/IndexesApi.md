@@ -4,10 +4,111 @@ All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**create_dataset_index**](IndexesApi.md#create_dataset_index) | **POST** /v1/datasets/{dataset_id}/indexes | Create an index on a dataset
 [**create_index**](IndexesApi.md#create_index) | **POST** /v1/connections/{connection_id}/tables/{schema}/{table}/indexes | Create an index on a table
+[**delete_dataset_index**](IndexesApi.md#delete_dataset_index) | **DELETE** /v1/datasets/{dataset_id}/indexes/{index_name} | Delete a dataset index
 [**delete_index**](IndexesApi.md#delete_index) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/indexes/{index_name} | Delete an index
+[**list_dataset_indexes**](IndexesApi.md#list_dataset_indexes) | **GET** /v1/datasets/{dataset_id}/indexes | List indexes on a dataset
 [**list_indexes**](IndexesApi.md#list_indexes) | **GET** /v1/connections/{connection_id}/tables/{schema}/{table}/indexes | List indexes on a table
 
+
+# **create_dataset_index**
+> IndexInfoResponse create_dataset_index(dataset_id, create_index_request)
+
+Create an index on a dataset
+
+Create a sorted, BM25, or vector index on a dataset.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.create_index_request import CreateIndexRequest
+from hotdata.models.index_info_response import IndexInfoResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.IndexesApi(api_client)
+    dataset_id = 'dataset_id_example' # str | Dataset identifier
+    create_index_request = hotdata.CreateIndexRequest() # CreateIndexRequest | 
+
+    try:
+        # Create an index on a dataset
+        api_response = api_instance.create_dataset_index(dataset_id, create_index_request)
+        print("The response of IndexesApi->create_dataset_index:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling IndexesApi->create_dataset_index: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **dataset_id** | **str**| Dataset identifier | 
+ **create_index_request** | [**CreateIndexRequest**](CreateIndexRequest.md)|  | 
+
+### Return type
+
+[**IndexInfoResponse**](IndexInfoResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**201** | Index created |  -  |
+**400** | Invalid request |  -  |
+**404** | Dataset not found |  -  |
+**500** | Internal server error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **create_index**
 > IndexInfoResponse create_index(connection_id, var_schema, table, create_index_request)
@@ -104,6 +205,98 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **delete_dataset_index**
+> delete_dataset_index(dataset_id, index_name)
+
+Delete a dataset index
+
+Delete a specific index from a dataset.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.IndexesApi(api_client)
+    dataset_id = 'dataset_id_example' # str | Dataset identifier
+    index_name = 'index_name_example' # str | Index name
+
+    try:
+        # Delete a dataset index
+        api_instance.delete_dataset_index(dataset_id, index_name)
+    except Exception as e:
+        print("Exception when calling IndexesApi->delete_dataset_index: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **dataset_id** | **str**| Dataset identifier | 
+ **index_name** | **str**| Index name | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**204** | Index deleted |  -  |
+**404** | Index or dataset not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **delete_index**
 > delete_index(connection_id, var_schema, table, index_name)
 
@@ -191,6 +384,99 @@ void (empty response body)
 **204** | Index deleted |  -  |
 **404** | Index not found |  -  |
 **500** | Internal server error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_dataset_indexes**
+> ListIndexesResponse list_dataset_indexes(dataset_id)
+
+List indexes on a dataset
+
+List all indexes created on a dataset.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Api Key Authentication (SessionId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.list_indexes_response import ListIndexesResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure API key authorization: SessionId
+configuration.api_key['SessionId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['SessionId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.IndexesApi(api_client)
+    dataset_id = 'dataset_id_example' # str | Dataset identifier
+
+    try:
+        # List indexes on a dataset
+        api_response = api_instance.list_dataset_indexes(dataset_id)
+        print("The response of IndexesApi->list_dataset_indexes:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling IndexesApi->list_dataset_indexes: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **dataset_id** | **str**| Dataset identifier | 
+
+### Return type
+
+[**ListIndexesResponse**](ListIndexesResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Indexes listed |  -  |
+**404** | Dataset not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
