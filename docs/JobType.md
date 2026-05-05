@@ -14,6 +14,8 @@ Background job types returned by the API.
 
 * `CREATE_INDEX` (value: `'create_index'`)
 
+* `CREATE_DATASET_INDEX` (value: `'create_dataset_index'`)
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 
