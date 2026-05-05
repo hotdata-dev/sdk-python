@@ -287,7 +287,4 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
-test/test_dataset_source_one_of2.py
-test/test_dataset_source_one_of3.py
-test/test_dataset_source_one_of4.py
 tox.ini

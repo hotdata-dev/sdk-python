@@ -16,7 +16,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictBytes, StrictStr
+from pydantic import Field, StrictBytes, StrictStr
 from typing import Optional, Tuple, Union
 from typing_extensions import Annotated
 from hotdata.models.list_uploads_response import ListUploadsResponse
@@ -305,7 +305,6 @@ class UploadsApi:
     def upload_file(
         self,
         body: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
-        streaming: Annotated[Optional[StrictBool], Field(description="Stream upload to disk for large files (up to 20GB)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -321,12 +320,10 @@ class UploadsApi:
     ) -> UploadResponse:
         """Upload file
 
-        Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table. Add `?streaming=true` for large files (up to 20GB) — streams to disk instead of loading into memory.
+        Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The body is streamed to disk, so files up to 20GB are supported. The returned upload ID can be passed to POST /v1/datasets to create a queryable table.
 
         :param body: (required)
         :type body: bytearray
-        :param streaming: Stream upload to disk for large files (up to 20GB)
-        :type streaming: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -351,7 +348,6 @@ class UploadsApi:
 
         _param = self._upload_file_serialize(
             body=body,
-            streaming=streaming,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -377,7 +373,6 @@ class UploadsApi:
     def upload_file_with_http_info(
         self,
         body: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
-        streaming: Annotated[Optional[StrictBool], Field(description="Stream upload to disk for large files (up to 20GB)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -393,12 +388,10 @@ class UploadsApi:
     ) -> ApiResponse[UploadResponse]:
         """Upload file
 
-        Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table. Add `?streaming=true` for large files (up to 20GB) — streams to disk instead of loading into memory.
+        Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The body is streamed to disk, so files up to 20GB are supported. The returned upload ID can be passed to POST /v1/datasets to create a queryable table.
 
         :param body: (required)
         :type body: bytearray
-        :param streaming: Stream upload to disk for large files (up to 20GB)
-        :type streaming: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -423,7 +416,6 @@ class UploadsApi:
 
         _param = self._upload_file_serialize(
             body=body,
-            streaming=streaming,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -449,7 +441,6 @@ class UploadsApi:
     def upload_file_without_preload_content(
         self,
         body: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
-        streaming: Annotated[Optional[StrictBool], Field(description="Stream upload to disk for large files (up to 20GB)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -465,12 +456,10 @@ class UploadsApi:
     ) -> RESTResponseType:
         """Upload file
 
-        Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The returned upload ID can be passed to POST /v1/datasets to create a queryable table. Add `?streaming=true` for large files (up to 20GB) — streams to disk instead of loading into memory.
+        Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The body is streamed to disk, so files up to 20GB are supported. The returned upload ID can be passed to POST /v1/datasets to create a queryable table.
 
         :param body: (required)
         :type body: bytearray
-        :param streaming: Stream upload to disk for large files (up to 20GB)
-        :type streaming: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -495,7 +484,6 @@ class UploadsApi:
 
         _param = self._upload_file_serialize(
             body=body,
-            streaming=streaming,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -516,7 +504,6 @@ class UploadsApi:
     def _upload_file_serialize(
         self,
         body,
-        streaming,
         _request_auth,
         _content_type,
         _headers,
@@ -539,10 +526,6 @@ class UploadsApi:
 
         # process the path parameters
         # process the query parameters
-        if streaming is not None:
-            
-            _query_params.append(('streaming', streaming))
-            
         # process the header parameters
         # process the form parameters
         # process the body parameter
