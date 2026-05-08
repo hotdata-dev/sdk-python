@@ -60,6 +60,35 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Each `Api` class groups endpoints by resource. Construct the client, then call the typed methods you need.
 
+## Arrow results
+
+Query results can be fetched as an [Apache Arrow](https://arrow.apache.org/) IPC stream instead of JSON, which is faster and far more memory-efficient for large result sets. Install the optional extra:
+
+```sh
+pip install 'hotdata[arrow]'
+```
+
+Use `hotdata.arrow.ResultsApi` (a drop-in subclass of `ResultsApi` that adds Arrow methods):
+
+```python
+from hotdata import ApiClient, Configuration
+from hotdata.arrow import ResultsApi
+
+with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
+    results = ResultsApi(client)
+
+    # Buffered: returns a pyarrow.Table.
+    table = results.get_result_arrow(result_id)
+
+    # Streaming: yields a pyarrow.RecordBatchStreamReader without
+    # materializing the full table in memory.
+    with results.stream_result_arrow(result_id) as reader:
+        for batch in reader:
+            ...
+```
+
+Both methods accept `offset` and `limit` for pagination. They raise `hotdata.arrow.ResultNotReadyError` if the result is still pending or processing — poll `results.get_result(result_id)` until `status == "ready"` first.
+
 ## API reference
 
 Generated Markdown for every operation and model is in [`docs/`](https://github.com/hotdata-dev/sdk-python/tree/main/docs):
