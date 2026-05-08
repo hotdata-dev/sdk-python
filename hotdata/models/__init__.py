@@ -100,6 +100,7 @@ from hotdata.models.refresh_request import RefreshRequest
 from hotdata.models.refresh_response import RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning
 from hotdata.models.result_info import ResultInfo
+from hotdata.models.results_format_query import ResultsFormatQuery
 from hotdata.models.sandbox import Sandbox
 from hotdata.models.sandbox_response import SandboxResponse
 from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource
