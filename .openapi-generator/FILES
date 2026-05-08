@@ -98,6 +98,7 @@ docs/RefreshResponse.md
 docs/RefreshWarning.md
 docs/ResultInfo.md
 docs/ResultsApi.md
+docs/ResultsFormatQuery.md
 docs/Sandbox.md
 docs/SandboxResponse.md
 docs/SandboxesApi.md
@@ -247,6 +248,7 @@ hotdata/models/refresh_request.py
 hotdata/models/refresh_response.py
 hotdata/models/refresh_warning.py
 hotdata/models/result_info.py
+hotdata/models/results_format_query.py
 hotdata/models/sandbox.py
 hotdata/models/sandbox_response.py
 hotdata/models/saved_query_dataset_source.py
@@ -287,4 +289,5 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
+test/test_results_format_query.py
 tox.ini

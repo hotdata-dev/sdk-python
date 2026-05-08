@@ -136,6 +136,7 @@ __all__ = [
     "RefreshResponse",
     "RefreshWarning",
     "ResultInfo",
+    "ResultsFormatQuery",
     "Sandbox",
     "SandboxResponse",
     "SavedQueryDatasetSource",
@@ -288,6 +289,7 @@ from hotdata.models.refresh_request import RefreshRequest as RefreshRequest
 from hotdata.models.refresh_response import RefreshResponse as RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning as RefreshWarning
 from hotdata.models.result_info import ResultInfo as ResultInfo
+from hotdata.models.results_format_query import ResultsFormatQuery as ResultsFormatQuery
 from hotdata.models.sandbox import Sandbox as Sandbox
 from hotdata.models.sandbox_response import SandboxResponse as SandboxResponse
 from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource as SavedQueryDatasetSource

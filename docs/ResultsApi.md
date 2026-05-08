@@ -9,11 +9,23 @@ Method | HTTP request | Description
 
 
 # **get_result**
-> GetResultResponse get_result(id)
+> GetResultResponse get_result(id, offset=offset, limit=limit, format=format)
 
 Get result
 
-Retrieve a persisted query result by ID. If the result is still being processed, only the status is returned. Once ready, the full column and row data is included in the response.
+Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.
+
+| Result status         | Status × body                                                                |
+|-----------------------|------------------------------------------------------------------------------|
+| `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    |
+| `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       |
+| `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 |
+| `failed`              | 409 `application/json` `{status, result_id, error_message}`                  |
+| not found             | 404 `application/json` (`ApiErrorResponse`)                                  |
+
+`?format=arrow` (or `?format=json`) takes precedence over `Accept`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel="next"` points at the following page.
+
+Ready responses (both formats) carry `X-Total-Row-Count` (full result row count from parquet metadata, independent of offset/limit). The Arrow path streams end-to-end with no spawned task between the parquet reader and the wire — clients can disconnect at any time and the server stops reading.
 
 ### Example
 
@@ -24,6 +36,7 @@ Retrieve a persisted query result by ID. If the result is still being processed,
 ```python
 import hotdata
 from hotdata.models.get_result_response import GetResultResponse
+from hotdata.models.results_format_query import ResultsFormatQuery
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -60,10 +73,13 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.ResultsApi(api_client)
     id = 'id_example' # str | Result ID
+    offset = 56 # int | Rows to skip (default: 0) (optional)
+    limit = 56 # int | Maximum rows to return (default: unbounded) (optional)
+    format = hotdata.ResultsFormatQuery() # ResultsFormatQuery | `arrow` or `json` — overrides the `Accept` header. (optional)
 
     try:
         # Get result
-        api_response = api_instance.get_result(id)
+        api_response = api_instance.get_result(id, offset=offset, limit=limit, format=format)
         print("The response of ResultsApi->get_result:\n")
         pprint(api_response)
     except Exception as e:
@@ -78,6 +94,9 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Result ID | 
+ **offset** | **int**| Rows to skip (default: 0) | [optional] 
+ **limit** | **int**| Maximum rows to return (default: unbounded) | [optional] 
+ **format** | [**ResultsFormatQuery**](.md)| &#x60;arrow&#x60; or &#x60;json&#x60; — overrides the &#x60;Accept&#x60; header. | [optional] 
 
 ### Return type
 
@@ -90,14 +109,17 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
+ - **Accept**: application/json, application/vnd.apache.arrow.stream
 
 ### HTTP response details
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Result data |  -  |
-**404** | Result not found |  -  |
+**200** | Result data. JSON callers receive &#x60;GetResultResponse&#x60;. Arrow callers receive an Arrow IPC stream — a sequence of IPC messages: schema header, then RecordBatch messages, then EOS. |  * Link - RFC 5988 &#x60;Link&#x60; header with &#x60;rel&#x3D;\&quot;next\&quot;&#x60; pointing at the next page when a finite &#x60;limit&#x60; does not reach the end of the result. <br>  * X-Total-Row-Count - Total rows in the full result, ignoring offset/limit. Present only when status is &#x60;ready&#x60;. <br>  |
+**202** | Result is still being computed (&#x60;pending&#x60; or &#x60;processing&#x60;). Poll the same URL. |  * Retry-After - Suggested seconds before the next poll. <br>  |
+**400** | Invalid offset, limit, or format. |  -  |
+**404** | Result not found. |  -  |
+**409** | Result computation failed. Body carries &#x60;error_message&#x60; describing the failure. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
