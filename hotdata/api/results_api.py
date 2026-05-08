@@ -44,6 +44,9 @@ class ResultsApi:
     def get_result(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
+        format: Annotated[Optional[StrictStr], Field(description="`arrow` or `json` — overrides the `Accept` header.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -59,10 +62,16 @@ class ResultsApi:
     ) -> GetResultResponse:
         """Get result
 
-        Retrieve a persisted query result by ID. If the result is still being processed, only the status is returned. Once ready, the full column and row data is included in the response.
+        Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.  | Result status         | Status × body                                                                | |-----------------------|------------------------------------------------------------------------------| | `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    | | `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       | | `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 | | `failed`              | 409 `application/json` `{status, result_id, error_message}`                  | | not found             | 404 `application/json` (`ApiErrorResponse`)                                  |  `?format=arrow` (or `?format=json`) takes precedence over `Accept`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel=\"next\"` points at the following page.  Ready responses (both formats) carry `X-Total-Row-Count` (full result row count from parquet metadata, independent of offset/limit). The Arrow path streams end-to-end with no spawned task between the parquet reader and the wire — clients can disconnect at any time and the server stops reading.
 
         :param id: Result ID (required)
         :type id: str
+        :param offset: Rows to skip (default: 0)
+        :type offset: int
+        :param limit: Maximum rows to return (default: unbounded)
+        :type limit: int
+        :param format: `arrow` or `json` — overrides the `Accept` header.
+        :type format: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -87,6 +96,9 @@ class ResultsApi:
 
         _param = self._get_result_serialize(
             id=id,
+            offset=offset,
+            limit=limit,
+            format=format,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -95,7 +107,10 @@ class ResultsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GetResultResponse",
+            '202': "GetResultResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "GetResultResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -112,6 +127,9 @@ class ResultsApi:
     def get_result_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
+        format: Annotated[Optional[StrictStr], Field(description="`arrow` or `json` — overrides the `Accept` header.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -127,10 +145,16 @@ class ResultsApi:
     ) -> ApiResponse[GetResultResponse]:
         """Get result
 
-        Retrieve a persisted query result by ID. If the result is still being processed, only the status is returned. Once ready, the full column and row data is included in the response.
+        Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.  | Result status         | Status × body                                                                | |-----------------------|------------------------------------------------------------------------------| | `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    | | `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       | | `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 | | `failed`              | 409 `application/json` `{status, result_id, error_message}`                  | | not found             | 404 `application/json` (`ApiErrorResponse`)                                  |  `?format=arrow` (or `?format=json`) takes precedence over `Accept`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel=\"next\"` points at the following page.  Ready responses (both formats) carry `X-Total-Row-Count` (full result row count from parquet metadata, independent of offset/limit). The Arrow path streams end-to-end with no spawned task between the parquet reader and the wire — clients can disconnect at any time and the server stops reading.
 
         :param id: Result ID (required)
         :type id: str
+        :param offset: Rows to skip (default: 0)
+        :type offset: int
+        :param limit: Maximum rows to return (default: unbounded)
+        :type limit: int
+        :param format: `arrow` or `json` — overrides the `Accept` header.
+        :type format: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -155,6 +179,9 @@ class ResultsApi:
 
         _param = self._get_result_serialize(
             id=id,
+            offset=offset,
+            limit=limit,
+            format=format,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -163,7 +190,10 @@ class ResultsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GetResultResponse",
+            '202': "GetResultResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "GetResultResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -180,6 +210,9 @@ class ResultsApi:
     def get_result_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
+        format: Annotated[Optional[StrictStr], Field(description="`arrow` or `json` — overrides the `Accept` header.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -195,10 +228,16 @@ class ResultsApi:
     ) -> RESTResponseType:
         """Get result
 
-        Retrieve a persisted query result by ID. If the result is still being processed, only the status is returned. Once ready, the full column and row data is included in the response.
+        Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.  | Result status         | Status × body                                                                | |-----------------------|------------------------------------------------------------------------------| | `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    | | `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       | | `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 | | `failed`              | 409 `application/json` `{status, result_id, error_message}`                  | | not found             | 404 `application/json` (`ApiErrorResponse`)                                  |  `?format=arrow` (or `?format=json`) takes precedence over `Accept`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel=\"next\"` points at the following page.  Ready responses (both formats) carry `X-Total-Row-Count` (full result row count from parquet metadata, independent of offset/limit). The Arrow path streams end-to-end with no spawned task between the parquet reader and the wire — clients can disconnect at any time and the server stops reading.
 
         :param id: Result ID (required)
         :type id: str
+        :param offset: Rows to skip (default: 0)
+        :type offset: int
+        :param limit: Maximum rows to return (default: unbounded)
+        :type limit: int
+        :param format: `arrow` or `json` — overrides the `Accept` header.
+        :type format: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -223,6 +262,9 @@ class ResultsApi:
 
         _param = self._get_result_serialize(
             id=id,
+            offset=offset,
+            limit=limit,
+            format=format,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -231,7 +273,10 @@ class ResultsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GetResultResponse",
+            '202': "GetResultResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "GetResultResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -243,6 +288,9 @@ class ResultsApi:
     def _get_result_serialize(
         self,
         id,
+        offset,
+        limit,
+        format,
         _request_auth,
         _content_type,
         _headers,
@@ -267,6 +315,18 @@ class ResultsApi:
         if id is not None:
             _path_params['id'] = id
         # process the query parameters
+        if offset is not None:
+            
+            _query_params.append(('offset', offset))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if format is not None:
+            
+            _query_params.append(('format', format))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -276,7 +336,8 @@ class ResultsApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/vnd.apache.arrow.stream'
                 ]
             )
 
