@@ -84,6 +84,14 @@ jobs:
                   'keywords = ["hotdata", "api-client", "data-platform"]',
                   re.MULTILINE,
               ),
+              # Insert [project.optional-dependencies] (for hotdata.arrow) just
+              # before [project.urls]. Run before the urls patch so the urls
+              # anchor is unchanged when this fires.
+              (
+                  r'(\ndependencies = \[\n(?:[^\]]|\][^\n])*\]\n)\n(\[project\.urls\])',
+                  r'\1\n[project.optional-dependencies]\narrow = ["pyarrow >= 14"]\n\n\2',
+                  0,
+              ),
               (
                   r'\[project\.urls\]\nRepository = "[^"]*"\n',
                   '[project.urls]\nHomepage = "https://www.hotdata.dev"\nRepository = "https://github.com/hotdata-dev/sdk-python"\n',

@@ -17,6 +17,9 @@ dependencies = [
   "typing-extensions (>=4.7.1)",
 ]
 
+[project.optional-dependencies]
+arrow = ["pyarrow >= 14"]
+
 [project.urls]
 Homepage = "https://www.hotdata.dev"
 Repository = "https://github.com/hotdata-dev/sdk-python"
