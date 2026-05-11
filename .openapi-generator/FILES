@@ -289,5 +289,4 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
-test/test_results_format_query.py
 tox.ini
