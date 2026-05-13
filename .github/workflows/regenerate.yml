@@ -36,10 +36,12 @@ jobs:
       - name: Clean existing source
         run: rm -rf src/
 
-      - name: Read package version from pyproject.toml
+      - name: Bump package patch version in pyproject.toml
         id: pkg
         run: |
-          version=$(python3 -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          python3 -m pip install --quiet bump-my-version
+          bump-my-version bump patch --no-commit --no-tag --allow-dirty
+          version=$(bump-my-version show current_version)
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Generate client
