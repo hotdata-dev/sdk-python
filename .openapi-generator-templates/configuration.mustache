@@ -175,7 +175,7 @@ class Configuration:
     :param password: Password for HTTP basic authentication.
 {{#hasHttpSignatureMethods}}
     :param signing_info: Configuration parameters for the HTTP signature security scheme.
-        Must be an instance of {{{packageName}}}.signing.HttpSigningConfiguration
+        Must be an instance of {{packageName}}.signing.HttpSigningConfiguration
 {{/hasHttpSignatureMethods}}
     :param server_index: Index to servers configuration.
     :param server_variables: Mapping with string values to replace variables in
@@ -206,7 +206,7 @@ class Configuration:
 
     Workspace / sandbox scoping example:
 
-conf = {{{packageName}}}.Configuration(
+conf = {{packageName}}.Configuration(
     api_key='sk_live_...',
     workspace_id='ws_abc',
     session_id='sb_xyz',
@@ -224,7 +224,7 @@ conf = {{{packageName}}}.Configuration(
 
     Configure API client with HTTP basic authentication:
 
-conf = {{{packageName}}}.Configuration(
+conf = {{packageName}}.Configuration(
     username='the-user',
     password='the-password',
 )
@@ -243,7 +243,7 @@ conf = {{{packageName}}}.Configuration(
     Configure API client with HTTP signature authentication. Use the 'hs2019' signature scheme,
     sign the HTTP requests with the RSA-SSA-PSS signature algorithm, and set the expiration time
     of the signature to 5 minutes after the signature has been created.
-    Note you can use the constants defined in the {{{packageName}}}.signing module, and you can
+    Note you can use the constants defined in the {{packageName}}.signing module, and you can
     also specify arbitrary HTTP headers to be included in the HTTP signature, except for the
     'Authorization' header, which is used to carry the signature.
 
@@ -252,18 +252,18 @@ conf = {{{packageName}}}.Configuration(
     load balancers may add/modify/remove headers. Include the HTTP headers that you know
     are not going to be modified in transit.
 
-conf = {{{packageName}}}.Configuration(
-    signing_info = {{{packageName}}}.signing.HttpSigningConfiguration(
+conf = {{packageName}}.Configuration(
+    signing_info = {{packageName}}.signing.HttpSigningConfiguration(
         key_id =                 'my-key-id',
         private_key_path =       'rsa.pem',
-        signing_scheme =         {{{packageName}}}.signing.SCHEME_HS2019,
-        signing_algorithm =      {{{packageName}}}.signing.ALGORITHM_RSASSA_PSS,
-        signed_headers =         [{{{packageName}}}.signing.HEADER_REQUEST_TARGET,
-                                    {{{packageName}}}.signing.HEADER_CREATED,
-                                    {{{packageName}}}.signing.HEADER_EXPIRES,
-                                    {{{packageName}}}.signing.HEADER_HOST,
-                                    {{{packageName}}}.signing.HEADER_DATE,
-                                    {{{packageName}}}.signing.HEADER_DIGEST,
+        signing_scheme =         {{packageName}}.signing.SCHEME_HS2019,
+        signing_algorithm =      {{packageName}}.signing.ALGORITHM_RSASSA_PSS,
+        signed_headers =         [{{packageName}}.signing.HEADER_REQUEST_TARGET,
+                                    {{packageName}}.signing.HEADER_CREATED,
+                                    {{packageName}}.signing.HEADER_EXPIRES,
+                                    {{packageName}}.signing.HEADER_HOST,
+                                    {{packageName}}.signing.HEADER_DATE,
+                                    {{packageName}}.signing.HEADER_DIGEST,
                                     'Content-Type',
                                     'User-Agent'
                                     ],
@@ -304,7 +304,7 @@ conf = {{{packageName}}}.Configuration(
     ) -> None:
         """Constructor
         """
-        self._base_path = "{{{basePath}}}" if host is None else host
+        self._base_path = "{{basePath}}" if host is None else host
         """Default Base url
         """
         self.server_index = 0 if server_index is None and host is None else server_index
@@ -438,11 +438,11 @@ conf = {{{packageName}}}.Configuration(
         """Options to pass down to the underlying urllib3 socket
         """
 
-        self.datetime_format = "{{{datetimeFormat}}}"
+        self.datetime_format = "{{datetimeFormat}}"
         """datetime format
         """
 
-        self.date_format = "{{{dateFormat}}}"
+        self.date_format = "{{dateFormat}}"
         """date format
         """
 
@@ -694,7 +694,7 @@ conf = {{{packageName}}}.Configuration(
                 'type': 'bearer',
                 'in': 'header',
                 {{#bearerFormat}}
-                'format': '{{{.}}}',
+                'format': '{{.}}',
                 {{/bearerFormat}}
                 'key': 'Authorization',
                 'value': 'Bearer ' + self.api_key
@@ -746,20 +746,20 @@ conf = {{{packageName}}}.Configuration(
         return [
             {{#servers}}
             {
-                'url': "{{{url}}}",
-                'description': "{{{description}}}{{^description}}No description provided{{/description}}",
+                'url': "{{url}}",
+                'description': "{{description}}{{^description}}No description provided{{/description}}",
                 {{#variables}}
                 {{#-first}}
                 'variables': {
                 {{/-first}}
-                    '{{{name}}}': {
-                        'description': "{{{description}}}{{^description}}No description provided{{/description}}",
-                        'default_value': "{{{defaultValue}}}",
+                    '{{name}}': {
+                        'description': "{{description}}{{^description}}No description provided{{/description}}",
+                        'default_value': "{{defaultValue}}",
                         {{#enumValues}}
                         {{#-first}}
                         'enum_values': [
                         {{/-first}}
-                            "{{{.}}}"{{^-last}},{{/-last}}
+                            "{{.}}"{{^-last}},{{/-last}}
                         {{#-last}}
                         ]
                         {{/-last}}
