@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          fetch-tags: true
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
@@ -40,7 +42,8 @@ jobs:
         id: pkg
         run: |
           python3 -m pip install --quiet bump-my-version
-          bump-my-version bump patch --no-commit --no-tag --allow-dirty
+          current_version=$(python3 -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          bump-my-version bump patch --current-version "$current_version" --no-commit --no-tag --allow-dirty
           version=$(bump-my-version show current_version)
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
