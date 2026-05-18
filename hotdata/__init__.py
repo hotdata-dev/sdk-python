@@ -127,6 +127,8 @@ __all__ = [
     "ListUploadsResponse",
     "ListWorkspaceContextsResponse",
     "ListWorkspacesResponse",
+    "LoadManagedTableRequest",
+    "LoadManagedTableResponse",
     "NumericProfileDetail",
     "QueryRequest",
     "QueryResponse",
@@ -280,6 +282,8 @@ from hotdata.models.list_secrets_response import ListSecretsResponse as ListSecr
 from hotdata.models.list_uploads_response import ListUploadsResponse as ListUploadsResponse
 from hotdata.models.list_workspace_contexts_response import ListWorkspaceContextsResponse as ListWorkspaceContextsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
+from hotdata.models.load_managed_table_request import LoadManagedTableRequest as LoadManagedTableRequest
+from hotdata.models.load_managed_table_response import LoadManagedTableResponse as LoadManagedTableResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail as NumericProfileDetail
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
