@@ -1,6 +1,6 @@
 [project]
 name = "hotdata"
-version = "0.1.0"
+version = "0.2.0"
 description = "Hotdata API"
 authors = [
   {name = "Hotdata",email = "developers@hotdata.dev"},
