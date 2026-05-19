@@ -7,9 +7,11 @@ Method | HTTP request | Description
 [**check_connection_health**](ConnectionsApi.md#check_connection_health) | **GET** /v1/connections/{connection_id}/health | Check connection health
 [**create_connection**](ConnectionsApi.md#create_connection) | **POST** /v1/connections | Create connection
 [**delete_connection**](ConnectionsApi.md#delete_connection) | **DELETE** /v1/connections/{connection_id} | Delete connection
+[**delete_managed_table**](ConnectionsApi.md#delete_managed_table) | **DELETE** /v1/connections/{connection_id}/schemas/{schema}/tables/{table} | Delete managed table
 [**get_connection**](ConnectionsApi.md#get_connection) | **GET** /v1/connections/{connection_id} | Get connection
 [**get_table_profile**](ConnectionsApi.md#get_table_profile) | **GET** /v1/connections/{connection_id}/tables/{schema}/{table}/profile | Get table profile
 [**list_connections**](ConnectionsApi.md#list_connections) | **GET** /v1/connections | List connections
+[**load_managed_table**](ConnectionsApi.md#load_managed_table) | **POST** /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads | Load managed table from upload
 [**purge_connection_cache**](ConnectionsApi.md#purge_connection_cache) | **DELETE** /v1/connections/{connection_id}/cache | Purge connection cache
 [**purge_table_cache**](ConnectionsApi.md#purge_table_cache) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/cache | Purge table cache
 
@@ -271,6 +273,94 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **delete_managed_table**
+> delete_managed_table(connection_id, var_schema, table)
+
+Delete managed table
+
+Delete a single managed-catalog table. The catalog row is removed and the backing parquet file (if any) is scheduled for deletion. Only valid against connections whose source type is `managed`.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.ConnectionsApi(api_client)
+    connection_id = 'connection_id_example' # str | Connection ID
+    var_schema = 'var_schema_example' # str | Schema name
+    table = 'table_example' # str | Table name
+
+    try:
+        # Delete managed table
+        api_instance.delete_managed_table(connection_id, var_schema, table)
+    except Exception as e:
+        print("Exception when calling ConnectionsApi->delete_managed_table: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **connection_id** | **str**| Connection ID | 
+ **var_schema** | **str**| Schema name | 
+ **table** | **str**| Table name | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**204** | Managed table deleted |  -  |
+**400** | Connection is not a managed catalog |  -  |
+**404** | Connection or table not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **get_connection**
 > GetConnectionResponse get_connection(connection_id)
 
@@ -525,6 +615,101 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of connections |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **load_managed_table**
+> LoadManagedTableResponse load_managed_table(connection_id, var_schema, table, load_managed_table_request)
+
+Load managed table from upload
+
+Publish a previously-uploaded parquet file as the new generation of a managed table. The upload must reference a parquet file (verified by magic bytes). Only `mode = "replace"` is supported. Concurrent loads against the same upload return 409.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.load_managed_table_request import LoadManagedTableRequest
+from hotdata.models.load_managed_table_response import LoadManagedTableResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.ConnectionsApi(api_client)
+    connection_id = 'connection_id_example' # str | Connection ID
+    var_schema = 'var_schema_example' # str | Schema name
+    table = 'table_example' # str | Table name
+    load_managed_table_request = hotdata.LoadManagedTableRequest() # LoadManagedTableRequest | 
+
+    try:
+        # Load managed table from upload
+        api_response = api_instance.load_managed_table(connection_id, var_schema, table, load_managed_table_request)
+        print("The response of ConnectionsApi->load_managed_table:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling ConnectionsApi->load_managed_table: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **connection_id** | **str**| Connection ID | 
+ **var_schema** | **str**| Schema name | 
+ **table** | **str**| Table name | 
+ **load_managed_table_request** | [**LoadManagedTableRequest**](LoadManagedTableRequest.md)|  | 
+
+### Return type
+
+[**LoadManagedTableResponse**](LoadManagedTableResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Managed table loaded |  -  |
+**400** | Invalid request (bad mode, non-managed connection, bad parquet) |  -  |
+**404** | Connection or upload not found |  -  |
+**409** | Upload already consumed or in flight |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -91,6 +91,8 @@ from hotdata.models.list_secrets_response import ListSecretsResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse
 from hotdata.models.list_workspace_contexts_response import ListWorkspaceContextsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse
+from hotdata.models.load_managed_table_request import LoadManagedTableRequest
+from hotdata.models.load_managed_table_response import LoadManagedTableResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse

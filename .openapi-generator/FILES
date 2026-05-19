@@ -85,6 +85,8 @@ docs/ListSecretsResponse.md
 docs/ListUploadsResponse.md
 docs/ListWorkspaceContextsResponse.md
 docs/ListWorkspacesResponse.md
+docs/LoadManagedTableRequest.md
+docs/LoadManagedTableResponse.md
 docs/NumericProfileDetail.md
 docs/QueryApi.md
 docs/QueryRequest.md
@@ -239,6 +241,8 @@ hotdata/models/list_secrets_response.py
 hotdata/models/list_uploads_response.py
 hotdata/models/list_workspace_contexts_response.py
 hotdata/models/list_workspaces_response.py
+hotdata/models/load_managed_table_request.py
+hotdata/models/load_managed_table_response.py
 hotdata/models/numeric_profile_detail.py
 hotdata/models/query_request.py
 hotdata/models/query_response.py
@@ -289,4 +293,6 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
+test/test_load_managed_table_request.py
+test/test_load_managed_table_response.py
 tox.ini
