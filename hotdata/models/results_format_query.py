@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class ResultsFormatQuery(str, Enum):
     """
-    Schema for the `?format=` query parameter on `GET /v1/results/{id}`.  Documents the canonical values accepted (`arrow`, `json`). The handler's negotiator (`negotiate_results_format`) is intentionally permissive — case-insensitive, with unknown values falling through to the `Accept` header — so this enum only declares the spec-level contract for clients and SDK generators.
+    Schema for the `?format=` query parameter on `GET /v1/results/{id}`.  Documents the canonical values that SDKs should treat as a closed set (`arrow`, `json`, `csv`, `md`, `parquet`). The runtime handler's negotiator (`negotiate_results_format`) additionally accepts `markdown` as an alias for `md` — case-insensitive, with unknown values falling through to the `Accept` header — but `markdown` is intentionally NOT listed in this enum so SDK generators emit a single canonical `Markdown` (or equivalent) variant rather than two distinct ones for the same logical format.
     """
 
     """
@@ -29,6 +29,9 @@ class ResultsFormatQuery(str, Enum):
     """
     ARROW = 'arrow'
     JSON = 'json'
+    CSV = 'csv'
+    MD = 'md'
+    PARQUET = 'parquet'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
