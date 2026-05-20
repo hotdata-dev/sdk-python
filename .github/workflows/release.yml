@@ -21,7 +21,7 @@ jobs:
     env:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
     steps:
-      - name: Validate release tag
+      - name: Validate release tag format
         if: github.event_name == 'workflow_dispatch'
         run: |
           set -euo pipefail
@@ -30,11 +30,11 @@ jobs:
             echo "tag must look like vX.Y.Z, got: $tag" >&2
             exit 1
           fi
-          git ls-remote --exit-code origin "refs/tags/${tag}" >/dev/null
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
