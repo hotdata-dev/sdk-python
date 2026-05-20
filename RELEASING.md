@@ -34,6 +34,18 @@ Pushing a `vX.Y.Z` tag triggers two workflows:
 | `publish.yml` | Build wheel/sdist and publish to PyPI |
 | `release.yml` | Create the GitHub Release with notes from `CHANGELOG.md` |
 
+## Recover a missing GitHub Release
+
+If PyPI publish succeeded but the GitHub Release workflow failed, rerun it from `main`
+without retagging:
+
+```bash
+gh workflow run "GitHub Release" --ref main -f tag=vX.Y.Z
+```
+
+The tag must already exist on the remote. The workflow checks out that tag, extracts the
+matching `CHANGELOG.md` section, and creates or updates the GitHub Release.
+
 ## Enforcement
 
 - **PR check** (`check-release.yml`): if `pyproject.toml` version changes, `CHANGELOG.md` must contain a matching `## [X.Y.Z]` section.
