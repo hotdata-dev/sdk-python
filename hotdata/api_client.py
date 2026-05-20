@@ -97,8 +97,12 @@ class ApiClient:
     def __enter__(self):
         return self
 
+    def close(self) -> None:
+        if self.rest_client is not None:
+            self.rest_client.close()
+
     def __exit__(self, exc_type, exc_value, traceback):
-        pass
+        self.close()
 
     @property
     def user_agent(self):

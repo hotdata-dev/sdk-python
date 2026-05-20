@@ -110,6 +110,9 @@ jobs:
           p.write_text(src)
           PY
 
+      - name: Patch ApiClient close lifecycle
+        run: python3 scripts/patch_api_client_close.py
+
       - name: Clean up generated artifacts
         run: |
           rm -f openapi.yaml
