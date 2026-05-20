@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+# Generate publish.yml for a package. Usage: publish-workflow.sh hotdata-runtime
+set -euo pipefail
+pkg="${1:?package name}"
+cat <<EOF
 name: Publish to PyPI
 
 on:
@@ -6,7 +11,7 @@ on:
       - 'v[0-9]*'
 
 concurrency:
-  group: pypi-publish-${{ github.ref_name }}
+  group: pypi-publish-\${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -28,14 +33,14 @@ jobs:
 
       - name: Verify tag matches pyproject version
         run: |
-          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9] ]]; then
-            echo "Release tag '$GITHUB_REF_NAME' must start with 'v' followed by a digit (e.g. v1.0.0)" >&2
+          if [[ ! "\$GITHUB_REF_NAME" =~ ^v[0-9] ]]; then
+            echo "Release tag '\$GITHUB_REF_NAME' must start with 'v' followed by a digit (e.g. v1.0.0)" >&2
             exit 1
           fi
-          tag="${GITHUB_REF_NAME#v}"
-          pkg_version=$(python -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
-          if [ "$tag" != "$pkg_version" ]; then
-            echo "Release tag ($tag) does not match pyproject.toml version ($pkg_version)" >&2
+          tag="\${GITHUB_REF_NAME#v}"
+          pkg_version=\$(python -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          if [ "\$tag" != "\$pkg_version" ]; then
+            echo "Release tag (\$tag) does not match pyproject.toml version (\$pkg_version)" >&2
             exit 1
           fi
 
@@ -56,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/hotdata
+      url: https://pypi.org/p/${pkg}
     permissions:
       id-token: write
     steps:
@@ -67,3 +72,4 @@ jobs:
 
       - name: Publish via Trusted Publishing
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+EOF

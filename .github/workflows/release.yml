@@ -1,0 +1,53 @@
+name: GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Read package metadata
+        id: meta
+        run: |
+          pkg_name=$(python -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['name'])")
+          pkg_version="${GITHUB_REF_NAME#v}"
+          echo "name=${pkg_name}" >> "$GITHUB_OUTPUT"
+          echo "version=${pkg_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Extract changelog notes
+        id: notes
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          if [[ -f CHANGELOG.md ]]; then
+            body="$(python scripts/extract-changelog.py "$version")"
+          else
+            body="Release ${version}."
+          fi
+          {
+            echo "body<<EOF"
+            echo "$body"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@1e812e8210a4a8a0b23075e5795f2a4e2b2a0b7 # v2.2.2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ steps.meta.outputs.name }} ${{ steps.meta.outputs.version }}
+          body: ${{ steps.notes.outputs.body }}
+          generate_release_notes: false
+          make_latest: true
