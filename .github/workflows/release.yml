@@ -37,10 +37,11 @@ jobs:
           else
             body="Release ${version}."
           fi
+          delimiter="EOF_${RANDOM}_${RANDOM}"
           {
-            echo "body<<EOF"
+            echo "body<<${delimiter}"
             echo "$body"
-            echo "EOF"
+            echo "${delimiter}"
           } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release

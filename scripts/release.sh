@@ -95,57 +95,7 @@ update_changelog() {
   local ver="$1"
   local date
   date="$(date +%Y-%m-%d)"
-  python3 - "$ver" "$date" <<'PY'
-import re, sys
-from pathlib import Path
-
-ver, date = sys.argv[1], sys.argv[2]
-path = Path("CHANGELOG.md")
-
-if not path.exists():
-    path.write_text(
-        "# Changelog\n\n"
-        "All notable changes to this project will be documented in this file.\n\n"
-        "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),\n"
-        "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n\n"
-        f"## [Unreleased]\n\n"
-        f"## [{ver}] - {date}\n\n"
-        "### Changed\n\n"
-        f"- Release {ver}\n"
-    )
-    raise SystemExit(0)
-
-text = path.read_text()
-if re.search(rf"^## \[{re.escape(ver)}\]", text, re.M):
-    raise SystemExit(0)
-
-unreleased = re.search(r"^## \[Unreleased\]\s*\n(.*?)(?=^## \[|\Z)", text, re.M | re.S)
-if unreleased and unreleased.group(1).strip():
-    body = unreleased.group(1).rstrip() + "\n"
-    text = re.sub(r"^## \[Unreleased\]\s*\n.*?(?=^## \[|\Z)", "", text, count=1, flags=re.M | re.S)
-    insert = f"## [Unreleased]\n\n## [{ver}] - {date}\n{body}\n"
-    if text.startswith("# Changelog"):
-        parts = text.split("\n\n", 2)
-        if len(parts) >= 2:
-            text = parts[0] + "\n\n" + parts[1] + "\n\n" + insert + (parts[2] if len(parts) > 2 else "")
-        else:
-            text = insert + text
-    else:
-        text = insert + text
-else:
-    insert = (
-        f"## [Unreleased]\n\n"
-        f"## [{ver}] - {date}\n\n"
-        "### Changed\n\n"
-        f"- Release {ver}\n\n"
-    )
-    if "## [Unreleased]" in text:
-        text = text.replace("## [Unreleased]", insert.strip() + "\n\n## [Unreleased]", 1)
-    else:
-        text = re.sub(r"(^# Changelog.*?)(\n\n|\Z)", r"\1\n\n" + insert, text, count=1, flags=re.S)
-
-path.write_text(text)
-PY
+  python3 scripts/update_changelog.py "$ver" "$date"
 }
 
 cmd_prepare() {
