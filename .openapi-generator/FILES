@@ -293,6 +293,4 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
-test/test_load_managed_table_request.py
-test/test_load_managed_table_response.py
 tox.ini
