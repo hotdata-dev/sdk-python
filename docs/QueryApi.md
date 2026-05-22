@@ -8,13 +8,15 @@ Method | HTTP request | Description
 
 
 # **query**
-> QueryResponse query(query_request)
+> QueryResponse query(query_request, x_database_id=x_database_id)
 
 Execute SQL query
 
 Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.
 
 Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
+
+Set the `X-Database-Id` header to scope the query to a specific database. Inside a database scope the query only sees that database's auto `default` catalog plus any catalogs explicitly attached to it; workspace catalogs are invisible.
 
 ### Example
 
@@ -62,10 +64,11 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.QueryApi(api_client)
     query_request = hotdata.QueryRequest() # QueryRequest | 
+    x_database_id = 'x_database_id_example' # str | Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404. (optional)
 
     try:
         # Execute SQL query
-        api_response = api_instance.query(query_request)
+        api_response = api_instance.query(query_request, x_database_id=x_database_id)
         print("The response of QueryApi->query:\n")
         pprint(api_response)
     except Exception as e:
@@ -80,6 +83,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **query_request** | [**QueryRequest**](QueryRequest.md)|  | 
+ **x_database_id** | **str**| Scope the query to a specific database (its id). When set, only the database&#39;s attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404. | [optional] 
 
 ### Return type
 
@@ -101,6 +105,7 @@ Name | Type | Description  | Notes
 **200** | Query executed successfully |  -  |
 **202** | Query submitted asynchronously |  -  |
 **400** | Invalid request |  -  |
+**404** | Database (from X-Database-Id) not found |  -  |
 **500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
