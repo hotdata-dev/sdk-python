@@ -16,6 +16,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
+from pydantic import Field, StrictStr
+from typing import Optional
+from typing_extensions import Annotated
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse
 
@@ -41,6 +44,7 @@ class QueryApi:
     def query(
         self,
         query_request: QueryRequest,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -56,10 +60,12 @@ class QueryApi:
     ) -> QueryResponse:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
+        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  Set the `X-Database-Id` header to scope the query to a specific database. Inside a database scope the query only sees that database's auto `default` catalog plus any catalogs explicitly attached to it; workspace catalogs are invisible.
 
         :param query_request: (required)
         :type query_request: QueryRequest
+        :param x_database_id: Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -84,6 +90,7 @@ class QueryApi:
 
         _param = self._query_serialize(
             query_request=query_request,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -94,6 +101,7 @@ class QueryApi:
             '200': "QueryResponse",
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -111,6 +119,7 @@ class QueryApi:
     def query_with_http_info(
         self,
         query_request: QueryRequest,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -126,10 +135,12 @@ class QueryApi:
     ) -> ApiResponse[QueryResponse]:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
+        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  Set the `X-Database-Id` header to scope the query to a specific database. Inside a database scope the query only sees that database's auto `default` catalog plus any catalogs explicitly attached to it; workspace catalogs are invisible.
 
         :param query_request: (required)
         :type query_request: QueryRequest
+        :param x_database_id: Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -154,6 +165,7 @@ class QueryApi:
 
         _param = self._query_serialize(
             query_request=query_request,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -164,6 +176,7 @@ class QueryApi:
             '200': "QueryResponse",
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -181,6 +194,7 @@ class QueryApi:
     def query_without_preload_content(
         self,
         query_request: QueryRequest,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -196,10 +210,12 @@ class QueryApi:
     ) -> RESTResponseType:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
+        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  Set the `X-Database-Id` header to scope the query to a specific database. Inside a database scope the query only sees that database's auto `default` catalog plus any catalogs explicitly attached to it; workspace catalogs are invisible.
 
         :param query_request: (required)
         :type query_request: QueryRequest
+        :param x_database_id: Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -224,6 +240,7 @@ class QueryApi:
 
         _param = self._query_serialize(
             query_request=query_request,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -234,6 +251,7 @@ class QueryApi:
             '200': "QueryResponse",
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -246,6 +264,7 @@ class QueryApi:
     def _query_serialize(
         self,
         query_request,
+        x_database_id,
         _request_auth,
         _content_type,
         _headers,
@@ -269,6 +288,8 @@ class QueryApi:
         # process the path parameters
         # process the query parameters
         # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
         # process the form parameters
         # process the body parameter
         if query_request is not None:

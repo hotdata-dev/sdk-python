@@ -4,6 +4,7 @@
 docs/ApiErrorDetail.md
 docs/ApiErrorResponse.md
 docs/AsyncQueryResponse.md
+docs/AttachDatabaseCatalogRequest.md
 docs/BooleanProfileDetail.md
 docs/CategoricalProfileDetail.md
 docs/CategoryValueInfo.md
@@ -26,6 +27,8 @@ docs/ConnectionTypesApi.md
 docs/ConnectionsApi.md
 docs/CreateConnectionRequest.md
 docs/CreateConnectionResponse.md
+docs/CreateDatabaseRequest.md
+docs/CreateDatabaseResponse.md
 docs/CreateDatasetRequest.md
 docs/CreateDatasetResponse.md
 docs/CreateEmbeddingProviderRequest.md
@@ -37,6 +40,12 @@ docs/CreateSecretRequest.md
 docs/CreateSecretResponse.md
 docs/CreateWorkspaceRequest.md
 docs/CreateWorkspaceResponse.md
+docs/DatabaseAttachmentInfo.md
+docs/DatabaseDefaultSchemaDecl.md
+docs/DatabaseDefaultTableDecl.md
+docs/DatabaseDetailResponse.md
+docs/DatabaseSummary.md
+docs/DatabasesApi.md
 docs/DatasetSource.md
 docs/DatasetSourceOneOf.md
 docs/DatasetSourceOneOf1.md
@@ -71,6 +80,7 @@ docs/JobType.md
 docs/JobsApi.md
 docs/ListConnectionTypesResponse.md
 docs/ListConnectionsResponse.md
+docs/ListDatabasesResponse.md
 docs/ListDatasetVersionsResponse.md
 docs/ListDatasetsResponse.md
 docs/ListEmbeddingProvidersResponse.md
@@ -144,6 +154,7 @@ hotdata/__init__.py
 hotdata/api/__init__.py
 hotdata/api/connection_types_api.py
 hotdata/api/connections_api.py
+hotdata/api/databases_api.py
 hotdata/api/datasets_api.py
 hotdata/api/embedding_providers_api.py
 hotdata/api/indexes_api.py
@@ -167,6 +178,7 @@ hotdata/models/__init__.py
 hotdata/models/api_error_detail.py
 hotdata/models/api_error_response.py
 hotdata/models/async_query_response.py
+hotdata/models/attach_database_catalog_request.py
 hotdata/models/boolean_profile_detail.py
 hotdata/models/categorical_profile_detail.py
 hotdata/models/category_value_info.py
@@ -187,6 +199,8 @@ hotdata/models/connection_type_detail.py
 hotdata/models/connection_type_summary.py
 hotdata/models/create_connection_request.py
 hotdata/models/create_connection_response.py
+hotdata/models/create_database_request.py
+hotdata/models/create_database_response.py
 hotdata/models/create_dataset_request.py
 hotdata/models/create_dataset_response.py
 hotdata/models/create_embedding_provider_request.py
@@ -198,6 +212,11 @@ hotdata/models/create_secret_request.py
 hotdata/models/create_secret_response.py
 hotdata/models/create_workspace_request.py
 hotdata/models/create_workspace_response.py
+hotdata/models/database_attachment_info.py
+hotdata/models/database_default_schema_decl.py
+hotdata/models/database_default_table_decl.py
+hotdata/models/database_detail_response.py
+hotdata/models/database_summary.py
 hotdata/models/dataset_source.py
 hotdata/models/dataset_source_one_of.py
 hotdata/models/dataset_source_one_of1.py
@@ -227,6 +246,7 @@ hotdata/models/job_status_response.py
 hotdata/models/job_type.py
 hotdata/models/list_connection_types_response.py
 hotdata/models/list_connections_response.py
+hotdata/models/list_databases_response.py
 hotdata/models/list_dataset_versions_response.py
 hotdata/models/list_datasets_response.py
 hotdata/models/list_embedding_providers_response.py
@@ -293,4 +313,14 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
+test/test_attach_database_catalog_request.py
+test/test_create_database_request.py
+test/test_create_database_response.py
+test/test_database_attachment_info.py
+test/test_database_default_schema_decl.py
+test/test_database_default_table_decl.py
+test/test_database_detail_response.py
+test/test_database_summary.py
+test/test_databases_api.py
+test/test_list_databases_response.py
 tox.ini

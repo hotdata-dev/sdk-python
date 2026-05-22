@@ -270,6 +270,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 **204** | Connection deleted |  -  |
 **404** | Connection not found |  -  |
+**409** | Connection backs a database&#39;s default catalog and cannot be deleted directly |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -792,7 +793,9 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **204** | Cache purged |  -  |
+**400** | Managed catalogs own their parquet generations and cannot be purged |  -  |
 **404** | Connection not found |  -  |
+**409** | Connection backs a database&#39;s default catalog and cannot be purged directly |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
