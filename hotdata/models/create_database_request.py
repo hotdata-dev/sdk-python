@@ -18,18 +18,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
-from hotdata.models.connection_type_summary import ConnectionTypeSummary
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ListConnectionTypesResponse(BaseModel):
+class CreateDatabaseRequest(BaseModel):
     """
-    Envelope for the connection-types list response.
+    Request body for POST /databases
     """ # noqa: E501
-    connection_types: List[ConnectionTypeSummary]
-    __properties: ClassVar[List[str]] = ["connection_types"]
+    description: Optional[StrictStr] = Field(default=None, description="Optional free-form display label (for UIs/CLIs). Not unique. Not an identifier — databases are always addressed by `id`.")
+    schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Optional schemas/tables to declare on the database's auto-created `default` catalog. Mirrors the `config.schemas` field of a managed `POST /v1/connections`. Tables declared here can be loaded via the standard managed-table load endpoint targeting `default_connection_id`. Omitted or empty means the default catalog starts empty.")
+    __properties: ClassVar[List[str]] = ["description", "schemas"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +50,7 @@ class ListConnectionTypesResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ListConnectionTypesResponse from a JSON string"""
+        """Create an instance of CreateDatabaseRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,18 +71,23 @@ class ListConnectionTypesResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in connection_types (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in schemas (list)
         _items = []
-        if self.connection_types:
-            for _item_connection_types in self.connection_types:
-                if _item_connection_types:
-                    _items.append(_item_connection_types.to_dict())
-            _dict['connection_types'] = _items
+        if self.schemas:
+            for _item_schemas in self.schemas:
+                if _item_schemas:
+                    _items.append(_item_schemas.to_dict())
+            _dict['schemas'] = _items
+        # set to None if description (nullable) is None
+        # and model_fields_set contains the field
+        if self.description is None and "description" in self.model_fields_set:
+            _dict['description'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ListConnectionTypesResponse from a dict"""
+        """Create an instance of CreateDatabaseRequest from a dict"""
         if obj is None:
             return None
 
@@ -89,7 +95,8 @@ class ListConnectionTypesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "connection_types": [ConnectionTypeSummary.from_dict(_item) for _item in obj["connection_types"]] if obj.get("connection_types") is not None else None
+            "description": obj.get("description"),
+            "schemas": [DatabaseDefaultSchemaDecl.from_dict(_item) for _item in obj["schemas"]] if obj.get("schemas") is not None else None
         })
         return _obj
 

@@ -1,5 +1,6 @@
 # ListConnectionTypesResponse
 
+Envelope for the connection-types list response.
 
 ## Properties
 

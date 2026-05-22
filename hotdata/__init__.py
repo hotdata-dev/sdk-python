@@ -26,6 +26,7 @@ except PackageNotFoundError:  # running from a source checkout without install
 __all__ = [
     "ConnectionTypesApi",
     "ConnectionsApi",
+    "DatabasesApi",
     "DatasetsApi",
     "EmbeddingProvidersApi",
     "IndexesApi",
@@ -53,6 +54,7 @@ __all__ = [
     "ApiErrorDetail",
     "ApiErrorResponse",
     "AsyncQueryResponse",
+    "AttachDatabaseCatalogRequest",
     "BooleanProfileDetail",
     "CategoricalProfileDetail",
     "CategoryValueInfo",
@@ -73,6 +75,8 @@ __all__ = [
     "ConnectionTypeSummary",
     "CreateConnectionRequest",
     "CreateConnectionResponse",
+    "CreateDatabaseRequest",
+    "CreateDatabaseResponse",
     "CreateDatasetRequest",
     "CreateDatasetResponse",
     "CreateEmbeddingProviderRequest",
@@ -84,6 +88,11 @@ __all__ = [
     "CreateSecretResponse",
     "CreateWorkspaceRequest",
     "CreateWorkspaceResponse",
+    "DatabaseAttachmentInfo",
+    "DatabaseDefaultSchemaDecl",
+    "DatabaseDefaultTableDecl",
+    "DatabaseDetailResponse",
+    "DatabaseSummary",
     "DatasetSource",
     "DatasetSourceOneOf",
     "DatasetSourceOneOf1",
@@ -113,6 +122,7 @@ __all__ = [
     "JobType",
     "ListConnectionTypesResponse",
     "ListConnectionsResponse",
+    "ListDatabasesResponse",
     "ListDatasetVersionsResponse",
     "ListDatasetsResponse",
     "ListEmbeddingProvidersResponse",
@@ -177,6 +187,7 @@ __all__ = [
 # import apis into sdk package
 from hotdata.api.connection_types_api import ConnectionTypesApi as ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi as ConnectionsApi
+from hotdata.api.databases_api import DatabasesApi as DatabasesApi
 from hotdata.api.datasets_api import DatasetsApi as DatasetsApi
 from hotdata.api.embedding_providers_api import EmbeddingProvidersApi as EmbeddingProvidersApi
 from hotdata.api.indexes_api import IndexesApi as IndexesApi
@@ -208,6 +219,7 @@ from hotdata.exceptions import ApiException as ApiException
 from hotdata.models.api_error_detail import ApiErrorDetail as ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse as ApiErrorResponse
 from hotdata.models.async_query_response import AsyncQueryResponse as AsyncQueryResponse
+from hotdata.models.attach_database_catalog_request import AttachDatabaseCatalogRequest as AttachDatabaseCatalogRequest
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail as BooleanProfileDetail
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail as CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo as CategoryValueInfo
@@ -228,6 +240,8 @@ from hotdata.models.connection_type_detail import ConnectionTypeDetail as Connec
 from hotdata.models.connection_type_summary import ConnectionTypeSummary as ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest as CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse as CreateConnectionResponse
+from hotdata.models.create_database_request import CreateDatabaseRequest as CreateDatabaseRequest
+from hotdata.models.create_database_response import CreateDatabaseResponse as CreateDatabaseResponse
 from hotdata.models.create_dataset_request import CreateDatasetRequest as CreateDatasetRequest
 from hotdata.models.create_dataset_response import CreateDatasetResponse as CreateDatasetResponse
 from hotdata.models.create_embedding_provider_request import CreateEmbeddingProviderRequest as CreateEmbeddingProviderRequest
@@ -239,6 +253,11 @@ from hotdata.models.create_secret_request import CreateSecretRequest as CreateSe
 from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
+from hotdata.models.database_attachment_info import DatabaseAttachmentInfo as DatabaseAttachmentInfo
+from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl as DatabaseDefaultSchemaDecl
+from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl as DatabaseDefaultTableDecl
+from hotdata.models.database_detail_response import DatabaseDetailResponse as DatabaseDetailResponse
+from hotdata.models.database_summary import DatabaseSummary as DatabaseSummary
 from hotdata.models.dataset_source import DatasetSource as DatasetSource
 from hotdata.models.dataset_source_one_of import DatasetSourceOneOf as DatasetSourceOneOf
 from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1 as DatasetSourceOneOf1
@@ -268,6 +287,7 @@ from hotdata.models.job_status_response import JobStatusResponse as JobStatusRes
 from hotdata.models.job_type import JobType as JobType
 from hotdata.models.list_connection_types_response import ListConnectionTypesResponse as ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
+from hotdata.models.list_databases_response import ListDatabasesResponse as ListDatabasesResponse
 from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse as ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse as ListDatasetsResponse
 from hotdata.models.list_embedding_providers_response import ListEmbeddingProvidersResponse as ListEmbeddingProvidersResponse

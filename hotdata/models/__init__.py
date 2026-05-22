@@ -17,6 +17,7 @@
 from hotdata.models.api_error_detail import ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse
 from hotdata.models.async_query_response import AsyncQueryResponse
+from hotdata.models.attach_database_catalog_request import AttachDatabaseCatalogRequest
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo
@@ -37,6 +38,8 @@ from hotdata.models.connection_type_detail import ConnectionTypeDetail
 from hotdata.models.connection_type_summary import ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse
+from hotdata.models.create_database_request import CreateDatabaseRequest
+from hotdata.models.create_database_response import CreateDatabaseResponse
 from hotdata.models.create_dataset_request import CreateDatasetRequest
 from hotdata.models.create_dataset_response import CreateDatasetResponse
 from hotdata.models.create_embedding_provider_request import CreateEmbeddingProviderRequest
@@ -48,6 +51,11 @@ from hotdata.models.create_secret_request import CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
+from hotdata.models.database_attachment_info import DatabaseAttachmentInfo
+from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl
+from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl
+from hotdata.models.database_detail_response import DatabaseDetailResponse
+from hotdata.models.database_summary import DatabaseSummary
 from hotdata.models.dataset_source import DatasetSource
 from hotdata.models.dataset_source_one_of import DatasetSourceOneOf
 from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1
@@ -77,6 +85,7 @@ from hotdata.models.job_status_response import JobStatusResponse
 from hotdata.models.job_type import JobType
 from hotdata.models.list_connection_types_response import ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse
+from hotdata.models.list_databases_response import ListDatabasesResponse
 from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse
 from hotdata.models.list_embedding_providers_response import ListEmbeddingProvidersResponse

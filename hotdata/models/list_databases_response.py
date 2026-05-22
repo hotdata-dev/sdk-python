@@ -20,16 +20,16 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from hotdata.models.connection_type_summary import ConnectionTypeSummary
+from hotdata.models.database_summary import DatabaseSummary
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ListConnectionTypesResponse(BaseModel):
+class ListDatabasesResponse(BaseModel):
     """
-    Envelope for the connection-types list response.
+    Response body for GET /databases
     """ # noqa: E501
-    connection_types: List[ConnectionTypeSummary]
-    __properties: ClassVar[List[str]] = ["connection_types"]
+    databases: List[DatabaseSummary]
+    __properties: ClassVar[List[str]] = ["databases"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +49,7 @@ class ListConnectionTypesResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ListConnectionTypesResponse from a JSON string"""
+        """Create an instance of ListDatabasesResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,18 +70,18 @@ class ListConnectionTypesResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in connection_types (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in databases (list)
         _items = []
-        if self.connection_types:
-            for _item_connection_types in self.connection_types:
-                if _item_connection_types:
-                    _items.append(_item_connection_types.to_dict())
-            _dict['connection_types'] = _items
+        if self.databases:
+            for _item_databases in self.databases:
+                if _item_databases:
+                    _items.append(_item_databases.to_dict())
+            _dict['databases'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ListConnectionTypesResponse from a dict"""
+        """Create an instance of ListDatabasesResponse from a dict"""
         if obj is None:
             return None
 
@@ -89,7 +89,7 @@ class ListConnectionTypesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "connection_types": [ConnectionTypeSummary.from_dict(_item) for _item in obj["connection_types"]] if obj.get("connection_types") is not None else None
+            "databases": [DatabaseSummary.from_dict(_item) for _item in obj["databases"]] if obj.get("databases") is not None else None
         })
         return _obj
 

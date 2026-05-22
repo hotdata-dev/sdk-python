@@ -18,18 +18,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
-from hotdata.models.connection_type_summary import ConnectionTypeSummary
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.database_attachment_info import DatabaseAttachmentInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ListConnectionTypesResponse(BaseModel):
+class DatabaseDetailResponse(BaseModel):
     """
-    Envelope for the connection-types list response.
+    Response body for GET /databases/{database_id}
     """ # noqa: E501
-    connection_types: List[ConnectionTypeSummary]
-    __properties: ClassVar[List[str]] = ["connection_types"]
+    attachments: List[DatabaseAttachmentInfo]
+    default_connection_id: StrictStr
+    description: Optional[StrictStr] = None
+    id: StrictStr
+    __properties: ClassVar[List[str]] = ["attachments", "default_connection_id", "description", "id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +52,7 @@ class ListConnectionTypesResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ListConnectionTypesResponse from a JSON string"""
+        """Create an instance of DatabaseDetailResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,18 +73,23 @@ class ListConnectionTypesResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in connection_types (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in attachments (list)
         _items = []
-        if self.connection_types:
-            for _item_connection_types in self.connection_types:
-                if _item_connection_types:
-                    _items.append(_item_connection_types.to_dict())
-            _dict['connection_types'] = _items
+        if self.attachments:
+            for _item_attachments in self.attachments:
+                if _item_attachments:
+                    _items.append(_item_attachments.to_dict())
+            _dict['attachments'] = _items
+        # set to None if description (nullable) is None
+        # and model_fields_set contains the field
+        if self.description is None and "description" in self.model_fields_set:
+            _dict['description'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ListConnectionTypesResponse from a dict"""
+        """Create an instance of DatabaseDetailResponse from a dict"""
         if obj is None:
             return None
 
@@ -89,7 +97,10 @@ class ListConnectionTypesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "connection_types": [ConnectionTypeSummary.from_dict(_item) for _item in obj["connection_types"]] if obj.get("connection_types") is not None else None
+            "attachments": [DatabaseAttachmentInfo.from_dict(_item) for _item in obj["attachments"]] if obj.get("attachments") is not None else None,
+            "default_connection_id": obj.get("default_connection_id"),
+            "description": obj.get("description"),
+            "id": obj.get("id")
         })
         return _obj
 

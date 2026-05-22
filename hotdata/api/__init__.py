@@ -3,6 +3,7 @@
 # import apis into api package
 from hotdata.api.connection_types_api import ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi
+from hotdata.api.databases_api import DatabasesApi
 from hotdata.api.datasets_api import DatasetsApi
 from hotdata.api.embedding_providers_api import EmbeddingProvidersApi
 from hotdata.api.indexes_api import IndexesApi

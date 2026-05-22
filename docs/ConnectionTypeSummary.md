@@ -1,5 +1,6 @@
 # ConnectionTypeSummary
 
+Summary entry for the connection-type list endpoint.
 
 ## Properties
 
