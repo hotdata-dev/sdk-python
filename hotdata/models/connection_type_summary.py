@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class ConnectionTypeSummary(BaseModel):
     """
-    ConnectionTypeSummary
+    Summary entry for the connection-type list endpoint.
     """ # noqa: E501
     label: StrictStr
     name: StrictStr

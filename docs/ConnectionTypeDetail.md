@@ -1,5 +1,6 @@
 # ConnectionTypeDetail
 
+Detailed configuration and authentication schema for a single connection type.
 
 ## Properties
 

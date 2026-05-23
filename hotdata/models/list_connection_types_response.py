@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class ListConnectionTypesResponse(BaseModel):
     """
-    ListConnectionTypesResponse
+    Envelope for the connection-types list response.
     """ # noqa: E501
     connection_types: List[ConnectionTypeSummary]
     __properties: ClassVar[List[str]] = ["connection_types"]
