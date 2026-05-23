@@ -7,6 +7,7 @@ Summary item in GET /databases
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **description** | **str** |  | [optional] 
+**expires_at** | **datetime** |  | [optional] 
 **id** | **str** |  | 
 
 ## Example

@@ -29,8 +29,9 @@ class CreateDatabaseRequest(BaseModel):
     Request body for POST /databases
     """ # noqa: E501
     description: Optional[StrictStr] = Field(default=None, description="Optional free-form display label (for UIs/CLIs). Not unique. Not an identifier — databases are always addressed by `id`.")
+    expires_at: Optional[StrictStr] = Field(default=None, description="When this database expires. Accepts either an RFC 3339 timestamp (e.g. `\"2026-06-01T00:00:00Z\"`) or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days) — for example `\"24h\"`, `\"48h\"`, or `\"7d\"`. Defaults to `\"24h\"` when omitted. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.")
     schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Optional schemas/tables to declare on the database's auto-created `default` catalog. Mirrors the `config.schemas` field of a managed `POST /v1/connections`. Tables declared here can be loaded via the standard managed-table load endpoint targeting `default_connection_id`. Omitted or empty means the default catalog starts empty.")
-    __properties: ClassVar[List[str]] = ["description", "schemas"]
+    __properties: ClassVar[List[str]] = ["description", "expires_at", "schemas"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -83,6 +84,11 @@ class CreateDatabaseRequest(BaseModel):
         if self.description is None and "description" in self.model_fields_set:
             _dict['description'] = None
 
+        # set to None if expires_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_at is None and "expires_at" in self.model_fields_set:
+            _dict['expires_at'] = None
+
         return _dict
 
     @classmethod
@@ -96,6 +102,7 @@ class CreateDatabaseRequest(BaseModel):
 
         _obj = cls.model_validate({
             "description": obj.get("description"),
+            "expires_at": obj.get("expires_at"),
             "schemas": [DatabaseDefaultSchemaDecl.from_dict(_item) for _item in obj["schemas"]] if obj.get("schemas") is not None else None
         })
         return _obj

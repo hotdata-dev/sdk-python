@@ -313,14 +313,4 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
-test/test_attach_database_catalog_request.py
-test/test_create_database_request.py
-test/test_create_database_response.py
-test/test_database_attachment_info.py
-test/test_database_default_schema_decl.py
-test/test_database_default_table_decl.py
-test/test_database_detail_response.py
-test/test_database_summary.py
-test/test_databases_api.py
-test/test_list_databases_response.py
 tox.ini

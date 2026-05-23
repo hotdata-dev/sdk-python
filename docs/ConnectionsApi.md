@@ -270,7 +270,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 **204** | Connection deleted |  -  |
 **404** | Connection not found |  -  |
-**409** | Connection backs a database&#39;s default catalog and cannot be deleted directly |  -  |
+**409** | Connection backs a database&#39;s default catalog, or is attached to one or more databases as a non-default catalog; detach via DELETE /v1/databases/{database_id}/catalogs/{connection_id} first |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

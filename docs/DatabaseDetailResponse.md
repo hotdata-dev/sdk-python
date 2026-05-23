@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **attachments** | [**List[DatabaseAttachmentInfo]**](DatabaseAttachmentInfo.md) |  | 
 **default_connection_id** | **str** |  | 
 **description** | **str** |  | [optional] 
+**expires_at** | **datetime** | When this database expires. | [optional] 
 **id** | **str** |  | 
 
 ## Example

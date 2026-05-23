@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class ConnectionTypeDetail(BaseModel):
     """
-    ConnectionTypeDetail
+    Detailed configuration and authentication schema for a single connection type.
     """ # noqa: E501
     auth: Optional[Any] = None
     config_schema: Optional[Any] = None
