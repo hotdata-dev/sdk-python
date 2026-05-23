@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.2.3] - 2026-05-22
+
+### Added
+
+- Databases API client (`DatabasesApi`) — create, get, list, delete databases and manage catalog attachments.
+- New models: `CreateDatabaseRequest`, `CreateDatabaseResponse`, `DatabaseDetailResponse`, `DatabaseSummary`, `DatabaseAttachmentInfo`, `DatabaseDefaultSchemaDecl`, `DatabaseDefaultTableDecl`, `ListDatabasesResponse`, `AttachDatabaseCatalogRequest`.
+- `expires_at` field on `CreateDatabaseRequest` for setting database expiry.
+- `connection_types` field on `ListConnectionTypesResponse`; updated `ConnectionTypeDetail` and `ConnectionTypeSummary` models.
+
 ## [0.2.2] - 2026-05-20
 
 ### Fixed
