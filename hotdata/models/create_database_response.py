@@ -18,6 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
@@ -29,8 +30,9 @@ class CreateDatabaseResponse(BaseModel):
     """ # noqa: E501
     default_connection_id: StrictStr = Field(description="Internal id of the connection that backs this database's `default` catalog. Workspace-level connection endpoints (list, get, health, delete, cache purge) refuse to act on this id — it is exposed only for the managed-tables load endpoint (`POST /v1/connections/{id}/schemas/{s}/tables/{t}/loads`) so callers can publish parquet into tables declared at database-create time. Addressing it directly in SQL is not the recommended path — use `default` inside an `X-Database-Id` scope instead.")
     description: Optional[StrictStr] = None
+    expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
     id: StrictStr
-    __properties: ClassVar[List[str]] = ["default_connection_id", "description", "id"]
+    __properties: ClassVar[List[str]] = ["default_connection_id", "description", "expires_at", "id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -76,6 +78,11 @@ class CreateDatabaseResponse(BaseModel):
         if self.description is None and "description" in self.model_fields_set:
             _dict['description'] = None
 
+        # set to None if expires_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_at is None and "expires_at" in self.model_fields_set:
+            _dict['expires_at'] = None
+
         return _dict
 
     @classmethod
@@ -90,6 +97,7 @@ class CreateDatabaseResponse(BaseModel):
         _obj = cls.model_validate({
             "default_connection_id": obj.get("default_connection_id"),
             "description": obj.get("description"),
+            "expires_at": obj.get("expires_at"),
             "id": obj.get("id")
         })
         return _obj
