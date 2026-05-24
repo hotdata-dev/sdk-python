@@ -52,6 +52,7 @@ from hotdata.models.create_secret_response import CreateSecretResponse
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.models.database_attachment_info import DatabaseAttachmentInfo
+from hotdata.models.database_context_entry import DatabaseContextEntry
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse
@@ -70,10 +71,10 @@ from hotdata.models.embedding_provider_response import EmbeddingProviderResponse
 from hotdata.models.error import Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest
 from hotdata.models.get_connection_response import GetConnectionResponse
+from hotdata.models.get_database_context_response import GetDatabaseContextResponse
 from hotdata.models.get_dataset_response import GetDatasetResponse
 from hotdata.models.get_result_response import GetResultResponse
 from hotdata.models.get_secret_response import GetSecretResponse
-from hotdata.models.get_workspace_context_response import GetWorkspaceContextResponse
 from hotdata.models.index_info_response import IndexInfoResponse
 from hotdata.models.index_status import IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse
@@ -85,6 +86,7 @@ from hotdata.models.job_status_response import JobStatusResponse
 from hotdata.models.job_type import JobType
 from hotdata.models.list_connection_types_response import ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse
+from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse
 from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse
@@ -98,7 +100,6 @@ from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse
-from hotdata.models.list_workspace_contexts_response import ListWorkspaceContextsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
@@ -139,10 +140,9 @@ from hotdata.models.update_secret_response import UpdateSecretResponse
 from hotdata.models.upload_dataset_source import UploadDatasetSource
 from hotdata.models.upload_info import UploadInfo
 from hotdata.models.upload_response import UploadResponse
-from hotdata.models.upsert_workspace_context_request import UpsertWorkspaceContextRequest
-from hotdata.models.upsert_workspace_context_response import UpsertWorkspaceContextResponse
+from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest
+from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse
 from hotdata.models.url_dataset_source import UrlDatasetSource
-from hotdata.models.workspace_context_entry import WorkspaceContextEntry
 from hotdata.models.workspace_detail import WorkspaceDetail
 from hotdata.models.workspace_list_item import WorkspaceListItem
 

@@ -3,6 +3,7 @@
 # import apis into api package
 from hotdata.api.connection_types_api import ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi
+from hotdata.api.database_context_api import DatabaseContextApi
 from hotdata.api.databases_api import DatabasesApi
 from hotdata.api.datasets_api import DatasetsApi
 from hotdata.api.embedding_providers_api import EmbeddingProvidersApi
@@ -17,6 +18,5 @@ from hotdata.api.sandboxes_api import SandboxesApi
 from hotdata.api.saved_queries_api import SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi
 from hotdata.api.uploads_api import UploadsApi
-from hotdata.api.workspace_context_api import WorkspaceContextApi
 from hotdata.api.workspaces_api import WorkspacesApi
 

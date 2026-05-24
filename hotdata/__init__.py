@@ -26,6 +26,7 @@ except PackageNotFoundError:  # running from a source checkout without install
 __all__ = [
     "ConnectionTypesApi",
     "ConnectionsApi",
+    "DatabaseContextApi",
     "DatabasesApi",
     "DatasetsApi",
     "EmbeddingProvidersApi",
@@ -40,7 +41,6 @@ __all__ = [
     "SavedQueriesApi",
     "SecretsApi",
     "UploadsApi",
-    "WorkspaceContextApi",
     "WorkspacesApi",
     "ApiResponse",
     "ApiClient",
@@ -89,6 +89,7 @@ __all__ = [
     "CreateWorkspaceRequest",
     "CreateWorkspaceResponse",
     "DatabaseAttachmentInfo",
+    "DatabaseContextEntry",
     "DatabaseDefaultSchemaDecl",
     "DatabaseDefaultTableDecl",
     "DatabaseDetailResponse",
@@ -107,10 +108,10 @@ __all__ = [
     "Error",
     "ExecuteSavedQueryRequest",
     "GetConnectionResponse",
+    "GetDatabaseContextResponse",
     "GetDatasetResponse",
     "GetResultResponse",
     "GetSecretResponse",
-    "GetWorkspaceContextResponse",
     "IndexInfoResponse",
     "IndexStatus",
     "InformationSchemaResponse",
@@ -122,6 +123,7 @@ __all__ = [
     "JobType",
     "ListConnectionTypesResponse",
     "ListConnectionsResponse",
+    "ListDatabaseContextsResponse",
     "ListDatabasesResponse",
     "ListDatasetVersionsResponse",
     "ListDatasetsResponse",
@@ -135,7 +137,6 @@ __all__ = [
     "ListSavedQueryVersionsResponse",
     "ListSecretsResponse",
     "ListUploadsResponse",
-    "ListWorkspaceContextsResponse",
     "ListWorkspacesResponse",
     "LoadManagedTableRequest",
     "LoadManagedTableResponse",
@@ -176,10 +177,9 @@ __all__ = [
     "UploadDatasetSource",
     "UploadInfo",
     "UploadResponse",
-    "UpsertWorkspaceContextRequest",
-    "UpsertWorkspaceContextResponse",
+    "UpsertDatabaseContextRequest",
+    "UpsertDatabaseContextResponse",
     "UrlDatasetSource",
-    "WorkspaceContextEntry",
     "WorkspaceDetail",
     "WorkspaceListItem",
 ]
@@ -187,6 +187,7 @@ __all__ = [
 # import apis into sdk package
 from hotdata.api.connection_types_api import ConnectionTypesApi as ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi as ConnectionsApi
+from hotdata.api.database_context_api import DatabaseContextApi as DatabaseContextApi
 from hotdata.api.databases_api import DatabasesApi as DatabasesApi
 from hotdata.api.datasets_api import DatasetsApi as DatasetsApi
 from hotdata.api.embedding_providers_api import EmbeddingProvidersApi as EmbeddingProvidersApi
@@ -201,7 +202,6 @@ from hotdata.api.sandboxes_api import SandboxesApi as SandboxesApi
 from hotdata.api.saved_queries_api import SavedQueriesApi as SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi as SecretsApi
 from hotdata.api.uploads_api import UploadsApi as UploadsApi
-from hotdata.api.workspace_context_api import WorkspaceContextApi as WorkspaceContextApi
 from hotdata.api.workspaces_api import WorkspacesApi as WorkspacesApi
 
 # import ApiClient
@@ -254,6 +254,7 @@ from hotdata.models.create_secret_response import CreateSecretResponse as Create
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.database_attachment_info import DatabaseAttachmentInfo as DatabaseAttachmentInfo
+from hotdata.models.database_context_entry import DatabaseContextEntry as DatabaseContextEntry
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl as DatabaseDefaultSchemaDecl
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl as DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse as DatabaseDetailResponse
@@ -272,10 +273,10 @@ from hotdata.models.embedding_provider_response import EmbeddingProviderResponse
 from hotdata.models.error import Error as Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest as ExecuteSavedQueryRequest
 from hotdata.models.get_connection_response import GetConnectionResponse as GetConnectionResponse
+from hotdata.models.get_database_context_response import GetDatabaseContextResponse as GetDatabaseContextResponse
 from hotdata.models.get_dataset_response import GetDatasetResponse as GetDatasetResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
 from hotdata.models.get_secret_response import GetSecretResponse as GetSecretResponse
-from hotdata.models.get_workspace_context_response import GetWorkspaceContextResponse as GetWorkspaceContextResponse
 from hotdata.models.index_info_response import IndexInfoResponse as IndexInfoResponse
 from hotdata.models.index_status import IndexStatus as IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse as InformationSchemaResponse
@@ -287,6 +288,7 @@ from hotdata.models.job_status_response import JobStatusResponse as JobStatusRes
 from hotdata.models.job_type import JobType as JobType
 from hotdata.models.list_connection_types_response import ListConnectionTypesResponse as ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
+from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse as ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse as ListDatabasesResponse
 from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse as ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse as ListDatasetsResponse
@@ -300,7 +302,6 @@ from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse 
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse as ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse as ListSecretsResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse as ListUploadsResponse
-from hotdata.models.list_workspace_contexts_response import ListWorkspaceContextsResponse as ListWorkspaceContextsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest as LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse as LoadManagedTableResponse
@@ -341,10 +342,9 @@ from hotdata.models.update_secret_response import UpdateSecretResponse as Update
 from hotdata.models.upload_dataset_source import UploadDatasetSource as UploadDatasetSource
 from hotdata.models.upload_info import UploadInfo as UploadInfo
 from hotdata.models.upload_response import UploadResponse as UploadResponse
-from hotdata.models.upsert_workspace_context_request import UpsertWorkspaceContextRequest as UpsertWorkspaceContextRequest
-from hotdata.models.upsert_workspace_context_response import UpsertWorkspaceContextResponse as UpsertWorkspaceContextResponse
+from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest as UpsertDatabaseContextRequest
+from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse as UpsertDatabaseContextResponse
 from hotdata.models.url_dataset_source import UrlDatasetSource as UrlDatasetSource
-from hotdata.models.workspace_context_entry import WorkspaceContextEntry as WorkspaceContextEntry
 from hotdata.models.workspace_detail import WorkspaceDetail as WorkspaceDetail
 from hotdata.models.workspace_list_item import WorkspaceListItem as WorkspaceListItem
 
