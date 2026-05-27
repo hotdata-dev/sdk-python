@@ -105,7 +105,7 @@ void (empty response body)
 
 Create database
 
-Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default`, with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `description` is a free-form display label and is not required to be unique. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. Defaults to `24h` when omitted. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.
+Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default`, with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. Defaults to `24h` when omitted. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.
 
 ### Example
 
@@ -360,7 +360,7 @@ void (empty response body)
 
 Get database
 
-Fetch a database by id. The `description` field is a display label only; it is not accepted as an identifier here.
+Fetch a database by id. The `name` field is a display label only; it is not accepted as an identifier here.
 
 ### Example
 
