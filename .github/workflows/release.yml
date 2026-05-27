@@ -23,11 +23,12 @@ jobs:
     steps:
       - name: Validate release tag format
         if: github.event_name == 'workflow_dispatch'
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
           set -euo pipefail
-          tag="${{ github.event.inputs.tag }}"
-          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "tag must look like vX.Y.Z, got: $tag" >&2
+          if [[ ! "$INPUT_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "tag must look like vX.Y.Z, got: $INPUT_TAG" >&2
             exit 1
           fi
 
