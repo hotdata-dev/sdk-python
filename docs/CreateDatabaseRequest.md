@@ -6,8 +6,8 @@ Request body for POST /databases
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**description** | **str** | Optional free-form display label (for UIs/CLIs). Not unique. Not an identifier — databases are always addressed by &#x60;id&#x60;. | [optional] 
 **expires_at** | **str** | When this database expires. Accepts either an RFC 3339 timestamp (e.g. &#x60;\&quot;2026-06-01T00:00:00Z\&quot;&#x60;) or a relative duration suffixed with &#x60;h&#x60; (hours), &#x60;m&#x60; (minutes), or &#x60;d&#x60; (days) — for example &#x60;\&quot;24h\&quot;&#x60;, &#x60;\&quot;48h\&quot;&#x60;, or &#x60;\&quot;7d\&quot;&#x60;. Defaults to &#x60;\&quot;24h\&quot;&#x60; when omitted. Expiry is best-effort: the database will not be deleted before &#x60;expires_at&#x60;, but cleanup may run later than the exact timestamp. | [optional] 
+**name** | **str** | Optional free-form display label (for UIs/CLIs). Not unique. Not an identifier — databases are always addressed by &#x60;id&#x60;.  Accepts the legacy &#x60;description&#x60; key as an alias so clients that predate the rename keep populating this field. | [optional] 
 **schemas** | [**List[DatabaseDefaultSchemaDecl]**](DatabaseDefaultSchemaDecl.md) | Optional schemas/tables to declare on the database&#39;s auto-created &#x60;default&#x60; catalog. Mirrors the &#x60;config.schemas&#x60; field of a managed &#x60;POST /v1/connections&#x60;. Tables declared here can be loaded via the standard managed-table load endpoint targeting &#x60;default_connection_id&#x60;. Omitted or empty means the default catalog starts empty. | [optional] 
 
 ## Example

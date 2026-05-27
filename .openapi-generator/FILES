@@ -313,10 +313,4 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
-test/test_database_context_api.py
-test/test_database_context_entry.py
-test/test_get_database_context_response.py
-test/test_list_database_contexts_response.py
-test/test_upsert_database_context_request.py
-test/test_upsert_database_context_response.py
 tox.ini

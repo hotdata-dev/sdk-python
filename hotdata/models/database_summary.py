@@ -28,10 +28,10 @@ class DatabaseSummary(BaseModel):
     """
     Summary item in GET /databases
     """ # noqa: E501
-    description: Optional[StrictStr] = None
     expires_at: Optional[datetime] = None
     id: StrictStr
-    __properties: ClassVar[List[str]] = ["description", "expires_at", "id"]
+    name: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["expires_at", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -72,15 +72,15 @@ class DatabaseSummary(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # set to None if description (nullable) is None
-        # and model_fields_set contains the field
-        if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
-
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
             _dict['expires_at'] = None
+
+        # set to None if name (nullable) is None
+        # and model_fields_set contains the field
+        if self.name is None and "name" in self.model_fields_set:
+            _dict['name'] = None
 
         return _dict
 
@@ -94,9 +94,9 @@ class DatabaseSummary(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "description": obj.get("description"),
             "expires_at": obj.get("expires_at"),
-            "id": obj.get("id")
+            "id": obj.get("id"),
+            "name": obj.get("name")
         })
         return _obj
 
