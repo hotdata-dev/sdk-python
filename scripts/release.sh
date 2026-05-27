@@ -122,10 +122,14 @@ cmd_prepare() {
 
   set_version "$new"
   update_changelog "$new"
+  if command -v uv >/dev/null 2>&1 && [[ -f uv.lock ]]; then
+    uv lock
+  fi
 
   branch="release/v${new}"
   git checkout -b "$branch"
   git add pyproject.toml CHANGELOG.md
+  [[ -f uv.lock ]] && git add uv.lock
   git commit -m "chore: release v${new}"
 
   pkg="$(get_pkg_name)"
