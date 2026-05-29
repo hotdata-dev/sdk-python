@@ -30,8 +30,10 @@ class QueryRequest(BaseModel):
     """ # noqa: E501
     var_async: Optional[StrictBool] = Field(default=None, description="When true, execute the query asynchronously and return a query run ID for polling via GET /query-runs/{id}. The query results can be retrieved via GET /results/{id} once the query run status is \"succeeded\".", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set with async=true, wait up to this many milliseconds for the query to complete synchronously before returning an async response. Minimum 1000ms. Ignored if async is false.")
+    default_catalog: Optional[StrictStr] = Field(default=None, description="Catalog that unqualified table references resolve against. Only honored inside an `X-Database-Id` scope; sending it without that header is a 400. Must name a catalog visible in the database (`default`, an attached catalog alias, or a system catalog). Defaults to `default` when omitted.")
+    default_schema: Optional[StrictStr] = Field(default=None, description="Schema that unqualified table references resolve against. Only honored inside an `X-Database-Id` scope; sending it without that header is a 400. Defaults to `main` when omitted. Existence is not validated up front — an unknown schema surfaces as a \"table not found\" error at planning time.")
     sql: StrictStr
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "sql"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "default_catalog", "default_schema", "sql"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -77,6 +79,16 @@ class QueryRequest(BaseModel):
         if self.async_after_ms is None and "async_after_ms" in self.model_fields_set:
             _dict['async_after_ms'] = None
 
+        # set to None if default_catalog (nullable) is None
+        # and model_fields_set contains the field
+        if self.default_catalog is None and "default_catalog" in self.model_fields_set:
+            _dict['default_catalog'] = None
+
+        # set to None if default_schema (nullable) is None
+        # and model_fields_set contains the field
+        if self.default_schema is None and "default_schema" in self.model_fields_set:
+            _dict['default_schema'] = None
+
         return _dict
 
     @classmethod
@@ -91,6 +103,8 @@ class QueryRequest(BaseModel):
         _obj = cls.model_validate({
             "async": obj.get("async"),
             "async_after_ms": obj.get("async_after_ms"),
+            "default_catalog": obj.get("default_catalog"),
+            "default_schema": obj.get("default_schema"),
             "sql": obj.get("sql")
         })
         return _obj
