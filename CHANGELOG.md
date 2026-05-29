@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.2.6] - 2026-05-29
 
+### Added
+
+- `default_catalog` and `default_schema` fields on `QueryRequest` to control how unqualified table references resolve within an `X-Database-Id` scope.
 
 ## [0.2.5] - 2026-05-27
 
