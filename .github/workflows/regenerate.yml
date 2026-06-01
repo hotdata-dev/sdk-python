@@ -236,6 +236,7 @@ jobs:
           rm -f test-scenarios.yaml
 
       - name: Create PR
+        id: cpr
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           token: ${{ steps.app-token.outputs.token }}
@@ -243,3 +244,16 @@ jobs:
           branch: openapi-update-${{ github.run_id }}
           commit-message: "chore: regenerate client from OpenAPI spec"
           body: "Auto-generated from updated HotData OpenAPI spec."
+
+      # Enable native auto-merge (squash). Branch protection on main gates the
+      # merge on the test checks (scenario-parity, integration) plus the org
+      # Claude review check and its approving review, so this only merges once
+      # everything is green and Claude has approved.
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" \
+            --repo "${{ github.repository }}" \
+            --squash --auto
