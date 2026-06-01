@@ -113,6 +113,86 @@ jobs:
       - name: Patch ApiClient close lifecycle
         run: python3 scripts/patch_api_client_close.py
 
+      - name: Verify JWT-exchange code survived regeneration
+        run: |
+          python3 - <<'PY'
+          import ast, pathlib, sys
+
+          errors = []
+
+          # 1. The hand-written, regen-immune auth module must survive.
+          if not pathlib.Path("hotdata/_auth.py").is_file():
+              errors.append("hotdata/_auth.py is missing (regen overwrote/dropped it)")
+
+          config = pathlib.Path("hotdata/configuration.py")
+          if not config.is_file():
+              errors.append("hotdata/configuration.py is missing")
+          else:
+              tree = ast.parse(config.read_text())
+              cls = next(
+                  (n for n in tree.body
+                   if isinstance(n, ast.ClassDef) and n.name == "Configuration"),
+                  None,
+              )
+              if cls is None:
+                  errors.append("Configuration class not found in configuration.py")
+              else:
+                  # 2. api_key must be a property (decorated getter), so every
+                  #    request transparently exchanges for a fresh JWT.
+                  api_key_is_property = any(
+                      isinstance(n, ast.FunctionDef)
+                      and n.name == "api_key"
+                      and any(
+                          isinstance(d, ast.Name) and d.id == "property"
+                          for d in n.decorator_list
+                      )
+                      for n in cls.body
+                  )
+                  if not api_key_is_property:
+                      errors.append("Configuration.api_key is not a @property (template drift)")
+
+                  # 3. The token manager must be created eagerly in __init__
+                  #    (lazy creation has a concurrent-first-request race).
+                  init = next(
+                      (n for n in cls.body
+                       if isinstance(n, ast.FunctionDef) and n.name == "__init__"),
+                      None,
+                  )
+                  init_src = ast.get_source_segment(config.read_text(), init) if init else ""
+                  if "self._token_manager = _TokenManager(" not in (init_src or ""):
+                      errors.append("eager self._token_manager assignment missing from __init__")
+
+                  # 4. __deepcopy__ must skip _token_manager (lock + PoolManager
+                  #    are not deepcopy-able) and rebuild it.
+                  deepcopy = next(
+                      (n for n in cls.body
+                       if isinstance(n, ast.FunctionDef) and n.name == "__deepcopy__"),
+                      None,
+                  )
+                  if deepcopy is None:
+                      errors.append("__deepcopy__ missing from Configuration")
+                  else:
+                      # Look for _token_manager as a real identifier/string in the
+                      # body (AST, so comments mentioning it don't count) — proves
+                      # the lock/PoolManager skip-and-rebuild actually survived.
+                      refs = any(
+                          (isinstance(n, ast.Constant) and n.value == "_token_manager")
+                          or (isinstance(n, ast.Attribute) and n.attr == "_token_manager")
+                          for n in ast.walk(deepcopy)
+                      )
+                      if not refs:
+                          errors.append("__deepcopy__ does not skip/rebuild _token_manager")
+
+          if errors:
+              print("::error::JWT-exchange regen-safety check failed:")
+              for e in errors:
+                  print(f"  - {e}")
+              sys.exit(1)
+          print("JWT-exchange code survived regeneration: "
+                "_auth.py present, api_key property, eager _token_manager, "
+                "__deepcopy__ handling all intact.")
+          PY
+
       - name: Clean up generated artifacts
         run: |
           rm -f openapi.yaml

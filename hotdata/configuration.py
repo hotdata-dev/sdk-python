@@ -226,7 +226,12 @@ conf = hotdata.Configuration(
         self.temp_folder_path = None
         """Temp file folder for downloading files
         """
-        self.api_key = api_key
+        # Transparent API-token -> JWT exchange. `api_key` is a property whose
+        # getter returns a live JWT minted from this credential (see _auth.py);
+        # the manager is created eagerly here (never lazily in the getter) so
+        # concurrent first requests don't each build one. The setter rebuilds it.
+        from hotdata._auth import _TokenManager
+        self._token_manager = _TokenManager(api_key, self) if api_key is not None else None
         """Hotdata API key, sent as `Authorization: Bearer <key>`."""
         # apiKey-security values (X-Workspace-Id, X-Session-Id), keyed by
         # scheme name. Read by the generated `auth_settings()` below.
@@ -339,13 +344,20 @@ conf = hotdata.Configuration(
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
-            if k not in ('logger', 'logger_file_handler'):
+            # _token_manager holds a threading.Lock and a urllib3 PoolManager,
+            # neither of which is deepcopy-able; rebuild it below from the
+            # (deepcopy-safe) credential string instead.
+            if k not in ('logger', 'logger_file_handler', '_token_manager'):
                 setattr(result, k, copy.deepcopy(v, memo))
         # shallow copy of loggers
         result.logger = copy.copy(self.logger)
         # use setters to configure loggers
         result.logger_file = self.logger_file
         result.debug = self.debug
+        # rebuild the token manager bound to the copy (never deepcopy lock/pool)
+        from hotdata._auth import _TokenManager
+        tm = self._token_manager
+        result._token_manager = _TokenManager(tm._credential, result) if tm else None
         return result
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -491,6 +503,26 @@ conf = hotdata.Configuration(
         return None
 
     @property
+    def api_key(self) -> Optional[str]:
+        """Live bearer credential, sent as `Authorization: Bearer <value>`.
+
+        Backed by the regeneration-immune `_TokenManager` (see `hotdata._auth`):
+        an opaque API token is transparently exchanged for a short-lived JWT and
+        kept fresh, while a credential already shaped like a JWT (or exchange
+        opted out) is returned unchanged. `auth_settings()` reads this on every
+        request, so the wire always carries a current token.
+        """
+        # Read the manager once: a concurrent `api_key` reset could otherwise
+        # set it to None between the check and the `.bearer_value()` call.
+        tm = self._token_manager
+        return None if tm is None else tm.bearer_value()
+
+    @api_key.setter
+    def api_key(self, value: Optional[str]) -> None:
+        from hotdata._auth import _TokenManager
+        self._token_manager = _TokenManager(value, self) if value is not None else None
+
+    @property
     def workspace_id(self) -> Optional[str]:
         """Public id of the target workspace (sent as `X-Workspace-Id`)."""
         return self.api_keys.get("WorkspaceId")
@@ -540,12 +572,16 @@ conf = hotdata.Configuration(
         :return: The Auth Settings information dict.
         """
         auth: AuthSettings = {}
-        if self.api_key is not None:
+        # Resolve the bearer token once: `api_key` is a property that may mint a
+        # JWT and take the token-manager lock, so a second read would lock twice
+        # and could race a concurrent `api_key` reset (yielding `Bearer None`).
+        BearerAuth_token = self.api_key
+        if BearerAuth_token is not None:
             auth['BearerAuth'] = {
                 'type': 'bearer',
                 'in': 'header',
                 'key': 'Authorization',
-                'value': 'Bearer ' + self.api_key
+                'value': 'Bearer ' + BearerAuth_token
             }
         if 'WorkspaceId' in self.api_keys:
             auth['WorkspaceId'] = {
