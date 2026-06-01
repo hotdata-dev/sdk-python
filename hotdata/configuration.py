@@ -571,12 +571,16 @@ conf = hotdata.Configuration(
         :return: The Auth Settings information dict.
         """
         auth: AuthSettings = {}
-        if self.api_key is not None:
+        # Resolve the bearer token once: `api_key` is a property that may mint a
+        # JWT and take the token-manager lock, so a second read would lock twice
+        # and could race a concurrent `api_key` reset (yielding `Bearer None`).
+        BearerAuth_token = self.api_key
+        if BearerAuth_token is not None:
             auth['BearerAuth'] = {
                 'type': 'bearer',
                 'in': 'header',
                 'key': 'Authorization',
-                'value': 'Bearer ' + self.api_key
+                'value': 'Bearer ' + BearerAuth_token
             }
         if 'WorkspaceId' in self.api_keys:
             auth['WorkspaceId'] = {

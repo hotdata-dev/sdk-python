@@ -720,7 +720,11 @@ conf = {{packageName}}.Configuration(
             }
   {{/isBasicBasic}}
   {{#isBasicBearer}}
-        if self.api_key is not None:
+        # Resolve the bearer token once: `api_key` is a property that may mint a
+        # JWT and take the token-manager lock, so a second read would lock twice
+        # and could race a concurrent `api_key` reset (yielding `Bearer None`).
+        {{name}}_token = self.api_key
+        if {{name}}_token is not None:
             auth['{{name}}'] = {
                 'type': 'bearer',
                 'in': 'header',
@@ -728,7 +732,7 @@ conf = {{packageName}}.Configuration(
                 'format': '{{.}}',
                 {{/bearerFormat}}
                 'key': 'Authorization',
-                'value': 'Bearer ' + self.api_key
+                'value': 'Bearer ' + {{name}}_token
             }
   {{/isBasicBearer}}
   {{#isHttpSignature}}
