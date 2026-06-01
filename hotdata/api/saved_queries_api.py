@@ -589,6 +589,7 @@ class SavedQueriesApi:
     def execute_saved_query(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.")],
         execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to execute")] = None,
         _request_timeout: Union[
             None,
@@ -605,10 +606,12 @@ class SavedQueriesApi:
     ) -> QueryResponse:
         """Execute saved query
 
-        Execute a saved query. By default runs the latest version. Optionally specify a version number to execute a previous version. Returns the same response format as POST /v1/query.
+        Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
 
         :param id: Saved query ID (required)
         :type id: str
+        :param x_database_id: Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. (required)
+        :type x_database_id: str
         :param execute_saved_query_request: Optional version to execute
         :type execute_saved_query_request: ExecuteSavedQueryRequest
         :param _request_timeout: timeout setting for this request. If one
@@ -635,6 +638,7 @@ class SavedQueriesApi:
 
         _param = self._execute_saved_query_serialize(
             id=id,
+            x_database_id=x_database_id,
             execute_saved_query_request=execute_saved_query_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -644,6 +648,7 @@ class SavedQueriesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -661,6 +666,7 @@ class SavedQueriesApi:
     def execute_saved_query_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.")],
         execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to execute")] = None,
         _request_timeout: Union[
             None,
@@ -677,10 +683,12 @@ class SavedQueriesApi:
     ) -> ApiResponse[QueryResponse]:
         """Execute saved query
 
-        Execute a saved query. By default runs the latest version. Optionally specify a version number to execute a previous version. Returns the same response format as POST /v1/query.
+        Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
 
         :param id: Saved query ID (required)
         :type id: str
+        :param x_database_id: Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. (required)
+        :type x_database_id: str
         :param execute_saved_query_request: Optional version to execute
         :type execute_saved_query_request: ExecuteSavedQueryRequest
         :param _request_timeout: timeout setting for this request. If one
@@ -707,6 +715,7 @@ class SavedQueriesApi:
 
         _param = self._execute_saved_query_serialize(
             id=id,
+            x_database_id=x_database_id,
             execute_saved_query_request=execute_saved_query_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -716,6 +725,7 @@ class SavedQueriesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -733,6 +743,7 @@ class SavedQueriesApi:
     def execute_saved_query_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.")],
         execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to execute")] = None,
         _request_timeout: Union[
             None,
@@ -749,10 +760,12 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """Execute saved query
 
-        Execute a saved query. By default runs the latest version. Optionally specify a version number to execute a previous version. Returns the same response format as POST /v1/query.
+        Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
 
         :param id: Saved query ID (required)
         :type id: str
+        :param x_database_id: Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. (required)
+        :type x_database_id: str
         :param execute_saved_query_request: Optional version to execute
         :type execute_saved_query_request: ExecuteSavedQueryRequest
         :param _request_timeout: timeout setting for this request. If one
@@ -779,6 +792,7 @@ class SavedQueriesApi:
 
         _param = self._execute_saved_query_serialize(
             id=id,
+            x_database_id=x_database_id,
             execute_saved_query_request=execute_saved_query_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -788,6 +802,7 @@ class SavedQueriesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -800,6 +815,7 @@ class SavedQueriesApi:
     def _execute_saved_query_serialize(
         self,
         id,
+        x_database_id,
         execute_saved_query_request,
         _request_auth,
         _content_type,
@@ -826,6 +842,8 @@ class SavedQueriesApi:
             _path_params['id'] = id
         # process the query parameters
         # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
         # process the form parameters
         # process the body parameter
         if execute_saved_query_request is not None:

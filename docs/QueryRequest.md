@@ -8,8 +8,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **var_async** | **bool** | When true, execute the query asynchronously and return a query run ID for polling via GET /query-runs/{id}. The query results can be retrieved via GET /results/{id} once the query run status is \&quot;succeeded\&quot;. | [optional] 
 **async_after_ms** | **int** | If set with async&#x3D;true, wait up to this many milliseconds for the query to complete synchronously before returning an async response. Minimum 1000ms. Ignored if async is false. | [optional] 
-**default_catalog** | **str** | Catalog that unqualified table references resolve against. Only honored inside an &#x60;X-Database-Id&#x60; scope; sending it without that header is a 400. Must name a catalog visible in the database (&#x60;default&#x60;, an attached catalog alias, or a system catalog). Defaults to &#x60;default&#x60; when omitted. | [optional] 
-**default_schema** | **str** | Schema that unqualified table references resolve against. Only honored inside an &#x60;X-Database-Id&#x60; scope; sending it without that header is a 400. Defaults to &#x60;main&#x60; when omitted. Existence is not validated up front — an unknown schema surfaces as a \&quot;table not found\&quot; error at planning time. | [optional] 
+**database_id** | **str** | Database to scope the query to (its id). Alternative to the &#x60;X-Database-Id&#x60; header — exactly one source must be provided. If both this field and the header are set and they disagree, the request is rejected with a 400. | [optional] 
+**default_catalog** | **str** | Catalog that unqualified table references resolve against within the query&#39;s database scope. Must name a catalog visible in the database (&#x60;default&#x60;, an attached catalog alias, or a system catalog). Defaults to &#x60;default&#x60; when omitted. | [optional] 
+**default_schema** | **str** | Schema that unqualified table references resolve against within the query&#39;s database scope. Defaults to &#x60;main&#x60; when omitted. Existence is not validated up front — an unknown schema surfaces as a \&quot;table not found\&quot; error at planning time. | [optional] 
 **sql** | **str** |  | 
 
 ## Example
