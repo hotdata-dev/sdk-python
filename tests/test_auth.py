@@ -503,3 +503,74 @@ def test_non_json_success_body_raises_token_exchange_error() -> None:
 
     with pytest.raises(TokenExchangeError):
         mgr.bearer_value()
+
+
+def test_missing_access_token_raises_token_exchange_error() -> None:
+    """A 200 with valid JSON but no ``access_token`` (e.g. a misrouted endpoint
+    returning some other JSON document) must surface as a TokenExchangeError,
+    not a bare KeyError."""
+    pool = _FakePool([_FakeResponse(200, {"token_type": "Bearer"})])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+
+    with pytest.raises(TokenExchangeError):
+        mgr.bearer_value()
+
+
+# --------------------------------------------------------------------------
+# Refresh that fails by *raising* (not just a non-200) still re-mints
+# --------------------------------------------------------------------------
+
+
+def test_refresh_raising_falls_back_to_api_token_mint() -> None:
+    """The refresh step is best-effort: if it fails in *any* way -- not just a
+    non-200, but a malformed/non-JSON body or a transport error -- the manager
+    must drop the refresh token and re-mint from the held API token rather than
+    letting the exception escape ``bearer_value()``."""
+    short_lived = _mint_response(
+        access_token="eyJ.short.jwt",
+        refresh_token="rt_doomed",
+        expires_in=_LEEWAY - 5,
+    )
+    # Refresh returns 200 but a non-JSON body -> would raise inside _mint.
+    refresh_garbage = _FakeResponse(200, b"<html>oops</html>")
+    remint = _mint_response(access_token="eyJ.reminted.jwt", expires_in=300)
+    pool = _FakePool([short_lived, refresh_garbage, remint])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+
+    assert mgr.bearer_value() == "eyJ.short.jwt"
+    # Second call: refresh raises internally -> fall back to api_token mint.
+    assert mgr.bearer_value() == "eyJ.reminted.jwt"
+
+    assert len(pool.calls) == 3
+    assert _form(pool.calls[1]["body"])["grant_type"] == ["refresh_token"]
+    assert _form(pool.calls[2]["body"])["grant_type"] == ["api_token"]
+
+
+# --------------------------------------------------------------------------
+# auth_settings() reads the token exactly once (no double bearer_value())
+# --------------------------------------------------------------------------
+
+
+def test_auth_settings_reads_token_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``auth_settings()`` must resolve the bearer token a single time, not
+    once for the null-check and again for the value -- otherwise it acquires the
+    manager lock twice per request and a concurrent ``api_key`` reset between the
+    two reads could yield ``'Bearer ' + None``."""
+    pool = _FakePool([_mint_response(access_token="eyJ.once.jwt")])
+    cfg = _config()
+    mgr = _TokenManager("hd_secret_token", cfg, pool=pool)
+    cfg._token_manager = mgr
+
+    count = {"n": 0}
+    real = mgr.bearer_value
+
+    def counting() -> str:
+        count["n"] += 1
+        return real()
+
+    monkeypatch.setattr(mgr, "bearer_value", counting)
+
+    auth = cfg.auth_settings()
+
+    assert _bearer_from(auth) == "Bearer eyJ.once.jwt"
+    assert count["n"] == 1

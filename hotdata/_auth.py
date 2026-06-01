@@ -177,33 +177,44 @@ class _TokenManager:
             return self._jwt
 
     def _mint(self, params):
-        # Returns True on success. A non-200 from a refresh returns False so the
-        # caller can re-mint from the API token; a non-200 from an api_token
-        # mint raises TokenExchangeError.
+        # Returns True on success. The refresh path is best-effort: ANY failure
+        # -- a non-200, a transport error, or a malformed/missing-token body --
+        # returns False so the caller re-mints from the held API token. An
+        # api_token mint instead raises TokenExchangeError on any failure, since
+        # there is no further fallback.
         params["client_id"] = _CLIENT_ID
-        pool = self._pool or _pool_from_config(self._config)   # reuses ssl_ca_cert/cert/proxy
-        host = self._config.host.rstrip("/")                   # read host lazily -- may be set post-construct
-        resp = pool.request(
-            "POST",
-            f"{host}/v1/auth/jwt",
-            body=urlencode(params),
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            timeout=_TIMEOUT,
-        )
-        if resp.status != 200:
-            if params["grant_type"] == "refresh_token":
-                return False               # let caller re-mint from the API token
-            raise TokenExchangeError(
-                f"token exchange failed: {resp.status} {resp.data[:200]!r}"
-            )
+        is_refresh = params["grant_type"] == "refresh_token"
         try:
+            pool = self._pool or _pool_from_config(self._config)   # reuses ssl_ca_cert/cert/proxy
+            host = self._config.host.rstrip("/")                   # read host lazily -- may be set post-construct
+            resp = pool.request(
+                "POST",
+                f"{host}/v1/auth/jwt",
+                body=urlencode(params),
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                timeout=_TIMEOUT,
+            )
+            if resp.status != 200:
+                raise TokenExchangeError(
+                    f"token exchange failed: {resp.status} {resp.data[:200]!r}"
+                )
             data = json.loads(resp.data)
-        except (ValueError, TypeError) as exc:
-            raise TokenExchangeError(
-                f"token exchange returned a non-JSON body: {resp.data[:200]!r}"
-            ) from exc
-        self._jwt = data["access_token"]
-        self._exp = time.time() + data.get("expires_in", 300)
+            token = data["access_token"]
+            expires_in = float(data.get("expires_in", 300))
+        except (
+            TokenExchangeError,
+            urllib3.exceptions.HTTPError,
+            ValueError,
+            TypeError,
+            KeyError,
+        ) as exc:
+            if is_refresh:
+                return False               # let caller re-mint from the API token
+            if isinstance(exc, TokenExchangeError):
+                raise
+            raise TokenExchangeError(f"token exchange failed: {exc!r}") from exc
+        self._jwt = token
+        self._exp = time.time() + expires_in
         self._refresh = data.get("refresh_token") or self._refresh
         return True
 
