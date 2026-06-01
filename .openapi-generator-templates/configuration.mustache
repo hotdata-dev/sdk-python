@@ -321,7 +321,12 @@ conf = {{packageName}}.Configuration(
         self.temp_folder_path = None
         """Temp file folder for downloading files
         """
-        self.api_key = api_key
+        # Transparent API-token -> JWT exchange. `api_key` is a property whose
+        # getter returns a live JWT minted from this credential (see _auth.py);
+        # the manager is created eagerly here (never lazily in the getter) so
+        # concurrent first requests don't each build one. The setter rebuilds it.
+        from {{packageName}}._auth import _TokenManager
+        self._token_manager = _TokenManager(api_key, self) if api_key is not None else None
         """Hotdata API key, sent as `Authorization: Bearer <key>`."""
         # apiKey-security values (X-Workspace-Id, X-Session-Id), keyed by
         # scheme name. Read by the generated `auth_settings()` below.
@@ -451,13 +456,20 @@ conf = {{packageName}}.Configuration(
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
-            if k not in ('logger', 'logger_file_handler'):
+            # _token_manager holds a threading.Lock and a urllib3 PoolManager,
+            # neither of which is deepcopy-able; rebuild it below from the
+            # (deepcopy-safe) credential string instead.
+            if k not in ('logger', 'logger_file_handler', '_token_manager'):
                 setattr(result, k, copy.deepcopy(v, memo))
         # shallow copy of loggers
         result.logger = copy.copy(self.logger)
         # use setters to configure loggers
         result.logger_file = self.logger_file
         result.debug = self.debug
+        # rebuild the token manager bound to the copy (never deepcopy lock/pool)
+        from {{packageName}}._auth import _TokenManager
+        tm = self._token_manager
+        result._token_manager = _TokenManager(tm._credential, result) if tm else None
         return result
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -607,6 +619,25 @@ conf = {{packageName}}.Configuration(
                 return key
 
         return None
+
+    @property
+    def api_key(self) -> Optional[str]:
+        """Live bearer credential, sent as `Authorization: Bearer <value>`.
+
+        Backed by the regeneration-immune `_TokenManager` (see `{{packageName}}._auth`):
+        an `hd_` API token is transparently exchanged for a short-lived JWT and
+        kept fresh, while a credential already shaped like a JWT (or exchange
+        opted out) is returned unchanged. `auth_settings()` reads this on every
+        request, so the wire always carries a current token.
+        """
+        if self._token_manager is None:
+            return None
+        return self._token_manager.bearer_value()
+
+    @api_key.setter
+    def api_key(self, value: Optional[str]) -> None:
+        from {{packageName}}._auth import _TokenManager
+        self._token_manager = _TokenManager(value, self) if value is not None else None
 
     @property
     def workspace_id(self) -> Optional[str]:
