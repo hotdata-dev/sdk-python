@@ -625,14 +625,15 @@ conf = {{packageName}}.Configuration(
         """Live bearer credential, sent as `Authorization: Bearer <value>`.
 
         Backed by the regeneration-immune `_TokenManager` (see `{{packageName}}._auth`):
-        an `hd_` API token is transparently exchanged for a short-lived JWT and
+        an opaque API token is transparently exchanged for a short-lived JWT and
         kept fresh, while a credential already shaped like a JWT (or exchange
         opted out) is returned unchanged. `auth_settings()` reads this on every
         request, so the wire always carries a current token.
         """
-        if self._token_manager is None:
-            return None
-        return self._token_manager.bearer_value()
+        # Read the manager once: a concurrent `api_key` reset could otherwise
+        # set it to None between the check and the `.bearer_value()` call.
+        tm = self._token_manager
+        return None if tm is None else tm.bearer_value()
 
     @api_key.setter
     def api_key(self, value: Optional[str]) -> None:
