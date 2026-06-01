@@ -18,8 +18,9 @@ Key behaviors:
   unchanged and never exchanged. Every other (opaque) credential is treated as
   an API token and exchanged; set ``HOTDATA_DISABLE_JWT_EXCHANGE`` to force a
   raw, non-JWT credential through as-is (local/dev setups, rollback).
-* **Opt-out** -- if ``HOTDATA_DISABLE_JWT_EXCHANGE`` is set to any truthy value,
-  the credential is always returned as-is (hard escape hatch for rollout).
+* **Opt-out** -- if ``HOTDATA_DISABLE_JWT_EXCHANGE`` is set to an affirmative
+  value (``1``/``true``/``yes``/``on``), the credential is always returned
+  as-is (hard escape hatch for rollout); ``0``/``false``/empty do not opt out.
 * **In-memory cache only** -- no disk writes. The server already de-duplicates
   mints (keyed by ``sha256(api_token)``), so per-process caching is sufficient.
 * **Thread-safe** -- a :class:`threading.Lock` with single-flight mint covers
@@ -46,9 +47,11 @@ _LEEWAY = 30          # refresh when <30s of life remains
 _TIMEOUT = 30.0       # seconds -- never let a stalled token endpoint hang every request
 _CLIENT_ID = "hotdata-python-sdk"
 
-# Env var that disables exchange entirely (any truthy value). Used as a hard
-# escape hatch during the rollout window and for local/dev setups.
+# Env var that disables exchange entirely. Used as a hard escape hatch during
+# the rollout window and for local/dev setups. Only affirmative values opt out
+# (see _DISABLE_VALUES) so that ``=0`` / ``=false`` do NOT silently disable it.
 _DISABLE_ENV = "HOTDATA_DISABLE_JWT_EXCHANGE"
+_DISABLE_VALUES = {"1", "true", "yes", "on"}
 
 # The SOCKS schemes urllib3 routes through SOCKSProxyManager rather than the
 # plain ProxyManager. Mirrors hotdata/rest.py's SUPPORTED_SOCKS_PROXIES.
@@ -104,6 +107,8 @@ def _pool_from_config(configuration):
         pool_args["assert_hostname"] = configuration.assert_hostname
     if configuration.tls_server_name:
         pool_args["server_hostname"] = configuration.tls_server_name
+    if configuration.socket_options is not None:
+        pool_args["socket_options"] = configuration.socket_options
     # `retries`/`maxsize` are intentionally not mirrored: the exchange is a
     # single bounded-timeout request that fails fast rather than retrying.
 
@@ -140,9 +145,10 @@ class _TokenManager:
 
     @property
     def _needs_exchange(self):
-        # Opt-out wins outright: any truthy HOTDATA_DISABLE_JWT_EXCHANGE means
-        # send the credential as-is, never touching the token endpoint.
-        if os.environ.get(_DISABLE_ENV):
+        # Opt-out wins outright: an affirmative HOTDATA_DISABLE_JWT_EXCHANGE
+        # (1/true/yes/on) means send the credential as-is, never touching the
+        # token endpoint. Other values (incl. 0/false/empty) do not opt out.
+        if os.environ.get(_DISABLE_ENV, "").strip().lower() in _DISABLE_VALUES:
             return False
         # A compact JWT always starts with "eyJ" (base64 of '{"'), matching the
         # Gateway's own ``^Bearer eyJ.*`` detection -- those already are what we

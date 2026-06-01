@@ -311,6 +311,32 @@ def test_opt_out_env_var_returns_credential_unchanged(
     assert pool.calls == []
 
 
+@pytest.mark.parametrize("value", ["1", "true", "TRUE", "yes", "on", "  on  "])
+def test_opt_out_affirmative_values_disable(
+    monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", value)
+    pool = _FakePool([_mint_response()])
+    mgr = _TokenManager("opaque_token", _config(), pool=pool)
+
+    assert mgr.bearer_value() == "opaque_token"
+    assert pool.calls == []
+
+
+@pytest.mark.parametrize("value", ["0", "false", "no", "off", ""])
+def test_opt_out_non_affirmative_values_still_exchange(
+    monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    """``=0`` / ``=false`` etc. must NOT silently disable exchange -- a footgun
+    if users set them expecting to *enable* it. Exchange still happens."""
+    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", value)
+    pool = _FakePool([_mint_response(access_token="eyJ.minted.jwt")])
+    mgr = _TokenManager("opaque_token", _config(), pool=pool)
+
+    assert mgr.bearer_value() == "eyJ.minted.jwt"
+    assert len(pool.calls) == 1
+
+
 # --------------------------------------------------------------------------
 # Concurrency: single-flight mint
 # --------------------------------------------------------------------------
@@ -488,6 +514,20 @@ def test_pool_from_config_omits_hostname_args_when_unset() -> None:
 
     assert "assert_hostname" not in kw
     assert "server_hostname" not in kw
+
+
+def test_pool_from_config_forwards_socket_options() -> None:
+    """socket_options (e.g. TCP keepalive) the user set for all SDK requests
+    must also apply to the exchange pool, matching rest.py."""
+    import socket
+
+    cfg = _config()
+    cfg.socket_options = [(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)]
+    pool = _pool_from_config(cfg)
+
+    assert pool.connection_pool_kw.get("socket_options") == [
+        (socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    ]
 
 
 # --------------------------------------------------------------------------
