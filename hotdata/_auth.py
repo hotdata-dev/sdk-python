@@ -13,10 +13,11 @@ additionally listed in ``.openapi-generator-ignore`` as belt-and-suspenders.
 
 Key behaviors:
 
-* **Pass-through** -- only ``hd_`` API tokens are exchanged. A credential that
-  already looks like a JWT (``eyJ`` prefix), or any other non-``hd_`` value
-  (local/dev/test credentials), is returned unchanged and never exchanged, so
-  local setups and the rollout window keep working.
+* **Pass-through** -- a credential that already looks like a JWT (``eyJ``
+  prefix, matching the Gateway's own ``^Bearer eyJ.*`` detection) is returned
+  unchanged and never exchanged. Every other (opaque) credential is treated as
+  an API token and exchanged; set ``HOTDATA_DISABLE_JWT_EXCHANGE`` to force a
+  raw, non-JWT credential through as-is (local/dev setups, rollback).
 * **Opt-out** -- if ``HOTDATA_DISABLE_JWT_EXCHANGE`` is set to any truthy value,
   the credential is always returned as-is (hard escape hatch for rollout).
 * **In-memory cache only** -- no disk writes. The server already de-duplicates
@@ -44,7 +45,6 @@ import urllib3
 _LEEWAY = 30          # refresh when <30s of life remains
 _TIMEOUT = 30.0       # seconds -- never let a stalled token endpoint hang every request
 _CLIENT_ID = "hotdata-python-sdk"
-_API_TOKEN_PREFIX = "hd_"   # only credentials with this prefix are exchanged
 
 # Env var that disables exchange entirely (any truthy value). Used as a hard
 # escape hatch during the rollout window and for local/dev setups.
@@ -56,7 +56,7 @@ _SUPPORTED_SOCKS_PROXIES = {"socks5", "socks5h", "socks4", "socks4a"}
 
 
 class TokenExchangeError(Exception):
-    """Raised when an ``hd_`` API token cannot be exchanged for a JWT.
+    """Raised when an API token cannot be exchanged for a JWT.
 
     Surfacing ``invalid_grant`` (expired/revoked API token) here keeps the
     failure clear instead of a confusing downstream 401.
@@ -123,9 +123,10 @@ def _pool_from_config(configuration):
 class _TokenManager:
     """Exchanges an API token for short-lived JWTs and keeps them fresh.
 
-    Only ``hd_`` API tokens are exchanged; anything else (raw ``eyJ`` JWTs,
-    local/dev/test credentials) is passed through unchanged, as is any
-    credential when ``HOTDATA_DISABLE_JWT_EXCHANGE`` is set.
+    A credential that already looks like a JWT (``eyJ`` prefix) is passed
+    through unchanged, as is any credential when
+    ``HOTDATA_DISABLE_JWT_EXCHANGE`` is set; every other (opaque) API token is
+    exchanged.
     """
 
     def __init__(self, credential, configuration, pool=None):
@@ -143,12 +144,14 @@ class _TokenManager:
         # send the credential as-is, never touching the token endpoint.
         if os.environ.get(_DISABLE_ENV):
             return False
-        # Exchange only real ``hd_`` API tokens. Everything else is passed
-        # through untouched: raw JWTs (``eyJ`` prefix) are already what we want
-        # on the wire, and non-``hd_`` values (local/dev/test credentials) must
-        # not be sent to the token endpoint -- doing so would break local setups
-        # and the rollout window (see the design's pass-through edge case).
-        return isinstance(self._credential, str) and self._credential.startswith(_API_TOKEN_PREFIX)
+        # A compact JWT always starts with "eyJ" (base64 of '{"'), matching the
+        # Gateway's own ``^Bearer eyJ.*`` detection -- those already are what we
+        # want on the wire, so pass them through. Everything else is an opaque
+        # API token to be exchanged. (Hotdata API tokens are bare hex; the
+        # ``hd_`` prefix seen in docs/comments is cosmetic and not enforced by
+        # the server, so we must not gate on it.) Use HOTDATA_DISABLE_JWT_EXCHANGE
+        # to force a raw, non-JWT credential through unchanged (local/dev).
+        return isinstance(self._credential, str) and not self._credential.startswith("eyJ")
 
     def bearer_value(self):
         """Return a live JWT (exchanging + caching), or the credential as-is.

@@ -7,8 +7,8 @@ from the network. Every test injects a *fake pool* via the documented
 
 They verify the pinned public contract:
 
-* first mint     -- an ``hd_`` credential POSTs an ``api_token`` grant to
-                    ``/v1/auth/jwt`` (form-encoded, correct Content-Type and
+* first mint     -- an opaque (non-JWT) credential POSTs an ``api_token`` grant
+                    to ``/v1/auth/jwt`` (form-encoded, correct Content-Type and
                     ``client_id``) and returns the minted ``access_token``;
 * cache hit      -- a second ``bearer_value()`` within TTL does not re-hit the
                     pool;
@@ -400,35 +400,45 @@ def test_deepcopied_manager_credential_still_mints() -> None:
 
 
 # --------------------------------------------------------------------------
-# Non-hd_ credentials pass through (only real API tokens are exchanged)
+# Opaque (non-JWT) credentials are exchanged -- the prefix is not gated
 # --------------------------------------------------------------------------
 
 
-def test_non_hd_credential_is_passed_through_unchanged() -> None:
-    """Only ``hd_`` API tokens are exchanged. A non-``hd_`` value (e.g. a
-    local/dev/test credential) must be sent as-is and never hit the token
-    endpoint -- otherwise local setups and the rollout window break."""
-    pool = _FakePool([_mint_response()])
-    mgr = _TokenManager("test-key", _config(), pool=pool)
+def test_bare_hex_token_is_exchanged() -> None:
+    """Hotdata API tokens are bare hex with no ``hd_`` prefix (the prefix in
+    the docs is cosmetic and not enforced by the server). Any opaque, non-JWT
+    credential must therefore be exchanged, not passed through."""
+    raw = "8a4bfd9cfa6926344f770d6b9a093c2b559dafc4de2a69137acb93e7e9821c7b"
+    pool = _FakePool([_mint_response(access_token="eyJ.minted.jwt")])
+    mgr = _TokenManager(raw, _config(), pool=pool)
 
-    assert mgr.bearer_value() == "test-key"
-    assert pool.calls == []
+    assert mgr.bearer_value() == "eyJ.minted.jwt"
+    assert len(pool.calls) == 1
+    assert _form(pool.calls[0]["body"])["api_token"] == [raw]
 
 
-def test_configuration_with_non_hd_key_never_mints() -> None:
-    """End-to-end regression for the predicate: building a Configuration with a
-    non-``hd_`` key (as the arrow tests do) must not trigger a network mint when
-    ``auth_settings()`` reads ``api_key``."""
-    cfg = Configuration(host="https://api.hotdata.test", api_key="test-key")
-    # Wire a recording pool in; if exchange were (wrongly) attempted it would
-    # show up here instead of trying a real socket.
-    pool = _FakePool([_mint_response()])
+def test_configuration_exchanges_bare_token_then_opt_out_passes_through(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """End-to-end at the Configuration level: a bare token is exchanged so
+    ``auth_settings()`` carries the minted JWT; with the opt-out env var set the
+    raw token is sent unchanged (the arrow-test style dummy-key setup)."""
+    raw = "8a4bfd9c0bare0token"
+
+    # Exchange path: auth_settings() carries the minted JWT, not the raw token.
+    pool = _FakePool([_mint_response(access_token="eyJ.live.jwt")])
+    cfg = Configuration(host="https://api.hotdata.test", api_key=raw)
     cfg._token_manager._pool = pool
+    assert _bearer_from(cfg.auth_settings()) == "Bearer eyJ.live.jwt"
+    assert len(pool.calls) == 1
 
-    assert cfg.api_key == "test-key"
-    bearer = _bearer_from(cfg.auth_settings())
-    assert bearer == "Bearer test-key"
-    assert pool.calls == []
+    # Opt-out path: same raw token, exchange disabled -> sent as-is, no mint.
+    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", "1")
+    pool2 = _FakePool([_mint_response()])
+    cfg2 = Configuration(host="https://api.hotdata.test", api_key=raw)
+    cfg2._token_manager._pool = pool2
+    assert _bearer_from(cfg2.auth_settings()) == f"Bearer {raw}"
+    assert pool2.calls == []
 
 
 # --------------------------------------------------------------------------

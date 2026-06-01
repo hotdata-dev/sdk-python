@@ -82,6 +82,11 @@ def _install_fake_response(
 ) -> None:
     """Replace RESTClientObject.request with a stub that records the call."""
 
+    # The api_key used here ("test-key") is a dummy, not a real token. Disable
+    # transparent JWT exchange so auth_settings() does not try to mint one
+    # against a non-existent endpoint when the (stubbed) request is built.
+    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", "1")
+
     from hotdata import rest
 
     def fake_request(
