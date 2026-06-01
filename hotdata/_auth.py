@@ -13,9 +13,10 @@ additionally listed in ``.openapi-generator-ignore`` as belt-and-suspenders.
 
 Key behaviors:
 
-* **Pass-through** -- a credential that already looks like a JWT (``eyJ``
-  prefix, matching the Gateway's own ``^Bearer eyJ.*`` detection) is returned
-  unchanged and never exchanged.
+* **Pass-through** -- only ``hd_`` API tokens are exchanged. A credential that
+  already looks like a JWT (``eyJ`` prefix), or any other non-``hd_`` value
+  (local/dev/test credentials), is returned unchanged and never exchanged, so
+  local setups and the rollout window keep working.
 * **Opt-out** -- if ``HOTDATA_DISABLE_JWT_EXCHANGE`` is set to any truthy value,
   the credential is always returned as-is (hard escape hatch for rollout).
 * **In-memory cache only** -- no disk writes. The server already de-duplicates
@@ -43,6 +44,7 @@ import urllib3
 _LEEWAY = 30          # refresh when <30s of life remains
 _TIMEOUT = 30.0       # seconds -- never let a stalled token endpoint hang every request
 _CLIENT_ID = "hotdata-python-sdk"
+_API_TOKEN_PREFIX = "hd_"   # only credentials with this prefix are exchanged
 
 # Env var that disables exchange entirely (any truthy value). Used as a hard
 # escape hatch during the rollout window and for local/dev setups.
@@ -95,6 +97,15 @@ def _pool_from_config(configuration):
         "key_file": configuration.key_file,
         "ca_cert_data": configuration.ca_cert_data,
     }
+    # Mirror rest.py's hostname/SNI handling so the exchange call does not
+    # silently fail for users who customize them (corporate MITM proxies set
+    # assert_hostname; some gateways require an explicit tls_server_name/SNI).
+    if configuration.assert_hostname is not None:
+        pool_args["assert_hostname"] = configuration.assert_hostname
+    if configuration.tls_server_name:
+        pool_args["server_hostname"] = configuration.tls_server_name
+    # `retries`/`maxsize` are intentionally not mirrored: the exchange is a
+    # single bounded-timeout request that fails fast rather than retrying.
 
     if configuration.proxy:
         if _is_socks_proxy_url(configuration.proxy):
@@ -112,8 +123,8 @@ def _pool_from_config(configuration):
 class _TokenManager:
     """Exchanges an API token for short-lived JWTs and keeps them fresh.
 
-    Pass-through for anything that already looks like a JWT (``eyJ`` prefix),
-    matching the Gateway's own ``^Bearer eyJ.*`` detection, and for any
+    Only ``hd_`` API tokens are exchanged; anything else (raw ``eyJ`` JWTs,
+    local/dev/test credentials) is passed through unchanged, as is any
     credential when ``HOTDATA_DISABLE_JWT_EXCHANGE`` is set.
     """
 
@@ -132,11 +143,12 @@ class _TokenManager:
         # send the credential as-is, never touching the token endpoint.
         if os.environ.get(_DISABLE_ENV):
             return False
-        # A compact JWT always starts with "eyJ" (base64 of '{"'). Anything
-        # else (hd_... or other opaque API tokens) must be exchanged.
-        # (Alternative: treat a 3-segment dotted string as a JWT -- the webapp
-        # uses dot-count detection. eyJ-prefix matches the Gateway and is fine.)
-        return isinstance(self._credential, str) and not self._credential.startswith("eyJ")
+        # Exchange only real ``hd_`` API tokens. Everything else is passed
+        # through untouched: raw JWTs (``eyJ`` prefix) are already what we want
+        # on the wire, and non-``hd_`` values (local/dev/test credentials) must
+        # not be sent to the token endpoint -- doing so would break local setups
+        # and the rollout window (see the design's pass-through edge case).
+        return isinstance(self._credential, str) and self._credential.startswith(_API_TOKEN_PREFIX)
 
     def bearer_value(self):
         """Return a live JWT (exchanging + caching), or the credential as-is.
@@ -181,7 +193,12 @@ class _TokenManager:
             raise TokenExchangeError(
                 f"token exchange failed: {resp.status} {resp.data[:200]!r}"
             )
-        data = json.loads(resp.data)
+        try:
+            data = json.loads(resp.data)
+        except (ValueError, TypeError) as exc:
+            raise TokenExchangeError(
+                f"token exchange returned a non-JSON body: {resp.data[:200]!r}"
+            ) from exc
         self._jwt = data["access_token"]
         self._exp = time.time() + data.get("expires_in", 300)
         self._refresh = data.get("refresh_token") or self._refresh

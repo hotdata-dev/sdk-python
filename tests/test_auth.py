@@ -41,6 +41,7 @@ from hotdata._auth import (
     _LEEWAY,
     TokenExchangeError,
     _TokenManager,
+    _pool_from_config,
 )
 
 
@@ -132,6 +133,15 @@ def _form(body: Any) -> Dict[str, List[str]]:
     if isinstance(body, (bytes, bytearray)):
         body = body.decode()
     return parse_qs(body)
+
+
+def _bearer_from(auth: Dict[str, Any]) -> str:
+    """Pull the ``Authorization: Bearer ...`` value out of auth_settings()."""
+    for setting in auth.values():
+        value = str(setting.get("value", ""))
+        if value.startswith("Bearer "):
+            return value
+    raise AssertionError(f"no Bearer auth setting found in {auth!r}")
 
 
 # --------------------------------------------------------------------------
@@ -387,3 +397,99 @@ def test_deepcopied_manager_credential_still_mints() -> None:
     assert mgr_b.bearer_value() == "eyJ.b.jwt"
     assert len(pool_a.calls) == 1
     assert len(pool_b.calls) == 1
+
+
+# --------------------------------------------------------------------------
+# Non-hd_ credentials pass through (only real API tokens are exchanged)
+# --------------------------------------------------------------------------
+
+
+def test_non_hd_credential_is_passed_through_unchanged() -> None:
+    """Only ``hd_`` API tokens are exchanged. A non-``hd_`` value (e.g. a
+    local/dev/test credential) must be sent as-is and never hit the token
+    endpoint -- otherwise local setups and the rollout window break."""
+    pool = _FakePool([_mint_response()])
+    mgr = _TokenManager("test-key", _config(), pool=pool)
+
+    assert mgr.bearer_value() == "test-key"
+    assert pool.calls == []
+
+
+def test_configuration_with_non_hd_key_never_mints() -> None:
+    """End-to-end regression for the predicate: building a Configuration with a
+    non-``hd_`` key (as the arrow tests do) must not trigger a network mint when
+    ``auth_settings()`` reads ``api_key``."""
+    cfg = Configuration(host="https://api.hotdata.test", api_key="test-key")
+    # Wire a recording pool in; if exchange were (wrongly) attempted it would
+    # show up here instead of trying a real socket.
+    pool = _FakePool([_mint_response()])
+    cfg._token_manager._pool = pool
+
+    assert cfg.api_key == "test-key"
+    bearer = _bearer_from(cfg.auth_settings())
+    assert bearer == "Bearer test-key"
+    assert pool.calls == []
+
+
+# --------------------------------------------------------------------------
+# Configuration.api_key property + auth_settings() end-to-end
+# --------------------------------------------------------------------------
+
+
+def test_configuration_api_key_property_and_auth_settings_use_jwt() -> None:
+    """The whole point of the design: ``Configuration.api_key`` returns a live
+    JWT and ``auth_settings()`` assembles ``Authorization: Bearer <jwt>`` from
+    it -- the regen-critical path that must keep working."""
+    pool = _FakePool([_mint_response(access_token="eyJ.live.jwt", expires_in=300)])
+    cfg = _config()
+    cfg._token_manager = _TokenManager("hd_secret_token", cfg, pool=pool)
+
+    assert cfg.api_key == "eyJ.live.jwt"
+    assert _bearer_from(cfg.auth_settings()) == "Bearer eyJ.live.jwt"
+    # Property getter + auth_settings together mint once and then cache.
+    assert len(pool.calls) == 1
+
+
+# --------------------------------------------------------------------------
+# _pool_from_config mirrors rest.py's TLS/SNI handling
+# --------------------------------------------------------------------------
+
+
+def test_pool_from_config_honors_assert_hostname_and_sni() -> None:
+    """A user who sets ``assert_hostname`` (corporate MITM) or
+    ``tls_server_name`` (custom SNI) must have those applied to the exchange
+    pool too, or the token call silently fails while normal calls work."""
+    cfg = _config()
+    cfg.assert_hostname = False
+    cfg.tls_server_name = "sni.internal.test"
+
+    pool = _pool_from_config(cfg)
+    kw = pool.connection_pool_kw
+
+    assert kw.get("assert_hostname") is False
+    assert kw.get("server_hostname") == "sni.internal.test"
+
+
+def test_pool_from_config_omits_hostname_args_when_unset() -> None:
+    """When the user has not customized them, the args are absent (so urllib3
+    uses its defaults) -- mirroring rest.py's conditional adds."""
+    pool = _pool_from_config(_config())
+    kw = pool.connection_pool_kw
+
+    assert "assert_hostname" not in kw
+    assert "server_hostname" not in kw
+
+
+# --------------------------------------------------------------------------
+# Malformed (non-JSON) success body
+# --------------------------------------------------------------------------
+
+
+def test_non_json_success_body_raises_token_exchange_error() -> None:
+    """A 200 with a non-JSON body (e.g. a misrouted health page) surfaces as a
+    clear TokenExchangeError rather than a bare JSONDecodeError."""
+    pool = _FakePool([_FakeResponse(200, b"<html>not json</html>")])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+
+    with pytest.raises(TokenExchangeError):
+        mgr.bearer_value()
