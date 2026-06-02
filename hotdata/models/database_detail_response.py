@@ -30,11 +30,12 @@ class DatabaseDetailResponse(BaseModel):
     Response body for GET /databases/{database_id}
     """ # noqa: E501
     attachments: List[DatabaseAttachmentInfo]
+    default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope (`default` unless overridden at create time).")
     default_connection_id: StrictStr
     expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["attachments", "default_connection_id", "expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["attachments", "default_catalog", "default_connection_id", "expires_at", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -105,6 +106,7 @@ class DatabaseDetailResponse(BaseModel):
 
         _obj = cls.model_validate({
             "attachments": [DatabaseAttachmentInfo.from_dict(_item) for _item in obj["attachments"]] if obj.get("attachments") is not None else None,
+            "default_catalog": obj.get("default_catalog"),
             "default_connection_id": obj.get("default_connection_id"),
             "expires_at": obj.get("expires_at"),
             "id": obj.get("id"),
