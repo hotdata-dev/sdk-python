@@ -2,6 +2,15 @@ name: Regenerate Client
 
 on:
   workflow_dispatch:
+    inputs:
+      title:
+        description: PR title, auto-generated from the spec diff in www.
+        required: false
+        type: string
+      summary:
+        description: PR body summarizing the spec changes.
+        required: false
+        type: string
 
 jobs:
   regenerate:
@@ -240,10 +249,10 @@ jobs:
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           token: ${{ steps.app-token.outputs.token }}
-          title: "chore: regenerate client from updated OpenAPI spec"
+          title: "${{ inputs.title || 'chore: regenerate client from updated OpenAPI spec' }}"
           branch: openapi-update-${{ github.run_id }}
-          commit-message: "chore: regenerate client from OpenAPI spec"
-          body: "Auto-generated from updated HotData OpenAPI spec."
+          commit-message: "${{ inputs.title || 'chore: regenerate client from OpenAPI spec' }}"
+          body: "${{ inputs.summary || 'Auto-generated from updated HotData OpenAPI spec.' }}"
 
       # Enable native auto-merge (squash). Branch protection on main gates the
       # merge on the test checks (scenario-parity, integration) plus the org
