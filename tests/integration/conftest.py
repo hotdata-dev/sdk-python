@@ -15,15 +15,23 @@ import pytest
 
 from hotdata import ApiClient, Configuration
 from hotdata.api.connections_api import ConnectionsApi
+from hotdata.api.databases_api import DatabasesApi
 from hotdata.api.datasets_api import DatasetsApi
 from hotdata.api.indexes_api import IndexesApi
 from hotdata.api.saved_queries_api import SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi
 from hotdata.api.workspaces_api import WorkspacesApi
+from hotdata.models.create_database_request import CreateDatabaseRequest
 
 
 REQUIRED_ENV = ("HOTDATA_SDK_TEST_API_KEY", "HOTDATA_SDK_TEST_WORKSPACE_ID")
 DEFAULT_API_URL = "https://api.hotdata.dev"
+
+# Queries are scoped to a database via the X-Database-Id header. Databases no
+# longer auto-expire, so rather than create one per run (which would leak),
+# tests find-or-create a single stable database by name and reuse it — same
+# pattern as the e2e suite. Name is not unique server-side; we key off it.
+SHARED_DATABASE_NAME = "sdkci-shared"
 
 
 @dataclass(frozen=True)
@@ -79,6 +87,23 @@ def connection_id(env: TestEnv) -> str:
     return env.connection_id
 
 
+@pytest.fixture(scope="session")
+def database_id(api_client: ApiClient) -> str:
+    """Id of the shared `sdkci-shared` database, creating it if absent.
+
+    Queries require an `X-Database-Id` scope; databases persist (no auto-expiry)
+    so we reuse one across runs instead of creating-and-deleting per session.
+    """
+    databases_api = DatabasesApi(api_client)
+    for db in databases_api.list_databases().databases:
+        if db.name == SHARED_DATABASE_NAME:
+            return db.id
+    created = databases_api.create_database(
+        CreateDatabaseRequest(name=SHARED_DATABASE_NAME)
+    )
+    return created.id
+
+
 @pytest.fixture
 def sdkci_name() -> "callable[[str], str]":
     """Returns `sdkci-<scenario>-<uuid8>` so orphans are identifiable.
@@ -107,6 +132,11 @@ def workspaces_api(api_client: ApiClient) -> WorkspacesApi:
 @pytest.fixture
 def connections_api(api_client: ApiClient) -> ConnectionsApi:
     return ConnectionsApi(api_client)
+
+
+@pytest.fixture
+def databases_api(api_client: ApiClient) -> DatabasesApi:
+    return DatabasesApi(api_client)
 
 
 @pytest.fixture
