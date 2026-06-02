@@ -30,10 +30,11 @@ class QueryRequest(BaseModel):
     """ # noqa: E501
     var_async: Optional[StrictBool] = Field(default=None, description="When true, execute the query asynchronously and return a query run ID for polling via GET /query-runs/{id}. The query results can be retrieved via GET /results/{id} once the query run status is \"succeeded\".", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set with async=true, wait up to this many milliseconds for the query to complete synchronously before returning an async response. Minimum 1000ms. Ignored if async is false.")
-    default_catalog: Optional[StrictStr] = Field(default=None, description="Catalog that unqualified table references resolve against. Only honored inside an `X-Database-Id` scope; sending it without that header is a 400. Must name a catalog visible in the database (`default`, an attached catalog alias, or a system catalog). Defaults to `default` when omitted.")
-    default_schema: Optional[StrictStr] = Field(default=None, description="Schema that unqualified table references resolve against. Only honored inside an `X-Database-Id` scope; sending it without that header is a 400. Defaults to `main` when omitted. Existence is not validated up front — an unknown schema surfaces as a \"table not found\" error at planning time.")
+    database_id: Optional[StrictStr] = Field(default=None, description="Database to scope the query to (its id). Alternative to the `X-Database-Id` header — exactly one source must be provided. If both this field and the header are set and they disagree, the request is rejected with a 400.")
+    default_catalog: Optional[StrictStr] = Field(default=None, description="Catalog that unqualified table references resolve against within the query's database scope. Must name a catalog visible in the database (`default`, an attached catalog alias, or a system catalog). Defaults to `default` when omitted.")
+    default_schema: Optional[StrictStr] = Field(default=None, description="Schema that unqualified table references resolve against within the query's database scope. Defaults to `main` when omitted. Existence is not validated up front — an unknown schema surfaces as a \"table not found\" error at planning time.")
     sql: StrictStr
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "default_catalog", "default_schema", "sql"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "database_id", "default_catalog", "default_schema", "sql"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -79,6 +80,11 @@ class QueryRequest(BaseModel):
         if self.async_after_ms is None and "async_after_ms" in self.model_fields_set:
             _dict['async_after_ms'] = None
 
+        # set to None if database_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.database_id is None and "database_id" in self.model_fields_set:
+            _dict['database_id'] = None
+
         # set to None if default_catalog (nullable) is None
         # and model_fields_set contains the field
         if self.default_catalog is None and "default_catalog" in self.model_fields_set:
@@ -103,6 +109,7 @@ class QueryRequest(BaseModel):
         _obj = cls.model_validate({
             "async": obj.get("async"),
             "async_after_ms": obj.get("async_after_ms"),
+            "database_id": obj.get("database_id"),
             "default_catalog": obj.get("default_catalog"),
             "default_schema": obj.get("default_schema"),
             "sql": obj.get("sql")

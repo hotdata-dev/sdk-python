@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Typed `x_database_id` parameter on `SavedQueriesApi.execute_saved_query` (required) and `DatasetsApi.create_dataset`, scoping execution to a database the same way `QueryApi.query` does — no more `_headers` override.
+- `database_id` field on `QueryRequest` as a body-level alternative to the `X-Database-Id` header.
+- `storage_backend` field on `CreateDatabaseRequest` to select the default catalog's physical backend (`parquet` or `ducklake`).
+
 
 ## [0.2.6] - 2026-05-29
 

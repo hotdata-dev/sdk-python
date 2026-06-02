@@ -182,11 +182,11 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **execute_saved_query**
-> QueryResponse execute_saved_query(id, execute_saved_query_request=execute_saved_query_request)
+> QueryResponse execute_saved_query(id, x_database_id, execute_saved_query_request=execute_saved_query_request)
 
 Execute saved query
 
-Execute a saved query. By default runs the latest version. Optionally specify a version number to execute a previous version. Returns the same response format as POST /v1/query.
+Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
 
 ### Example
 
@@ -227,11 +227,12 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.SavedQueriesApi(api_client)
     id = 'id_example' # str | Saved query ID
+    x_database_id = 'x_database_id_example' # str | Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.
     execute_saved_query_request = hotdata.ExecuteSavedQueryRequest() # ExecuteSavedQueryRequest | Optional version to execute (optional)
 
     try:
         # Execute saved query
-        api_response = api_instance.execute_saved_query(id, execute_saved_query_request=execute_saved_query_request)
+        api_response = api_instance.execute_saved_query(id, x_database_id, execute_saved_query_request=execute_saved_query_request)
         print("The response of SavedQueriesApi->execute_saved_query:\n")
         pprint(api_response)
     except Exception as e:
@@ -246,6 +247,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Saved query ID | 
+ **x_database_id** | **str**| Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. | 
  **execute_saved_query_request** | [**ExecuteSavedQueryRequest**](ExecuteSavedQueryRequest.md)| Optional version to execute | [optional] 
 
 ### Return type
@@ -266,7 +268,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Query executed |  -  |
-**404** | Saved query not found |  -  |
+**400** | Invalid request (including a missing X-Database-Id header) |  -  |
+**404** | Saved query or database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
