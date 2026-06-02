@@ -13,7 +13,7 @@ from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest
 
 
 def test_saved_query_versioning(
-    saved_queries_api: SavedQueriesApi, sdkci_name
+    saved_queries_api: SavedQueriesApi, sdkci_name, database_id: str
 ) -> None:
     name = sdkci_name("savedq-versioning")
     created_id: str | None = None
@@ -50,7 +50,12 @@ def test_saved_query_versioning(
             f"expected versions 1,2,3 in {sorted(version_numbers)}"
         )
 
-        executed = saved_queries_api.execute_saved_query(created.id)
+        # execute_saved_query runs SQL, so it also needs the database scope.
+        # The endpoint has no typed x_database_id param yet, so set the header
+        # directly via the _headers override.
+        executed = saved_queries_api.execute_saved_query(
+            created.id, _headers={"X-Database-Id": database_id}
+        )
         assert executed.row_count == 1
         assert executed.rows == [[3]]
     finally:

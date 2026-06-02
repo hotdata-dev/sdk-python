@@ -40,13 +40,15 @@ def test_query_async_polling(
     query_api: QueryApi,
     query_runs_api: QueryRunsApi,
     results_api: ResultsApi,
+    database_id: str,
 ) -> None:
     # async=True with a small async_after_ms forces the run to come back as
     # AsyncQueryResponse rather than synchronous. The QueryResponse / async
     # response variants are union-shaped on the client; we treat anything with
     # query_run_id as the start of the polling loop.
     submitted = query_api.query(
-        QueryRequest(var_async=True, async_after_ms=1000, sql="SELECT 1 AS x")
+        QueryRequest(var_async=True, async_after_ms=1000, sql="SELECT 1 AS x"),
+        x_database_id=database_id,
     )
     query_run_id = submitted.query_run_id
     assert query_run_id

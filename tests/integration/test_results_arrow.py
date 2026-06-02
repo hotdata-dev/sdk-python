@@ -46,13 +46,15 @@ def test_results_arrow(
     query_api: QueryApi,
     query_runs_api: QueryRunsApi,
     results_api: ResultsApi,
+    database_id: str,
 ) -> None:
     submitted = query_api.query(
         QueryRequest(
             var_async=True,
             async_after_ms=1000,
             sql="SELECT 1 AS x, 'hello' AS msg UNION ALL SELECT 2, 'world'",
-        )
+        ),
+        x_database_id=database_id,
     )
     query_run_id = submitted.query_run_id
     assert query_run_id
