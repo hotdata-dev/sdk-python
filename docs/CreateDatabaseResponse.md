@@ -6,6 +6,7 @@ Response body for POST /databases
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**default_catalog** | **str** | Name the database&#39;s default catalog answers to inside its query scope (&#x60;default&#x60; unless overridden at create time). | 
 **default_connection_id** | **str** | Internal id of the connection that backs this database&#39;s &#x60;default&#x60; catalog. Workspace-level connection endpoints (list, get, health, delete, cache purge) refuse to act on this id — it is exposed only for the managed-tables load endpoint (&#x60;POST /v1/connections/{id}/schemas/{s}/tables/{t}/loads&#x60;) so callers can publish parquet into tables declared at database-create time. Addressing it directly in SQL is not the recommended path — use &#x60;default&#x60; inside an &#x60;X-Database-Id&#x60; scope instead. | 
 **expires_at** | **datetime** | When this database expires. | [optional] 
 **id** | **str** |  | 

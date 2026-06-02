@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,10 +28,11 @@ class DatabaseSummary(BaseModel):
     """
     Summary item in GET /databases
     """ # noqa: E501
+    default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope.")
     expires_at: Optional[datetime] = None
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["default_catalog", "expires_at", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,6 +95,7 @@ class DatabaseSummary(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "default_catalog": obj.get("default_catalog"),
             "expires_at": obj.get("expires_at"),
             "id": obj.get("id"),
             "name": obj.get("name")

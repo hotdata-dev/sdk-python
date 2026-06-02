@@ -28,11 +28,12 @@ class CreateDatabaseRequest(BaseModel):
     """
     Request body for POST /databases
     """ # noqa: E501
+    default_catalog: Optional[StrictStr] = Field(default=None, description="Optional name the database's auto-created default catalog answers to inside its query scope. Must be a valid SQL identifier (`[a-z0-9_]`, not starting with a digit) and may not collide with the system catalogs `hotdata`, `datasets`, or `information_schema`. Defaults to `default` when omitted, so `default.main.<table>` keeps working.")
     expires_at: Optional[StrictStr] = Field(default=None, description="When this database expires. Accepts either an RFC 3339 timestamp (e.g. `\"2026-06-01T00:00:00Z\"`) or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days) — for example `\"24h\"`, `\"48h\"`, or `\"7d\"`. Omitted (or empty) means the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.")
     name: Optional[StrictStr] = Field(default=None, description="Optional free-form display label (for UIs/CLIs). Not unique. Not an identifier — databases are always addressed by `id`.  Accepts the legacy `description` key as an alias so clients that predate the rename keep populating this field.")
-    schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Optional schemas/tables to declare on the database's auto-created `default` catalog. Mirrors the `config.schemas` field of a managed `POST /v1/connections`. Tables declared here can be loaded via the standard managed-table load endpoint targeting `default_connection_id`. Omitted or empty means the default catalog starts empty.")
+    schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Optional schemas/tables to declare on the database's auto-created default catalog. Mirrors the `config.schemas` field of a managed `POST /v1/connections`. Tables declared here can be loaded via the standard managed-table load endpoint targeting `default_connection_id`. Omitted or empty means the default catalog starts empty.")
     storage_backend: Optional[StrictStr] = Field(default=None, description="Physical storage backend for the database's auto-created `default` catalog. `\"parquet\"` (default) uses the versioned parquet cache. `\"ducklake\"` stores data in a DuckLake catalog in the shared metadata DB configured via `ducklake.metadata_pg_url`, which must be configured for that value to be accepted. Omitted means `\"parquet\"`.")
-    __properties: ClassVar[List[str]] = ["expires_at", "name", "schemas", "storage_backend"]
+    __properties: ClassVar[List[str]] = ["default_catalog", "expires_at", "name", "schemas", "storage_backend"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -80,6 +81,11 @@ class CreateDatabaseRequest(BaseModel):
                 if _item_schemas:
                     _items.append(_item_schemas.to_dict())
             _dict['schemas'] = _items
+        # set to None if default_catalog (nullable) is None
+        # and model_fields_set contains the field
+        if self.default_catalog is None and "default_catalog" in self.model_fields_set:
+            _dict['default_catalog'] = None
+
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
@@ -107,6 +113,7 @@ class CreateDatabaseRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "default_catalog": obj.get("default_catalog"),
             "expires_at": obj.get("expires_at"),
             "name": obj.get("name"),
             "schemas": [DatabaseDefaultSchemaDecl.from_dict(_item) for _item in obj["schemas"]] if obj.get("schemas") is not None else None,
