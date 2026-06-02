@@ -50,11 +50,10 @@ def test_saved_query_versioning(
             f"expected versions 1,2,3 in {sorted(version_numbers)}"
         )
 
-        # execute_saved_query runs SQL, so it also needs the database scope.
-        # The endpoint has no typed x_database_id param yet, so set the header
-        # directly via the _headers override.
+        # execute_saved_query runs SQL, so it also needs the database scope,
+        # passed via the typed x_database_id parameter.
         executed = saved_queries_api.execute_saved_query(
-            created.id, _headers={"X-Database-Id": database_id}
+            created.id, x_database_id=database_id
         )
         assert executed.row_count == 1
         assert executed.rows == [[3]]

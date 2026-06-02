@@ -13,11 +13,13 @@ Method | HTTP request | Description
 
 
 # **create_dataset**
-> CreateDatasetResponse create_dataset(create_dataset_request)
+> CreateDatasetResponse create_dataset(create_dataset_request, x_database_id=x_database_id)
 
 Create dataset
 
-Create a new dataset from an uploaded file or inline data. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.
+Create a new dataset from an uploaded file, inline data, a URL, or a SQL/saved query. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.
+
+For `sql_query` / `saved_query` sources the dataset materializes by running that SQL, so the `X-Database-Id` header is required and the query sees only that database's catalogs (the scope is also reused on refresh). Upload/url/inline sources ignore the header.
 
 ### Example
 
@@ -65,10 +67,11 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.DatasetsApi(api_client)
     create_dataset_request = hotdata.CreateDatasetRequest() # CreateDatasetRequest | 
+    x_database_id = 'x_database_id_example' # str | Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404. (optional)
 
     try:
         # Create dataset
-        api_response = api_instance.create_dataset(create_dataset_request)
+        api_response = api_instance.create_dataset(create_dataset_request, x_database_id=x_database_id)
         print("The response of DatasetsApi->create_dataset:\n")
         pprint(api_response)
     except Exception as e:
@@ -83,6 +86,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **create_dataset_request** | [**CreateDatasetRequest**](CreateDatasetRequest.md)|  | 
+ **x_database_id** | **str**| Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404. | [optional] 
 
 ### Return type
 
@@ -102,7 +106,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Dataset created |  -  |
-**400** | Invalid request |  -  |
+**400** | Invalid request (query-backed dataset without X-Database-Id) |  -  |
+**404** | Database (from X-Database-Id) not found |  -  |
 **409** | Dataset already exists |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
