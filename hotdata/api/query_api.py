@@ -44,7 +44,7 @@ class QueryApi:
     def query(
         self,
         query_request: QueryRequest,
-        x_database_id: Annotated[Optional[StrictStr], Field(description="Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -60,11 +60,11 @@ class QueryApi:
     ) -> QueryResponse:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  Set the `X-Database-Id` header to scope the query to a specific database. Inside a database scope the query only sees that database's auto `default` catalog plus any catalogs explicitly attached to it; workspace catalogs are invisible.
+        Execute a SQL query scoped to a database. A database is the only window into catalogs: the query sees only that database's auto `default` catalog plus any catalogs explicitly attached to it. Select the database with EITHER the `X-Database-Id` header OR the `database_id` body field (exactly one must be given; if both are sent and disagree, that's a 400). Use standard Postgres-compatible SQL; reference the default catalog as `default.<schema>.<table>` (or just `<schema>.<table>` / `<table>`) and attached catalogs by their alias. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
 
         :param query_request: (required)
         :type query_request: QueryRequest
-        :param x_database_id: Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :param x_database_id: Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -119,7 +119,7 @@ class QueryApi:
     def query_with_http_info(
         self,
         query_request: QueryRequest,
-        x_database_id: Annotated[Optional[StrictStr], Field(description="Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -135,11 +135,11 @@ class QueryApi:
     ) -> ApiResponse[QueryResponse]:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  Set the `X-Database-Id` header to scope the query to a specific database. Inside a database scope the query only sees that database's auto `default` catalog plus any catalogs explicitly attached to it; workspace catalogs are invisible.
+        Execute a SQL query scoped to a database. A database is the only window into catalogs: the query sees only that database's auto `default` catalog plus any catalogs explicitly attached to it. Select the database with EITHER the `X-Database-Id` header OR the `database_id` body field (exactly one must be given; if both are sent and disagree, that's a 400). Use standard Postgres-compatible SQL; reference the default catalog as `default.<schema>.<table>` (or just `<schema>.<table>` / `<table>`) and attached catalogs by their alias. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
 
         :param query_request: (required)
         :type query_request: QueryRequest
-        :param x_database_id: Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :param x_database_id: Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -194,7 +194,7 @@ class QueryApi:
     def query_without_preload_content(
         self,
         query_request: QueryRequest,
-        x_database_id: Annotated[Optional[StrictStr], Field(description="Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -210,11 +210,11 @@ class QueryApi:
     ) -> RESTResponseType:
         """Execute SQL query
 
-        Execute a SQL query against all registered connections and datasets. Use standard Postgres-compatible SQL to reference tables from any connection using the format `connection_name.schema.table`. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  Set the `X-Database-Id` header to scope the query to a specific database. Inside a database scope the query only sees that database's auto `default` catalog plus any catalogs explicitly attached to it; workspace catalogs are invisible.
+        Execute a SQL query scoped to a database. A database is the only window into catalogs: the query sees only that database's auto `default` catalog plus any catalogs explicitly attached to it. Select the database with EITHER the `X-Database-Id` header OR the `database_id` body field (exactly one must be given; if both are sent and disagree, that's a 400). Use standard Postgres-compatible SQL; reference the default catalog as `default.<schema>.<table>` (or just `<schema>.<table>` / `<table>`) and attached catalogs by their alias. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
 
         :param query_request: (required)
         :type query_request: QueryRequest
-        :param x_database_id: Scope the query to a specific database (its id). When set, only the database's attached catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :param x_database_id: Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

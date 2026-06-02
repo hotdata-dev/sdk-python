@@ -49,6 +49,7 @@ class DatasetsApi:
     def create_dataset(
         self,
         create_dataset_request: CreateDatasetRequest,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -64,10 +65,12 @@ class DatasetsApi:
     ) -> CreateDatasetResponse:
         """Create dataset
 
-        Create a new dataset from an uploaded file or inline data. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.
+        Create a new dataset from an uploaded file, inline data, a URL, or a SQL/saved query. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.  For `sql_query` / `saved_query` sources the dataset materializes by running that SQL, so the `X-Database-Id` header is required and the query sees only that database's catalogs (the scope is also reused on refresh). Upload/url/inline sources ignore the header.
 
         :param create_dataset_request: (required)
         :type create_dataset_request: CreateDatasetRequest
+        :param x_database_id: Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404.
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -92,6 +95,7 @@ class DatasetsApi:
 
         _param = self._create_dataset_serialize(
             create_dataset_request=create_dataset_request,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -101,6 +105,7 @@ class DatasetsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "CreateDatasetResponse",
             '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -118,6 +123,7 @@ class DatasetsApi:
     def create_dataset_with_http_info(
         self,
         create_dataset_request: CreateDatasetRequest,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -133,10 +139,12 @@ class DatasetsApi:
     ) -> ApiResponse[CreateDatasetResponse]:
         """Create dataset
 
-        Create a new dataset from an uploaded file or inline data. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.
+        Create a new dataset from an uploaded file, inline data, a URL, or a SQL/saved query. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.  For `sql_query` / `saved_query` sources the dataset materializes by running that SQL, so the `X-Database-Id` header is required and the query sees only that database's catalogs (the scope is also reused on refresh). Upload/url/inline sources ignore the header.
 
         :param create_dataset_request: (required)
         :type create_dataset_request: CreateDatasetRequest
+        :param x_database_id: Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404.
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -161,6 +169,7 @@ class DatasetsApi:
 
         _param = self._create_dataset_serialize(
             create_dataset_request=create_dataset_request,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -170,6 +179,7 @@ class DatasetsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "CreateDatasetResponse",
             '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -187,6 +197,7 @@ class DatasetsApi:
     def create_dataset_without_preload_content(
         self,
         create_dataset_request: CreateDatasetRequest,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -202,10 +213,12 @@ class DatasetsApi:
     ) -> RESTResponseType:
         """Create dataset
 
-        Create a new dataset from an uploaded file or inline data. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.
+        Create a new dataset from an uploaded file, inline data, a URL, or a SQL/saved query. The dataset becomes a queryable table under the `datasets` schema (e.g., `SELECT * FROM datasets.my_table`). Supports CSV, JSON, and Parquet formats. Optionally specify explicit column types.  For `sql_query` / `saved_query` sources the dataset materializes by running that SQL, so the `X-Database-Id` header is required and the query sees only that database's catalogs (the scope is also reused on refresh). Upload/url/inline sources ignore the header.
 
         :param create_dataset_request: (required)
         :type create_dataset_request: CreateDatasetRequest
+        :param x_database_id: Required for query-backed datasets (sql_query / saved_query): the database whose catalogs the materializing query runs against. An unknown id is a 404.
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -230,6 +243,7 @@ class DatasetsApi:
 
         _param = self._create_dataset_serialize(
             create_dataset_request=create_dataset_request,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -239,6 +253,7 @@ class DatasetsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "CreateDatasetResponse",
             '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -251,6 +266,7 @@ class DatasetsApi:
     def _create_dataset_serialize(
         self,
         create_dataset_request,
+        x_database_id,
         _request_auth,
         _content_type,
         _headers,
@@ -274,6 +290,8 @@ class DatasetsApi:
         # process the path parameters
         # process the query parameters
         # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
         # process the form parameters
         # process the body parameter
         if create_dataset_request is not None:
