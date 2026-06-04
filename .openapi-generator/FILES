@@ -1,6 +1,9 @@
 .github/workflows/python.yml
 .gitignore
 .gitlab-ci.yml
+docs/AddManagedSchemaRequest.md
+docs/AddManagedTableDecl.md
+docs/AddManagedTableRequest.md
 docs/ApiErrorDetail.md
 docs/ApiErrorResponse.md
 docs/AsyncQueryResponse.md
@@ -99,6 +102,8 @@ docs/ListUploadsResponse.md
 docs/ListWorkspacesResponse.md
 docs/LoadManagedTableRequest.md
 docs/LoadManagedTableResponse.md
+docs/ManagedSchemaResponse.md
+docs/ManagedTableResponse.md
 docs/NumericProfileDetail.md
 docs/QueryApi.md
 docs/QueryRequest.md
@@ -175,6 +180,9 @@ hotdata/api_response.py
 hotdata/configuration.py
 hotdata/exceptions.py
 hotdata/models/__init__.py
+hotdata/models/add_managed_schema_request.py
+hotdata/models/add_managed_table_decl.py
+hotdata/models/add_managed_table_request.py
 hotdata/models/api_error_detail.py
 hotdata/models/api_error_response.py
 hotdata/models/async_query_response.py
@@ -264,6 +272,8 @@ hotdata/models/list_uploads_response.py
 hotdata/models/list_workspaces_response.py
 hotdata/models/load_managed_table_request.py
 hotdata/models/load_managed_table_response.py
+hotdata/models/managed_schema_response.py
+hotdata/models/managed_table_response.py
 hotdata/models/numeric_profile_detail.py
 hotdata/models/query_request.py
 hotdata/models/query_response.py
@@ -313,4 +323,9 @@ requirements.txt
 setup.cfg
 test-requirements.txt
 test/__init__.py
+test/test_add_managed_schema_request.py
+test/test_add_managed_table_decl.py
+test/test_add_managed_table_request.py
+test/test_managed_schema_response.py
+test/test_managed_table_response.py
 tox.ini

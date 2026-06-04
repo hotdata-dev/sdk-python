@@ -4,6 +4,8 @@ All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**add_managed_schema**](ConnectionsApi.md#add_managed_schema) | **POST** /v1/connections/{connection_id}/schemas | Add managed schema
+[**add_managed_table**](ConnectionsApi.md#add_managed_table) | **POST** /v1/connections/{connection_id}/schemas/{schema}/tables | Add managed table
 [**check_connection_health**](ConnectionsApi.md#check_connection_health) | **GET** /v1/connections/{connection_id}/health | Check connection health
 [**create_connection**](ConnectionsApi.md#create_connection) | **POST** /v1/connections | Create connection
 [**delete_connection**](ConnectionsApi.md#delete_connection) | **DELETE** /v1/connections/{connection_id} | Delete connection
@@ -15,6 +17,190 @@ Method | HTTP request | Description
 [**purge_connection_cache**](ConnectionsApi.md#purge_connection_cache) | **DELETE** /v1/connections/{connection_id}/cache | Purge connection cache
 [**purge_table_cache**](ConnectionsApi.md#purge_table_cache) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/cache | Purge table cache
 
+
+# **add_managed_schema**
+> ManagedSchemaResponse add_managed_schema(connection_id, add_managed_schema_request)
+
+Add managed schema
+
+Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.add_managed_schema_request import AddManagedSchemaRequest
+from hotdata.models.managed_schema_response import ManagedSchemaResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.ConnectionsApi(api_client)
+    connection_id = 'connection_id_example' # str | Connection ID
+    add_managed_schema_request = hotdata.AddManagedSchemaRequest() # AddManagedSchemaRequest | 
+
+    try:
+        # Add managed schema
+        api_response = api_instance.add_managed_schema(connection_id, add_managed_schema_request)
+        print("The response of ConnectionsApi->add_managed_schema:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling ConnectionsApi->add_managed_schema: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **connection_id** | **str**| Connection ID | 
+ **add_managed_schema_request** | [**AddManagedSchemaRequest**](AddManagedSchemaRequest.md)|  | 
+
+### Return type
+
+[**ManagedSchemaResponse**](ManagedSchemaResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**201** | Schema added |  -  |
+**400** | Connection is not a managed catalog or identifier is invalid |  -  |
+**404** | Connection not found |  -  |
+**409** | Schema already exists |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **add_managed_table**
+> ManagedTableResponse add_managed_table(connection_id, var_schema, add_managed_table_request)
+
+Add managed table
+
+Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.add_managed_table_request import AddManagedTableRequest
+from hotdata.models.managed_table_response import ManagedTableResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.ConnectionsApi(api_client)
+    connection_id = 'connection_id_example' # str | Connection ID
+    var_schema = 'var_schema_example' # str | Schema name
+    add_managed_table_request = hotdata.AddManagedTableRequest() # AddManagedTableRequest | 
+
+    try:
+        # Add managed table
+        api_response = api_instance.add_managed_table(connection_id, var_schema, add_managed_table_request)
+        print("The response of ConnectionsApi->add_managed_table:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling ConnectionsApi->add_managed_table: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **connection_id** | **str**| Connection ID | 
+ **var_schema** | **str**| Schema name | 
+ **add_managed_table_request** | [**AddManagedTableRequest**](AddManagedTableRequest.md)|  | 
+
+### Return type
+
+[**ManagedTableResponse**](ManagedTableResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**201** | Table added |  -  |
+**400** | Connection is not a managed catalog or identifier is invalid |  -  |
+**404** | Connection or schema not found |  -  |
+**409** | Table already exists |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **check_connection_health**
 > ConnectionHealthResponse check_connection_health(connection_id)
