@@ -14,6 +14,9 @@
 """  # noqa: E501
 
 # import models into model package
+from hotdata.models.add_managed_schema_request import AddManagedSchemaRequest
+from hotdata.models.add_managed_table_decl import AddManagedTableDecl
+from hotdata.models.add_managed_table_request import AddManagedTableRequest
 from hotdata.models.api_error_detail import ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse
 from hotdata.models.async_query_response import AsyncQueryResponse
@@ -103,6 +106,8 @@ from hotdata.models.list_uploads_response import ListUploadsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
+from hotdata.models.managed_schema_response import ManagedSchemaResponse
+from hotdata.models.managed_table_response import ManagedTableResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse

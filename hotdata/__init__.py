@@ -51,6 +51,9 @@ __all__ = [
     "ApiKeyError",
     "ApiAttributeError",
     "ApiException",
+    "AddManagedSchemaRequest",
+    "AddManagedTableDecl",
+    "AddManagedTableRequest",
     "ApiErrorDetail",
     "ApiErrorResponse",
     "AsyncQueryResponse",
@@ -140,6 +143,8 @@ __all__ = [
     "ListWorkspacesResponse",
     "LoadManagedTableRequest",
     "LoadManagedTableResponse",
+    "ManagedSchemaResponse",
+    "ManagedTableResponse",
     "NumericProfileDetail",
     "QueryRequest",
     "QueryResponse",
@@ -216,6 +221,9 @@ from hotdata.exceptions import ApiAttributeError as ApiAttributeError
 from hotdata.exceptions import ApiException as ApiException
 
 # import models into sdk package
+from hotdata.models.add_managed_schema_request import AddManagedSchemaRequest as AddManagedSchemaRequest
+from hotdata.models.add_managed_table_decl import AddManagedTableDecl as AddManagedTableDecl
+from hotdata.models.add_managed_table_request import AddManagedTableRequest as AddManagedTableRequest
 from hotdata.models.api_error_detail import ApiErrorDetail as ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse as ApiErrorResponse
 from hotdata.models.async_query_response import AsyncQueryResponse as AsyncQueryResponse
@@ -305,6 +313,8 @@ from hotdata.models.list_uploads_response import ListUploadsResponse as ListUplo
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest as LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse as LoadManagedTableResponse
+from hotdata.models.managed_schema_response import ManagedSchemaResponse as ManagedSchemaResponse
+from hotdata.models.managed_table_response import ManagedTableResponse as ManagedTableResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail as NumericProfileDetail
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
