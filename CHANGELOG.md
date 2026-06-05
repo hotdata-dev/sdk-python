@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.3.0] - 2026-06-05
+
 ### Added
 
+- Transparent API-token → JWT exchange: the client now exchanges an opaque API token for a short-lived JWT on first use and keeps it refreshed, so the wire always carries a current token. Credentials already shaped like a JWT pass through unchanged. Set `HOTDATA_DISABLE_JWT_EXCHANGE` to an affirmative value (`1`, `true`, `yes`, `on`) as a hard escape hatch.
+- Managed-catalog editing endpoints: `add_managed_schema` and `add_managed_table` on `ConnectionsApi` and `DatabasesApi`, with new models `AddManagedSchemaRequest`, `AddManagedTableDecl`, `AddManagedTableRequest`, `ManagedSchemaResponse`, and `ManagedTableResponse`.
 - Typed `x_database_id` parameter on `SavedQueriesApi.execute_saved_query` (required) and `DatasetsApi.create_dataset`, scoping execution to a database the same way `QueryApi.query` does — no more `_headers` override.
 - `database_id` field on `QueryRequest` as a body-level alternative to the `X-Database-Id` header.
 - `storage_backend` field on `CreateDatabaseRequest` to select the default catalog's physical backend (`parquet` or `ducklake`).
-
+- `default_catalog` field on `CreateDatabaseRequest` to name the database's auto-created default catalog within its query scope, surfaced on `CreateDatabaseResponse`, `DatabaseDetailResponse`, and `DatabaseSummary`.
 
 ## [0.2.6] - 2026-05-29
 
