@@ -14,13 +14,21 @@ from typing import Iterator
 import pytest
 
 from hotdata import ApiClient, Configuration
+from hotdata.api.connection_types_api import ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi
+from hotdata.api.database_context_api import DatabaseContextApi
 from hotdata.api.databases_api import DatabasesApi
 from hotdata.api.datasets_api import DatasetsApi
+from hotdata.api.embedding_providers_api import EmbeddingProvidersApi
 from hotdata.api.indexes_api import IndexesApi
+from hotdata.api.information_schema_api import InformationSchemaApi
+from hotdata.api.jobs_api import JobsApi
+from hotdata.api.refresh_api import RefreshApi
 from hotdata.api.saved_queries_api import SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi
+from hotdata.api.uploads_api import UploadsApi
 from hotdata.api.workspaces_api import WorkspacesApi
+from hotdata.exceptions import ApiException
 from hotdata.models.create_database_request import CreateDatabaseRequest
 
 
@@ -152,3 +160,60 @@ def saved_queries_api(api_client: ApiClient) -> SavedQueriesApi:
 @pytest.fixture
 def secrets_api(api_client: ApiClient) -> SecretsApi:
     return SecretsApi(api_client)
+
+
+@pytest.fixture
+def database_context_api(api_client: ApiClient) -> DatabaseContextApi:
+    return DatabaseContextApi(api_client)
+
+
+@pytest.fixture
+def embedding_providers_api(api_client: ApiClient) -> EmbeddingProvidersApi:
+    return EmbeddingProvidersApi(api_client)
+
+
+@pytest.fixture
+def connection_types_api(api_client: ApiClient) -> ConnectionTypesApi:
+    return ConnectionTypesApi(api_client)
+
+
+@pytest.fixture
+def jobs_api(api_client: ApiClient) -> JobsApi:
+    return JobsApi(api_client)
+
+
+@pytest.fixture
+def information_schema_api(api_client: ApiClient) -> InformationSchemaApi:
+    return InformationSchemaApi(api_client)
+
+
+@pytest.fixture
+def uploads_api(api_client: ApiClient) -> UploadsApi:
+    return UploadsApi(api_client)
+
+
+@pytest.fixture
+def refresh_api(api_client: ApiClient) -> RefreshApi:
+    return RefreshApi(api_client)
+
+
+@pytest.fixture
+def scratch_database(databases_api: DatabasesApi, sdkci_name) -> Iterator[str]:
+    """Yields the id of a fresh, isolated database, deleting it on teardown.
+
+    Unlike the session-scoped `database_id` (the shared `sdkci-shared` db reused
+    across runs), scenarios that declare schemas/tables/contexts or attach
+    catalogs need their own throwaway database so they never touch seeded data
+    or collide with a parallel run. `expires_at` is a safety net: if teardown is
+    interrupted, the server reclaims the database rather than leaking it.
+    """
+    created = databases_api.create_database(
+        CreateDatabaseRequest(name=sdkci_name("scratch"), expires_at="2h")
+    )
+    try:
+        yield created.id
+    finally:
+        try:
+            databases_api.delete_database(created.id)
+        except ApiException:
+            pass
