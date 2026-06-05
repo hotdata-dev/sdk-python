@@ -3,13 +3,12 @@
 Register an embedding provider, read it, confirm it appears in
 list_embedding_providers, update it, then delete it.
 
-The scenario calls for a credential-free provider. It nominally asks for
-`provider_type=local`, but the runtime currently rejects `local`
-("not yet supported; use 'service'"), so we register a `service` provider with
-**no** api_key/secret_name. A service provider's key is only consulted when
-embeddings are actually generated (indexing) — never at create/get/update — so
-this exercises the full CRUD surface without any real external credential and
-without auto-creating a secret that would need cleanup.
+The scenario calls for a `service` provider with **no** api_key/secret_name
+(not `local` — the runtime currently rejects `local` as "not yet supported").
+A service provider's key is only consulted when embeddings are actually
+generated (indexing) — never at create/get/update — so this exercises the full
+CRUD surface without any real external credential and without auto-creating a
+secret that would need cleanup.
 """
 
 from __future__ import annotations
