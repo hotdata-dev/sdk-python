@@ -5,34 +5,41 @@ against a fresh scratch database (whose default catalog is a managed catalog):
 
   1. declare a schema and a table on the database's default catalog connection,
   2. upload a small parquet file,
-  3. load it into the table (load_managed_table),
-  4. read get_table_profile,
-  5. refresh the catalog metadata,
-  6. purge_table_cache,
-  7. delete the managed table.
+  3. load it into the table (load_managed_table) and verify the load response,
+  4. delete the managed table.
+
+Notes on managed-catalog semantics (all confirmed against prod). A managed
+catalog rejects the maintenance ops that apply to external catalogs, so this
+scenario deliberately omits them:
+
+  * No `refresh` step — rejected with 400 on a managed catalog ("use the loads
+    endpoint to update its data"); `load_managed_table` is itself the load.
+  * No `purge_table_cache` step — rejected with 400 ("purge not supported for
+    managed catalogs").
+  * No `get_table_profile` step — the profile is not populated within a usable
+    window after a load, and no API call (refresh and purge are rejected; there
+    is no profile-build/scan endpoint) triggers it. The load is verified via the
+    `load_managed_table` response (row_count etc.), not a profile read.
 
 The scratch_database fixture tears the database (and its catalog) down, so the
-test touches no seeded data. Skipped if pyarrow is unavailable (needed to author
-the parquet payload).
+test touches no seeded data. pyarrow is a hard test dependency (see
+test-requirements.txt) and is imported directly — a missing pyarrow must fail
+loudly, never silently skip this scenario in CI.
 """
 
 from __future__ import annotations
 
 import io
 
-import pytest
-
-pa = pytest.importorskip("pyarrow")
-pq = pytest.importorskip("pyarrow.parquet")
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from hotdata.api.connections_api import ConnectionsApi
 from hotdata.api.databases_api import DatabasesApi
-from hotdata.api.refresh_api import RefreshApi
 from hotdata.api.uploads_api import UploadsApi
 from hotdata.models.add_managed_schema_request import AddManagedSchemaRequest
 from hotdata.models.add_managed_table_request import AddManagedTableRequest
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
-from hotdata.models.refresh_request import RefreshRequest
 
 
 def _parquet_bytes() -> bytes:
@@ -46,7 +53,6 @@ def test_managed_tables_lifecycle(
     databases_api: DatabasesApi,
     connections_api: ConnectionsApi,
     uploads_api: UploadsApi,
-    refresh_api: RefreshApi,
     scratch_database: str,
 ) -> None:
     # The database's auto-provisioned default catalog is a managed catalog,
@@ -77,15 +83,5 @@ def test_managed_tables_lifecycle(
     assert loaded.table_name == table_name
     assert loaded.row_count == 3
 
-    profile = connections_api.get_table_profile(connection_id, schema_name, table_name)
-    assert profile.var_schema == schema_name
-    assert profile.table == table_name
-    assert profile.row_count == 3
-
-    # Refresh the catalog metadata for the managed connection.
-    refreshed = refresh_api.refresh(RefreshRequest(connection_id=connection_id))
-    assert refreshed.actual_instance is not None
-
-    # purge_table_cache and delete_managed_table both return None on success.
-    connections_api.purge_table_cache(connection_id, schema_name, table_name)
+    # delete_managed_table returns None on success.
     connections_api.delete_managed_table(connection_id, schema_name, table_name)

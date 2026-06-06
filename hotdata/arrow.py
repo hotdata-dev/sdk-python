@@ -50,6 +50,22 @@ class ResultNotReadyError(Exception):
         )
 
 
+def _release_conn(response: Any) -> None:
+    """Return a urllib3 connection to the pool without poisoning it.
+
+    pyarrow stops reading at the Arrow end-of-stream marker, which can leave
+    bytes unconsumed at the HTTP layer (e.g. the terminating zero-length chunk
+    of a chunked response). ``release_conn`` on a partially-read connection
+    hands a tainted socket back to the pool — the next request to reuse it
+    fails with ``http.client.ResponseNotReady`` ("Request-sent"). Draining any
+    unread bytes first makes the connection safe to reuse.
+    """
+    try:
+        response.drain_conn()
+    finally:
+        response.release_conn()
+
+
 def _import_pyarrow() -> Any:
     try:
         import pyarrow.ipc as ipc  # type: ignore[import-untyped]
@@ -95,7 +111,7 @@ class ResultsApi(_GeneratedResultsApi):
         try:
             return ipc.open_stream(response).read_all()
         finally:
-            response.release_conn()
+            _release_conn(response)
 
     @contextmanager
     def stream_result_arrow(
@@ -108,8 +124,10 @@ class ResultsApi(_GeneratedResultsApi):
     ) -> Iterator["pa.RecordBatchStreamReader"]:
         """Yield a :class:`pyarrow.RecordBatchStreamReader` for a ready result.
 
-        The HTTP connection is released when the context exits. Iterate the
-        reader to consume :class:`pyarrow.RecordBatch` messages, or call
+        The HTTP connection is drained and released when the context exits, so
+        exiting early (before the reader is exhausted) reads and discards the
+        remaining body to keep the connection reusable. Iterate the reader to
+        consume :class:`pyarrow.RecordBatch` messages, or call
         ``reader.read_all()`` for a full :class:`pyarrow.Table`.
 
         Example::
@@ -127,7 +145,7 @@ class ResultsApi(_GeneratedResultsApi):
         try:
             yield ipc.open_stream(response)
         finally:
-            response.release_conn()
+            _release_conn(response)
 
     def _call_arrow(
         self,

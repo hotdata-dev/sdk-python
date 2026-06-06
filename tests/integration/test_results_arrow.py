@@ -5,16 +5,17 @@ as a pyarrow.Table via hotdata.arrow.ResultsApi.get_result_arrow. Verifies
 that Arrow IPC content negotiation works end-to-end and that the streaming
 variant yields the same data.
 
-Skipped if pyarrow is not installed (the helper requires the ``arrow`` extra).
+pyarrow is a hard test dependency (see test-requirements.txt), so this imports
+it directly rather than via importorskip — a missing pyarrow must fail loudly,
+never silently skip this scenario in CI.
 """
 
 from __future__ import annotations
 
 import time
 
+import pyarrow as pa
 import pytest
-
-pa = pytest.importorskip("pyarrow")
 
 from hotdata.api.query_api import QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi
@@ -52,7 +53,14 @@ def test_results_arrow(
         QueryRequest(
             var_async=True,
             async_after_ms=1000,
-            sql="SELECT 1 AS x, 'hello' AS msg UNION ALL SELECT 2, 'world'",
+            # ORDER BY so row order is deterministic — UNION ALL alone does not
+            # guarantee it, and the column/pagination asserts below depend on it.
+            sql=(
+                "SELECT x, msg FROM ("
+                "SELECT 1 AS x, 'hello' AS msg "
+                "UNION ALL SELECT 2, 'world'"
+                ") ORDER BY x"
+            ),
         ),
         x_database_id=database_id,
     )
