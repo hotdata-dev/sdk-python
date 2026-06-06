@@ -53,7 +53,14 @@ def test_results_arrow(
         QueryRequest(
             var_async=True,
             async_after_ms=1000,
-            sql="SELECT 1 AS x, 'hello' AS msg UNION ALL SELECT 2, 'world'",
+            # ORDER BY so row order is deterministic — UNION ALL alone does not
+            # guarantee it, and the column/pagination asserts below depend on it.
+            sql=(
+                "SELECT x, msg FROM ("
+                "SELECT 1 AS x, 'hello' AS msg "
+                "UNION ALL SELECT 2, 'world'"
+                ") ORDER BY x"
+            ),
         ),
         x_database_id=database_id,
     )
