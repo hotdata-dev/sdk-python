@@ -47,13 +47,28 @@ jobs:
       - name: Clean existing source
         run: rm -rf src/
 
+      # pyproject.toml is hand-maintained (see .openapi-generator-ignore), so the
+      # generator no longer stamps the version. Bump the patch version directly,
+      # rewriting the same `^version = "X"` line scripts/release.sh treats as the
+      # source of truth.
       - name: Bump package patch version in pyproject.toml
         id: pkg
         run: |
-          python3 -m pip install --quiet bump-my-version
-          current_version=$(python3 -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
-          bump-my-version bump patch --current-version "$current_version" --no-commit --no-tag --allow-dirty
-          version=$(bump-my-version show current_version)
+          version=$(python3 - <<'PY'
+          import re, pathlib
+          path = pathlib.Path("pyproject.toml")
+          text = path.read_text()
+          m = re.search(r'(?m)^version = "(\d+)\.(\d+)\.(\d+)"', text)
+          if not m:
+              raise SystemExit("could not find a semver version in pyproject.toml")
+          new = f"{int(m[1])}.{int(m[2])}.{int(m[3]) + 1}"
+          text, n = re.subn(r'(?m)^version = "[^"]+"', f'version = "{new}"', text, count=1)
+          if n != 1:
+              raise SystemExit("failed to rewrite version in pyproject.toml")
+          path.write_text(text)
+          print(new)
+          PY
+          )
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Generate client
@@ -65,6 +80,51 @@ jobs:
             -t .openapi-generator-templates \
             --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }},gitUserId=hotdata-dev,gitRepoId=sdk-python \
             --skip-validate-spec
+
+      # pyproject.toml/requirements*.txt are hand-maintained, so the generator no
+      # longer writes them. Guard against silent drift: regenerate the generator's
+      # pyproject into a throwaway dir and fail if it now requires a runtime
+      # dependency we don't declare. Version floors are intentionally raised (e.g.
+      # for security), so compare dependency NAMES only, never the specs.
+      - name: Check for generator dependency drift
+        run: |
+          npx @openapitools/openapi-generator-cli generate \
+            -i openapi.yaml \
+            -g python \
+            -o /tmp/gencheck \
+            -t .openapi-generator-templates \
+            --additional-properties=packageName=hotdata,projectName=hotdata,gitUserId=hotdata-dev,gitRepoId=sdk-python \
+            --skip-validate-spec >/dev/null
+          python3 - <<'PY'
+          import re, sys, pathlib, tomllib
+
+          def dep_names(path):
+              data = tomllib.loads(pathlib.Path(path).read_text())
+              specs = list(data.get("project", {}).get("dependencies", []) or [])
+              poetry = data.get("tool", {}).get("poetry", {})
+              specs += list((poetry.get("dependencies") or {}).keys())
+              names = set()
+              for spec in specs:
+                  m = re.match(r"\s*([A-Za-z0-9._-]+)", spec)
+                  if m and m.group(1).lower() != "python":
+                      names.add(m.group(1).lower().replace("_", "-"))
+              return names
+
+          ours = dep_names("pyproject.toml")
+          theirs = dep_names("/tmp/gencheck/pyproject.toml")
+          missing = sorted(theirs - ours)
+          extra = sorted(ours - theirs)
+          if extra:
+              print(f"::notice::pyproject declares runtime deps the generator does not: {extra} (intentional project additions)")
+          if missing:
+              print("::error::The generated client now requires runtime dependencies missing from the hand-maintained pyproject.toml:")
+              for name in missing:
+                  print(f"  - {name}")
+              print("Add them to [project].dependencies (and requirements.txt), then re-run.")
+              sys.exit(1)
+          print(f"No runtime dependency drift. Generator runtime deps: {sorted(theirs)}")
+          PY
+          rm -rf /tmp/gencheck
 
       - name: Patch generated __version__ to read from package metadata
         run: |
@@ -84,39 +144,6 @@ jobs:
           if n != 1:
               sys.exit("Failed to patch __version__ line in hotdata/__init__.py")
           p.write_text(new)
-          PY
-
-      - name: Patch generated pyproject.toml metadata
-        run: |
-          python3 - <<'PY'
-          import re, pathlib, sys
-          p = pathlib.Path("pyproject.toml")
-          src = p.read_text()
-          patches = [
-              (
-                  r'^keywords = \[.*\]$',
-                  'keywords = ["hotdata", "api-client", "data-platform"]',
-                  re.MULTILINE,
-              ),
-              # Insert [project.optional-dependencies] (for hotdata.arrow) just
-              # before [project.urls]. Run before the urls patch so the urls
-              # anchor is unchanged when this fires.
-              (
-                  r'(\ndependencies = \[\n(?:[^\]]|\][^\n])*\]\n)\n(\[project\.urls\])',
-                  r'\1\n[project.optional-dependencies]\narrow = ["pyarrow >= 14"]\n\n\2',
-                  0,
-              ),
-              (
-                  r'\[project\.urls\]\nRepository = "[^"]*"\n',
-                  '[project.urls]\nHomepage = "https://www.hotdata.dev"\nRepository = "https://github.com/hotdata-dev/sdk-python"\n',
-                  0,
-              ),
-          ]
-          for pattern, replacement, flags in patches:
-              src, n = re.subn(pattern, replacement, src, count=1, flags=flags)
-              if n != 1:
-                  sys.exit(f"Failed to patch pyproject.toml: pattern {pattern!r}")
-          p.write_text(src)
           PY
 
       - name: Patch ApiClient close lifecycle
