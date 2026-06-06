@@ -3,3 +3,11 @@ git_push.sh
 README.md
 setup.py
 hotdata/_auth.py
+
+# Hand-maintained packaging files. The generator's versions would clobber
+# project-specific config (mypy/pylint settings, the `arrow` extra, security
+# version floors). regenerate.yml's drift check guards against the generated
+# client silently requiring a new runtime dependency not declared here.
+pyproject.toml
+requirements.txt
+test-requirements.txt
