@@ -6,18 +6,20 @@ against a fresh scratch database (whose default catalog is a managed catalog):
   1. declare a schema and a table on the database's default catalog connection,
   2. upload a small parquet file,
   3. load it into the table (load_managed_table) and verify the load response,
-  4. purge_table_cache,
-  5. delete the managed table.
+  4. delete the managed table.
 
-Notes on managed-catalog semantics (both confirmed against prod):
+Notes on managed-catalog semantics (all confirmed against prod). A managed
+catalog rejects the maintenance ops that apply to external catalogs, so this
+scenario deliberately omits them:
 
-  * There is no `refresh` step. `refresh` is rejected with a 400 on a managed
-    catalog ("use the loads endpoint to update its data") — `load_managed_table`
-    is itself the load.
-  * There is no `get_table_profile` step. The profile is not populated within a
-    usable window after a load, and no API call (refresh is rejected; there is
-    no profile-build/scan endpoint) triggers it — so the load is verified via
-    the `load_managed_table` response (row_count etc.), not a profile read.
+  * No `refresh` step — rejected with 400 on a managed catalog ("use the loads
+    endpoint to update its data"); `load_managed_table` is itself the load.
+  * No `purge_table_cache` step — rejected with 400 ("purge not supported for
+    managed catalogs").
+  * No `get_table_profile` step — the profile is not populated within a usable
+    window after a load, and no API call (refresh and purge are rejected; there
+    is no profile-build/scan endpoint) triggers it. The load is verified via the
+    `load_managed_table` response (row_count etc.), not a profile read.
 
 The scratch_database fixture tears the database (and its catalog) down, so the
 test touches no seeded data. pyarrow is a hard test dependency (see
@@ -81,6 +83,5 @@ def test_managed_tables_lifecycle(
     assert loaded.table_name == table_name
     assert loaded.row_count == 3
 
-    # purge_table_cache and delete_managed_table both return None on success.
-    connections_api.purge_table_cache(connection_id, schema_name, table_name)
+    # delete_managed_table returns None on success.
     connections_api.delete_managed_table(connection_id, schema_name, table_name)
