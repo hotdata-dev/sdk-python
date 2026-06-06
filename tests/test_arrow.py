@@ -45,7 +45,8 @@ class _FakeUrllib3Response(io.RawIOBase):
 
     pyarrow.ipc.open_stream wants a real file-like object (it checks
     ``closed`` and ``readable()``); the SDK's RESTResponse needs ``status``,
-    ``reason``, ``data``, and ``headers``. release_conn is recorded.
+    ``reason``, ``data``, and ``headers``. drain_conn / release_conn are
+    recorded so tests can assert the connection is drained before reuse.
     """
 
     def __init__(self, status: int, body: bytes, headers: Dict[str, str]):
@@ -56,6 +57,7 @@ class _FakeUrllib3Response(io.RawIOBase):
         self._buf = io.BytesIO(body)
         self.headers = headers
         self.release_conn_called = False
+        self.drain_conn_called = False
 
     @property
     def data(self) -> bytes:
@@ -70,6 +72,9 @@ class _FakeUrllib3Response(io.RawIOBase):
 
     def readable(self) -> bool:
         return True
+
+    def drain_conn(self) -> None:
+        self.drain_conn_called = True
 
     def release_conn(self) -> None:
         self.release_conn_called = True
@@ -146,6 +151,9 @@ def test_get_result_arrow_returns_table(monkeypatch: pytest.MonkeyPatch) -> None
     got = results.get_result_arrow("res_123")
 
     assert got.equals(table)
+    # Connection is drained (not just released) so a partially-read body can't
+    # poison the pool and break the next request with ResponseNotReady.
+    assert fake.drain_conn_called
     assert fake.release_conn_called
 
     # Single request was made.
@@ -197,7 +205,8 @@ def test_stream_result_arrow_yields_reader(
         roundtrip = pa.Table.from_batches(batches, schema=reader.schema)
         assert roundtrip.equals(table)
 
-    # Connection is released after the context exits.
+    # Connection is drained and released after the context exits.
+    assert fake.drain_conn_called
     assert fake.release_conn_called
 
 
