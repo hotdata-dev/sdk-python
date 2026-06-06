@@ -7,4 +7,4 @@ mypy >= 1.5
 # pyarrow backs the `arrow` extra. Required here (not just an optional extra) so
 # the arrow integration scenarios actually run in CI instead of silently
 # skipping via importorskip. Keep the floor in sync with pyproject's extra.
-pyarrow >= 14
+pyarrow >= 14.0.1
