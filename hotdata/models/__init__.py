@@ -48,7 +48,6 @@ from hotdata.models.create_dataset_response import CreateDatasetResponse
 from hotdata.models.create_embedding_provider_request import CreateEmbeddingProviderRequest
 from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse
 from hotdata.models.create_index_request import CreateIndexRequest
-from hotdata.models.create_sandbox_request import CreateSandboxRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse
@@ -68,7 +67,6 @@ from hotdata.models.dataset_source_one_of3 import DatasetSourceOneOf3
 from hotdata.models.dataset_source_one_of4 import DatasetSourceOneOf4
 from hotdata.models.dataset_summary import DatasetSummary
 from hotdata.models.dataset_version_summary import DatasetVersionSummary
-from hotdata.models.delete_sandbox_response import DeleteSandboxResponse
 from hotdata.models.discovery_status import DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse
 from hotdata.models.error import Error
@@ -78,6 +76,7 @@ from hotdata.models.get_database_context_response import GetDatabaseContextRespo
 from hotdata.models.get_dataset_response import GetDatasetResponse
 from hotdata.models.get_result_response import GetResultResponse
 from hotdata.models.get_secret_response import GetSecretResponse
+from hotdata.models.index_entry_response import IndexEntryResponse
 from hotdata.models.index_info_response import IndexInfoResponse
 from hotdata.models.index_status import IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse
@@ -94,11 +93,11 @@ from hotdata.models.list_databases_response import ListDatabasesResponse
 from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse
 from hotdata.models.list_datasets_response import ListDatasetsResponse
 from hotdata.models.list_embedding_providers_response import ListEmbeddingProvidersResponse
+from hotdata.models.list_indexes_page_response import ListIndexesPageResponse
 from hotdata.models.list_indexes_response import ListIndexesResponse
 from hotdata.models.list_jobs_response import ListJobsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse
-from hotdata.models.list_sandboxes_response import ListSandboxesResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse
@@ -118,8 +117,6 @@ from hotdata.models.refresh_response import RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning
 from hotdata.models.result_info import ResultInfo
 from hotdata.models.results_format_query import ResultsFormatQuery
-from hotdata.models.sandbox import Sandbox
-from hotdata.models.sandbox_response import SandboxResponse
 from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource
 from hotdata.models.saved_query_detail import SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary
@@ -138,7 +135,6 @@ from hotdata.models.update_dataset_request import UpdateDatasetRequest
 from hotdata.models.update_dataset_response import UpdateDatasetResponse
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest
 from hotdata.models.update_embedding_provider_response import UpdateEmbeddingProviderResponse
-from hotdata.models.update_sandbox_request import UpdateSandboxRequest
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse

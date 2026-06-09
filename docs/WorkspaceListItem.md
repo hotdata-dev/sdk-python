@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **active** | **bool** |  | 
 **favorite** | **bool** |  | 
 **provision_status** | **str** |  | 
-**namespace** | **str** |  | 
 
 ## Example
 

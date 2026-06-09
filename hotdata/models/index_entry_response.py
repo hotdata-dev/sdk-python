@@ -18,19 +18,28 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.index_status import IndexStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
-class WorkspaceDetail(BaseModel):
+class IndexEntryResponse(BaseModel):
     """
-    WorkspaceDetail
+    One index in a cross-table listing: the per-table [`IndexInfoResponse`] plus the identity needed to know which table it belongs to.
     """ # noqa: E501
-    public_id: StrictStr
-    name: StrictStr
-    provision_status: StrictStr
-    __properties: ClassVar[List[str]] = ["public_id", "name", "provision_status"]
+    columns: List[StrictStr]
+    created_at: datetime
+    index_name: StrictStr
+    index_type: StrictStr
+    metric: Optional[StrictStr] = Field(default=None, description="Distance metric this index was built with. Only present for vector indexes.")
+    status: IndexStatus
+    updated_at: datetime
+    connection_id: Optional[StrictStr] = None
+    schema_name: StrictStr
+    table_name: StrictStr
+    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "status", "updated_at", "connection_id", "schema_name", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +59,7 @@ class WorkspaceDetail(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of WorkspaceDetail from a JSON string"""
+        """Create an instance of IndexEntryResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,11 +80,16 @@ class WorkspaceDetail(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if connection_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.connection_id is None and "connection_id" in self.model_fields_set:
+            _dict['connection_id'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of WorkspaceDetail from a dict"""
+        """Create an instance of IndexEntryResponse from a dict"""
         if obj is None:
             return None
 
@@ -83,9 +97,16 @@ class WorkspaceDetail(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "public_id": obj.get("public_id"),
-            "name": obj.get("name"),
-            "provision_status": obj.get("provision_status")
+            "columns": obj.get("columns"),
+            "created_at": obj.get("created_at"),
+            "index_name": obj.get("index_name"),
+            "index_type": obj.get("index_type"),
+            "metric": obj.get("metric"),
+            "status": obj.get("status"),
+            "updated_at": obj.get("updated_at"),
+            "connection_id": obj.get("connection_id"),
+            "schema_name": obj.get("schema_name"),
+            "table_name": obj.get("table_name")
         })
         return _obj
 

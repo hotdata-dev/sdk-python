@@ -17,9 +17,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
+from typing import Optional
 from typing_extensions import Annotated
 from hotdata.models.create_index_request import CreateIndexRequest
 from hotdata.models.index_info_response import IndexInfoResponse
+from hotdata.models.list_indexes_page_response import ListIndexesPageResponse
 from hotdata.models.list_indexes_response import ListIndexesResponse
 
 from hotdata.api_client import ApiClient, RequestSerialized
@@ -1812,6 +1814,379 @@ class IndexesApi:
         return self.api_client.param_serialize(
             method='GET',
             resource_path='/v1/connections/{connection_id}/tables/{schema}/{table}/indexes',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def list_indexes_collection(
+        self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope to (required)")],
+        connection_id: Annotated[Optional[StrictStr], Field(description="Filter to one connection")] = None,
+        var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name")] = None,
+        table: Annotated[Optional[StrictStr], Field(description="Filter by table name")] = None,
+        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max indexes per page")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ListIndexesPageResponse:
+        """List indexes across tables in a database
+
+        List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+
+        :param x_database_id: Database to scope to (required) (required)
+        :type x_database_id: str
+        :param connection_id: Filter to one connection
+        :type connection_id: str
+        :param var_schema: Filter by schema name
+        :type var_schema: str
+        :param table: Filter by table name
+        :type table: str
+        :param index_type: Filter by index type
+        :type index_type: str
+        :param limit: Max indexes per page
+        :type limit: int
+        :param cursor: Pagination cursor
+        :type cursor: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_indexes_collection_serialize(
+            x_database_id=x_database_id,
+            connection_id=connection_id,
+            var_schema=var_schema,
+            table=table,
+            index_type=index_type,
+            limit=limit,
+            cursor=cursor,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ListIndexesPageResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '500': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def list_indexes_collection_with_http_info(
+        self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope to (required)")],
+        connection_id: Annotated[Optional[StrictStr], Field(description="Filter to one connection")] = None,
+        var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name")] = None,
+        table: Annotated[Optional[StrictStr], Field(description="Filter by table name")] = None,
+        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max indexes per page")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[ListIndexesPageResponse]:
+        """List indexes across tables in a database
+
+        List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+
+        :param x_database_id: Database to scope to (required) (required)
+        :type x_database_id: str
+        :param connection_id: Filter to one connection
+        :type connection_id: str
+        :param var_schema: Filter by schema name
+        :type var_schema: str
+        :param table: Filter by table name
+        :type table: str
+        :param index_type: Filter by index type
+        :type index_type: str
+        :param limit: Max indexes per page
+        :type limit: int
+        :param cursor: Pagination cursor
+        :type cursor: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_indexes_collection_serialize(
+            x_database_id=x_database_id,
+            connection_id=connection_id,
+            var_schema=var_schema,
+            table=table,
+            index_type=index_type,
+            limit=limit,
+            cursor=cursor,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ListIndexesPageResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '500': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def list_indexes_collection_without_preload_content(
+        self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope to (required)")],
+        connection_id: Annotated[Optional[StrictStr], Field(description="Filter to one connection")] = None,
+        var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name")] = None,
+        table: Annotated[Optional[StrictStr], Field(description="Filter by table name")] = None,
+        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max indexes per page")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """List indexes across tables in a database
+
+        List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+
+        :param x_database_id: Database to scope to (required) (required)
+        :type x_database_id: str
+        :param connection_id: Filter to one connection
+        :type connection_id: str
+        :param var_schema: Filter by schema name
+        :type var_schema: str
+        :param table: Filter by table name
+        :type table: str
+        :param index_type: Filter by index type
+        :type index_type: str
+        :param limit: Max indexes per page
+        :type limit: int
+        :param cursor: Pagination cursor
+        :type cursor: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_indexes_collection_serialize(
+            x_database_id=x_database_id,
+            connection_id=connection_id,
+            var_schema=var_schema,
+            table=table,
+            index_type=index_type,
+            limit=limit,
+            cursor=cursor,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ListIndexesPageResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '500': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _list_indexes_collection_serialize(
+        self,
+        x_database_id,
+        connection_id,
+        var_schema,
+        table,
+        index_type,
+        limit,
+        cursor,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if connection_id is not None:
+            
+            _query_params.append(('connection_id', connection_id))
+            
+        if var_schema is not None:
+            
+            _query_params.append(('schema', var_schema))
+            
+        if table is not None:
+            
+            _query_params.append(('table', table))
+            
+        if index_type is not None:
+            
+            _query_params.append(('index_type', index_type))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if cursor is not None:
+            
+            _query_params.append(('cursor', cursor))
+            
+        # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/v1/indexes',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
