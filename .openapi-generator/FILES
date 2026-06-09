@@ -37,7 +37,6 @@ docs/CreateDatasetResponse.md
 docs/CreateEmbeddingProviderRequest.md
 docs/CreateEmbeddingProviderResponse.md
 docs/CreateIndexRequest.md
-docs/CreateSandboxRequest.md
 docs/CreateSavedQueryRequest.md
 docs/CreateSecretRequest.md
 docs/CreateSecretResponse.md
@@ -60,7 +59,6 @@ docs/DatasetSourceOneOf4.md
 docs/DatasetSummary.md
 docs/DatasetVersionSummary.md
 docs/DatasetsApi.md
-docs/DeleteSandboxResponse.md
 docs/DiscoveryStatus.md
 docs/EmbeddingProviderResponse.md
 docs/EmbeddingProvidersApi.md
@@ -94,7 +92,6 @@ docs/ListIndexesResponse.md
 docs/ListJobsResponse.md
 docs/ListQueryRunsResponse.md
 docs/ListResultsResponse.md
-docs/ListSandboxesResponse.md
 docs/ListSavedQueriesResponse.md
 docs/ListSavedQueryVersionsResponse.md
 docs/ListSecretsResponse.md
@@ -118,9 +115,6 @@ docs/RefreshWarning.md
 docs/ResultInfo.md
 docs/ResultsApi.md
 docs/ResultsFormatQuery.md
-docs/Sandbox.md
-docs/SandboxResponse.md
-docs/SandboxesApi.md
 docs/SavedQueriesApi.md
 docs/SavedQueryDatasetSource.md
 docs/SavedQueryDetail.md
@@ -141,7 +135,6 @@ docs/UpdateDatasetRequest.md
 docs/UpdateDatasetResponse.md
 docs/UpdateEmbeddingProviderRequest.md
 docs/UpdateEmbeddingProviderResponse.md
-docs/UpdateSandboxRequest.md
 docs/UpdateSavedQueryRequest.md
 docs/UpdateSecretRequest.md
 docs/UpdateSecretResponse.md
@@ -170,7 +163,6 @@ hotdata/api/query_api.py
 hotdata/api/query_runs_api.py
 hotdata/api/refresh_api.py
 hotdata/api/results_api.py
-hotdata/api/sandboxes_api.py
 hotdata/api/saved_queries_api.py
 hotdata/api/secrets_api.py
 hotdata/api/uploads_api.py
@@ -214,7 +206,6 @@ hotdata/models/create_dataset_response.py
 hotdata/models/create_embedding_provider_request.py
 hotdata/models/create_embedding_provider_response.py
 hotdata/models/create_index_request.py
-hotdata/models/create_sandbox_request.py
 hotdata/models/create_saved_query_request.py
 hotdata/models/create_secret_request.py
 hotdata/models/create_secret_response.py
@@ -234,7 +225,6 @@ hotdata/models/dataset_source_one_of3.py
 hotdata/models/dataset_source_one_of4.py
 hotdata/models/dataset_summary.py
 hotdata/models/dataset_version_summary.py
-hotdata/models/delete_sandbox_response.py
 hotdata/models/discovery_status.py
 hotdata/models/embedding_provider_response.py
 hotdata/models/error.py
@@ -264,7 +254,6 @@ hotdata/models/list_indexes_response.py
 hotdata/models/list_jobs_response.py
 hotdata/models/list_query_runs_response.py
 hotdata/models/list_results_response.py
-hotdata/models/list_sandboxes_response.py
 hotdata/models/list_saved_queries_response.py
 hotdata/models/list_saved_query_versions_response.py
 hotdata/models/list_secrets_response.py
@@ -284,8 +273,6 @@ hotdata/models/refresh_response.py
 hotdata/models/refresh_warning.py
 hotdata/models/result_info.py
 hotdata/models/results_format_query.py
-hotdata/models/sandbox.py
-hotdata/models/sandbox_response.py
 hotdata/models/saved_query_dataset_source.py
 hotdata/models/saved_query_detail.py
 hotdata/models/saved_query_summary.py
@@ -304,7 +291,6 @@ hotdata/models/update_dataset_request.py
 hotdata/models/update_dataset_response.py
 hotdata/models/update_embedding_provider_request.py
 hotdata/models/update_embedding_provider_response.py
-hotdata/models/update_sandbox_request.py
 hotdata/models/update_saved_query_request.py
 hotdata/models/update_secret_request.py
 hotdata/models/update_secret_response.py
@@ -318,14 +304,6 @@ hotdata/models/workspace_detail.py
 hotdata/models/workspace_list_item.py
 hotdata/py.typed
 hotdata/rest.py
-pyproject.toml
-requirements.txt
 setup.cfg
-test-requirements.txt
 test/__init__.py
-test/test_add_managed_schema_request.py
-test/test_add_managed_table_decl.py
-test/test_add_managed_table_request.py
-test/test_managed_schema_response.py
-test/test_managed_table_response.py
 tox.ini

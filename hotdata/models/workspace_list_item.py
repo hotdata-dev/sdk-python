@@ -32,8 +32,7 @@ class WorkspaceListItem(BaseModel):
     active: StrictBool
     favorite: StrictBool
     provision_status: StrictStr
-    namespace: StrictStr
-    __properties: ClassVar[List[str]] = ["public_id", "name", "active", "favorite", "provision_status", "namespace"]
+    __properties: ClassVar[List[str]] = ["public_id", "name", "active", "favorite", "provision_status"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,8 +89,7 @@ class WorkspaceListItem(BaseModel):
             "name": obj.get("name"),
             "active": obj.get("active"),
             "favorite": obj.get("favorite"),
-            "provision_status": obj.get("provision_status"),
-            "namespace": obj.get("namespace")
+            "provision_status": obj.get("provision_status")
         })
         return _obj
 

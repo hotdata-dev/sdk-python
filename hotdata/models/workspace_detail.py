@@ -30,8 +30,7 @@ class WorkspaceDetail(BaseModel):
     public_id: StrictStr
     name: StrictStr
     provision_status: StrictStr
-    namespace: StrictStr
-    __properties: ClassVar[List[str]] = ["public_id", "name", "provision_status", "namespace"]
+    __properties: ClassVar[List[str]] = ["public_id", "name", "provision_status"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,8 +85,7 @@ class WorkspaceDetail(BaseModel):
         _obj = cls.model_validate({
             "public_id": obj.get("public_id"),
             "name": obj.get("name"),
-            "provision_status": obj.get("provision_status"),
-            "namespace": obj.get("namespace")
+            "provision_status": obj.get("provision_status")
         })
         return _obj
 
