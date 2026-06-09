@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 **public_id** | **str** |  | 
 **name** | **str** |  | 
 **provision_status** | **str** |  | 
-**namespace** | **str** |  | 
 
 ## Example
 

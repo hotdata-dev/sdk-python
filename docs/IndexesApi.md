@@ -10,6 +10,7 @@ Method | HTTP request | Description
 [**delete_index**](IndexesApi.md#delete_index) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/indexes/{index_name} | Delete an index
 [**list_dataset_indexes**](IndexesApi.md#list_dataset_indexes) | **GET** /v1/datasets/{dataset_id}/indexes | List indexes on a dataset
 [**list_indexes**](IndexesApi.md#list_indexes) | **GET** /v1/connections/{connection_id}/tables/{schema}/{table}/indexes | List indexes on a table
+[**list_indexes_collection**](IndexesApi.md#list_indexes_collection) | **GET** /v1/indexes | List indexes across tables in a database
 
 
 # **create_dataset_index**
@@ -567,6 +568,106 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | Indexes listed |  -  |
 **404** | Table not found |  -  |
+**500** | Internal server error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_indexes_collection**
+> ListIndexesPageResponse list_indexes_collection(x_database_id, connection_id=connection_id, var_schema=var_schema, table=table, index_type=index_type, limit=limit, cursor=cursor)
+
+List indexes across tables in a database
+
+List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.list_indexes_page_response import ListIndexesPageResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.IndexesApi(api_client)
+    x_database_id = 'x_database_id_example' # str | Database to scope to (required)
+    connection_id = 'connection_id_example' # str | Filter to one connection (optional)
+    var_schema = 'var_schema_example' # str | Filter by schema name (optional)
+    table = 'table_example' # str | Filter by table name (optional)
+    index_type = 'index_type_example' # str | Filter by index type (optional)
+    limit = 56 # int | Max indexes per page (optional)
+    cursor = 'cursor_example' # str | Pagination cursor (optional)
+
+    try:
+        # List indexes across tables in a database
+        api_response = api_instance.list_indexes_collection(x_database_id, connection_id=connection_id, var_schema=var_schema, table=table, index_type=index_type, limit=limit, cursor=cursor)
+        print("The response of IndexesApi->list_indexes_collection:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling IndexesApi->list_indexes_collection: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **x_database_id** | **str**| Database to scope to (required) | 
+ **connection_id** | **str**| Filter to one connection | [optional] 
+ **var_schema** | **str**| Filter by schema name | [optional] 
+ **table** | **str**| Filter by table name | [optional] 
+ **index_type** | **str**| Filter by index type | [optional] 
+ **limit** | **int**| Max indexes per page | [optional] 
+ **cursor** | **str**| Pagination cursor | [optional] 
+
+### Return type
+
+[**ListIndexesPageResponse**](ListIndexesPageResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Indexes listed |  -  |
+**400** | Missing X-Database-Id or bad cursor |  -  |
+**404** | Database not found |  -  |
 **500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
