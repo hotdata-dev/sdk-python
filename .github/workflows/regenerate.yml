@@ -44,8 +44,15 @@ jobs:
             https://api.github.com/repos/hotdata-dev/www.hotdata.dev/contents/api/openapi.yaml \
             -o openapi.yaml
 
-      - name: Clean existing source
-        run: rm -rf src/
+      # Remove the generator-owned subtrees before regenerating so endpoints and
+      # models dropped from the spec don't linger as orphaned files. The package
+      # lives in hotdata/, so the previous `rm -rf src/` was a no-op and removed
+      # APIs (e.g. the sandbox endpoints) kept shipping as dead modules. The
+      # hand-written modules (hotdata/_auth.py, hotdata/arrow.py) live at the
+      # package root and are untouched; the integration tests in tests/ (plural)
+      # are distinct from the generated test/ (singular) unit tests.
+      - name: Clean generated source
+        run: rm -rf hotdata/api hotdata/models docs test
 
       # pyproject.toml is hand-maintained (see .openapi-generator-ignore), so the
       # generator no longer stamps the version. Bump the patch version directly,
@@ -70,6 +77,43 @@ jobs:
           PY
           )
           echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # check-release.yml gates merges on a `## [x.y.z]` CHANGELOG section
+      # matching the bumped version, so without a seeded entry every regen PR
+      # fails that check. Insert a stub (the spec-change title under ### Changed)
+      # just above the most recent released section; the PR author refines the
+      # wording before merge. Idempotent: skips if a section for this version
+      # already exists.
+      - name: Seed changelog entry
+        env:
+          VERSION: ${{ steps.pkg.outputs.version }}
+          TITLE: ${{ inputs.title }}
+        run: |
+          export CHANGELOG_DATE=$(date -u +%Y-%m-%d)
+          python3 - <<'PY'
+          import os, pathlib, re
+          version = os.environ["VERSION"]
+          date = os.environ["CHANGELOG_DATE"]
+          title = (os.environ.get("TITLE") or "").strip() \
+              or "Regenerate the client from the updated Hotdata OpenAPI spec"
+          path = pathlib.Path("CHANGELOG.md")
+          text = path.read_text()
+          if re.search(rf"^## \[{re.escape(version)}\]", text, re.M):
+              print(f"CHANGELOG already has a [{version}] section; leaving it untouched.")
+              raise SystemExit(0)
+          unreleased = re.search(r"^## \[Unreleased\]", text, re.M)
+          if not unreleased:
+              raise SystemExit("CHANGELOG.md has no '## [Unreleased]' section to anchor the new entry")
+          # Insert before the first released section after [Unreleased] (falling
+          # back to end of file) so any pending entries under [Unreleased] stay
+          # attributed to it rather than being absorbed by the new version.
+          nxt = re.search(r"^## \[", text[unreleased.end():], re.M)
+          insert_at = unreleased.end() + nxt.start() if nxt else len(text)
+          entry = f"## [{version}] - {date}\n\n### Changed\n\n- {title}\n\n"
+          text = text[:insert_at] + entry + text[insert_at:]
+          path.write_text(text)
+          print(f"Inserted CHANGELOG [{version}] section.")
+          PY
 
       - name: Generate client
         run: |
@@ -234,13 +278,14 @@ jobs:
           rm -f openapi.yaml
           rm -f .github/workflows/python.yml
 
-      - name: Verify built wheel installs and imports
-        run: |
-          python -m pip install --upgrade build
-          python -m build
-          python -m pip install dist/*.whl
-          # cd away from the source tree so the import resolves against the installed wheel.
-          cd /tmp && python -c "import hotdata; print(hotdata.__version__)"
+      # NOTE: regeneration deliberately does NOT build/import the package. A
+      # failure here used to abort the job before "Create PR", so a regen that
+      # produced valid-but-not-yet-wired output failed silently with no PR to act
+      # on. The PR is the artifact we want, and breakage surfaces on it as red CI:
+      # integration-tests.yml installs the package (`pip install -e .`) and runs
+      # pytest, and check-release.yml builds + installs + imports the wheel on
+      # every PR that bumps pyproject.toml/CHANGELOG.md (which every regen PR
+      # does). Auto-merge is gated on those checks, so a broken regen can't merge.
 
       - name: Check integration test scenario parity
         env:
