@@ -281,10 +281,11 @@ jobs:
       # NOTE: regeneration deliberately does NOT build/import the package. A
       # failure here used to abort the job before "Create PR", so a regen that
       # produced valid-but-not-yet-wired output failed silently with no PR to act
-      # on. The PR is the artifact we want: integration-tests.yml installs the
-      # package (`pip install -e .`) and runs pytest on every PR to main, so any
-      # import/build breakage shows up as red CI on the filed PR (and auto-merge,
-      # gated on those checks, won't merge it) instead of a buried workflow run.
+      # on. The PR is the artifact we want, and breakage surfaces on it as red CI:
+      # integration-tests.yml installs the package (`pip install -e .`) and runs
+      # pytest, and check-release.yml builds + installs + imports the wheel on
+      # every PR that bumps pyproject.toml/CHANGELOG.md (which every regen PR
+      # does). Auto-merge is gated on those checks, so a broken regen can't merge.
 
       - name: Check integration test scenario parity
         env:
