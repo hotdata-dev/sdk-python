@@ -44,8 +44,15 @@ jobs:
             https://api.github.com/repos/hotdata-dev/www.hotdata.dev/contents/api/openapi.yaml \
             -o openapi.yaml
 
-      - name: Clean existing source
-        run: rm -rf src/
+      # Remove the generator-owned subtrees before regenerating so endpoints and
+      # models dropped from the spec don't linger as orphaned files. The package
+      # lives in hotdata/, so the previous `rm -rf src/` was a no-op and removed
+      # APIs (e.g. the sandbox endpoints) kept shipping as dead modules. The
+      # hand-written modules (hotdata/_auth.py, hotdata/arrow.py) live at the
+      # package root and are untouched; the integration tests in tests/ (plural)
+      # are distinct from the generated test/ (singular) unit tests.
+      - name: Clean generated source
+        run: rm -rf hotdata/api hotdata/models docs test
 
       # pyproject.toml is hand-maintained (see .openapi-generator-ignore), so the
       # generator no longer stamps the version. Bump the patch version directly,
