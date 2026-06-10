@@ -27,10 +27,24 @@ class TestIndexesApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
+    def test_create_dataset_index(self) -> None:
+        """Test case for create_dataset_index
+
+        Create an index on a dataset
+        """
+        pass
+
     def test_create_index(self) -> None:
         """Test case for create_index
 
         Create an index on a table
+        """
+        pass
+
+    def test_delete_dataset_index(self) -> None:
+        """Test case for delete_dataset_index
+
+        Delete a dataset index
         """
         pass
 
@@ -41,10 +55,24 @@ class TestIndexesApi(unittest.TestCase):
         """
         pass
 
+    def test_list_dataset_indexes(self) -> None:
+        """Test case for list_dataset_indexes
+
+        List indexes on a dataset
+        """
+        pass
+
     def test_list_indexes(self) -> None:
         """Test case for list_indexes
 
         List indexes on a table
+        """
+        pass
+
+    def test_list_indexes_collection(self) -> None:
+        """Test case for list_indexes_collection
+
+        List indexes across tables in a database
         """
         pass
 

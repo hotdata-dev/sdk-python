@@ -41,9 +41,11 @@ class TestDatabaseDetailResponse(unittest.TestCase):
                         alias = '', 
                         connection_id = '', )
                     ],
+                default_catalog = '',
                 default_connection_id = '',
-                description = '',
-                id = ''
+                expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                id = '',
+                name = ''
             )
         else:
             return DatabaseDetailResponse(
@@ -52,6 +54,7 @@ class TestDatabaseDetailResponse(unittest.TestCase):
                         alias = '', 
                         connection_id = '', )
                     ],
+                default_catalog = '',
                 default_connection_id = '',
                 id = '',
         )

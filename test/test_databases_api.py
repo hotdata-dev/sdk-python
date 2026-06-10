@@ -27,6 +27,20 @@ class TestDatabasesApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
+    def test_add_database_schema(self) -> None:
+        """Test case for add_database_schema
+
+        Add schema to database default catalog
+        """
+        pass
+
+    def test_add_database_table(self) -> None:
+        """Test case for add_database_table
+
+        Add table to database default catalog
+        """
+        pass
+
     def test_attach_database_catalog(self) -> None:
         """Test case for attach_database_catalog
 
