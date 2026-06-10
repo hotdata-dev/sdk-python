@@ -51,8 +51,21 @@ jobs:
       # hand-written modules (hotdata/_auth.py, hotdata/arrow.py) live at the
       # package root and are untouched; the integration tests in tests/ (plural)
       # are distinct from the generated test/ (singular) unit tests.
+      #
+      # A few hand-written files DO live inside these subtrees (e.g.
+      # test/test_api_client_close.py). They're listed in .openapi-generator-ignore
+      # — the source of truth for "hand-maintained, don't touch" — so restore any
+      # ignored path under a cleaned subtree after the wipe. The generator already
+      # won't overwrite them; this makes the clean step honor the same list so a
+      # regen never deletes hand-maintained code.
       - name: Clean generated source
-        run: rm -rf hotdata/api hotdata/models docs test
+        run: |
+          rm -rf hotdata/api hotdata/models docs test
+          grep -vE '^[[:space:]]*(#|$)' .openapi-generator-ignore | while IFS= read -r path; do
+            case "$path" in
+              hotdata/api/*|hotdata/models/*|docs/*|test/*) git checkout -- "$path" ;;
+            esac
+          done
 
       # pyproject.toml is hand-maintained (see .openapi-generator-ignore), so the
       # generator no longer stamps the version. Bump the patch version directly,

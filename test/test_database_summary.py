@@ -36,11 +36,14 @@ class TestDatabaseSummary(unittest.TestCase):
         model = DatabaseSummary()
         if include_optional:
             return DatabaseSummary(
-                description = '',
-                id = ''
+                default_catalog = '',
+                expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                id = '',
+                name = ''
             )
         else:
             return DatabaseSummary(
+                default_catalog = '',
                 id = '',
         )
         """

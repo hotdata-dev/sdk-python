@@ -36,7 +36,9 @@ class TestCreateDatabaseRequest(unittest.TestCase):
         model = CreateDatabaseRequest()
         if include_optional:
             return CreateDatabaseRequest(
-                description = '',
+                default_catalog = '',
+                expires_at = '',
+                name = '',
                 schemas = [
                     hotdata.models.database_default_schema_decl.DatabaseDefaultSchemaDecl(
                         name = '', 
@@ -44,7 +46,8 @@ class TestCreateDatabaseRequest(unittest.TestCase):
                             hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
                                 name = '', )
                             ], )
-                    ]
+                    ],
+                storage_backend = ''
             )
         else:
             return CreateDatabaseRequest(

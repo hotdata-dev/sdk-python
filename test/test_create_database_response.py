@@ -36,12 +36,15 @@ class TestCreateDatabaseResponse(unittest.TestCase):
         model = CreateDatabaseResponse()
         if include_optional:
             return CreateDatabaseResponse(
+                default_catalog = '',
                 default_connection_id = '',
-                description = '',
-                id = ''
+                expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                id = '',
+                name = ''
             )
         else:
             return CreateDatabaseResponse(
+                default_catalog = '',
                 default_connection_id = '',
                 id = '',
         )

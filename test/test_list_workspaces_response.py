@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-    HotData API
+    Hotdata API
 
     Powerful data platform API for datasets, queries, and analytics.
 
@@ -39,12 +39,11 @@ class TestListWorkspacesResponse(unittest.TestCase):
                 ok = True,
                 workspaces = [
                     hotdata.models.workspace_list_item.WorkspaceListItem(
-                        public_id = 'ws_abc123', 
+                        public_id = 'workm4lz2mp899l2i7h9lk9u84azg3', 
                         name = 'production-analytics', 
                         active = True, 
                         favorite = True, 
-                        provision_status = 'provisioned', 
-                        namespace = 'workspace-ws_abc123', )
+                        provision_status = 'provisioned', )
                     ]
             )
         else:
@@ -52,12 +51,11 @@ class TestListWorkspacesResponse(unittest.TestCase):
                 ok = True,
                 workspaces = [
                     hotdata.models.workspace_list_item.WorkspaceListItem(
-                        public_id = 'ws_abc123', 
+                        public_id = 'workm4lz2mp899l2i7h9lk9u84azg3', 
                         name = 'production-analytics', 
                         active = True, 
                         favorite = True, 
-                        provision_status = 'provisioned', 
-                        namespace = 'workspace-ws_abc123', )
+                        provision_status = 'provisioned', )
                     ],
         )
         """

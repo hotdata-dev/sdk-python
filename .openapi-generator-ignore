@@ -4,6 +4,12 @@ README.md
 setup.py
 hotdata/_auth.py
 
+# Hand-written test for the patched ApiClient.close()/context-manager behavior
+# (re-applied by scripts/patch_api_client_close.py). It lives in the generated
+# test/ dir but isn't generator output; regenerate.yml's clean step preserves
+# every path listed here so the regen doesn't delete it.
+test/test_api_client_close.py
+
 # Hand-maintained packaging files. The generator's versions would clobber
 # project-specific config (mypy/pylint settings, the `arrow` extra, security
 # version floors). regenerate.yml's drift check guards against the generated
