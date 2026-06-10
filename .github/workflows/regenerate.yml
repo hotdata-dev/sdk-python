@@ -278,13 +278,13 @@ jobs:
           rm -f openapi.yaml
           rm -f .github/workflows/python.yml
 
-      - name: Verify built wheel installs and imports
-        run: |
-          python -m pip install --upgrade build
-          python -m build
-          python -m pip install dist/*.whl
-          # cd away from the source tree so the import resolves against the installed wheel.
-          cd /tmp && python -c "import hotdata; print(hotdata.__version__)"
+      # NOTE: regeneration deliberately does NOT build/import the package. A
+      # failure here used to abort the job before "Create PR", so a regen that
+      # produced valid-but-not-yet-wired output failed silently with no PR to act
+      # on. The PR is the artifact we want: integration-tests.yml installs the
+      # package (`pip install -e .`) and runs pytest on every PR to main, so any
+      # import/build breakage shows up as red CI on the filed PR (and auto-merge,
+      # gated on those checks, won't merge it) instead of a buried workflow run.
 
       - name: Check integration test scenario parity
         env:
