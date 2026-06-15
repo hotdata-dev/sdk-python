@@ -348,3 +348,11 @@ from hotdata.models.url_dataset_source import UrlDatasetSource as UrlDatasetSour
 from hotdata.models.workspace_detail import WorkspaceDetail as WorkspaceDetail
 from hotdata.models.workspace_list_item import WorkspaceListItem as WorkspaceListItem
 
+
+# --- hand-applied: prefer the enhanced clients over the generated ones
+# (re-applied by scripts/patch_query_exports.py after regeneration).
+# hotdata.query.QueryApi adds 429 retry + truncation auto-follow;
+# hotdata.arrow.ResultsApi adds Arrow IPC result fetch. The raw generated
+# classes remain importable from hotdata.api.query_api / hotdata.api.results_api.
+from hotdata.query import QueryApi as QueryApi  # noqa: E402,F811
+from hotdata.arrow import ResultsApi as ResultsApi  # noqa: E402,F811
