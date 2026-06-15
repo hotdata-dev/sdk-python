@@ -26,13 +26,16 @@ from hotdata.api.query_api import QueryApi as _GeneratedQueryApi
 from hotdata.api.query_runs_api import QueryRunsApi as _QueryRunsApi
 from hotdata.api.results_api import ResultsApi as _ResultsApi
 from hotdata.exceptions import ApiException
+from hotdata.models.async_query_response import AsyncQueryResponse
 from hotdata.models.get_result_response import GetResultResponse
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse
 from hotdata.query import (
     PollPolicy,
     QueryApi,
+    ResultError,
     ResultFailedError,
+    ResultIncompleteError,
     ResultTimeoutError,
     ResultTooLargeError,
     ResultUnavailableError,
@@ -293,7 +296,8 @@ def test_autofollow_guard_rejects_oversized_result() -> None:
         )
         with pytest.raises(ResultTooLargeError) as ei:
             _api(max_auto_rows=5).query(REQ)
-    assert ei.value.total == 10
+    assert ei.value.kind == "rows"
+    assert ei.value.observed == 10
     assert ei.value.limit == 5
     # Guard trips before any JSON page is fetched (only the readiness poll ran).
     assert all(fmt is None for fmt in calls)
@@ -362,3 +366,117 @@ def test_unknown_response_fields_are_ignored() -> None:
     assert resp.truncated is False
     assert resp.preview_row_count == 1
     assert not hasattr(resp, "some_future_field")
+
+
+# --- bug fixes ----------------------------------------------------------------
+
+
+def test_async_response_passes_through_untouched() -> None:
+    # var_async=True returns AsyncQueryResponse (no .truncated). The enhanced
+    # query() must return it untouched, not AttributeError on response.truncated.
+    async_resp = AsyncQueryResponse(
+        query_run_id="qrun1", status="running", status_url="/v1/query-runs/qrun1"
+    )
+    with patch.object(_GeneratedQueryApi, "query", return_value=async_resp) as q, \
+            patch.object(_ResultsApi, "get_result") as gr:
+        out = _api().query(REQ, x_database_id="db1")
+    assert out is async_resp
+    assert q.call_count == 1
+    gr.assert_not_called()  # no auto-follow attempted on an async submission
+
+
+def test_retry_after_not_capped_by_max_backoff() -> None:
+    # Retry-After larger than max_backoff_s must be honored, not shrunk to the
+    # cap — the server told us exactly how long to wait.
+    resp = _preview(truncated=False)
+    with patch.object(_GeneratedQueryApi, "query", side_effect=[_too_many("60"), resp]), \
+            patch("hotdata.query.time.sleep") as sleep, \
+            patch("hotdata.query.random.random", return_value=0.0):
+        _api(retry=RetryPolicy(max_backoff_s=30.0, deadline_s=1000)).query(REQ)
+    sleep.assert_called_once_with(60.0)
+
+
+def test_pagination_raises_on_premature_empty_page() -> None:
+    # total is known (5) but the server returns no more rows after 2 — must
+    # raise rather than silently returning a partial result.
+    preview = _preview(truncated=True, total=5, rows=[[0]])
+    partial = [[0], [1]]
+
+    def get_result(result_id, offset=None, limit=None, format=None, **kw):
+        if format is None:
+            return _result(status="ready")
+        return _result(status="ready", rows=partial[offset:offset + limit])
+
+    with ExitStack() as stack:
+        _follow_patches(
+            stack, query_response=preview, get_result_side_effect=get_result
+        )
+        with pytest.raises(ResultIncompleteError) as ei:
+            _api(poll=PollPolicy(page_size=2)).query(REQ)
+    assert ei.value.expected == 5
+    assert ei.value.fetched == 2
+
+
+# --- byte guard + exception hierarchy ----------------------------------------
+
+
+def test_byte_guard_trips_before_row_guard() -> None:
+    # Few rows, but each is wide — the byte guard must catch it even though the
+    # row count stays well under max_auto_rows.
+    preview = _preview(truncated=True, total=3, rows=[["x"]])
+    wide = [["A" * 10_000], ["B" * 10_000], ["C" * 10_000]]
+
+    def get_result(result_id, offset=None, limit=None, format=None, **kw):
+        if format is None:
+            return _result(status="ready")
+        return _result(status="ready", rows=wide[offset:offset + limit])
+
+    with ExitStack() as stack:
+        _follow_patches(
+            stack, query_response=preview, get_result_side_effect=get_result
+        )
+        with pytest.raises(ResultTooLargeError) as ei:
+            _api(
+                max_auto_rows=1_000_000,
+                max_auto_bytes=15_000,
+                poll=PollPolicy(page_size=1),
+            ).query(REQ)
+    assert ei.value.kind == "bytes"
+    assert ei.value.limit == 15_000
+
+
+def test_result_errors_share_a_base() -> None:
+    # Callers should be able to catch every lifecycle error with one except.
+    preview = _preview(truncated=True, total=3)
+
+    def get_result(result_id, offset=None, limit=None, format=None, **kw):
+        return _result(status="failed", error_message="boom")
+
+    with ExitStack() as stack:
+        _follow_patches(
+            stack, query_response=preview, get_result_side_effect=get_result
+        )
+        with pytest.raises(ResultError):  # ResultFailedError is a ResultError
+            _api().query(REQ)
+    assert issubclass(ResultFailedError, ResultError)
+    assert issubclass(ResultTimeoutError, ResultError)
+    assert issubclass(ResultTooLargeError, ResultError)
+    assert issubclass(ResultUnavailableError, ResultError)
+    assert issubclass(ResultIncompleteError, ResultError)
+
+
+# --- default export ----------------------------------------------------------
+
+
+def test_enhanced_clients_are_the_default_export() -> None:
+    # `from hotdata import QueryApi` / `ResultsApi` must resolve to the enhanced
+    # clients (retry + auto-follow / Arrow), not the bare generated ones, so the
+    # obvious happy path gets the safe behavior. (Patched by patch_query_exports.)
+    import hotdata
+    from hotdata.arrow import ResultsApi as ArrowResultsApi
+    from hotdata.query import QueryApi as EnhancedQueryApi
+
+    assert hotdata.QueryApi is EnhancedQueryApi
+    assert hotdata.ResultsApi is ArrowResultsApi
+    # The raw generated classes stay reachable on their explicit path.
+    assert _GeneratedQueryApi is not EnhancedQueryApi

@@ -29,6 +29,7 @@ auto-follow can be turned off entirely to get just the preview.
 
 from __future__ import annotations
 
+import logging
 import random
 import time
 from dataclasses import dataclass
@@ -48,16 +49,36 @@ from hotdata.models.results_format_query import ResultsFormatQuery
 _HTTP_TOO_MANY_REQUESTS = 429
 OVERLOADED_ERROR_CODE = "OVERLOADED"
 
-# Default ceiling on rows auto-materialized into memory when following a
-# truncated result. Mirrors the server's own bounded-memory concern: large
-# enough that ordinary results follow transparently, small enough that an
-# accidental ``SELECT *`` over a huge table fails loudly instead of OOMing the
-# client. Pass ``max_auto_rows=None`` to opt into unbounded materialization.
+_log = logging.getLogger("hotdata.query")
+
+# Default ceilings on what auto-follow will materialize into memory. Mirror the
+# server's own bounded-memory concern: large enough that ordinary results follow
+# transparently, small enough that an accidental ``SELECT *`` over a huge table
+# fails loudly instead of OOMing the client. The byte ceiling is a client-RAM
+# guard (an estimate from page content), distinct from the server's 8 MiB
+# inline-preview cap. Pass ``max_auto_rows=None`` / ``max_auto_bytes=None`` to
+# opt into unbounded materialization on that axis.
 DEFAULT_MAX_AUTO_ROWS = 1_000_000
+DEFAULT_MAX_AUTO_BYTES = 64 * 1024 * 1024
 
 # Sentinel so a per-call ``max_auto_rows=None`` (opt into unbounded) is
 # distinguishable from "not passed, use the instance default".
 _UNSET: Any = object()
+
+
+def _estimate_rows_bytes(batch: List[List[Any]]) -> int:
+    """Rough in-memory size of a page of rows, used only for the byte guard.
+
+    Sums stringified cell lengths plus small per-cell/per-row overhead. This is
+    a conservative ceiling *signal*, not exact accounting — good enough to stop
+    a wide result before it exhausts RAM, cheap enough to run per page.
+    """
+    total = 0
+    for row in batch:
+        for cell in row:
+            total += len(str(cell)) + 2
+        total += 2
+    return total
 
 
 @dataclass(frozen=True)
@@ -114,7 +135,17 @@ class ServerOverloadedError(ApiException):
         self.headers = getattr(last_exc, "headers", None)
 
 
-class ResultFailedError(Exception):
+class ResultError(Exception):
+    """Base class for result-lifecycle errors raised while auto-following a
+    truncated result. Catch this to handle any of them uniformly.
+
+    Note ``ServerOverloadedError`` is intentionally *not* a ``ResultError`` — it
+    is an :class:`~hotdata.exceptions.ApiException` raised during query
+    submission, before any result exists.
+    """
+
+
+class ResultFailedError(ResultError):
     """Raised when a followed result reaches terminal status ``failed``."""
 
     def __init__(self, *, result_id: str, error_message: Optional[str]) -> None:
@@ -126,7 +157,7 @@ class ResultFailedError(Exception):
         )
 
 
-class ResultTimeoutError(Exception):
+class ResultTimeoutError(ResultError):
     """Raised when a result does not reach ``ready`` within the poll deadline."""
 
     def __init__(self, *, result_id: str, status: str, deadline_s: float) -> None:
@@ -139,25 +170,50 @@ class ResultTimeoutError(Exception):
         )
 
 
-class ResultTooLargeError(Exception):
-    """Raised when auto-follow would materialize more rows than the guard
-    allows. Fetch the result incrementally via :mod:`hotdata.arrow` (Arrow
-    streaming) or raise ``max_auto_rows`` if you truly want it all in memory.
+class ResultIncompleteError(ResultError):
+    """Raised when pagination cannot retrieve the full result — the server
+    returned no further rows before the known total was reached. Surfaced
+    instead of silently returning a partial result.
     """
 
-    def __init__(self, *, result_id: str, total: Optional[int], limit: int) -> None:
+    def __init__(self, *, result_id: str, fetched: int, expected: int) -> None:
         self.result_id = result_id
-        self.total = total
-        self.limit = limit
-        total_desc = f"{total} rows" if total is not None else "an unknown number of rows"
+        self.fetched = fetched
+        self.expected = expected
         super().__init__(
-            f"Result {result_id} has {total_desc}, exceeding the auto-materialize "
-            f"limit of {limit}. Stream it with hotdata.arrow.ResultsApi, or pass a "
-            f"higher (or None) max_auto_rows to override."
+            f"Result {result_id} pagination stalled: fetched {fetched} of "
+            f"{expected} rows before the server returned an empty page."
         )
 
 
-class ResultUnavailableError(Exception):
+class ResultTooLargeError(ResultError):
+    """Raised when auto-follow would materialize more than the guard allows,
+    on either the row or byte axis. Stream the result instead via
+    :meth:`hotdata.arrow.ResultsApi.stream_result_arrow`, or raise the guard.
+
+    ``kind`` is ``"rows"`` or ``"bytes"``; ``observed`` is the offending count
+    (row count or estimated bytes) and ``limit`` the ceiling it exceeded.
+    """
+
+    def __init__(self, *, result_id: str, kind: str, observed: int, limit: int) -> None:
+        self.result_id = result_id
+        self.kind = kind
+        self.observed = observed
+        self.limit = limit
+        if kind == "bytes":
+            desc = f"~{observed} bytes (limit {limit})"
+            knob = "max_auto_bytes"
+        else:
+            desc = f"{observed} rows (limit {limit})"
+            knob = "max_auto_rows"
+        super().__init__(
+            f"Result {result_id} exceeds the auto-materialize limit: {desc}. "
+            f"Stream it with hotdata.arrow.ResultsApi.stream_result_arrow, or "
+            f"raise (or set to None) {knob} to override."
+        )
+
+
+class ResultUnavailableError(ResultError):
     """Raised when a result is truncated but no ``result_id`` is available to
     follow (persistence failed — see the response ``warning`` field).
     """
@@ -210,12 +266,14 @@ class QueryApi(_GeneratedQueryApi):
         poll: Optional[PollPolicy] = None,
         auto_follow: bool = True,
         max_auto_rows: Optional[int] = DEFAULT_MAX_AUTO_ROWS,
+        max_auto_bytes: Optional[int] = DEFAULT_MAX_AUTO_BYTES,
     ) -> None:
         super().__init__(api_client)
         self.retry = retry or RetryPolicy()
         self.poll = poll or PollPolicy()
         self.auto_follow = auto_follow
         self.max_auto_rows = max_auto_rows
+        self.max_auto_bytes = max_auto_bytes
 
     def query(
         self,
@@ -229,6 +287,7 @@ class QueryApi(_GeneratedQueryApi):
         *,
         auto_follow: Optional[bool] = None,
         max_auto_rows: Any = _UNSET,
+        max_auto_bytes: Any = _UNSET,
     ) -> QueryResponse:
         """Execute a query, retrying on 429 and auto-following truncation.
 
@@ -240,18 +299,27 @@ class QueryApi(_GeneratedQueryApi):
           result set (``truncated`` / ``total_row_count`` are left intact so the
           caller can still tell it *was* truncated).
 
+        An async submission (``async=true``) returns an ``AsyncQueryResponse``,
+        which is passed through untouched — there is nothing to follow yet.
+
         :param auto_follow: Override the instance default for this call. ``False``
             returns the bounded preview unchanged.
         :param max_auto_rows: Override the instance row guard for this call.
             ``None`` opts into unbounded materialization.
+        :param max_auto_bytes: Override the instance byte guard for this call.
+            ``None`` opts into unbounded materialization.
         :raises ServerOverloadedError: 429 retries exhausted.
         :raises ResultFailedError: the followed result failed.
         :raises ResultTimeoutError: the result never became ready.
-        :raises ResultTooLargeError: the full result exceeds the row guard.
+        :raises ResultTooLargeError: the full result exceeds a guard (rows/bytes).
+        :raises ResultIncompleteError: pagination could not retrieve all rows.
         :raises ResultUnavailableError: truncated with no ``result_id`` to follow.
         """
         follow = self.auto_follow if auto_follow is None else auto_follow
-        guard = self.max_auto_rows if max_auto_rows is _UNSET else max_auto_rows
+        row_guard = self.max_auto_rows if max_auto_rows is _UNSET else max_auto_rows
+        byte_guard = (
+            self.max_auto_bytes if max_auto_bytes is _UNSET else max_auto_bytes
+        )
 
         response = self._query_with_retry(
             query_request,
@@ -263,9 +331,13 @@ class QueryApi(_GeneratedQueryApi):
             _host_index=_host_index,
         )
 
+        # An async submission comes back as AsyncQueryResponse (no `truncated`);
+        # there is no inline result to follow, so pass it straight through.
+        if not isinstance(response, QueryResponse):
+            return response
         if not follow or not response.truncated:
             return response
-        return self._materialize_full(response, guard)
+        return self._materialize_full(response, row_guard, byte_guard)
 
     def wait_for_result(
         self,
@@ -347,14 +419,19 @@ class QueryApi(_GeneratedQueryApi):
         policy = self.retry
         retry_after = _parse_retry_after(getattr(exc, "headers", None))
         if retry_after is not None:
-            base = retry_after
-        else:
-            base = policy.base_backoff_s * (2 ** (attempt - 1))
-        jitter = base * policy.jitter * random.random()
-        return min(base + jitter, policy.max_backoff_s)
+            # The server told us exactly how long to wait — honor it. Add jitter
+            # on top (never below) to desync retries onto the freed slot, and do
+            # NOT cap with max_backoff_s: capping would dishonor a Retry-After
+            # larger than the cap. The overall deadline budget is the only bound.
+            return retry_after + retry_after * policy.jitter * random.random()
+        base = policy.base_backoff_s * (2 ** (attempt - 1))
+        return min(base + base * policy.jitter * random.random(), policy.max_backoff_s)
 
     def _materialize_full(
-        self, preview: QueryResponse, max_auto_rows: Optional[int]
+        self,
+        preview: QueryResponse,
+        max_auto_rows: Optional[int],
+        max_auto_bytes: Optional[int],
     ) -> QueryResponse:
         if preview.result_id is None:
             raise ResultUnavailableError(warning=preview.warning)
@@ -363,13 +440,25 @@ class QueryApi(_GeneratedQueryApi):
         self.wait_for_result(preview.result_id, results_api=results_api)
 
         total = self._authoritative_total(preview)
+        # Auto-follow does extra round-trips (poll + paginate) and materializes
+        # the full result; log it so the hidden work behind one query() call is
+        # observable without being noisy (info, not a warning).
+        _log.info(
+            "auto-following truncated result %s (%s rows) for query run %s",
+            preview.result_id,
+            total if total is not None else "unknown",
+            preview.query_run_id,
+        )
         if max_auto_rows is not None and total is not None and total > max_auto_rows:
             raise ResultTooLargeError(
-                result_id=preview.result_id, total=total, limit=max_auto_rows
+                result_id=preview.result_id,
+                kind="rows",
+                observed=total,
+                limit=max_auto_rows,
             )
 
         rows = self._fetch_all_rows(
-            preview.result_id, total, max_auto_rows, results_api
+            preview.result_id, total, max_auto_rows, max_auto_bytes, results_api
         )
         # Replace the bounded preview with the full row set. truncated /
         # total_row_count stay as the server reported them so the caller can
@@ -397,10 +486,12 @@ class QueryApi(_GeneratedQueryApi):
         result_id: str,
         total: Optional[int],
         max_auto_rows: Optional[int],
+        max_auto_bytes: Optional[int],
         results_api: _ResultsApi,
     ) -> List[List[Any]]:
         page_size = self.poll.page_size
         rows: List[List[Any]] = []
+        byte_estimate = 0
         offset = 0
         while True:
             page = results_api.get_result(
@@ -410,27 +501,58 @@ class QueryApi(_GeneratedQueryApi):
                 format=ResultsFormatQuery.JSON,
             )
             batch = page.rows or []
+
+            # Known total but the server returned nothing more: surface the gap
+            # rather than silently returning a partial result.
+            if total is not None and not batch and offset < total:
+                raise ResultIncompleteError(
+                    result_id=result_id, fetched=offset, expected=total
+                )
+
             rows.extend(batch)
-            # Enforce the guard during pagination too, in case the total was
+
+            # Enforce both guards during pagination, in case the total was
             # unknown up front (total_row_count null, query-run lookup failed).
             if max_auto_rows is not None and len(rows) > max_auto_rows:
                 raise ResultTooLargeError(
-                    result_id=result_id, total=total, limit=max_auto_rows
+                    result_id=result_id,
+                    kind="rows",
+                    observed=len(rows),
+                    limit=max_auto_rows,
                 )
+            if max_auto_bytes is not None:
+                byte_estimate += _estimate_rows_bytes(batch)
+                if byte_estimate > max_auto_bytes:
+                    raise ResultTooLargeError(
+                        result_id=result_id,
+                        kind="bytes",
+                        observed=byte_estimate,
+                        limit=max_auto_bytes,
+                    )
+
             offset += len(batch)
-            if total is not None and offset >= total:
-                break
+            if total is not None:
+                # When the total is known, completion is offset >= total; a
+                # short (non-empty) page just means keep paging. Never stop on
+                # page size, which is what previously dropped rows.
+                if offset >= total:
+                    break
+                continue
+            # Total unknown: a short/empty page is the end of the stream.
             if len(batch) < page_size:
                 break
         return rows
 
 
 __all__ = [
+    "DEFAULT_MAX_AUTO_BYTES",
     "DEFAULT_MAX_AUTO_ROWS",
     "OVERLOADED_ERROR_CODE",
     "PollPolicy",
     "QueryApi",
+    "ResultError",
     "ResultFailedError",
+    "ResultIncompleteError",
     "ResultTimeoutError",
     "ResultTooLargeError",
     "ResultUnavailableError",
