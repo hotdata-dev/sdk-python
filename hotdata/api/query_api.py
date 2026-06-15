@@ -102,6 +102,7 @@ class QueryApi:
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -177,6 +178,7 @@ class QueryApi:
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -252,6 +254,7 @@ class QueryApi:
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(

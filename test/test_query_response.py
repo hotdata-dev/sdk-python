@@ -43,6 +43,7 @@ class TestQueryResponse(unittest.TestCase):
                 nullable = [
                     True
                     ],
+                preview_row_count = 56,
                 query_run_id = '',
                 result_id = '',
                 row_count = 0,
@@ -51,6 +52,8 @@ class TestQueryResponse(unittest.TestCase):
                         null
                         ]
                     ],
+                total_row_count = 56,
+                truncated = True,
                 warning = ''
             )
         else:
@@ -62,6 +65,7 @@ class TestQueryResponse(unittest.TestCase):
                 nullable = [
                     True
                     ],
+                preview_row_count = 56,
                 query_run_id = '',
                 row_count = 0,
                 rows = [
@@ -69,6 +73,7 @@ class TestQueryResponse(unittest.TestCase):
                         null
                         ]
                     ],
+                truncated = True,
         )
         """
 

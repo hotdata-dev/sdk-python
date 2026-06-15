@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
 from typing import Optional, Set
@@ -31,12 +31,15 @@ class QueryResponse(BaseModel):
     columns: List[StrictStr]
     execution_time_ms: Annotated[int, Field(strict=True, ge=0)]
     nullable: List[StrictBool] = Field(description="Nullable flags for each column (parallel to columns vec). True if the column allows NULL values, false if NOT NULL.")
+    preview_row_count: StrictInt = Field(description="Number of rows in *this* response body (`rows.len()`). Always present. For a large result this is a bounded preview, not the grand total — see `total_row_count` and `truncated` (#640).")
     query_run_id: StrictStr = Field(description="Unique identifier for the query run record (qrun...).")
     result_id: Optional[StrictStr] = Field(default=None, description="Unique identifier for retrieving this result via GET /results/{id}. Null if catalog registration failed (see `warning` field for details). When non-null, the result is being persisted asynchronously.")
-    row_count: Annotated[int, Field(strict=True, ge=0)]
+    row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="**Deprecated** — use `preview_row_count` (rows in this body) and `total_row_count` (grand total) instead. Retained for backward compatibility and currently always equal to `preview_row_count`; it will be removed in a future release once clients migrate to the count fields below (#640).")
     rows: List[List[Any]] = Field(description="Array of rows, where each row is an array of column values. Values can be strings, numbers, booleans, or null.")
+    total_row_count: Optional[StrictInt] = Field(default=None, description="Grand total rows in the full result. Present (and equal to `preview_row_count`) when the whole result fit in this response; `null` while a truncated result is still being persisted. When `null`, read the authoritative total from `GET /v1/query-runs/{id}` (`row_count`) or the `X-Total-Row-Count` header on `GET /v1/results/{id}` (#640).")
+    truncated: StrictBool = Field(description="True when `rows` is a bounded preview of a larger result. Fetch the full result via `result_id` (#640). Always `false` until bounded streaming is enabled; clients should still branch on it so no code change is needed when truncation goes live.")
     warning: Optional[StrictStr] = Field(default=None, description="Warning message if result persistence could not be initiated. When present, `result_id` will be null and the result cannot be retrieved later. The query results are still returned in this response.")
-    __properties: ClassVar[List[str]] = ["columns", "execution_time_ms", "nullable", "query_run_id", "result_id", "row_count", "rows", "warning"]
+    __properties: ClassVar[List[str]] = ["columns", "execution_time_ms", "nullable", "preview_row_count", "query_run_id", "result_id", "row_count", "rows", "total_row_count", "truncated", "warning"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -82,6 +85,11 @@ class QueryResponse(BaseModel):
         if self.result_id is None and "result_id" in self.model_fields_set:
             _dict['result_id'] = None
 
+        # set to None if total_row_count (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_row_count is None and "total_row_count" in self.model_fields_set:
+            _dict['total_row_count'] = None
+
         # set to None if warning (nullable) is None
         # and model_fields_set contains the field
         if self.warning is None and "warning" in self.model_fields_set:
@@ -102,10 +110,13 @@ class QueryResponse(BaseModel):
             "columns": obj.get("columns"),
             "execution_time_ms": obj.get("execution_time_ms"),
             "nullable": obj.get("nullable"),
+            "preview_row_count": obj.get("preview_row_count"),
             "query_run_id": obj.get("query_run_id"),
             "result_id": obj.get("result_id"),
             "row_count": obj.get("row_count"),
             "rows": obj.get("rows"),
+            "total_row_count": obj.get("total_row_count"),
+            "truncated": obj.get("truncated"),
             "warning": obj.get("warning")
         })
         return _obj

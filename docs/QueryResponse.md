@@ -9,10 +9,13 @@ Name | Type | Description | Notes
 **columns** | **List[str]** |  | 
 **execution_time_ms** | **int** |  | 
 **nullable** | **List[bool]** | Nullable flags for each column (parallel to columns vec). True if the column allows NULL values, false if NOT NULL. | 
+**preview_row_count** | **int** | Number of rows in *this* response body (&#x60;rows.len()&#x60;). Always present. For a large result this is a bounded preview, not the grand total — see &#x60;total_row_count&#x60; and &#x60;truncated&#x60; (#640). | 
 **query_run_id** | **str** | Unique identifier for the query run record (qrun...). | 
 **result_id** | **str** | Unique identifier for retrieving this result via GET /results/{id}. Null if catalog registration failed (see &#x60;warning&#x60; field for details). When non-null, the result is being persisted asynchronously. | [optional] 
-**row_count** | **int** |  | 
+**row_count** | **int** | **Deprecated** — use &#x60;preview_row_count&#x60; (rows in this body) and &#x60;total_row_count&#x60; (grand total) instead. Retained for backward compatibility and currently always equal to &#x60;preview_row_count&#x60;; it will be removed in a future release once clients migrate to the count fields below (#640). | 
 **rows** | **List[List[object]]** | Array of rows, where each row is an array of column values. Values can be strings, numbers, booleans, or null. | 
+**total_row_count** | **int** | Grand total rows in the full result. Present (and equal to &#x60;preview_row_count&#x60;) when the whole result fit in this response; &#x60;null&#x60; while a truncated result is still being persisted. When &#x60;null&#x60;, read the authoritative total from &#x60;GET /v1/query-runs/{id}&#x60; (&#x60;row_count&#x60;) or the &#x60;X-Total-Row-Count&#x60; header on &#x60;GET /v1/results/{id}&#x60; (#640). | [optional] 
+**truncated** | **bool** | True when &#x60;rows&#x60; is a bounded preview of a larger result. Fetch the full result via &#x60;result_id&#x60; (#640). Always &#x60;false&#x60; until bounded streaming is enabled; clients should still branch on it so no code change is needed when truncation goes live. | 
 **warning** | **str** | Warning message if result persistence could not be initiated. When present, &#x60;result_id&#x60; will be null and the result cannot be retrieved later. The query results are still returned in this response. | [optional] 
 
 ## Example
