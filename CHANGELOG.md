@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `hotdata.query.QueryApi`: enhanced query client that transparently retries
+  HTTP 429 (`OVERLOADED`) admission shedding honoring `Retry-After`, and
+  auto-follows truncated results to materialize the full row set, guarded by
+  configurable `max_auto_rows` (default 1M) and `max_auto_bytes` (default
+  64 MiB) ceilings (#688).
+- `ResultError` base class for the result-lifecycle exceptions
+  (`ResultFailedError`, `ResultTimeoutError`, `ResultTooLargeError`,
+  `ResultIncompleteError`, `ResultUnavailableError`) so callers can catch them
+  with a single `except`.
+
+### Changed
+
+- `from hotdata import QueryApi` / `ResultsApi` now resolve to the enhanced
+  clients (429 retry + truncation auto-follow; Arrow IPC fetch) instead of the
+  bare generated classes, so the default happy path gets the safe behavior the
+  query contract needs. The raw generated classes remain importable from
+  `hotdata.api.query_api` / `hotdata.api.results_api`.
+
 
 ## [0.3.4] - 2026-06-15
 

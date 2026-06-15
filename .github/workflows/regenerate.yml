@@ -206,6 +206,9 @@ jobs:
       - name: Patch ApiClient close lifecycle
         run: python3 scripts/patch_api_client_close.py
 
+      - name: Patch default client exports (enhanced query/results)
+        run: python3 scripts/patch_query_exports.py
+
       - name: Verify JWT-exchange code survived regeneration
         run: |
           python3 - <<'PY'
