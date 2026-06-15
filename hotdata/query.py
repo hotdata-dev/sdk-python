@@ -350,7 +350,12 @@ class QueryApi(_GeneratedQueryApi):
         Returns the ready :class:`~hotdata.models.get_result_response.GetResultResponse`.
         Shared by auto-follow and available for direct use.
 
-        :raises ResultFailedError: status reached ``failed``.
+        Polls with ``limit=0`` so the readiness check fetches status only — a
+        ``ready`` result would otherwise return its full (unbounded) row set on
+        every poll, materializing the whole result into memory before the size
+        guards can act.
+
+        :raises ResultFailedError: the result failed (delivered as HTTP 409).
         :raises ResultTimeoutError: ``ready`` not reached within the poll deadline.
         """
         api = results_api or _ResultsApi(self.api_client)
@@ -359,11 +364,25 @@ class QueryApi(_GeneratedQueryApi):
         delay = policy.base_backoff_s
         last_status = "pending"
         while True:
-            result = api.get_result(result_id)
+            try:
+                result = api.get_result(result_id, limit=0)
+            except ApiException as exc:
+                # A failed result is delivered as HTTP 409: the generated client
+                # raises (response_deserialize raises on any non-2xx) rather than
+                # returning status="failed". The GetResultResponse body — and its
+                # error_message — rides on exc.data.
+                if exc.status == 409:
+                    data = getattr(exc, "data", None)
+                    raise ResultFailedError(
+                        result_id=result_id,
+                        error_message=getattr(data, "error_message", None),
+                    ) from exc
+                raise
             last_status = result.status
             if last_status == "ready":
                 return result
             if last_status == "failed":
+                # Defensive: handle a failure also surfaced via a 2xx body.
                 raise ResultFailedError(
                     result_id=result_id, error_message=result.error_message
                 )

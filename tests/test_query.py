@@ -93,6 +93,15 @@ def _too_many(retry_after: Optional[str] = None) -> ApiException:
     return exc
 
 
+def _failed_409(error_message: str = "boom") -> ApiException:
+    # A failed result is delivered as HTTP 409: the generated client raises
+    # ApiException (it raises on any non-2xx), with the GetResultResponse body
+    # — and its error_message — on exc.data.
+    exc = ApiException(status=409, reason="Conflict")
+    exc.data = _result(status="failed", error_message=error_message)
+    return exc
+
+
 # --- 429 retry ----------------------------------------------------------------
 
 
@@ -267,7 +276,8 @@ def test_autofollow_failed_result_raises() -> None:
     preview = _preview(truncated=True, total=3)
 
     def get_result(result_id, offset=None, limit=None, format=None, **kw):
-        return _result(status="failed", error_message="planner exploded")
+        # The readiness poll hits a failed result -> HTTP 409 ApiException.
+        raise _failed_409("planner exploded")
 
     with ExitStack() as stack:
         _follow_patches(
@@ -276,7 +286,30 @@ def test_autofollow_failed_result_raises() -> None:
         with pytest.raises(ResultFailedError) as ei:
             _api().query(REQ)
     assert ei.value.result_id == "rslt1"
+    assert ei.value.error_message == "planner exploded"
     assert "planner exploded" in str(ei.value)
+
+
+def test_readiness_poll_fetches_status_only() -> None:
+    # The poll must not pull the full (unbounded) result into memory before the
+    # guards run — it asks for limit=0 and gets status only.
+    preview = _preview(truncated=True, total=2)
+    full = [[1], [2]]
+    poll_limits: List[Any] = []
+
+    def get_result(result_id, offset=None, limit=None, format=None, **kw):
+        if format is None:  # readiness poll
+            poll_limits.append(limit)
+            return _result(status="ready")
+        return _result(status="ready", rows=full[offset:offset + limit])
+
+    with ExitStack() as stack:
+        _follow_patches(
+            stack, query_response=preview, get_result_side_effect=get_result
+        )
+        out = _api(poll=PollPolicy(page_size=10)).query(REQ)
+    assert out.rows == full
+    assert poll_limits == [0]  # status-only, not the default unbounded fetch
 
 
 def test_autofollow_guard_rejects_oversized_result() -> None:
@@ -450,7 +483,7 @@ def test_result_errors_share_a_base() -> None:
     preview = _preview(truncated=True, total=3)
 
     def get_result(result_id, offset=None, limit=None, format=None, **kw):
-        return _result(status="failed", error_message="boom")
+        raise _failed_409("boom")
 
     with ExitStack() as stack:
         _follow_patches(
