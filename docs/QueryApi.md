@@ -104,6 +104,7 @@ Name | Type | Description  | Notes
 **202** | Query submitted asynchronously |  -  |
 **400** | Invalid request (no database specified, or header/body database_id conflict) |  -  |
 **404** | Database not found |  -  |
+**429** | Too many concurrent queries; retry after the Retry-After delay |  -  |
 **500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
