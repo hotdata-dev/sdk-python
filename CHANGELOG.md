@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `hotdata.query.QueryApi`: enhanced query client that transparently retries
+  HTTP 429 (`OVERLOADED`) admission shedding honoring `Retry-After`, and
+  auto-follows truncated results to materialize the full row set with a
+  configurable `max_auto_rows` guard (#688).
+
 
 ## [0.3.4] - 2026-06-15
 
