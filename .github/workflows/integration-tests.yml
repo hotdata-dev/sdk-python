@@ -57,6 +57,25 @@ jobs:
           print(f"All {len(scenarios)} scenarios have corresponding test files.")
           PY
 
+  # Unit tests need no server or secrets (they stub the transport / generated
+  # methods), so they run on every PR including forks. This is where the
+  # hand-written behavior (Arrow fetch, auth, 429 retry + truncation auto-follow)
+  # is verified — the integration job only covers tests/integration, and the
+  # truncation/429 contract can't be exercised against prod until it deploys.
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+      - name: Install package and test deps
+        run: |
+          pip install --quiet -r requirements.txt -r test-requirements.txt
+          pip install --quiet -e .
+      - name: Run unit tests
+        run: pytest test tests --ignore=tests/integration -v
+
   # Integration tests run against production. Skipped automatically by the
   # conftest if HOTDATA_SDK_TEST_API_KEY / HOTDATA_SDK_TEST_WORKSPACE_ID aren't
   # set (e.g. PRs from forks where secrets aren't injected).
