@@ -86,9 +86,14 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           text=":package: *hotdata* \`v${version}\` published to PyPI — <https://pypi.org/project/hotdata/${version}/|PyPI> · <https://github.com/${GITHUB_REPOSITORY}/releases/tag/${GITHUB_REF_NAME}|release notes>"
           # #deploy channel ID (rename-proof). chat.postMessage returns HTTP 200
-          # even on logical errors, so assert on .ok to fail the step.
-          curl -sSf -X POST https://slack.com/api/chat.postMessage \
+          # even on logical errors, so capture the body and assert on .ok —
+          # echoing Slack's error makes a swallowed (continue-on-error) miss
+          # debuggable in the job log instead of disappearing silently.
+          response="$(curl -sS -X POST https://slack.com/api/chat.postMessage \
             -H "Authorization: Bearer ${SLACK_CI_BOT_TOKEN}" \
             -H 'Content-Type: application/json; charset=utf-8' \
-            --data "$(jq -n --arg ch 'C0ARK84E1D4' --arg text "$text" '{channel:$ch, text:$text}')" \
-          | jq -e '.ok' >/dev/null
+            --data "$(jq -n --arg ch 'C0ARK84E1D4' --arg text "$text" '{channel:$ch, text:$text}')")"
+          if ! jq -e '.ok' >/dev/null <<<"$response"; then
+            echo "Slack notification failed: $(jq -r '.error // "unknown"' <<<"$response")" >&2
+            exit 1
+          fi
