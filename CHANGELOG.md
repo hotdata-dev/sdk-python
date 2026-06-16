@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-16
+
 ### Added
 
 - `hotdata.query.QueryApi`: enhanced query client that transparently retries
@@ -26,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bare generated classes, so the default happy path gets the safe behavior the
   query contract needs. The raw generated classes remain importable from
   `hotdata.api.query_api` / `hotdata.api.results_api`.
-
 
 ## [0.3.4] - 2026-06-15
 
