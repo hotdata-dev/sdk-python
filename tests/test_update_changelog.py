@@ -34,6 +34,8 @@ def test_empty_unreleased_inserts_version_without_duplicate_heading():
     assert "## [0.1.2] - 2026-05-20" in result
     assert "The format is based on [Keep a Changelog]" in result.split("## [0.1.2]")[0]
     assert result.index("## [0.1.2]") < result.index("## [0.1.1]")
+    assert "## [Unreleased]\n\n## [0.1.2]" in result
+    assert "\n\n\n" not in result
 
 
 def test_populated_unreleased_moves_notes_into_new_section():
@@ -46,3 +48,5 @@ def test_populated_unreleased_moves_notes_into_new_section():
     assert "- New widget." in result
     assert result.index("- New widget.") < result.index("## [0.1.1]")
     assert "The format is based on [Keep a Changelog]" in result.split("## [0.1.2]")[0]
+    assert "## [Unreleased]\n\n## [0.1.2]" in result
+    assert "\n\n\n" not in result
