@@ -24,8 +24,8 @@ def update_changelog_text(text: str, ver: str, date: str) -> str:
                 f"- Release {ver}\n\n"
             )
         return re.sub(
-            r"^(## \[Unreleased\]\s*\n)(.*?)(?=^## \[|\Z)",
-            lambda match: match.group(1) + "\n" + section,
+            r"^## \[Unreleased\]\s*\n.*?(?=^## \[|\Z)",
+            lambda _match: f"## [Unreleased]\n\n{section}",
             text,
             count=1,
             flags=re.M | re.S,
