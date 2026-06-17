@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class ManagedSchemaResponse(BaseModel):
     """
-    Response body for a successful add-schema request. Echoes the normalised (lowercased) names so callers see exactly what was persisted.
+    Response body for a successful add-schema request. Echoes the normalized (lowercased) names so callers see exactly what was persisted.
     """ # noqa: E501
     connection_id: StrictStr = Field(description="Connection backing the catalog the schema was added to. For a database default catalog this is the database's `default_connection_id`.")
     var_schema: StrictStr = Field(alias="schema")

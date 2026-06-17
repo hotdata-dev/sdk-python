@@ -69,7 +69,7 @@ class ConnectionsApi:
     ) -> ManagedSchemaResponse:
         """Add managed schema
 
-        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -143,7 +143,7 @@ class ConnectionsApi:
     ) -> ApiResponse[ManagedSchemaResponse]:
         """Add managed schema
 
-        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -217,7 +217,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Add managed schema
 
-        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -369,7 +369,7 @@ class ConnectionsApi:
     ) -> ManagedTableResponse:
         """Add managed table
 
-        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -447,7 +447,7 @@ class ConnectionsApi:
     ) -> ApiResponse[ManagedTableResponse]:
         """Add managed table
 
-        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -525,7 +525,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Add managed table
 
-        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalised to lowercase.
+        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1497,7 +1497,7 @@ class ConnectionsApi:
     ) -> None:
         """Delete managed table
 
-        Delete a single managed-catalog table. The catalog row is removed and the backing parquet file (if any) is scheduled for deletion. Only valid against connections whose source type is `managed`.
+        Delete a single managed-catalog table. The table and its data are removed. Only valid against connections whose source type is `managed`.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1574,7 +1574,7 @@ class ConnectionsApi:
     ) -> ApiResponse[None]:
         """Delete managed table
 
-        Delete a single managed-catalog table. The catalog row is removed and the backing parquet file (if any) is scheduled for deletion. Only valid against connections whose source type is `managed`.
+        Delete a single managed-catalog table. The table and its data are removed. Only valid against connections whose source type is `managed`.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1651,7 +1651,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Delete managed table
 
-        Delete a single managed-catalog table. The catalog row is removed and the backing parquet file (if any) is scheduled for deletion. Only valid against connections whose source type is `managed`.
+        Delete a single managed-catalog table. The table and its data are removed. Only valid against connections whose source type is `managed`.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2603,7 +2603,7 @@ class ConnectionsApi:
     ) -> LoadManagedTableResponse:
         """Load managed table from upload
 
-        Publish a previously-uploaded parquet file as the new generation of a managed table. The upload must reference a parquet file (verified by magic bytes). Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
+        Publish a previously-uploaded parquet file as the new contents of a managed table. The upload must reference a parquet file. Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2685,7 +2685,7 @@ class ConnectionsApi:
     ) -> ApiResponse[LoadManagedTableResponse]:
         """Load managed table from upload
 
-        Publish a previously-uploaded parquet file as the new generation of a managed table. The upload must reference a parquet file (verified by magic bytes). Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
+        Publish a previously-uploaded parquet file as the new contents of a managed table. The upload must reference a parquet file. Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2767,7 +2767,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Load managed table from upload
 
-        Publish a previously-uploaded parquet file as the new generation of a managed table. The upload must reference a parquet file (verified by magic bytes). Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
+        Publish a previously-uploaded parquet file as the new contents of a managed table. The upload must reference a parquet file. Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str

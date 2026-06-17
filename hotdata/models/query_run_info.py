@@ -28,6 +28,7 @@ class QueryRunInfo(BaseModel):
     """
     Single query run for listing
     """ # noqa: E501
+    bytes_scanned: Optional[StrictInt] = Field(default=None, description="Total bytes of table data read from storage to run this query. `null` when the query touches no table at all (for example a constant expression like `SELECT 1`). May be `0` when the query reads a table but not its row data — for example a row count served from table statistics.")
     completed_at: Optional[datetime] = None
     created_at: datetime
     error_message: Optional[StrictStr] = None
@@ -35,6 +36,7 @@ class QueryRunInfo(BaseModel):
     id: StrictStr
     result_id: Optional[StrictStr] = None
     row_count: Optional[StrictInt] = None
+    rows_scanned: Optional[StrictInt] = Field(default=None, description="Total rows read from storage to run this query, before any filtering or aggregation. Distinct from `row_count`, which is how many rows the query returned. `null` when the query reads no table data from storage.")
     saved_query_id: Optional[StrictStr] = None
     saved_query_version: Optional[StrictInt] = None
     server_processing_ms: Optional[StrictInt] = Field(default=None, description="Total server-side processing time for this query (milliseconds). Measured from query start to result ready. Includes SQL execution, task spawning, and result preparation. Does not include network transit. Populated for all completed query runs (sync and async).")
@@ -43,9 +45,9 @@ class QueryRunInfo(BaseModel):
     sql_text: StrictStr
     status: StrictStr
     trace_id: Optional[StrictStr] = None
-    user_public_id: Optional[StrictStr] = Field(default=None, description="Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: `user_{first_10_hex_chars}`. Mirrors the webapp's `user_public_id_from_auth_header`.")
+    user_public_id: Optional[StrictStr] = Field(default=None, description="Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: `user_{first_10_hex_chars}`.")
     warning_message: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["completed_at", "created_at", "error_message", "execution_time_ms", "id", "result_id", "row_count", "saved_query_id", "saved_query_version", "server_processing_ms", "snapshot_id", "sql_hash", "sql_text", "status", "trace_id", "user_public_id", "warning_message"]
+    __properties: ClassVar[List[str]] = ["bytes_scanned", "completed_at", "created_at", "error_message", "execution_time_ms", "id", "result_id", "row_count", "rows_scanned", "saved_query_id", "saved_query_version", "server_processing_ms", "snapshot_id", "sql_hash", "sql_text", "status", "trace_id", "user_public_id", "warning_message"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,6 +88,11 @@ class QueryRunInfo(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if bytes_scanned (nullable) is None
+        # and model_fields_set contains the field
+        if self.bytes_scanned is None and "bytes_scanned" in self.model_fields_set:
+            _dict['bytes_scanned'] = None
+
         # set to None if completed_at (nullable) is None
         # and model_fields_set contains the field
         if self.completed_at is None and "completed_at" in self.model_fields_set:
@@ -110,6 +117,11 @@ class QueryRunInfo(BaseModel):
         # and model_fields_set contains the field
         if self.row_count is None and "row_count" in self.model_fields_set:
             _dict['row_count'] = None
+
+        # set to None if rows_scanned (nullable) is None
+        # and model_fields_set contains the field
+        if self.rows_scanned is None and "rows_scanned" in self.model_fields_set:
+            _dict['rows_scanned'] = None
 
         # set to None if saved_query_id (nullable) is None
         # and model_fields_set contains the field
@@ -153,6 +165,7 @@ class QueryRunInfo(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "bytes_scanned": obj.get("bytes_scanned"),
             "completed_at": obj.get("completed_at"),
             "created_at": obj.get("created_at"),
             "error_message": obj.get("error_message"),
@@ -160,6 +173,7 @@ class QueryRunInfo(BaseModel):
             "id": obj.get("id"),
             "result_id": obj.get("result_id"),
             "row_count": obj.get("row_count"),
+            "rows_scanned": obj.get("rows_scanned"),
             "saved_query_id": obj.get("saved_query_id"),
             "saved_query_version": obj.get("saved_query_version"),
             "server_processing_ms": obj.get("server_processing_ms"),

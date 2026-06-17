@@ -6,6 +6,7 @@ Single query run for listing
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**bytes_scanned** | **int** | Total bytes of table data read from storage to run this query. &#x60;null&#x60; when the query touches no table at all (for example a constant expression like &#x60;SELECT 1&#x60;). May be &#x60;0&#x60; when the query reads a table but not its row data — for example a row count served from table statistics. | [optional] 
 **completed_at** | **datetime** |  | [optional] 
 **created_at** | **datetime** |  | 
 **error_message** | **str** |  | [optional] 
@@ -13,6 +14,7 @@ Name | Type | Description | Notes
 **id** | **str** |  | 
 **result_id** | **str** |  | [optional] 
 **row_count** | **int** |  | [optional] 
+**rows_scanned** | **int** | Total rows read from storage to run this query, before any filtering or aggregation. Distinct from &#x60;row_count&#x60;, which is how many rows the query returned. &#x60;null&#x60; when the query reads no table data from storage. | [optional] 
 **saved_query_id** | **str** |  | [optional] 
 **saved_query_version** | **int** |  | [optional] 
 **server_processing_ms** | **int** | Total server-side processing time for this query (milliseconds). Measured from query start to result ready. Includes SQL execution, task spawning, and result preparation. Does not include network transit. Populated for all completed query runs (sync and async). | [optional] 
@@ -21,7 +23,7 @@ Name | Type | Description | Notes
 **sql_text** | **str** |  | 
 **status** | **str** |  | 
 **trace_id** | **str** |  | [optional] 
-**user_public_id** | **str** | Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: &#x60;user_{first_10_hex_chars}&#x60;. Mirrors the webapp&#39;s &#x60;user_public_id_from_auth_header&#x60;. | [optional] 
+**user_public_id** | **str** | Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: &#x60;user_{first_10_hex_chars}&#x60;. | [optional] 
 **warning_message** | **str** |  | [optional] 
 
 ## Example

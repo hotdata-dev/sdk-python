@@ -106,6 +106,7 @@ Name | Type | Description  | Notes
 **404** | Database not found |  -  |
 **429** | Too many concurrent queries; retry after the Retry-After delay |  -  |
 **500** | Internal server error |  -  |
+**503** | Result store temporarily unavailable (a truncated result could not be persisted); retry after the Retry-After delay |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

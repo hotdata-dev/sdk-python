@@ -45,7 +45,7 @@ class IndexesApi:
     @validate_call
     def create_dataset_index(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         create_index_request: CreateIndexRequest,
         _request_timeout: Union[
             None,
@@ -64,7 +64,7 @@ class IndexesApi:
 
         Create a sorted, BM25, or vector index on a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param create_index_request: (required)
         :type create_index_request: CreateIndexRequest
@@ -119,7 +119,7 @@ class IndexesApi:
     @validate_call
     def create_dataset_index_with_http_info(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         create_index_request: CreateIndexRequest,
         _request_timeout: Union[
             None,
@@ -138,7 +138,7 @@ class IndexesApi:
 
         Create a sorted, BM25, or vector index on a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param create_index_request: (required)
         :type create_index_request: CreateIndexRequest
@@ -193,7 +193,7 @@ class IndexesApi:
     @validate_call
     def create_dataset_index_without_preload_content(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         create_index_request: CreateIndexRequest,
         _request_timeout: Union[
             None,
@@ -212,7 +212,7 @@ class IndexesApi:
 
         Create a sorted, BM25, or vector index on a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param create_index_request: (required)
         :type create_index_request: CreateIndexRequest
@@ -345,7 +345,7 @@ class IndexesApi:
     @validate_call
     def create_index(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -366,7 +366,7 @@ class IndexesApi:
 
         Create a sorted or BM25 full-text index on a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -427,7 +427,7 @@ class IndexesApi:
     @validate_call
     def create_index_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -448,7 +448,7 @@ class IndexesApi:
 
         Create a sorted or BM25 full-text index on a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -509,7 +509,7 @@ class IndexesApi:
     @validate_call
     def create_index_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -530,7 +530,7 @@ class IndexesApi:
 
         Create a sorted or BM25 full-text index on a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -674,7 +674,7 @@ class IndexesApi:
     @validate_call
     def delete_dataset_index(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
         _request_timeout: Union[
             None,
@@ -693,7 +693,7 @@ class IndexesApi:
 
         Delete a specific index from a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param index_name: Index name (required)
         :type index_name: str
@@ -746,7 +746,7 @@ class IndexesApi:
     @validate_call
     def delete_dataset_index_with_http_info(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
         _request_timeout: Union[
             None,
@@ -765,7 +765,7 @@ class IndexesApi:
 
         Delete a specific index from a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param index_name: Index name (required)
         :type index_name: str
@@ -818,7 +818,7 @@ class IndexesApi:
     @validate_call
     def delete_dataset_index_without_preload_content(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
         _request_timeout: Union[
             None,
@@ -837,7 +837,7 @@ class IndexesApi:
 
         Delete a specific index from a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param index_name: Index name (required)
         :type index_name: str
@@ -955,7 +955,7 @@ class IndexesApi:
     @validate_call
     def delete_index(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -976,7 +976,7 @@ class IndexesApi:
 
         Delete a specific index from a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -1036,7 +1036,7 @@ class IndexesApi:
     @validate_call
     def delete_index_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -1057,7 +1057,7 @@ class IndexesApi:
 
         Delete a specific index from a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -1117,7 +1117,7 @@ class IndexesApi:
     @validate_call
     def delete_index_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -1138,7 +1138,7 @@ class IndexesApi:
 
         Delete a specific index from a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -1268,7 +1268,7 @@ class IndexesApi:
     @validate_call
     def list_dataset_indexes(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1286,7 +1286,7 @@ class IndexesApi:
 
         List all indexes created on a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1336,7 +1336,7 @@ class IndexesApi:
     @validate_call
     def list_dataset_indexes_with_http_info(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1354,7 +1354,7 @@ class IndexesApi:
 
         List all indexes created on a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1404,7 +1404,7 @@ class IndexesApi:
     @validate_call
     def list_dataset_indexes_without_preload_content(
         self,
-        dataset_id: Annotated[StrictStr, Field(description="Dataset identifier")],
+        dataset_id: Annotated[StrictStr, Field(description="Dataset ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1422,7 +1422,7 @@ class IndexesApi:
 
         List all indexes created on a dataset.
 
-        :param dataset_id: Dataset identifier (required)
+        :param dataset_id: Dataset ID (required)
         :type dataset_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1534,7 +1534,7 @@ class IndexesApi:
     @validate_call
     def list_indexes(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -1554,7 +1554,7 @@ class IndexesApi:
 
         List all indexes created on a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -1611,7 +1611,7 @@ class IndexesApi:
     @validate_call
     def list_indexes_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -1631,7 +1631,7 @@ class IndexesApi:
 
         List all indexes created on a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -1688,7 +1688,7 @@ class IndexesApi:
     @validate_call
     def list_indexes_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection identifier")],
+        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -1708,7 +1708,7 @@ class IndexesApi:
 
         List all indexes created on a cached table.
 
-        :param connection_id: Connection identifier (required)
+        :param connection_id: Connection ID (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str

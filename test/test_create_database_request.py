@@ -46,8 +46,7 @@ class TestCreateDatabaseRequest(unittest.TestCase):
                             hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
                                 name = '', )
                             ], )
-                    ],
-                storage_backend = ''
+                    ]
             )
         else:
             return CreateDatabaseRequest(

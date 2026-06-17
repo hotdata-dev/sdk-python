@@ -18,9 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -32,7 +31,7 @@ class GetResultResponse(BaseModel):
     error_message: Optional[StrictStr] = None
     nullable: Optional[List[StrictBool]] = None
     result_id: StrictStr
-    row_count: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
+    row_count: Optional[StrictInt] = None
     rows: Optional[List[List[Any]]] = Field(default=None, description="Array of rows, where each row is an array of column values.")
     status: StrictStr
     __properties: ClassVar[List[str]] = ["columns", "error_message", "nullable", "result_id", "row_count", "rows", "status"]

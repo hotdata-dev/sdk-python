@@ -33,6 +33,7 @@ class JobType(str, Enum):
     DATASET_REFRESH = 'dataset_refresh'
     CREATE_INDEX = 'create_index'
     CREATE_DATASET_INDEX = 'create_dataset_index'
+    MANAGED_LOAD = 'managed_load'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

@@ -104,6 +104,7 @@ class QueryApi:
             '404': "ApiErrorResponse",
             '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -180,6 +181,7 @@ class QueryApi:
             '404': "ApiErrorResponse",
             '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -256,6 +258,7 @@ class QueryApi:
             '404': "ApiErrorResponse",
             '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,

@@ -38,7 +38,6 @@ class TestCreateDatasetRequest(unittest.TestCase):
             return CreateDatasetRequest(
                 label = '',
                 source = None,
-                storage_backend = '',
                 table_name = ''
             )
         else:

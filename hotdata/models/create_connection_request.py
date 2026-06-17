@@ -33,8 +33,7 @@ class CreateConnectionRequest(BaseModel):
     secret_name: Optional[StrictStr] = Field(default=None, description="Optional reference to a secret by name. If provided, this secret will be used for authentication. Mutually exclusive with `secret_id`.")
     skip_discovery: Optional[StrictBool] = Field(default=None, description="If true, skip automatic schema discovery after registering the connection. The connection will be created but no tables will be discovered. You can run discovery later via the refresh endpoint.")
     source_type: StrictStr
-    storage_backend: Optional[StrictStr] = Field(default=None, description="Physical storage backend for tables created under this connection. `\"parquet\"` (default) uses the versioned parquet cache. `\"ducklake\"` stores data in a DuckLake catalog in the shared metadata DB configured via `ducklake.metadata_pg_url`; accepted for any source type and requires that pool to be configured.")
-    __properties: ClassVar[List[str]] = ["config", "name", "secret_id", "secret_name", "skip_discovery", "source_type", "storage_backend"]
+    __properties: ClassVar[List[str]] = ["config", "name", "secret_id", "secret_name", "skip_discovery", "source_type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,11 +84,6 @@ class CreateConnectionRequest(BaseModel):
         if self.secret_name is None and "secret_name" in self.model_fields_set:
             _dict['secret_name'] = None
 
-        # set to None if storage_backend (nullable) is None
-        # and model_fields_set contains the field
-        if self.storage_backend is None and "storage_backend" in self.model_fields_set:
-            _dict['storage_backend'] = None
-
         return _dict
 
     @classmethod
@@ -107,8 +101,7 @@ class CreateConnectionRequest(BaseModel):
             "secret_id": obj.get("secret_id"),
             "secret_name": obj.get("secret_name"),
             "skip_discovery": obj.get("skip_discovery"),
-            "source_type": obj.get("source_type"),
-            "storage_backend": obj.get("storage_backend")
+            "source_type": obj.get("source_type")
         })
         return _obj
 

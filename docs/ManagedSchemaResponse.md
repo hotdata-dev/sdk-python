@@ -1,6 +1,6 @@
 # ManagedSchemaResponse
 
-Response body for a successful add-schema request. Echoes the normalised (lowercased) names so callers see exactly what was persisted.
+Response body for a successful add-schema request. Echoes the normalized (lowercased) names so callers see exactly what was persisted.
 
 ## Properties
 

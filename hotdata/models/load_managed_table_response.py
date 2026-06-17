@@ -28,7 +28,7 @@ class LoadManagedTableResponse(BaseModel):
     """
     Response body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads`.
     """ # noqa: E501
-    arrow_schema_json: StrictStr = Field(description="Arrow schema (JSON) parsed from the uploaded parquet footer.")
+    arrow_schema_json: StrictStr = Field(description="Schema of the loaded table, as JSON.")
     connection_id: StrictStr
     row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Total rows in the published parquet file.")
     schema_name: StrictStr

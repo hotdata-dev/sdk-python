@@ -26,9 +26,9 @@ Retrieve a persisted query result by ID. The response format for the `ready` sta
 | `failed`              | 409 `application/json` `{status, result_id, error_message}`                  |
 | not found             | 404 `application/json` (`ApiErrorResponse`)                                  |
 
-`?format=` accepts `arrow`, `json`, `csv`, `md`, `parquet` and takes precedence over `Accept`. `markdown` is accepted as a runtime alias for `md` (the OpenAPI enum lists only `md` to keep the SDK shape clean). Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel="next"` points at the following page. `?offset`/`?limit` are ignored for `format=parquet` since that path returns the underlying file unchanged.
+`?format=` accepts `arrow`, `json`, `csv`, `md`, `parquet` and takes precedence over `Accept`. `markdown` is accepted as a runtime alias for `md`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel="next"` points at the following page. `?offset`/`?limit` are ignored for `format=parquet` since that path returns the underlying file unchanged.
 
-Ready responses (Arrow, CSV, Markdown, JSON) carry `X-Total-Row-Count` (full result row count from parquet metadata, independent of offset/limit). The streaming paths run end-to-end with no spawned task between the parquet reader and the wire — clients can disconnect at any time and the server stops reading.
+Ready responses (Arrow, CSV, Markdown, JSON) carry `X-Total-Row-Count` (the full result row count, independent of offset/limit). Responses are streamed end-to-end, so a client can disconnect at any time and the server stops reading.
 
 IEEE special floats (`±Inf`, `NaN`) have no canonical JSON representation. For cross-format consistency the JSON, CSV, and Markdown paths emit them as `null` / empty cells, and JSON `nullable[]` is widened to match. The Arrow IPC and Parquet bodies are binary round-trip formats and preserve the raw IEEE values; callers cross-checking a result across CSV and Parquet should not byte-compare those slots.
 
@@ -80,7 +80,7 @@ with hotdata.ApiClient(configuration) as api_client:
     id = 'id_example' # str | Result ID
     offset = 56 # int | Rows to skip (default: 0) (optional)
     limit = 56 # int | Maximum rows to return (default: unbounded) (optional)
-    format = hotdata.ResultsFormatQuery() # ResultsFormatQuery | `arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`, but is not in the OpenAPI enum to keep the SDK shape clean. (optional)
+    format = hotdata.ResultsFormatQuery() # ResultsFormatQuery | `arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`. (optional)
 
     try:
         # Get result
@@ -101,7 +101,7 @@ Name | Type | Description  | Notes
  **id** | **str**| Result ID | 
  **offset** | **int**| Rows to skip (default: 0) | [optional] 
  **limit** | **int**| Maximum rows to return (default: unbounded) | [optional] 
- **format** | [**ResultsFormatQuery**](.md)| &#x60;arrow&#x60;, &#x60;json&#x60;, &#x60;csv&#x60;, &#x60;md&#x60;, or &#x60;parquet&#x60; — overrides the &#x60;Accept&#x60; header. &#x60;markdown&#x60; is also accepted at runtime as an alias for &#x60;md&#x60;, but is not in the OpenAPI enum to keep the SDK shape clean. | [optional] 
+ **format** | [**ResultsFormatQuery**](.md)| &#x60;arrow&#x60;, &#x60;json&#x60;, &#x60;csv&#x60;, &#x60;md&#x60;, or &#x60;parquet&#x60; — overrides the &#x60;Accept&#x60; header. &#x60;markdown&#x60; is also accepted at runtime as an alias for &#x60;md&#x60;. | [optional] 
 
 ### Return type
 
@@ -120,7 +120,7 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Result data. The body depends on the negotiated format: JSON callers receive &#x60;GetResultResponse&#x60;; Arrow callers receive an Arrow IPC stream; CSV callers receive comma-separated text (LF-terminated, double-quote escaped, RFC 4180-style quoting but not RFC 4180-strict on line endings); Markdown callers receive a single GitHub-flavored pipe table; Parquet callers receive the raw parquet bytes from object storage. Non-finite floats (&#x60;±Inf&#x60;, &#x60;NaN&#x60;) render as &#x60;null&#x60; (JSON) or empty cells (CSV, Markdown) for cross-format consistency. &#x60;Accept&#x60; is treated as a flat content-type list — &#x60;q&#x3D;&#x60; quality values are ignored; use &#x60;?format&#x3D;&#x60; to disambiguate. |  * Link - RFC 5988 &#x60;Link&#x60; header with &#x60;rel&#x3D;\&quot;next\&quot;&#x60; pointing at the next page when a finite &#x60;limit&#x60; does not reach the end of the result. <br>  * X-Total-Row-Count - Total rows in the full result, ignoring offset/limit. Present only when status is &#x60;ready&#x60;. <br>  |
+**200** | Result data. The body depends on the negotiated format: JSON callers receive &#x60;GetResultResponse&#x60;; Arrow callers receive an Arrow IPC stream; CSV callers receive comma-separated text (LF-terminated, double-quote escaped, RFC 4180-style quoting but not RFC 4180-strict on line endings); Markdown callers receive a single GitHub-flavored pipe table; Parquet callers receive the raw parquet bytes, served as-is. Non-finite floats (&#x60;±Inf&#x60;, &#x60;NaN&#x60;) render as &#x60;null&#x60; (JSON) or empty cells (CSV, Markdown) for cross-format consistency. &#x60;Accept&#x60; is treated as a flat content-type list — &#x60;q&#x3D;&#x60; quality values are ignored; use &#x60;?format&#x3D;&#x60; to disambiguate. |  * Link - RFC 5988 &#x60;Link&#x60; header with &#x60;rel&#x3D;\&quot;next\&quot;&#x60; pointing at the next page when a finite &#x60;limit&#x60; does not reach the end of the result. <br>  * X-Total-Row-Count - Total rows in the full result, ignoring offset/limit. Present only when status is &#x60;ready&#x60;. <br>  |
 **202** | Result is still being computed (&#x60;pending&#x60; or &#x60;processing&#x60;). Poll the same URL. |  * Retry-After - Suggested seconds before the next poll. <br>  |
 **400** | Invalid offset, limit, or format. |  -  |
 **404** | Result not found. |  -  |
