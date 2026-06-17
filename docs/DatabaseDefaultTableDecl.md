@@ -1,6 +1,6 @@
 # DatabaseDefaultTableDecl
 
-One table declaration inside a default-catalog schema at database-create time. Mirrors `crate::source::ManagedTableDecl` shape so the controller can convert with a simple `.map`.
+One table declaration inside a default-catalog schema, supplied at database-create time.
 
 ## Properties
 

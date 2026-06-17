@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **label** | **str** |  | 
 **source** | [**DatasetSource**](DatasetSource.md) |  | 
-**storage_backend** | **str** | Optional storage backend: &#x60;\&quot;parquet\&quot;&#x60; (default) or &#x60;\&quot;ducklake\&quot;&#x60;. &#x60;\&quot;ducklake\&quot;&#x60; requires &#x60;ducklake.metadata_pg_url&#x60; to be configured at engine boot; the engine also rejects the combo of &#x60;storage_backend: \&quot;ducklake\&quot;&#x60; with a saved-query source or with explicit geometry columns (both deferred to a follow-up). | [optional] 
 **table_name** | **str** | Optional table_name - if not provided, derived from label | [optional] 
 
 ## Example

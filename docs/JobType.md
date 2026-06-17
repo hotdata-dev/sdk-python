@@ -16,6 +16,8 @@ Background job types returned by the API.
 
 * `CREATE_DATASET_INDEX` (value: `'create_dataset_index'`)
 
+* `MANAGED_LOAD` (value: `'managed_load'`)
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

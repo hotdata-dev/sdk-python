@@ -42,6 +42,7 @@ class TestListQueryRunsResponse(unittest.TestCase):
                 next_cursor = '',
                 query_runs = [
                     hotdata.models.query_run_info.QueryRunInfo(
+                        bytes_scanned = 56, 
                         completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         error_message = '', 
@@ -49,6 +50,7 @@ class TestListQueryRunsResponse(unittest.TestCase):
                         id = '', 
                         result_id = '', 
                         row_count = 56, 
+                        rows_scanned = 56, 
                         saved_query_id = '', 
                         saved_query_version = 56, 
                         server_processing_ms = 56, 
@@ -68,6 +70,7 @@ class TestListQueryRunsResponse(unittest.TestCase):
                 limit = 0,
                 query_runs = [
                     hotdata.models.query_run_info.QueryRunInfo(
+                        bytes_scanned = 56, 
                         completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         error_message = '', 
@@ -75,6 +78,7 @@ class TestListQueryRunsResponse(unittest.TestCase):
                         id = '', 
                         result_id = '', 
                         row_count = 56, 
+                        rows_scanned = 56, 
                         saved_query_id = '', 
                         saved_query_version = 56, 
                         server_processing_ms = 56, 

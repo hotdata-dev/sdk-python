@@ -1,6 +1,6 @@
 # DatabaseDefaultSchemaDecl
 
-One schema declaration inside the database's default catalog at create time. Mirrors `crate::source::ManagedSchemaDecl`. Tables default to empty so callers can declare just a schema name and add tables later via the managed-tables API on the default connection.
+One schema declaration inside the database's default catalog, supplied at create time. `tables` defaults to empty, so you can declare just a schema name and add tables later.
 
 ## Properties
 

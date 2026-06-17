@@ -43,8 +43,7 @@ class TestCreateConnectionRequest(unittest.TestCase):
                 secret_id = '',
                 secret_name = '',
                 skip_discovery = True,
-                source_type = '',
-                storage_backend = ''
+                source_type = ''
             )
         else:
             return CreateConnectionRequest(

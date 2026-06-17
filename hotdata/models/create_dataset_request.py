@@ -30,9 +30,8 @@ class CreateDatasetRequest(BaseModel):
     """ # noqa: E501
     label: StrictStr
     source: DatasetSource
-    storage_backend: Optional[StrictStr] = Field(default=None, description="Optional storage backend: `\"parquet\"` (default) or `\"ducklake\"`. `\"ducklake\"` requires `ducklake.metadata_pg_url` to be configured at engine boot; the engine also rejects the combo of `storage_backend: \"ducklake\"` with a saved-query source or with explicit geometry columns (both deferred to a follow-up).")
     table_name: Optional[StrictStr] = Field(default=None, description="Optional table_name - if not provided, derived from label")
-    __properties: ClassVar[List[str]] = ["label", "source", "storage_backend", "table_name"]
+    __properties: ClassVar[List[str]] = ["label", "source", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -76,11 +75,6 @@ class CreateDatasetRequest(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of source
         if self.source:
             _dict['source'] = self.source.to_dict()
-        # set to None if storage_backend (nullable) is None
-        # and model_fields_set contains the field
-        if self.storage_backend is None and "storage_backend" in self.model_fields_set:
-            _dict['storage_backend'] = None
-
         # set to None if table_name (nullable) is None
         # and model_fields_set contains the field
         if self.table_name is None and "table_name" in self.model_fields_set:
@@ -100,7 +94,6 @@ class CreateDatasetRequest(BaseModel):
         _obj = cls.model_validate({
             "label": obj.get("label"),
             "source": DatasetSource.from_dict(obj["source"]) if obj.get("source") is not None else None,
-            "storage_backend": obj.get("storage_backend"),
             "table_name": obj.get("table_name")
         })
         return _obj

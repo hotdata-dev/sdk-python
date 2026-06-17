@@ -44,7 +44,7 @@ class TestGetResultResponse(unittest.TestCase):
                     True
                     ],
                 result_id = '',
-                row_count = 0,
+                row_count = 56,
                 rows = [
                     [
                         null

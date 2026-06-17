@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class LoadManagedTableRequest(BaseModel):
     """
-    Request body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads`.  Publishes a previously-uploaded parquet file as the new generation for the named managed table. `mode` is fixed to `\"replace\"` today; the field is kept in the request body so future modes (e.g. append) are an additive change.
+    Request body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads`.  Publishes a previously-uploaded parquet file as the new contents of the named managed table. `mode` is fixed to `\"replace\"` today; the field is kept in the request body so future modes (e.g. append) are an additive change.
     """ # noqa: E501
     mode: StrictStr = Field(description="Load mode. Only `\"replace\"` is supported in this release.")
     upload_id: StrictStr = Field(description="ID of a previously-staged upload (see `POST /v1/files`). The upload must reference a parquet file. The upload is claimed atomically; concurrent loads against the same `upload_id` return 409.")

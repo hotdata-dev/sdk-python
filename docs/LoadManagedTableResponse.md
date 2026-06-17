@@ -6,7 +6,7 @@ Response body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**arrow_schema_json** | **str** | Arrow schema (JSON) parsed from the uploaded parquet footer. | 
+**arrow_schema_json** | **str** | Schema of the loaded table, as JSON. | 
 **connection_id** | **str** |  | 
 **row_count** | **int** | Total rows in the published parquet file. | 
 **schema_name** | **str** |  | 

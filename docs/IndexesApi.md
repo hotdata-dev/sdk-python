@@ -65,7 +65,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    dataset_id = 'dataset_id_example' # str | Dataset identifier
+    dataset_id = 'dataset_id_example' # str | Dataset ID
     create_index_request = hotdata.CreateIndexRequest() # CreateIndexRequest | 
 
     try:
@@ -84,7 +84,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **dataset_id** | **str**| Dataset identifier | 
+ **dataset_id** | **str**| Dataset ID | 
  **create_index_request** | [**CreateIndexRequest**](CreateIndexRequest.md)|  | 
 
 ### Return type
@@ -156,7 +156,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection identifier
+    connection_id = 'connection_id_example' # str | Connection ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
     create_index_request = hotdata.CreateIndexRequest() # CreateIndexRequest | 
@@ -177,7 +177,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection identifier | 
+ **connection_id** | **str**| Connection ID | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
  **create_index_request** | [**CreateIndexRequest**](CreateIndexRequest.md)|  | 
@@ -256,7 +256,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    dataset_id = 'dataset_id_example' # str | Dataset identifier
+    dataset_id = 'dataset_id_example' # str | Dataset ID
     index_name = 'index_name_example' # str | Index name
 
     try:
@@ -273,7 +273,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **dataset_id** | **str**| Dataset identifier | 
+ **dataset_id** | **str**| Dataset ID | 
  **index_name** | **str**| Index name | 
 
 ### Return type
@@ -341,7 +341,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection identifier
+    connection_id = 'connection_id_example' # str | Connection ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
     index_name = 'index_name_example' # str | Index name
@@ -360,7 +360,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection identifier | 
+ **connection_id** | **str**| Connection ID | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
  **index_name** | **str**| Index name | 
@@ -439,7 +439,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    dataset_id = 'dataset_id_example' # str | Dataset identifier
+    dataset_id = 'dataset_id_example' # str | Dataset ID
 
     try:
         # List indexes on a dataset
@@ -457,7 +457,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **dataset_id** | **str**| Dataset identifier | 
+ **dataset_id** | **str**| Dataset ID | 
 
 ### Return type
 
@@ -525,7 +525,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection identifier
+    connection_id = 'connection_id_example' # str | Connection ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
 
@@ -545,7 +545,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection identifier | 
+ **connection_id** | **str**| Connection ID | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
 
