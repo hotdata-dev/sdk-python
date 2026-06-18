@@ -66,6 +66,7 @@ class TestJobResult(unittest.TestCase):
                 index_name = '',
                 index_type = '',
                 metric = '',
+                source_column = '',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f')
             )
         else:
