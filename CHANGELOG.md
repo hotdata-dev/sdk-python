@@ -7,16 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.2] - 2026-06-18
-
 ### Changed
 
 - feat(indexes): add source_column field to index responses
 
-## [0.4.1] - 2026-06-17
+## [0.4.1] - 2026-06-19
 
 ### Changed
 
+- `Configuration` now defaults to a retry policy that transparently retries
+  pre-response connection resets (stale pooled keep-alive connections, e.g.
+  `ProtocolError('Connection aborted.', ConnectionResetError)`) on **every**
+  method, including `POST`. Such a reset happens before the request reaches the
+  server, so retrying on a fresh connection cannot double-execute. Read timeouts
+  and status retries stay idempotent-only. Pass an explicit `retries` to
+  override (#118).
 - chore: make api doc language end-user focused
 
 ## [0.4.0] - 2026-06-16

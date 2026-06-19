@@ -27,9 +27,9 @@ jobs:
 
       # Build + install + import the wheel here rather than in the regen workflow.
       # This job runs on any PR touching pyproject.toml/CHANGELOG.md — which every
-      # regen PR does (version bump + seeded changelog) — so a packaging or import
-      # regression surfaces as red CI on the PR instead of silently aborting the
-      # regen before it can open one. (Step name kept stable to preserve the
+      # regen PR does (it seeds a [Unreleased] changelog entry) — so a packaging or
+      # import regression surfaces as red CI on the PR instead of silently aborting
+      # the regen before it can open one. (Step name kept stable to preserve the
       # required-check / branch-protection wiring.)
       - name: Build, install, and import the wheel
         run: |

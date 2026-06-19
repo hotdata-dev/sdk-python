@@ -321,6 +321,13 @@ conf = hotdata.Configuration(
         self.safe_chars_for_path_param = ''
         """Safe chars for path_param
         """
+        # Default to a retry policy that transparently retries pre-response
+        # connection resets (stale pooled keep-alive connections) on every
+        # method, including POST (#118). Passing an explicit `retries` (int or
+        # urllib3.Retry) overrides it entirely.
+        if retries is None:
+            from hotdata._retry import default_retry
+            retries = default_retry()
         self.retries = retries
         """Retry configuration
         """
