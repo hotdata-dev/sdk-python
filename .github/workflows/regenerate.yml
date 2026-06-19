@@ -67,67 +67,56 @@ jobs:
             esac
           done
 
-      # pyproject.toml is hand-maintained (see .openapi-generator-ignore), so the
-      # generator no longer stamps the version. Bump the patch version directly,
-      # rewriting the same `^version = "X"` line scripts/release.sh treats as the
-      # source of truth.
-      - name: Bump package patch version in pyproject.toml
-        id: pkg
-        run: |
-          version=$(python3 - <<'PY'
-          import re, pathlib
-          path = pathlib.Path("pyproject.toml")
-          text = path.read_text()
-          m = re.search(r'(?m)^version = "(\d+)\.(\d+)\.(\d+)"', text)
-          if not m:
-              raise SystemExit("could not find a semver version in pyproject.toml")
-          new = f"{int(m[1])}.{int(m[2])}.{int(m[3]) + 1}"
-          text, n = re.subn(r'(?m)^version = "[^"]+"', f'version = "{new}"', text, count=1)
-          if n != 1:
-              raise SystemExit("failed to rewrite version in pyproject.toml")
-          path.write_text(text)
-          print(new)
-          PY
-          )
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
-      # check-release.yml gates merges on a `## [x.y.z]` CHANGELOG section
-      # matching the bumped version, so without a seeded entry every regen PR
-      # fails that check. Insert a stub (the spec-change title under ### Changed)
-      # just above the most recent released section; the PR author refines the
-      # wording before merge. Idempotent: skips if a section for this version
-      # already exists.
-      - name: Seed changelog entry
+      # The version bump is intentionally NOT done here. A regen is just a set of
+      # changes; which release they ship in (and the bump kind) is decided later
+      # by scripts/release.sh prepare. Seed the regen notes under [Unreleased] so
+      # they accumulate there until a release rolls them into a version. This
+      # avoids minting a dated version section per regen that may never publish.
+      - name: Seed changelog entry under [Unreleased]
         env:
-          VERSION: ${{ steps.pkg.outputs.version }}
           TITLE: ${{ inputs.title }}
         run: |
-          export CHANGELOG_DATE=$(date -u +%Y-%m-%d)
           python3 - <<'PY'
           import os, pathlib, re
-          version = os.environ["VERSION"]
-          date = os.environ["CHANGELOG_DATE"]
           title = (os.environ.get("TITLE") or "").strip() \
               or "Regenerate the client from the updated Hotdata OpenAPI spec"
+          bullet = f"- {title}"
           path = pathlib.Path("CHANGELOG.md")
           text = path.read_text()
-          if re.search(rf"^## \[{re.escape(version)}\]", text, re.M):
-              print(f"CHANGELOG already has a [{version}] section; leaving it untouched.")
-              raise SystemExit(0)
-          unreleased = re.search(r"^## \[Unreleased\]", text, re.M)
-          if not unreleased:
+
+          heading = re.search(r"^## \[Unreleased\][^\n]*\n", text, re.M)
+          if not heading:
               raise SystemExit("CHANGELOG.md has no '## [Unreleased]' section to anchor the new entry")
-          # Insert before the first released section after [Unreleased] (falling
-          # back to end of file) so any pending entries under [Unreleased] stay
-          # attributed to it rather than being absorbed by the new version.
-          nxt = re.search(r"^## \[", text[unreleased.end():], re.M)
-          insert_at = unreleased.end() + nxt.start() if nxt else len(text)
-          entry = f"## [{version}] - {date}\n\n### Changed\n\n- {title}\n\n"
-          text = text[:insert_at] + entry + text[insert_at:]
-          path.write_text(text)
-          print(f"Inserted CHANGELOG [{version}] section.")
+
+          # Scope edits to the [Unreleased] body (up to the next '## [' or EOF).
+          start = heading.end()
+          nxt = re.search(r"^## \[", text[start:], re.M)
+          end = start + nxt.start() if nxt else len(text)
+          body = text[start:end]
+
+          if any(line.strip() == bullet for line in body.splitlines()):
+              print("CHANGELOG [Unreleased] already lists this entry; leaving it untouched.")
+              raise SystemExit(0)
+
+          changed = re.search(r"^### Changed[ \t]*\n", body, re.M)
+          if changed:
+              # Prepend the bullet to the existing ### Changed list.
+              i = changed.end()
+              while i < len(body) and body[i] == "\n":
+                  i += 1
+              body = body[:i] + bullet + "\n" + body[i:]
+          else:
+              # No ### Changed yet: open one right under the heading.
+              body = "\n### Changed\n\n" + bullet + "\n\n" + body.lstrip("\n")
+
+          path.write_text(text[:start] + body + text[end:])
+          print("Added regen entry under CHANGELOG [Unreleased].")
           PY
 
+      # No packageVersion: pyproject.toml is hand-maintained and the generator
+      # doesn't stamp it, while __version__ and the SDK version string both read
+      # from installed package metadata — so the generator's packageVersion never
+      # reaches committed output.
       - name: Generate client
         run: |
           npx @openapitools/openapi-generator-cli generate \
@@ -135,7 +124,7 @@ jobs:
             -g python \
             -o . \
             -t .openapi-generator-templates \
-            --additional-properties=packageName=hotdata,projectName=hotdata,packageVersion=${{ steps.pkg.outputs.version }},gitUserId=hotdata-dev,gitRepoId=sdk-python \
+            --additional-properties=packageName=hotdata,projectName=hotdata,gitUserId=hotdata-dev,gitRepoId=sdk-python \
             --skip-validate-spec
 
       # pyproject.toml/requirements*.txt are hand-maintained, so the generator no
@@ -300,8 +289,9 @@ jobs:
       # on. The PR is the artifact we want, and breakage surfaces on it as red CI:
       # integration-tests.yml installs the package (`pip install -e .`) and runs
       # pytest, and check-release.yml builds + installs + imports the wheel on
-      # every PR that bumps pyproject.toml/CHANGELOG.md (which every regen PR
-      # does). Auto-merge is gated on those checks, so a broken regen can't merge.
+      # every PR touching pyproject.toml/CHANGELOG.md (a regen seeds a [Unreleased]
+      # changelog entry, so it always touches CHANGELOG.md). Auto-merge is gated on
+      # those checks, so a broken regen can't merge.
 
       - name: Check integration test scenario parity
         env:
