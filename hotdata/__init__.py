@@ -28,7 +28,6 @@ __all__ = [
     "ConnectionsApi",
     "DatabaseContextApi",
     "DatabasesApi",
-    "DatasetsApi",
     "EmbeddingProvidersApi",
     "IndexesApi",
     "InformationSchemaApi",
@@ -40,6 +39,7 @@ __all__ = [
     "SavedQueriesApi",
     "SecretsApi",
     "UploadsApi",
+    "UsageApi",
     "WorkspacesApi",
     "ApiResponse",
     "ApiClient",
@@ -68,7 +68,6 @@ __all__ = [
     "ColumnProfileDetailOneOf3",
     "ColumnProfileDetailOneOf4",
     "ColumnProfileInfo",
-    "ColumnTypeSpec",
     "ConnectionHealthResponse",
     "ConnectionInfo",
     "ConnectionRefreshResult",
@@ -79,8 +78,6 @@ __all__ = [
     "CreateConnectionResponse",
     "CreateDatabaseRequest",
     "CreateDatabaseResponse",
-    "CreateDatasetRequest",
-    "CreateDatasetResponse",
     "CreateEmbeddingProviderRequest",
     "CreateEmbeddingProviderResponse",
     "CreateIndexRequest",
@@ -95,29 +92,18 @@ __all__ = [
     "DatabaseDefaultTableDecl",
     "DatabaseDetailResponse",
     "DatabaseSummary",
-    "DatasetSource",
-    "DatasetSourceOneOf",
-    "DatasetSourceOneOf1",
-    "DatasetSourceOneOf2",
-    "DatasetSourceOneOf3",
-    "DatasetSourceOneOf4",
-    "DatasetSummary",
-    "DatasetVersionSummary",
     "DiscoveryStatus",
     "EmbeddingProviderResponse",
     "Error",
     "ExecuteSavedQueryRequest",
     "GetConnectionResponse",
     "GetDatabaseContextResponse",
-    "GetDatasetResponse",
     "GetResultResponse",
     "GetSecretResponse",
     "IndexEntryResponse",
     "IndexInfoResponse",
     "IndexStatus",
     "InformationSchemaResponse",
-    "InlineData",
-    "InlineDatasetSource",
     "JobResult",
     "JobStatus",
     "JobStatusResponse",
@@ -126,8 +112,6 @@ __all__ = [
     "ListConnectionsResponse",
     "ListDatabaseContextsResponse",
     "ListDatabasesResponse",
-    "ListDatasetVersionsResponse",
-    "ListDatasetsResponse",
     "ListEmbeddingProvidersResponse",
     "ListIndexesPageResponse",
     "ListIndexesResponse",
@@ -147,19 +131,16 @@ __all__ = [
     "QueryRequest",
     "QueryResponse",
     "QueryRunInfo",
-    "RefreshDatasetResponse",
     "RefreshRequest",
     "RefreshResponse",
     "RefreshWarning",
     "ResultInfo",
     "ResultsFormatQuery",
-    "SavedQueryDatasetSource",
     "SavedQueryDetail",
     "SavedQuerySummary",
     "SavedQueryVersionInfo",
     "SchemaRefreshResult",
     "SecretMetadataResponse",
-    "SqlQueryDatasetSource",
     "SubmitJobResponse",
     "TableInfo",
     "TableProfileResponse",
@@ -167,21 +148,18 @@ __all__ = [
     "TableRefreshResult",
     "TemporalProfileDetail",
     "TextProfileDetail",
-    "UpdateDatasetRequest",
-    "UpdateDatasetResponse",
     "UpdateEmbeddingProviderRequest",
     "UpdateEmbeddingProviderResponse",
     "UpdateSavedQueryRequest",
     "UpdateSecretRequest",
     "UpdateSecretResponse",
-    "UploadDatasetSource",
     "UploadInfo",
     "UploadResponse",
     "UpsertDatabaseContextRequest",
     "UpsertDatabaseContextResponse",
-    "UrlDatasetSource",
     "WorkspaceDetail",
     "WorkspaceListItem",
+    "WorkspaceUsageResponse",
 ]
 
 # import apis into sdk package
@@ -189,7 +167,6 @@ from hotdata.api.connection_types_api import ConnectionTypesApi as ConnectionTyp
 from hotdata.api.connections_api import ConnectionsApi as ConnectionsApi
 from hotdata.api.database_context_api import DatabaseContextApi as DatabaseContextApi
 from hotdata.api.databases_api import DatabasesApi as DatabasesApi
-from hotdata.api.datasets_api import DatasetsApi as DatasetsApi
 from hotdata.api.embedding_providers_api import EmbeddingProvidersApi as EmbeddingProvidersApi
 from hotdata.api.indexes_api import IndexesApi as IndexesApi
 from hotdata.api.information_schema_api import InformationSchemaApi as InformationSchemaApi
@@ -201,6 +178,7 @@ from hotdata.api.results_api import ResultsApi as ResultsApi
 from hotdata.api.saved_queries_api import SavedQueriesApi as SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi as SecretsApi
 from hotdata.api.uploads_api import UploadsApi as UploadsApi
+from hotdata.api.usage_api import UsageApi as UsageApi
 from hotdata.api.workspaces_api import WorkspacesApi as WorkspacesApi
 
 # import ApiClient
@@ -233,7 +211,6 @@ from hotdata.models.column_profile_detail_one_of2 import ColumnProfileDetailOneO
 from hotdata.models.column_profile_detail_one_of3 import ColumnProfileDetailOneOf3 as ColumnProfileDetailOneOf3
 from hotdata.models.column_profile_detail_one_of4 import ColumnProfileDetailOneOf4 as ColumnProfileDetailOneOf4
 from hotdata.models.column_profile_info import ColumnProfileInfo as ColumnProfileInfo
-from hotdata.models.column_type_spec import ColumnTypeSpec as ColumnTypeSpec
 from hotdata.models.connection_health_response import ConnectionHealthResponse as ConnectionHealthResponse
 from hotdata.models.connection_info import ConnectionInfo as ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult as ConnectionRefreshResult
@@ -244,8 +221,6 @@ from hotdata.models.create_connection_request import CreateConnectionRequest as 
 from hotdata.models.create_connection_response import CreateConnectionResponse as CreateConnectionResponse
 from hotdata.models.create_database_request import CreateDatabaseRequest as CreateDatabaseRequest
 from hotdata.models.create_database_response import CreateDatabaseResponse as CreateDatabaseResponse
-from hotdata.models.create_dataset_request import CreateDatasetRequest as CreateDatasetRequest
-from hotdata.models.create_dataset_response import CreateDatasetResponse as CreateDatasetResponse
 from hotdata.models.create_embedding_provider_request import CreateEmbeddingProviderRequest as CreateEmbeddingProviderRequest
 from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse as CreateEmbeddingProviderResponse
 from hotdata.models.create_index_request import CreateIndexRequest as CreateIndexRequest
@@ -260,29 +235,18 @@ from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDec
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl as DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse as DatabaseDetailResponse
 from hotdata.models.database_summary import DatabaseSummary as DatabaseSummary
-from hotdata.models.dataset_source import DatasetSource as DatasetSource
-from hotdata.models.dataset_source_one_of import DatasetSourceOneOf as DatasetSourceOneOf
-from hotdata.models.dataset_source_one_of1 import DatasetSourceOneOf1 as DatasetSourceOneOf1
-from hotdata.models.dataset_source_one_of2 import DatasetSourceOneOf2 as DatasetSourceOneOf2
-from hotdata.models.dataset_source_one_of3 import DatasetSourceOneOf3 as DatasetSourceOneOf3
-from hotdata.models.dataset_source_one_of4 import DatasetSourceOneOf4 as DatasetSourceOneOf4
-from hotdata.models.dataset_summary import DatasetSummary as DatasetSummary
-from hotdata.models.dataset_version_summary import DatasetVersionSummary as DatasetVersionSummary
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse as EmbeddingProviderResponse
 from hotdata.models.error import Error as Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest as ExecuteSavedQueryRequest
 from hotdata.models.get_connection_response import GetConnectionResponse as GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse as GetDatabaseContextResponse
-from hotdata.models.get_dataset_response import GetDatasetResponse as GetDatasetResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
 from hotdata.models.get_secret_response import GetSecretResponse as GetSecretResponse
 from hotdata.models.index_entry_response import IndexEntryResponse as IndexEntryResponse
 from hotdata.models.index_info_response import IndexInfoResponse as IndexInfoResponse
 from hotdata.models.index_status import IndexStatus as IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse as InformationSchemaResponse
-from hotdata.models.inline_data import InlineData as InlineData
-from hotdata.models.inline_dataset_source import InlineDatasetSource as InlineDatasetSource
 from hotdata.models.job_result import JobResult as JobResult
 from hotdata.models.job_status import JobStatus as JobStatus
 from hotdata.models.job_status_response import JobStatusResponse as JobStatusResponse
@@ -291,8 +255,6 @@ from hotdata.models.list_connection_types_response import ListConnectionTypesRes
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
 from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse as ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse as ListDatabasesResponse
-from hotdata.models.list_dataset_versions_response import ListDatasetVersionsResponse as ListDatasetVersionsResponse
-from hotdata.models.list_datasets_response import ListDatasetsResponse as ListDatasetsResponse
 from hotdata.models.list_embedding_providers_response import ListEmbeddingProvidersResponse as ListEmbeddingProvidersResponse
 from hotdata.models.list_indexes_page_response import ListIndexesPageResponse as ListIndexesPageResponse
 from hotdata.models.list_indexes_response import ListIndexesResponse as ListIndexesResponse
@@ -312,19 +274,16 @@ from hotdata.models.numeric_profile_detail import NumericProfileDetail as Numeri
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo as QueryRunInfo
-from hotdata.models.refresh_dataset_response import RefreshDatasetResponse as RefreshDatasetResponse
 from hotdata.models.refresh_request import RefreshRequest as RefreshRequest
 from hotdata.models.refresh_response import RefreshResponse as RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning as RefreshWarning
 from hotdata.models.result_info import ResultInfo as ResultInfo
 from hotdata.models.results_format_query import ResultsFormatQuery as ResultsFormatQuery
-from hotdata.models.saved_query_dataset_source import SavedQueryDatasetSource as SavedQueryDatasetSource
 from hotdata.models.saved_query_detail import SavedQueryDetail as SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary as SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo as SavedQueryVersionInfo
 from hotdata.models.schema_refresh_result import SchemaRefreshResult as SchemaRefreshResult
 from hotdata.models.secret_metadata_response import SecretMetadataResponse as SecretMetadataResponse
-from hotdata.models.sql_query_dataset_source import SqlQueryDatasetSource as SqlQueryDatasetSource
 from hotdata.models.submit_job_response import SubmitJobResponse as SubmitJobResponse
 from hotdata.models.table_info import TableInfo as TableInfo
 from hotdata.models.table_profile_response import TableProfileResponse as TableProfileResponse
@@ -332,21 +291,18 @@ from hotdata.models.table_refresh_error import TableRefreshError as TableRefresh
 from hotdata.models.table_refresh_result import TableRefreshResult as TableRefreshResult
 from hotdata.models.temporal_profile_detail import TemporalProfileDetail as TemporalProfileDetail
 from hotdata.models.text_profile_detail import TextProfileDetail as TextProfileDetail
-from hotdata.models.update_dataset_request import UpdateDatasetRequest as UpdateDatasetRequest
-from hotdata.models.update_dataset_response import UpdateDatasetResponse as UpdateDatasetResponse
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest as UpdateEmbeddingProviderRequest
 from hotdata.models.update_embedding_provider_response import UpdateEmbeddingProviderResponse as UpdateEmbeddingProviderResponse
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest as UpdateSavedQueryRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest as UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse as UpdateSecretResponse
-from hotdata.models.upload_dataset_source import UploadDatasetSource as UploadDatasetSource
 from hotdata.models.upload_info import UploadInfo as UploadInfo
 from hotdata.models.upload_response import UploadResponse as UploadResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest as UpsertDatabaseContextRequest
 from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse as UpsertDatabaseContextResponse
-from hotdata.models.url_dataset_source import UrlDatasetSource as UrlDatasetSource
 from hotdata.models.workspace_detail import WorkspaceDetail as WorkspaceDetail
 from hotdata.models.workspace_list_item import WorkspaceListItem as WorkspaceListItem
+from hotdata.models.workspace_usage_response import WorkspaceUsageResponse as WorkspaceUsageResponse
 
 
 # --- hand-applied: prefer the enhanced clients over the generated ones

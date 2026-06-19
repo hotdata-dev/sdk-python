@@ -1,25 +1,18 @@
-# hotdata.RefreshApi
+# hotdata.UsageApi
 
 All URIs are relative to *https://api.hotdata.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**refresh**](RefreshApi.md#refresh) | **POST** /v1/refresh | Refresh connection data
+[**get_usage**](UsageApi.md#get_usage) | **GET** /v1/usage | Get workspace usage snapshot
 
 
-# **refresh**
-> RefreshResponse refresh(refresh_request)
+# **get_usage**
+> WorkspaceUsageResponse get_usage(since=since)
 
-Refresh connection data
+Get workspace usage snapshot
 
-Refresh schema metadata or table data. The behavior depends on the request fields:
-
-- **Schema refresh (all)**: omit all fields — re-discovers tables for every connection.
-- **Schema refresh (single)**: set `connection_id` — re-discovers tables for one connection.
-- **Data refresh (single table)**: set `connection_id`, `schema_name`, `table_name`, and `data: true`.
-- **Data refresh (connection)**: set `connection_id` and `data: true` — refreshes all cached tables. Set `include_uncached: true` to also sync tables that haven't been cached yet.
-
-Set `async: true` on data refresh operations to run in the background and return a job ID for polling.
+Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the subscription's `current_period_start` so the meter value aligns with the Stripe invoice window rather than the calendar month.
 
 ### Example
 
@@ -28,8 +21,7 @@ Set `async: true` on data refresh operations to run in the background and return
 
 ```python
 import hotdata
-from hotdata.models.refresh_request import RefreshRequest
-from hotdata.models.refresh_response import RefreshResponse
+from hotdata.models.workspace_usage_response import WorkspaceUsageResponse
 from hotdata.rest import ApiException
 from pprint import pprint
 
@@ -58,16 +50,16 @@ configuration = hotdata.Configuration(
 # Enter a context with an instance of the API client
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = hotdata.RefreshApi(api_client)
-    refresh_request = hotdata.RefreshRequest() # RefreshRequest | 
+    api_instance = hotdata.UsageApi(api_client)
+    since = 'since_example' # str | Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted. (optional)
 
     try:
-        # Refresh connection data
-        api_response = api_instance.refresh(refresh_request)
-        print("The response of RefreshApi->refresh:\n")
+        # Get workspace usage snapshot
+        api_response = api_instance.get_usage(since=since)
+        print("The response of UsageApi->get_usage:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling RefreshApi->refresh: %s\n" % e)
+        print("Exception when calling UsageApi->get_usage: %s\n" % e)
 ```
 
 
@@ -77,11 +69,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **refresh_request** | [**RefreshRequest**](RefreshRequest.md)|  | 
+ **since** | **str**| Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted. | [optional] 
 
 ### Return type
 
-[**RefreshResponse**](RefreshResponse.md)
+[**WorkspaceUsageResponse**](WorkspaceUsageResponse.md)
 
 ### Authorization
 
@@ -89,16 +81,14 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Refresh completed |  -  |
-**400** | Invalid request |  -  |
-**404** | Connection not found |  -  |
+**200** | Workspace usage snapshot |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

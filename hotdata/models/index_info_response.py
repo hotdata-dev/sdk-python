@@ -34,9 +34,10 @@ class IndexInfoResponse(BaseModel):
     index_name: StrictStr
     index_type: StrictStr
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric this index was built with. Only present for vector indexes.")
+    source_column: Optional[StrictStr] = Field(default=None, description="Source text column for an embedding-backed vector index. A query searches it via `vector_distance(<source_column>, …)`; the indexed `columns` hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes.")
     status: IndexStatus
     updated_at: datetime
-    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "status", "updated_at"]
+    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "source_column", "status", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -82,6 +83,11 @@ class IndexInfoResponse(BaseModel):
         if self.metric is None and "metric" in self.model_fields_set:
             _dict['metric'] = None
 
+        # set to None if source_column (nullable) is None
+        # and model_fields_set contains the field
+        if self.source_column is None and "source_column" in self.model_fields_set:
+            _dict['source_column'] = None
+
         return _dict
 
     @classmethod
@@ -99,6 +105,7 @@ class IndexInfoResponse(BaseModel):
             "index_name": obj.get("index_name"),
             "index_type": obj.get("index_type"),
             "metric": obj.get("metric"),
+            "source_column": obj.get("source_column"),
             "status": obj.get("status"),
             "updated_at": obj.get("updated_at")
         })
