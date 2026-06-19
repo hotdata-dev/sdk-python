@@ -94,7 +94,7 @@ jobs:
           end = start + nxt.start() if nxt else len(text)
           body = text[start:end]
 
-          if bullet in body:
+          if any(line.strip() == bullet for line in body.splitlines()):
               print("CHANGELOG [Unreleased] already lists this entry; leaving it untouched.")
               raise SystemExit(0)
 
