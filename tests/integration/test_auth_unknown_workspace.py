@@ -12,7 +12,7 @@ import uuid
 import pytest
 
 from hotdata import ApiClient, Configuration
-from hotdata.api.datasets_api import DatasetsApi
+from hotdata.api.connections_api import ConnectionsApi
 from hotdata.exceptions import ApiException
 
 
@@ -24,9 +24,9 @@ def test_auth_unknown_workspace(env) -> None:
         workspace_id=fake_workspace,
     )
     with ApiClient(config) as client:
-        api = DatasetsApi(client)
+        api = ConnectionsApi(client)
         with pytest.raises(ApiException) as excinfo:
-            api.list_datasets()
+            api.list_connections()
     assert excinfo.value.status in (403, 404), (
         f"expected 403/404 for fabricated workspace, got {excinfo.value.status}"
     )
