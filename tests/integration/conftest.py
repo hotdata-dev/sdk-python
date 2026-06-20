@@ -18,7 +18,6 @@ from hotdata.api.connection_types_api import ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi
 from hotdata.api.database_context_api import DatabaseContextApi
 from hotdata.api.databases_api import DatabasesApi
-from hotdata.api.datasets_api import DatasetsApi
 from hotdata.api.embedding_providers_api import EmbeddingProvidersApi
 from hotdata.api.indexes_api import IndexesApi
 from hotdata.api.information_schema_api import InformationSchemaApi
@@ -127,11 +126,6 @@ def sdkci_name() -> "callable[[str], str]":
 
 # Per-API client fixtures keep tests one-liner short and avoid every test
 # instantiating its own *Api(api_client).
-@pytest.fixture
-def datasets_api(api_client: ApiClient) -> DatasetsApi:
-    return DatasetsApi(api_client)
-
-
 @pytest.fixture
 def workspaces_api(api_client: ApiClient) -> WorkspacesApi:
     return WorkspacesApi(api_client)

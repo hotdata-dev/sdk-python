@@ -16,14 +16,13 @@ Name | Type | Description | Notes
 **tables_failed** | **int** |  | 
 **tables_refreshed** | **int** |  | 
 **total_rows** | **int** |  | 
-**created_at** | **datetime** |  | 
-**id** | **str** |  | 
-**status** | [**IndexStatus**](IndexStatus.md) |  | 
-**version** | **int** |  | 
 **columns** | **List[str]** |  | 
+**created_at** | **datetime** |  | 
 **index_name** | **str** |  | 
 **index_type** | **str** |  | 
 **metric** | **str** | Distance metric this index was built with. Only present for vector indexes. | [optional] 
+**source_column** | **str** | Source text column for an embedding-backed vector index. A query searches it via &#x60;vector_distance(&lt;source_column&gt;, …)&#x60;; the indexed &#x60;columns&#x60; hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes. | [optional] 
+**status** | [**IndexStatus**](IndexStatus.md) |  | 
 **updated_at** | **datetime** |  | 
 
 ## Example

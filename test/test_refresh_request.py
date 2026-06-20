@@ -39,7 +39,6 @@ class TestRefreshRequest(unittest.TestCase):
                 var_async = True,
                 connection_id = '',
                 data = True,
-                dataset_id = '',
                 include_uncached = True,
                 schema_name = '',
                 table_name = ''

@@ -56,16 +56,15 @@ class TestJobResult(unittest.TestCase):
                 tables_failed = 0,
                 tables_refreshed = 0,
                 total_rows = 0,
-                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                id = '',
-                status = 'ready',
-                version = 56,
                 columns = [
                     ''
                     ],
+                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 index_name = '',
                 index_type = '',
                 metric = '',
+                source_column = '',
+                status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f')
             )
         else:
@@ -78,15 +77,13 @@ class TestJobResult(unittest.TestCase):
                 tables_failed = 0,
                 tables_refreshed = 0,
                 total_rows = 0,
-                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                id = '',
-                status = 'ready',
-                version = 56,
                 columns = [
                     ''
                     ],
+                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 index_name = '',
                 index_type = '',
+                status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
         )
         """

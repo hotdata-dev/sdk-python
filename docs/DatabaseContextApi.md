@@ -54,7 +54,7 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.DatabaseContextApi(api_client)
     database_id = 'database_id_example' # str | Database ID
-    name = 'name_example' # str | Context key: same character rules as a dataset table name
+    name = 'name_example' # str | Context key: same character rules as a table name
 
     try:
         # Delete database context
@@ -71,7 +71,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **database_id** | **str**| Database ID | 
- **name** | **str**| Context key: same character rules as a dataset table name | 
+ **name** | **str**| Context key: same character rules as a table name | 
 
 ### Return type
 
@@ -139,7 +139,7 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.DatabaseContextApi(api_client)
     database_id = 'database_id_example' # str | Database ID
-    name = 'name_example' # str | Context key: same character rules as a dataset table name
+    name = 'name_example' # str | Context key: same character rules as a table name
 
     try:
         # Get one database context
@@ -158,7 +158,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **database_id** | **str**| Database ID | 
- **name** | **str**| Context key: same character rules as a dataset table name | 
+ **name** | **str**| Context key: same character rules as a table name | 
 
 ### Return type
 
