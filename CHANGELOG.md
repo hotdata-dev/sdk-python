@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- chore: update api schema and metadata
+
 ## [0.4.1] - 2026-06-19
 
 ### Changed

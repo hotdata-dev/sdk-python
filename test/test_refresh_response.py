@@ -61,10 +61,8 @@ class TestRefreshResponse(unittest.TestCase):
                 tables_failed = 0,
                 tables_refreshed = 0,
                 total_rows = 0,
-                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 id = '',
                 status = 'pending',
-                version = 56,
                 status_url = ''
             )
         else:
@@ -82,10 +80,8 @@ class TestRefreshResponse(unittest.TestCase):
                 tables_failed = 0,
                 tables_refreshed = 0,
                 total_rows = 0,
-                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 id = '',
                 status = 'pending',
-                version = 56,
                 status_url = '',
         )
         """

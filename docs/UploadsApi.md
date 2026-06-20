@@ -96,7 +96,7 @@ Name | Type | Description  | Notes
 
 Upload file
 
-Upload a file to be used as a dataset source. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `text/csv`, `application/json`, `application/parquet`). The body is streamed to disk, so files up to 20GB are supported. The returned upload ID can be passed to POST /v1/datasets to create a queryable table.
+Upload a Parquet file to publish as the contents of a managed table. Send the raw file bytes as the request body with an appropriate Content-Type header (e.g., `application/parquet`). The body is streamed to disk, so files up to 20GB are supported. The returned upload ID can be passed to the managed-table load endpoint.
 
 ### Example
 

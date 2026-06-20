@@ -104,7 +104,7 @@ Name | Type | Description  | Notes
 **202** | Query submitted asynchronously |  -  |
 **400** | Invalid request (no database specified, or header/body database_id conflict) |  -  |
 **404** | Database not found |  -  |
-**429** | Too many concurrent queries; retry after the Retry-After delay |  -  |
+**429** | The engine was too busy to run this query right now — too many concurrent queries, or not enough memory available (often because of other queries running at the same time). Retry after the Retry-After delay; if it persists, narrowing the query (add a filter or LIMIT) may help. |  -  |
 **500** | Internal server error |  -  |
 **503** | Result store temporarily unavailable (a truncated result could not be persisted); retry after the Retry-After delay |  -  |
 

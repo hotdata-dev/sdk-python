@@ -18,23 +18,22 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from typing import Any, ClassVar, Dict, List
-from typing_extensions import Annotated
-from hotdata.models.dataset_summary import DatasetSummary
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ListDatasetsResponse(BaseModel):
+class WorkspaceUsageResponse(BaseModel):
     """
-    Response body for GET /v1/datasets
+    Response for GET /v1/usage
     """ # noqa: E501
-    count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of datasets returned in this response")
-    datasets: List[DatasetSummary]
-    has_more: StrictBool = Field(description="Whether there are more datasets available after this page")
-    limit: Annotated[int, Field(strict=True, ge=0)] = Field(description="Limit used for this request")
-    offset: Annotated[int, Field(strict=True, ge=0)] = Field(description="Pagination offset used for this request")
-    __properties: ClassVar[List[str]] = ["count", "datasets", "has_more", "limit", "offset"]
+    bytes_scanned: StrictInt = Field(description="Sum of `bytes_scanned` across all completed/failed query runs since `since`. Null bytes (queries that touched no row data) contribute 0.")
+    query_count: StrictInt = Field(description="Number of query runs (succeeded + failed) since `since`.")
+    since: datetime = Field(description="The period start used for this response (echoed back for the caller to verify).")
+    storage_bytes: StrictInt = Field(description="The workspace's current stored-data footprint in bytes, measured at request time: managed-database and dataset data, plus un-consumed uploads, connection caches, and search-index artifacts.")
+    storage_captured_at: Optional[datetime] = Field(default=None, description="When `storage_bytes` was measured (the time this response was produced).")
+    __properties: ClassVar[List[str]] = ["bytes_scanned", "query_count", "since", "storage_bytes", "storage_captured_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +53,7 @@ class ListDatasetsResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ListDatasetsResponse from a JSON string"""
+        """Create an instance of WorkspaceUsageResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -75,18 +74,16 @@ class ListDatasetsResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in datasets (list)
-        _items = []
-        if self.datasets:
-            for _item_datasets in self.datasets:
-                if _item_datasets:
-                    _items.append(_item_datasets.to_dict())
-            _dict['datasets'] = _items
+        # set to None if storage_captured_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.storage_captured_at is None and "storage_captured_at" in self.model_fields_set:
+            _dict['storage_captured_at'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ListDatasetsResponse from a dict"""
+        """Create an instance of WorkspaceUsageResponse from a dict"""
         if obj is None:
             return None
 
@@ -94,11 +91,11 @@ class ListDatasetsResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "count": obj.get("count"),
-            "datasets": [DatasetSummary.from_dict(_item) for _item in obj["datasets"]] if obj.get("datasets") is not None else None,
-            "has_more": obj.get("has_more"),
-            "limit": obj.get("limit"),
-            "offset": obj.get("offset")
+            "bytes_scanned": obj.get("bytes_scanned"),
+            "query_count": obj.get("query_count"),
+            "since": obj.get("since"),
+            "storage_bytes": obj.get("storage_bytes"),
+            "storage_captured_at": obj.get("storage_captured_at")
         })
         return _obj
 

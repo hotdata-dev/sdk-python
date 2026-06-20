@@ -45,7 +45,7 @@ class DatabaseContextApi:
     def delete_database_context(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -65,7 +65,7 @@ class DatabaseContextApi:
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a dataset table name (required)
+        :param name: Context key: same character rules as a table name (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -118,7 +118,7 @@ class DatabaseContextApi:
     def delete_database_context_with_http_info(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -138,7 +138,7 @@ class DatabaseContextApi:
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a dataset table name (required)
+        :param name: Context key: same character rules as a table name (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -191,7 +191,7 @@ class DatabaseContextApi:
     def delete_database_context_without_preload_content(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -211,7 +211,7 @@ class DatabaseContextApi:
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a dataset table name (required)
+        :param name: Context key: same character rules as a table name (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -328,7 +328,7 @@ class DatabaseContextApi:
     def get_database_context(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -347,7 +347,7 @@ class DatabaseContextApi:
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a dataset table name (required)
+        :param name: Context key: same character rules as a table name (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -400,7 +400,7 @@ class DatabaseContextApi:
     def get_database_context_with_http_info(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -419,7 +419,7 @@ class DatabaseContextApi:
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a dataset table name (required)
+        :param name: Context key: same character rules as a table name (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -472,7 +472,7 @@ class DatabaseContextApi:
     def get_database_context_without_preload_content(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a dataset table name")],
+        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -491,7 +491,7 @@ class DatabaseContextApi:
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a dataset table name (required)
+        :param name: Context key: same character rules as a table name (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

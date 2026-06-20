@@ -10,11 +10,7 @@ Background job types returned by the API.
 
 * `DATA_REFRESH_CONNECTION` (value: `'data_refresh_connection'`)
 
-* `DATASET_REFRESH` (value: `'dataset_refresh'`)
-
 * `CREATE_INDEX` (value: `'create_index'`)
-
-* `CREATE_DATASET_INDEX` (value: `'create_dataset_index'`)
 
 * `MANAGED_LOAD` (value: `'managed_load'`)
 

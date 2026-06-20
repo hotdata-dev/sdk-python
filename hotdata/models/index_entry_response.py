@@ -34,12 +34,13 @@ class IndexEntryResponse(BaseModel):
     index_name: StrictStr
     index_type: StrictStr
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric this index was built with. Only present for vector indexes.")
+    source_column: Optional[StrictStr] = Field(default=None, description="Source text column for an embedding-backed vector index. A query searches it via `vector_distance(<source_column>, …)`; the indexed `columns` hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes.")
     status: IndexStatus
     updated_at: datetime
     connection_id: Optional[StrictStr] = None
     schema_name: StrictStr
     table_name: StrictStr
-    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "status", "updated_at", "connection_id", "schema_name", "table_name"]
+    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "source_column", "status", "updated_at", "connection_id", "schema_name", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -102,6 +103,7 @@ class IndexEntryResponse(BaseModel):
             "index_name": obj.get("index_name"),
             "index_type": obj.get("index_type"),
             "metric": obj.get("metric"),
+            "source_column": obj.get("source_column"),
             "status": obj.get("status"),
             "updated_at": obj.get("updated_at"),
             "connection_id": obj.get("connection_id"),
