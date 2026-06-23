@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- docs: remove stale datasets references, refresh MCP + CLI reference
 - feat(tables): add csv and json file format support for table loads
 - Regenerate the client from the updated Hotdata OpenAPI spec
 - chore: remove datasets API and related job types

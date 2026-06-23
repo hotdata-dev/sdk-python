@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for datasets, queries, and analytics.
+    Powerful data platform API for managed databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
