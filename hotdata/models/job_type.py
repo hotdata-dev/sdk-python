@@ -32,6 +32,11 @@ class JobType(str, Enum):
     DATA_REFRESH_CONNECTION = 'data_refresh_connection'
     CREATE_INDEX = 'create_index'
     MANAGED_LOAD = 'managed_load'
+    DUCKLAKE_VACUUM = 'ducklake_vacuum'
+    DUCKLAKE_ORPHAN_CLEANUP = 'ducklake_orphan_cleanup'
+    RESULT_DELETION = 'result_deletion'
+    STALE_RESULT_CLEANUP = 'stale_result_cleanup'
+    RESULT_RETENTION = 'result_retention'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

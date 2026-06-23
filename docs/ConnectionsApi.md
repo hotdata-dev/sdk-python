@@ -810,7 +810,7 @@ This endpoint does not need any parameter.
 
 Load managed table from upload
 
-Publish a previously-uploaded parquet file as the new contents of a managed table. The upload must reference a parquet file. Only `mode = "replace"` is supported. Concurrent loads against the same upload return 409.
+Publish a previously-uploaded file as the new contents of a managed table. CSV, JSON, and Parquet uploads are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. Only `mode = "replace"` is supported. Concurrent loads against the same upload return 409.
 
 ### Example
 
