@@ -19,17 +19,18 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
 class LoadManagedTableRequest(BaseModel):
     """
-    Request body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads`.  Publishes a previously-uploaded parquet file as the new contents of the named managed table. `mode` is fixed to `\"replace\"` today; the field is kept in the request body so future modes (e.g. append) are an additive change.
+    Request body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads`.  Publishes a previously-uploaded file as the new contents of the named managed table. CSV and JSON uploads are converted to columnar storage on load; Parquet uploads are published directly. `mode` is fixed to `\"replace\"` today; the field is kept in the request body so future modes (e.g. append) are an additive change.
     """ # noqa: E501
+    format: Optional[StrictStr] = Field(default=None, description="File format of the upload: `\"csv\"`, `\"json\"`, or `\"parquet\"`. Optional — when omitted, the format is auto-detected from the upload's `Content-Type` and, failing that, from the file contents. Provide it explicitly to override detection or when the contents are ambiguous. `\"json\"` expects newline-delimited JSON (one object per line), not a JSON array.")
     mode: StrictStr = Field(description="Load mode. Only `\"replace\"` is supported in this release.")
-    upload_id: StrictStr = Field(description="ID of a previously-staged upload (see `POST /v1/files`). The upload must reference a parquet file. The upload is claimed atomically; concurrent loads against the same `upload_id` return 409.")
-    __properties: ClassVar[List[str]] = ["mode", "upload_id"]
+    upload_id: StrictStr = Field(description="ID of a previously-staged upload (see `POST /v1/files`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409.")
+    __properties: ClassVar[List[str]] = ["format", "mode", "upload_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,6 +71,11 @@ class LoadManagedTableRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if format (nullable) is None
+        # and model_fields_set contains the field
+        if self.format is None and "format" in self.model_fields_set:
+            _dict['format'] = None
+
         return _dict
 
     @classmethod
@@ -82,6 +88,7 @@ class LoadManagedTableRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "format": obj.get("format"),
             "mode": obj.get("mode"),
             "upload_id": obj.get("upload_id")
         })

@@ -36,6 +36,7 @@ class TestLoadManagedTableRequest(unittest.TestCase):
         model = LoadManagedTableRequest()
         if include_optional:
             return LoadManagedTableRequest(
+                format = '',
                 mode = '',
                 upload_id = ''
             )

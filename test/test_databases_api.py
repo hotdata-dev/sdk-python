@@ -83,6 +83,13 @@ class TestDatabasesApi(unittest.TestCase):
         """
         pass
 
+    def test_load_database_table(self) -> None:
+        """Test case for load_database_table
+
+        Load database table from upload
+        """
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()
