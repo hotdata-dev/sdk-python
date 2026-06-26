@@ -19,8 +19,14 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictBytes, StrictStr
 from typing import Optional, Tuple, Union
 from typing_extensions import Annotated
+from hotdata.models.batch_create_upload_request import BatchCreateUploadRequest
+from hotdata.models.batch_create_upload_response import BatchCreateUploadResponse
+from hotdata.models.create_upload_request import CreateUploadRequest
+from hotdata.models.finalize_upload_request import FinalizeUploadRequest
+from hotdata.models.finalize_upload_response import FinalizeUploadResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse
 from hotdata.models.upload_response import UploadResponse
+from hotdata.models.upload_session_response import UploadSessionResponse
 
 from hotdata.api_client import ApiClient, RequestSerialized
 from hotdata.api_response import ApiResponse
@@ -38,6 +44,879 @@ class UploadsApi:
         if api_client is None:
             api_client = ApiClient.get_default()
         self.api_client = api_client
+
+
+    @validate_call
+    def create_upload_session_handler(
+        self,
+        create_upload_request: CreateUploadRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> UploadSessionResponse:
+        """Create upload session
+
+        Create an upload session for a file you will send directly to storage. Based on the declared size, the response is one of two shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). In both cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
+
+        :param create_upload_request: (required)
+        :type create_upload_request: CreateUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_upload_session_handler_serialize(
+            create_upload_request=create_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "UploadSessionResponse",
+            '400': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def create_upload_session_handler_with_http_info(
+        self,
+        create_upload_request: CreateUploadRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[UploadSessionResponse]:
+        """Create upload session
+
+        Create an upload session for a file you will send directly to storage. Based on the declared size, the response is one of two shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). In both cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
+
+        :param create_upload_request: (required)
+        :type create_upload_request: CreateUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_upload_session_handler_serialize(
+            create_upload_request=create_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "UploadSessionResponse",
+            '400': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def create_upload_session_handler_without_preload_content(
+        self,
+        create_upload_request: CreateUploadRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Create upload session
+
+        Create an upload session for a file you will send directly to storage. Based on the declared size, the response is one of two shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). In both cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
+
+        :param create_upload_request: (required)
+        :type create_upload_request: CreateUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_upload_session_handler_serialize(
+            create_upload_request=create_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "UploadSessionResponse",
+            '400': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _create_upload_session_handler_serialize(
+        self,
+        create_upload_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if create_upload_request is not None:
+            _body_params = create_upload_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/v1/uploads',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def create_upload_sessions_batch_handler(
+        self,
+        batch_create_upload_request: BatchCreateUploadRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> BatchCreateUploadResponse:
+        """Create upload sessions in bulk
+
+        Create upload sessions for several files in one request. Each file is planned independently and the response returns one session per requested file, in the same order. Each session is finalized separately via the finalize endpoint, so you can upload and finalize files at your own pace.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send each file to the `POST /v1/files` endpoint instead.
+
+        :param batch_create_upload_request: (required)
+        :type batch_create_upload_request: BatchCreateUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_upload_sessions_batch_handler_serialize(
+            batch_create_upload_request=batch_create_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "BatchCreateUploadResponse",
+            '400': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def create_upload_sessions_batch_handler_with_http_info(
+        self,
+        batch_create_upload_request: BatchCreateUploadRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[BatchCreateUploadResponse]:
+        """Create upload sessions in bulk
+
+        Create upload sessions for several files in one request. Each file is planned independently and the response returns one session per requested file, in the same order. Each session is finalized separately via the finalize endpoint, so you can upload and finalize files at your own pace.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send each file to the `POST /v1/files` endpoint instead.
+
+        :param batch_create_upload_request: (required)
+        :type batch_create_upload_request: BatchCreateUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_upload_sessions_batch_handler_serialize(
+            batch_create_upload_request=batch_create_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "BatchCreateUploadResponse",
+            '400': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def create_upload_sessions_batch_handler_without_preload_content(
+        self,
+        batch_create_upload_request: BatchCreateUploadRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Create upload sessions in bulk
+
+        Create upload sessions for several files in one request. Each file is planned independently and the response returns one session per requested file, in the same order. Each session is finalized separately via the finalize endpoint, so you can upload and finalize files at your own pace.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send each file to the `POST /v1/files` endpoint instead.
+
+        :param batch_create_upload_request: (required)
+        :type batch_create_upload_request: BatchCreateUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_upload_sessions_batch_handler_serialize(
+            batch_create_upload_request=batch_create_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "BatchCreateUploadResponse",
+            '400': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _create_upload_sessions_batch_handler_serialize(
+        self,
+        batch_create_upload_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if batch_create_upload_request is not None:
+            _body_params = batch_create_upload_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/v1/uploads/batch',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def finalize_upload_handler(
+        self,
+        upload_id: Annotated[StrictStr, Field(description="Upload session ID returned at create time")],
+        x_upload_finalize_token: Annotated[StrictStr, Field(description="One-time finalize token returned when the session was created")],
+        finalize_upload_request: Annotated[Optional[FinalizeUploadRequest], Field(description="Optional; send `parts` only for a multi-part upload. Single-`PUT` uploads finalize with no body.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> FinalizeUploadResponse:
+        """Finalize upload
+
+        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. The uploaded file's size is validated against the size declared at create time; a mismatch is rejected. Finalize is exactly-once: a second finalize of the same upload is rejected.
+
+        :param upload_id: Upload session ID returned at create time (required)
+        :type upload_id: str
+        :param x_upload_finalize_token: One-time finalize token returned when the session was created (required)
+        :type x_upload_finalize_token: str
+        :param finalize_upload_request: Optional; send `parts` only for a multi-part upload. Single-`PUT` uploads finalize with no body.
+        :type finalize_upload_request: FinalizeUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._finalize_upload_handler_serialize(
+            upload_id=upload_id,
+            x_upload_finalize_token=x_upload_finalize_token,
+            finalize_upload_request=finalize_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "FinalizeUploadResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def finalize_upload_handler_with_http_info(
+        self,
+        upload_id: Annotated[StrictStr, Field(description="Upload session ID returned at create time")],
+        x_upload_finalize_token: Annotated[StrictStr, Field(description="One-time finalize token returned when the session was created")],
+        finalize_upload_request: Annotated[Optional[FinalizeUploadRequest], Field(description="Optional; send `parts` only for a multi-part upload. Single-`PUT` uploads finalize with no body.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[FinalizeUploadResponse]:
+        """Finalize upload
+
+        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. The uploaded file's size is validated against the size declared at create time; a mismatch is rejected. Finalize is exactly-once: a second finalize of the same upload is rejected.
+
+        :param upload_id: Upload session ID returned at create time (required)
+        :type upload_id: str
+        :param x_upload_finalize_token: One-time finalize token returned when the session was created (required)
+        :type x_upload_finalize_token: str
+        :param finalize_upload_request: Optional; send `parts` only for a multi-part upload. Single-`PUT` uploads finalize with no body.
+        :type finalize_upload_request: FinalizeUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._finalize_upload_handler_serialize(
+            upload_id=upload_id,
+            x_upload_finalize_token=x_upload_finalize_token,
+            finalize_upload_request=finalize_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "FinalizeUploadResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def finalize_upload_handler_without_preload_content(
+        self,
+        upload_id: Annotated[StrictStr, Field(description="Upload session ID returned at create time")],
+        x_upload_finalize_token: Annotated[StrictStr, Field(description="One-time finalize token returned when the session was created")],
+        finalize_upload_request: Annotated[Optional[FinalizeUploadRequest], Field(description="Optional; send `parts` only for a multi-part upload. Single-`PUT` uploads finalize with no body.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Finalize upload
+
+        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. The uploaded file's size is validated against the size declared at create time; a mismatch is rejected. Finalize is exactly-once: a second finalize of the same upload is rejected.
+
+        :param upload_id: Upload session ID returned at create time (required)
+        :type upload_id: str
+        :param x_upload_finalize_token: One-time finalize token returned when the session was created (required)
+        :type x_upload_finalize_token: str
+        :param finalize_upload_request: Optional; send `parts` only for a multi-part upload. Single-`PUT` uploads finalize with no body.
+        :type finalize_upload_request: FinalizeUploadRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._finalize_upload_handler_serialize(
+            upload_id=upload_id,
+            x_upload_finalize_token=x_upload_finalize_token,
+            finalize_upload_request=finalize_upload_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "FinalizeUploadResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _finalize_upload_handler_serialize(
+        self,
+        upload_id,
+        x_upload_finalize_token,
+        finalize_upload_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if upload_id is not None:
+            _path_params['upload_id'] = upload_id
+        # process the query parameters
+        # process the header parameters
+        if x_upload_finalize_token is not None:
+            _header_params['X-Upload-Finalize-Token'] = x_upload_finalize_token
+        # process the form parameters
+        # process the body parameter
+        if finalize_upload_request is not None:
+            _body_params = finalize_upload_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/v1/uploads/{upload_id}/finalize',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
 
 
     @validate_call

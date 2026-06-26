@@ -8,6 +8,8 @@ docs/ApiErrorDetail.md
 docs/ApiErrorResponse.md
 docs/AsyncQueryResponse.md
 docs/AttachDatabaseCatalogRequest.md
+docs/BatchCreateUploadRequest.md
+docs/BatchCreateUploadResponse.md
 docs/BooleanProfileDetail.md
 docs/CategoricalProfileDetail.md
 docs/CategoryValueInfo.md
@@ -37,6 +39,7 @@ docs/CreateIndexRequest.md
 docs/CreateSavedQueryRequest.md
 docs/CreateSecretRequest.md
 docs/CreateSecretResponse.md
+docs/CreateUploadRequest.md
 docs/CreateWorkspaceRequest.md
 docs/CreateWorkspaceResponse.md
 docs/DatabaseAttachmentInfo.md
@@ -52,6 +55,9 @@ docs/EmbeddingProviderResponse.md
 docs/EmbeddingProvidersApi.md
 docs/Error.md
 docs/ExecuteSavedQueryRequest.md
+docs/FinalizeUploadPart.md
+docs/FinalizeUploadRequest.md
+docs/FinalizeUploadResponse.md
 docs/GetConnectionResponse.md
 docs/GetDatabaseContextResponse.md
 docs/GetResultResponse.md
@@ -120,6 +126,7 @@ docs/UpdateSecretRequest.md
 docs/UpdateSecretResponse.md
 docs/UploadInfo.md
 docs/UploadResponse.md
+docs/UploadSessionResponse.md
 docs/UploadsApi.md
 docs/UpsertDatabaseContextRequest.md
 docs/UpsertDatabaseContextResponse.md
@@ -159,6 +166,8 @@ hotdata/models/api_error_detail.py
 hotdata/models/api_error_response.py
 hotdata/models/async_query_response.py
 hotdata/models/attach_database_catalog_request.py
+hotdata/models/batch_create_upload_request.py
+hotdata/models/batch_create_upload_response.py
 hotdata/models/boolean_profile_detail.py
 hotdata/models/categorical_profile_detail.py
 hotdata/models/category_value_info.py
@@ -186,6 +195,7 @@ hotdata/models/create_index_request.py
 hotdata/models/create_saved_query_request.py
 hotdata/models/create_secret_request.py
 hotdata/models/create_secret_response.py
+hotdata/models/create_upload_request.py
 hotdata/models/create_workspace_request.py
 hotdata/models/create_workspace_response.py
 hotdata/models/database_attachment_info.py
@@ -198,6 +208,9 @@ hotdata/models/discovery_status.py
 hotdata/models/embedding_provider_response.py
 hotdata/models/error.py
 hotdata/models/execute_saved_query_request.py
+hotdata/models/finalize_upload_part.py
+hotdata/models/finalize_upload_request.py
+hotdata/models/finalize_upload_response.py
 hotdata/models/get_connection_response.py
 hotdata/models/get_database_context_response.py
 hotdata/models/get_result_response.py
@@ -257,6 +270,7 @@ hotdata/models/update_secret_request.py
 hotdata/models/update_secret_response.py
 hotdata/models/upload_info.py
 hotdata/models/upload_response.py
+hotdata/models/upload_session_response.py
 hotdata/models/upsert_database_context_request.py
 hotdata/models/upsert_database_context_response.py
 hotdata/models/workspace_detail.py
@@ -273,6 +287,8 @@ test/test_api_error_detail.py
 test/test_api_error_response.py
 test/test_async_query_response.py
 test/test_attach_database_catalog_request.py
+test/test_batch_create_upload_request.py
+test/test_batch_create_upload_response.py
 test/test_boolean_profile_detail.py
 test/test_categorical_profile_detail.py
 test/test_category_value_info.py
@@ -302,6 +318,7 @@ test/test_create_index_request.py
 test/test_create_saved_query_request.py
 test/test_create_secret_request.py
 test/test_create_secret_response.py
+test/test_create_upload_request.py
 test/test_create_workspace_request.py
 test/test_create_workspace_response.py
 test/test_database_attachment_info.py
@@ -317,6 +334,9 @@ test/test_embedding_provider_response.py
 test/test_embedding_providers_api.py
 test/test_error.py
 test/test_execute_saved_query_request.py
+test/test_finalize_upload_part.py
+test/test_finalize_upload_request.py
+test/test_finalize_upload_response.py
 test/test_get_connection_response.py
 test/test_get_database_context_response.py
 test/test_get_result_response.py
@@ -385,6 +405,7 @@ test/test_update_secret_request.py
 test/test_update_secret_response.py
 test/test_upload_info.py
 test/test_upload_response.py
+test/test_upload_session_response.py
 test/test_uploads_api.py
 test/test_upsert_database_context_request.py
 test/test_upsert_database_context_response.py
