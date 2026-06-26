@@ -27,6 +27,27 @@ class TestUploadsApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
+    def test_create_upload_session_handler(self) -> None:
+        """Test case for create_upload_session_handler
+
+        Create upload session
+        """
+        pass
+
+    def test_create_upload_sessions_batch_handler(self) -> None:
+        """Test case for create_upload_sessions_batch_handler
+
+        Create upload sessions in bulk
+        """
+        pass
+
+    def test_finalize_upload_handler(self) -> None:
+        """Test case for finalize_upload_handler
+
+        Finalize upload
+        """
+        pass
+
     def test_list_uploads(self) -> None:
         """Test case for list_uploads
 

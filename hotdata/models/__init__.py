@@ -21,6 +21,8 @@ from hotdata.models.api_error_detail import ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse
 from hotdata.models.async_query_response import AsyncQueryResponse
 from hotdata.models.attach_database_catalog_request import AttachDatabaseCatalogRequest
+from hotdata.models.batch_create_upload_request import BatchCreateUploadRequest
+from hotdata.models.batch_create_upload_response import BatchCreateUploadResponse
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo
@@ -48,6 +50,7 @@ from hotdata.models.create_index_request import CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse
+from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.models.database_attachment_info import DatabaseAttachmentInfo
@@ -60,6 +63,9 @@ from hotdata.models.discovery_status import DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse
 from hotdata.models.error import Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest
+from hotdata.models.finalize_upload_part import FinalizeUploadPart
+from hotdata.models.finalize_upload_request import FinalizeUploadRequest
+from hotdata.models.finalize_upload_response import FinalizeUploadResponse
 from hotdata.models.get_connection_response import GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse
@@ -119,6 +125,7 @@ from hotdata.models.update_secret_request import UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse
 from hotdata.models.upload_info import UploadInfo
 from hotdata.models.upload_response import UploadResponse
+from hotdata.models.upload_session_response import UploadSessionResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest
 from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse
 from hotdata.models.workspace_detail import WorkspaceDetail

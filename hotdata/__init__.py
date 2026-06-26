@@ -57,6 +57,8 @@ __all__ = [
     "ApiErrorResponse",
     "AsyncQueryResponse",
     "AttachDatabaseCatalogRequest",
+    "BatchCreateUploadRequest",
+    "BatchCreateUploadResponse",
     "BooleanProfileDetail",
     "CategoricalProfileDetail",
     "CategoryValueInfo",
@@ -84,6 +86,7 @@ __all__ = [
     "CreateSavedQueryRequest",
     "CreateSecretRequest",
     "CreateSecretResponse",
+    "CreateUploadRequest",
     "CreateWorkspaceRequest",
     "CreateWorkspaceResponse",
     "DatabaseAttachmentInfo",
@@ -96,6 +99,9 @@ __all__ = [
     "EmbeddingProviderResponse",
     "Error",
     "ExecuteSavedQueryRequest",
+    "FinalizeUploadPart",
+    "FinalizeUploadRequest",
+    "FinalizeUploadResponse",
     "GetConnectionResponse",
     "GetDatabaseContextResponse",
     "GetResultResponse",
@@ -155,6 +161,7 @@ __all__ = [
     "UpdateSecretResponse",
     "UploadInfo",
     "UploadResponse",
+    "UploadSessionResponse",
     "UpsertDatabaseContextRequest",
     "UpsertDatabaseContextResponse",
     "WorkspaceDetail",
@@ -200,6 +207,8 @@ from hotdata.models.api_error_detail import ApiErrorDetail as ApiErrorDetail
 from hotdata.models.api_error_response import ApiErrorResponse as ApiErrorResponse
 from hotdata.models.async_query_response import AsyncQueryResponse as AsyncQueryResponse
 from hotdata.models.attach_database_catalog_request import AttachDatabaseCatalogRequest as AttachDatabaseCatalogRequest
+from hotdata.models.batch_create_upload_request import BatchCreateUploadRequest as BatchCreateUploadRequest
+from hotdata.models.batch_create_upload_response import BatchCreateUploadResponse as BatchCreateUploadResponse
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail as BooleanProfileDetail
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail as CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo as CategoryValueInfo
@@ -227,6 +236,7 @@ from hotdata.models.create_index_request import CreateIndexRequest as CreateInde
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
 from hotdata.models.create_secret_request import CreateSecretRequest as CreateSecretRequest
 from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
+from hotdata.models.create_upload_request import CreateUploadRequest as CreateUploadRequest
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.database_attachment_info import DatabaseAttachmentInfo as DatabaseAttachmentInfo
@@ -239,6 +249,9 @@ from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse as EmbeddingProviderResponse
 from hotdata.models.error import Error as Error
 from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest as ExecuteSavedQueryRequest
+from hotdata.models.finalize_upload_part import FinalizeUploadPart as FinalizeUploadPart
+from hotdata.models.finalize_upload_request import FinalizeUploadRequest as FinalizeUploadRequest
+from hotdata.models.finalize_upload_response import FinalizeUploadResponse as FinalizeUploadResponse
 from hotdata.models.get_connection_response import GetConnectionResponse as GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse as GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
@@ -298,6 +311,7 @@ from hotdata.models.update_secret_request import UpdateSecretRequest as UpdateSe
 from hotdata.models.update_secret_response import UpdateSecretResponse as UpdateSecretResponse
 from hotdata.models.upload_info import UploadInfo as UploadInfo
 from hotdata.models.upload_response import UploadResponse as UploadResponse
+from hotdata.models.upload_session_response import UploadSessionResponse as UploadSessionResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest as UpsertDatabaseContextRequest
 from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse as UpsertDatabaseContextResponse
 from hotdata.models.workspace_detail import WorkspaceDetail as WorkspaceDetail
