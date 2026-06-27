@@ -43,6 +43,7 @@ from hotdata.uploads import (
     SizeLimitError,
     StorageError,
     StorageTransportError,
+    UploadError,
     UploadOptions,
     UploadsApi,
     auto_part_size_hint,
@@ -161,13 +162,11 @@ def _patch_session(
 
     def fake_finalize(
         upload_id: str,
-        x_upload_finalize_token: str,
-        finalize_upload_request: Any = None,
-        **kwargs: Any,
+        finalize_token: str,
+        body: Any = None,
+        _request_timeout: Any = None,
     ) -> FinalizeUploadResponse:
-        finalize_capture.append(
-            ("finalize", upload_id, x_upload_finalize_token, finalize_upload_request)
-        )
+        finalize_capture.append(("finalize", upload_id, finalize_token, body))
         from datetime import datetime, timezone
 
         return FinalizeUploadResponse(
@@ -179,7 +178,10 @@ def _patch_session(
         )
 
     monkeypatch.setattr(api, "create_upload_session_handler", fake_create)
-    monkeypatch.setattr(api, "finalize_upload_handler", fake_finalize)
+    # Stub the internal finalize seam (upload_file calls _finalize_handler, which
+    # routes through a one-off no-retry client); see test_finalize_uses_no_retry_client
+    # for the real seam's behavior.
+    monkeypatch.setattr(api, "_finalize_handler", fake_finalize)
 
 
 def _make_api() -> UploadsApi:
@@ -1141,4 +1143,168 @@ def test_upload_stream_file_object_streams_with_inferred_length(
     assert captured["preload_content"] is False
     # Default content type when unset.
     assert captured["headers"]["Content-Type"] == "application/octet-stream"
+    # The SDK's User-Agent and scope auth ride the streamed request too.
+    assert "User-Agent" in captured["headers"]
+    assert captured["headers"]["X-Workspace-Id"] == "ws_test"
     assert isinstance(out, UploadResponse)
+
+
+def test_upload_stream_bad_type_raises() -> None:
+    api = _make_api()
+    with pytest.raises(TypeError, match="bytes or a readable"):
+        api.upload_stream(12345)  # type: ignore[arg-type]
+
+
+def _make_api_with_session(session_id: str) -> UploadsApi:
+    from hotdata import ApiClient, Configuration
+
+    config = Configuration(
+        host="https://api.hotdata.test",
+        api_key="test-key",
+        workspace_id="ws_test",
+        session_id=session_id,
+    )
+    return UploadsApi(ApiClient(config))
+
+
+def test_upload_stream_sends_session_and_workspace_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", "1")
+    from hotdata import rest
+
+    captured: Dict[str, Any] = {}
+
+    def fake_request(
+        self: Any,
+        method: str,
+        url: str,
+        headers: Any = None,
+        body: Any = None,
+        post_params: Any = None,
+        _request_timeout: Any = None,
+    ) -> Any:
+        captured["headers"] = dict(headers or {})
+        resp = _FakeUrllib3Response(
+            201, _upload_response_json(), {"content-type": "application/json"}
+        )
+        return rest.RESTResponse(resp)
+
+    monkeypatch.setattr(rest.RESTClientObject, "request", fake_request)
+    api = _make_api_with_session("sb_xyz")
+    api.upload_stream(b"hi")
+    assert captured["headers"]["X-Session-Id"] == "sb_xyz"
+    assert captured["headers"]["X-Workspace-Id"] == "ws_test"
+
+
+# --- Finalize hardening ----------------------------------------------------
+
+
+def test_finalize_uses_no_retry_client(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool
+) -> None:
+    # Don't stub _finalize_handler: let the real one run and route through its
+    # one-off no-retry client. Capture the retries policy the generated finalize
+    # sees.
+    from datetime import datetime, timezone
+
+    from hotdata.api.uploads_api import UploadsApi as Gen
+
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    api = _make_api()
+    monkeypatch.setattr(
+        api, "create_upload_session_handler", lambda *a, **k: session
+    )
+
+    captured: Dict[str, Any] = {}
+
+    def fake_gen_finalize(
+        self: Any,
+        upload_id: str,
+        x_upload_finalize_token: str,
+        finalize_upload_request: Any = None,
+        **kwargs: Any,
+    ) -> FinalizeUploadResponse:
+        captured["retries"] = self.api_client.configuration.retries
+        return FinalizeUploadResponse(
+            content_type=None,
+            created_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            size_bytes=0,
+            status="ready",
+            upload_id=upload_id,
+        )
+
+    monkeypatch.setattr(Gen, "finalize_upload_handler", fake_gen_finalize)
+    api.upload_file(b"hello world")
+    # The exactly-once finalize must run with retries disabled regardless of the
+    # SDK's configured policy.
+    assert captured["retries"] is False
+
+
+# --- File-object cursor + short-read correctness --------------------------
+
+
+def test_upload_file_file_object_mid_cursor_single(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool
+) -> None:
+    # A file object positioned mid-stream uploads from the cursor to the end
+    # (the tail), not from byte 0.
+    content = b"H" * 100 + b"T" * 200
+    fobj = io.BytesIO(content)
+    fobj.seek(100)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    capture: List[Tuple[Any, ...]] = []
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, capture)
+    api.upload_file(fobj)
+    assert fake_pool.calls[0]["body"] == b"T" * 200
+    assert capture[0][1].declared_size_bytes == 200
+
+
+def test_upload_file_file_object_mid_cursor_multipart(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool
+) -> None:
+    part_size = 5 * MIB
+    head = b"H" * 10
+    tail = bytes((i % 251) for i in range(2 * part_size + 77))
+    fobj = io.BytesIO(head + tail)
+    fobj.seek(len(head))
+    part_urls = ["https://storage.test/p1", "https://storage.test/p2", "https://storage.test/p3"]
+    for i, url in enumerate(part_urls, start=1):
+        fake_pool.responses[url] = _FakeResponse(200, etag=f'"e{i}"')
+    session = _multipart_session(part_urls, part_size)
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    api.upload_file(fobj, max_concurrency=3)
+    by_url = {c["url"]: c for c in fake_pool.calls}
+    assert by_url[part_urls[0]]["body"] == tail[0:part_size]
+    assert by_url[part_urls[1]]["body"] == tail[part_size:2 * part_size]
+    assert by_url[part_urls[2]]["body"] == tail[2 * part_size:]
+
+
+def test_multipart_short_read_raises(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool
+) -> None:
+    part_size = 5 * MIB
+    # Only one part's worth of bytes, but we declare two parts' worth via `size`.
+    fobj = io.BytesIO(b"a" * part_size)
+    part_urls = ["https://storage.test/p1", "https://storage.test/p2"]
+    for url in part_urls:
+        fake_pool.responses[url] = _FakeResponse(200, etag='"e"')
+    session = _multipart_session(part_urls, part_size)
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    with pytest.raises(UploadError, match="returned 0 bytes"):
+        api.upload_file(fobj, size=2 * part_size)

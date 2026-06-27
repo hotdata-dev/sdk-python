@@ -41,6 +41,7 @@ unchanged, and :meth:`UploadsApi.upload_file` adds the orchestrated flow.
 
 from __future__ import annotations
 
+import copy
 import io
 import logging
 import os
@@ -54,6 +55,7 @@ import urllib3
 from urllib3.util.retry import Retry
 
 from hotdata.api.uploads_api import UploadsApi as _GeneratedUploadsApi
+from hotdata.api_client import ApiClient
 from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.finalize_upload_part import FinalizeUploadPart
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest
@@ -439,6 +441,9 @@ class UploadsApi(_GeneratedUploadsApi):
         ``source`` may be a filesystem path, raw ``bytes`` / ``bytearray``, or a
         seekable binary file object. A non-seekable stream is not accepted here
         (multipart needs positioned reads) — use :meth:`upload_stream` for that.
+        A file object is uploaded from its current position to the end (its
+        cursor is consumed, not restored); pass ``size`` only if its length
+        cannot be inferred by seeking.
 
         Per-call keyword arguments override the matching :class:`UploadOptions`
         field when both are given.
@@ -535,25 +540,15 @@ class UploadsApi(_GeneratedUploadsApi):
         # field in pydantic's `model_fields_set`, serializing to `{"parts":
         # null}`; constructing WITHOUT the field leaves it unset so it drops out
         # and the body is `{}`. So build the single-mode body field-free.
-        #
-        # Finalize is exactly-once on the server. It is safe under the SDK's
-        # DEFAULT retry policy: that policy does no status retries (status=0), and
-        # urllib3 gates read-error retries (which include any ProtocolError, e.g.
-        # a post-response reset) by allowed_methods, which excludes POST — so a
-        # finalize the server already processed is never replayed. Only a
-        # pre-response reset (server did no work) is retried, which is safe. NOTE:
-        # a caller who overrides Configuration.retries with a policy that retries
-        # POST on a status/read error could double-finalize and see a spurious
-        # "already finalized" error; the default is the safe path.
         if parts is None:
             finalize_body = FinalizeUploadRequest()
         else:
             finalize_body = FinalizeUploadRequest(parts=parts)
-        return self.finalize_upload_handler(
+        return self._finalize_handler(
             session.upload_id,
             session.finalize_token,
             finalize_body,
-            _request_timeout=_request_timeout,
+            _request_timeout,
         )
 
     def upload_stream(
@@ -588,6 +583,20 @@ class UploadsApi(_GeneratedUploadsApi):
             stream to avoid chunked transfer.
         :raises hotdata.exceptions.ApiException: the upload was rejected.
         """
+        if not isinstance(body, (bytes, bytearray)) and not hasattr(body, "read"):
+            raise TypeError(
+                f"upload_stream accepts bytes or a readable binary file object, "
+                f"not {type(body).__name__}"
+            )
+
+        # The generated /v1/files op carries only WorkspaceId + BearerAuth; add
+        # the X-Session-Id scope header here when a session is configured so
+        # sandbox-scoped uploads keep their session context (matches the Rust SDK).
+        scope_headers: Dict[str, str] = {}
+        session_id = self.api_client.configuration.session_id
+        if session_id:
+            scope_headers["X-Session-Id"] = session_id
+
         if isinstance(body, (bytes, bytearray)):
             # bytes go through the generated serialize + transport unchanged;
             # urllib3 sets Content-Length from the buffer length automatically.
@@ -596,7 +605,7 @@ class UploadsApi(_GeneratedUploadsApi):
                 body=data,
                 _request_auth=None,
                 _content_type=content_type,
-                _headers=None,
+                _headers=scope_headers or None,
                 _host_index=0,
             )
             response_data = self.api_client.call_api(*params, _request_timeout=_request_timeout)
@@ -614,14 +623,14 @@ class UploadsApi(_GeneratedUploadsApi):
                 current = body.tell()
                 content_length = body.seek(0, io.SEEK_END) - current
                 body.seek(current)
-        headers: Optional[Dict[str, str]] = (
-            {"Content-Length": str(content_length)} if content_length is not None else None
-        )
+        headers: Dict[str, str] = dict(scope_headers)
+        if content_length is not None:
+            headers["Content-Length"] = str(content_length)
         method, url, header_params, _body, _post = self._upload_file_serialize(
             body=None,
             _request_auth=None,
             _content_type=content_type,
-            _headers=headers,
+            _headers=headers or None,
             _host_index=0,
         )
         # Stream via the SDK's configured pool (auth + TLS/proxy), bypassing the
@@ -642,6 +651,36 @@ class UploadsApi(_GeneratedUploadsApi):
         ).data
 
     # -- internals ---------------------------------------------------------
+
+    def _finalize_handler(
+        self,
+        upload_id: str,
+        finalize_token: str,
+        body: FinalizeUploadRequest,
+        _request_timeout: Any,
+    ) -> FinalizeUploadResponse:
+        """Finalize the upload with retries disabled.
+
+        Finalize is exactly-once on the server: a retry of an ambiguous transient
+        (a 429 the server actually processed, or a lost response) would turn a
+        finalize that SUCCEEDED into a spurious "already finalized" error. So,
+        regardless of the SDK's configured retry policy, this runs through a
+        one-off client whose transport does no retries — mirroring the Rust SDK,
+        which clones its config with ``max_retries = 0`` for finalize. Auth and
+        scope settings are inherited via the shallow-copied configuration.
+        """
+        finalize_config = copy.copy(self.api_client.configuration)
+        finalize_config.retries = False
+        finalize_client = ApiClient(finalize_config)
+        try:
+            return _GeneratedUploadsApi(finalize_client).finalize_upload_handler(
+                upload_id,
+                finalize_token,
+                body,
+                _request_timeout=_request_timeout,
+            )
+        finally:
+            finalize_client.close()
 
     def _upload_single(
         self,
@@ -720,6 +759,15 @@ class UploadsApi(_GeneratedUploadsApi):
             offset = index * part_size
             length = min(part_size, total - offset)
             chunk = src.read_range(offset, length)
+            if len(chunk) != length:
+                # The source returned fewer bytes than its declared size implies
+                # (a truncated file, or a wrong explicit `size`). Sending it would
+                # mismatch Content-Length, so fail loudly before the PUT.
+                raise UploadError(
+                    f"source returned {len(chunk)} bytes for part {part_number} "
+                    f"(expected {length} at offset {offset}); it may have changed "
+                    f"size or the declared size is wrong"
+                )
             response = _put_to_storage(
                 part_urls[index],
                 chunk,
@@ -752,9 +800,11 @@ class UploadsApi(_GeneratedUploadsApi):
                     raise exc
                 results[futures[future]] = future.result()
         finally:
-            # cancel_futures drops parts that have not started; already-running
-            # ones can't be cancelled (threads) but we no longer wait on them.
-            executor.shutdown(wait=False, cancel_futures=True)
+            # cancel_futures drops parts that have not started; wait=True then
+            # blocks for the few already-running workers so that, by the time
+            # this returns (or re-raises), no background thread is still reading
+            # the (possibly caller-owned) source or firing the progress callback.
+            executor.shutdown(wait=True, cancel_futures=True)
 
         # results is indexed by 0-based part position, so it is already ascending
         # by part_number with no duplicates.
@@ -824,25 +874,34 @@ class _BytesSource(_Source):
 
 
 class _FileObjSource(_Source):
-    """A user-owned, seekable binary file object. A lock serializes the
-    seek+read of each part (cheap, in-memory) so concurrent part tasks never
-    corrupt the shared cursor; the slow ``PUT`` s still run concurrently. The
-    file object is never closed (the caller owns it).
+    """A user-owned, seekable binary file object. The content uploaded is from
+    the object's position *at call time* to its end (the Python convention for
+    file-object uploads, like ``requests`` / ``boto3``); ``base`` records that
+    position so every read is relative to it.
+
+    A lock serializes the seek+read of each part (cheap, in-memory) so concurrent
+    part tasks never corrupt the shared cursor; the slow ``PUT`` s still run
+    concurrently. The file object is never closed (the caller owns it), and its
+    cursor is not restored afterwards.
     """
 
-    def __init__(self, fileobj: BinaryIO, size: int) -> None:
+    def __init__(self, fileobj: BinaryIO, size: Optional[int]) -> None:
         self._file = fileobj
+        self._base = fileobj.tell()
+        if size is None:
+            size = fileobj.seek(0, io.SEEK_END) - self._base
+            fileobj.seek(self._base)
         self.size = size
         self._lock = threading.Lock()
 
     def read_range(self, offset: int, length: int) -> bytes:
         with self._lock:
-            self._file.seek(offset)
+            self._file.seek(self._base + offset)
             return self._file.read(length)
 
     @contextmanager
     def reader(self) -> Iterator[BinaryIO]:
-        self._file.seek(0)
+        self._file.seek(self._base)
         yield self._file
 
 
@@ -865,10 +924,6 @@ def _make_source(source: UploadSource, size: Optional[int]) -> _Source:
                 "reads for multipart). For a non-seekable stream use "
                 "upload_stream, which sends to POST /v1/files in one request."
             )
-        if size is None:
-            current = source.tell()
-            size = source.seek(0, io.SEEK_END) - current
-            source.seek(current)
         return _FileObjSource(source, size)
     raise TypeError(
         f"upload_file accepts a path, bytes, or a seekable binary file object, "

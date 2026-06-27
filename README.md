@@ -114,12 +114,14 @@ with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
 ```
 
 `upload_file` accepts a path, raw `bytes`, or a seekable binary file object
-(`size` is inferred for all three). The SDK picks single vs. multipart from the
-size, auto-scales the part size, and bounds part concurrency to a peak-memory
-budget (override with `part_size` / `max_concurrency` / `part_retry`). Storage
-`PUT`s go through a dedicated, header-isolated connection pool, so the SDK's auth
-and workspace headers never reach object storage (which would otherwise reject
-the upload).
+(`size` is inferred for all three; a file object is read from its current
+position to the end). The SDK picks single vs. multipart from the size,
+auto-scales the part size, and bounds part concurrency to a peak-memory budget
+(override with `part_size` / `max_concurrency` / `part_retry`). Storage `PUT`s go
+through a dedicated, header-isolated connection pool, so the SDK's auth and
+workspace headers never reach object storage (which would otherwise reject the
+upload). Finalize is sent with retries disabled so the exactly-once call is never
+accidentally replayed.
 
 Failures surface as a typed hierarchy under `hotdata.uploads.UploadError`:
 `StorageError` (storage returned a non-2xx), `StorageTransportError` (the PUT
