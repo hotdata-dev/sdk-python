@@ -46,8 +46,9 @@ import logging
 import os
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, BinaryIO, Callable, Dict, List, Optional, Union
+from typing import Any, BinaryIO, Callable, Dict, Iterator, List, Optional, Union
 
 import urllib3
 from urllib3.util.retry import Retry
@@ -57,7 +58,20 @@ from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.finalize_upload_part import FinalizeUploadPart
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse
+from hotdata.models.upload_response import UploadResponse
 from hotdata.models.upload_session_response import UploadSessionResponse
+from hotdata.rest import RESTResponse
+
+#: Response-type map for the legacy ``POST /v1/files`` op, mirroring the
+#: generated ``upload_file`` handler.
+_UPLOAD_FILE_RESPONSE_TYPES: Dict[str, Optional[str]] = {
+    "201": "UploadResponse",
+    "400": "ApiErrorResponse",
+}
+
+#: The accepted input types for :meth:`UploadsApi.upload_file`: a filesystem
+#: path, raw bytes, or a seekable binary file object.
+UploadSource = Union[str, "os.PathLike[str]", bytes, bytearray, BinaryIO]
 
 _log = logging.getLogger("hotdata.uploads")
 
@@ -300,6 +314,20 @@ def default_part_retry() -> Retry:
     )
 
 
+def _to_timeout(request_timeout: Any) -> Any:
+    """Convert the SDK's ``_request_timeout`` (a number or ``(connect, read)``
+    tuple) into a :class:`urllib3.Timeout`, or ``None`` for the pool default —
+    matching the generated REST client's conversion.
+    """
+    if not request_timeout:
+        return None
+    if isinstance(request_timeout, (int, float)):
+        return urllib3.Timeout(total=request_timeout)
+    if isinstance(request_timeout, tuple) and len(request_timeout) == 2:
+        return urllib3.Timeout(connect=request_timeout[0], read=request_timeout[1])
+    return None
+
+
 def _storage_headers(session_headers: Dict[str, str], content_length: int) -> Dict[str, str]:
     """Build the bare PUT headers: an explicit ``Content-Length`` plus the
     server-provided session headers replayed verbatim (currently always empty;
@@ -386,8 +414,9 @@ class UploadsApi(_GeneratedUploadsApi):
 
     def upload_file(  # type: ignore[override]
         self,
-        path: Union[str, "os.PathLike[str]"],
+        source: UploadSource,
         *,
+        size: Optional[int] = None,
         content_type: Optional[str] = None,
         content_encoding: Optional[str] = None,
         filename: Optional[str] = None,
@@ -398,7 +427,7 @@ class UploadsApi(_GeneratedUploadsApi):
         options: Optional[UploadOptions] = None,
         _request_timeout: Any = None,
     ) -> FinalizeUploadResponse:
-        """Upload a local file directly to object storage and finalize it.
+        """Upload a file directly to object storage and finalize it.
 
         Opens an upload session, ``PUT`` s the bytes straight to storage (one
         ``PUT`` for a small file, concurrent part ``PUT`` s for a large one),
@@ -407,14 +436,20 @@ class UploadsApi(_GeneratedUploadsApi):
         Read ``upload_id`` from it to load the upload into a managed table. The
         bytes never round-trip through the API.
 
+        ``source`` may be a filesystem path, raw ``bytes`` / ``bytearray``, or a
+        seekable binary file object. A non-seekable stream is not accepted here
+        (multipart needs positioned reads) — use :meth:`upload_stream` for that.
+
         Per-call keyword arguments override the matching :class:`UploadOptions`
         field when both are given.
 
-        :param path: Path to the local file to upload.
+        :param source: A path, ``bytes``, or seekable binary file object.
+        :param size: Byte size of ``source`` when it is a file object whose size
+            cannot be determined (otherwise inferred from the path/bytes/seek).
         :param content_type: Content type to record (advisory).
         :param content_encoding: Content encoding to record (advisory).
         :param filename: Original file name to record; defaults to the path's
-            base name.
+            base name (no default for bytes / file-object sources).
         :param part_size: Preferred multipart part-size hint, in bytes; the
             server clamps it and ignores it for single-``PUT`` uploads.
         :param max_concurrency: Max in-flight part ``PUT`` s for a multipart
@@ -449,10 +484,10 @@ class UploadsApi(_GeneratedUploadsApi):
         progress = progress if progress is not None else opts.progress
         part_retry = part_retry if part_retry is not None else opts.part_retry
 
-        fspath = os.fspath(path)
-        total = os.stat(fspath).st_size
-        if filename is None:
-            filename = os.path.basename(fspath)
+        src = _make_source(source, size)
+        total = src.size
+        if filename is None and isinstance(src, _PathSource):
+            filename = src.default_filename
 
         # Part-size hint: honor an explicit value, else auto-scale from the
         # declared size. The server clamps it regardless.
@@ -482,12 +517,12 @@ class UploadsApi(_GeneratedUploadsApi):
             progress(0, total)
 
         if session.mode == "single":
-            self._upload_single(session, fspath, total, progress)
+            self._upload_single(session, src, total, progress)
             parts: Optional[List[FinalizeUploadPart]] = None
         elif session.mode == "multipart":
             cap = max_concurrency if max_concurrency is not None else DEFAULT_MAX_CONCURRENCY
             retry = part_retry if part_retry is not None else default_part_retry()
-            parts = self._upload_multipart(session, fspath, total, cap, retry, progress)
+            parts = self._upload_multipart(session, src, total, cap, retry, progress)
         else:
             raise MalformedSessionError(f"unknown upload mode {session.mode!r}")
 
@@ -521,16 +556,101 @@ class UploadsApi(_GeneratedUploadsApi):
             _request_timeout=_request_timeout,
         )
 
+    def upload_stream(
+        self,
+        body: Union[bytes, bytearray, BinaryIO],
+        *,
+        content_type: Optional[str] = None,
+        content_length: Optional[int] = None,
+        _request_timeout: Any = None,
+    ) -> UploadResponse:
+        """Stream an arbitrary byte source to the legacy ``POST /v1/files`` raw
+        upload endpoint, returning the
+        :class:`~hotdata.models.upload_response.UploadResponse`.
+
+        Use this when the presigned :meth:`upload_file` path is unavailable
+        (e.g. a ``501`` ``PRESIGN_UNSUPPORTED``) or when the bytes come from a
+        non-seekable stream that :meth:`upload_file` cannot use. The body is sent
+        through the SDK's authenticated client (workspace + bearer headers) — not
+        the bare storage pool — because this request goes to the API, not object
+        storage.
+
+        ``body`` may be ``bytes`` / ``bytearray`` or a readable binary file
+        object. A file object is streamed without being buffered into memory; set
+        ``content_length`` (or pass a seekable file, whose length is inferred) so
+        the server can reject an oversized upload before reading the body.
+
+        :param body: The bytes or binary stream to upload.
+        :param content_type: Content type for the body; defaults to
+            ``application/octet-stream``.
+        :param content_length: Explicit body length in bytes. Inferred from
+            ``bytes`` length or a seekable file; required for a non-seekable
+            stream to avoid chunked transfer.
+        :raises hotdata.exceptions.ApiException: the upload was rejected.
+        """
+        if isinstance(body, (bytes, bytearray)):
+            # bytes go through the generated serialize + transport unchanged;
+            # urllib3 sets Content-Length from the buffer length automatically.
+            data = bytes(body)
+            params = self._upload_file_serialize(
+                body=data,
+                _request_auth=None,
+                _content_type=content_type,
+                _headers=None,
+                _host_index=0,
+            )
+            response_data = self.api_client.call_api(*params, _request_timeout=_request_timeout)
+            response_data.read()
+            return self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_UPLOAD_FILE_RESPONSE_TYPES,
+            ).data
+
+        # A file object: infer its length when seekable so the request is framed
+        # (not chunked), then stream it through the SDK's authenticated pool.
+        if content_length is None:
+            seekable = getattr(body, "seekable", None)
+            if callable(seekable) and body.seekable():
+                current = body.tell()
+                content_length = body.seek(0, io.SEEK_END) - current
+                body.seek(current)
+        headers: Optional[Dict[str, str]] = (
+            {"Content-Length": str(content_length)} if content_length is not None else None
+        )
+        method, url, header_params, _body, _post = self._upload_file_serialize(
+            body=None,
+            _request_auth=None,
+            _content_type=content_type,
+            _headers=headers,
+            _host_index=0,
+        )
+        # Stream via the SDK's configured pool (auth + TLS/proxy), bypassing the
+        # generated rest layer, which buffers and rejects file-like bodies.
+        raw = self.api_client.rest_client.pool_manager.request(
+            method,
+            url,
+            body=body,
+            headers=header_params,
+            preload_content=False,
+            timeout=_to_timeout(_request_timeout),
+        )
+        rest_response = RESTResponse(raw)
+        rest_response.read()
+        return self.api_client.response_deserialize(
+            response_data=rest_response,
+            response_types_map=_UPLOAD_FILE_RESPONSE_TYPES,
+        ).data
+
     # -- internals ---------------------------------------------------------
 
     def _upload_single(
         self,
         session: UploadSessionResponse,
-        path: str,
+        src: _Source,
         total: int,
         progress: Optional[UploadProgress],
     ) -> None:
-        """Single-``PUT`` path: stream the whole file to ``session.url``,
+        """Single-``PUT`` path: stream the whole source to ``session.url``,
         invoking the progress callback incrementally as chunks are sent.
 
         A streaming body cannot be replayed, so this ``PUT`` is sent once with no
@@ -541,7 +661,7 @@ class UploadsApi(_GeneratedUploadsApi):
         if not url:
             raise MalformedSessionError("single upload missing `url`")
 
-        with open(path, "rb") as fileobj:
+        with src.reader() as fileobj:
             body = _ProgressReader(fileobj, total, progress)
             _put_to_storage(
                 url,
@@ -559,7 +679,7 @@ class UploadsApi(_GeneratedUploadsApi):
     def _upload_multipart(
         self,
         session: UploadSessionResponse,
-        path: str,
+        src: _Source,
         total: int,
         max_concurrency: int,
         part_retry: Retry,
@@ -599,7 +719,7 @@ class UploadsApi(_GeneratedUploadsApi):
             part_number = index + 1
             offset = index * part_size
             length = min(part_size, total - offset)
-            chunk = _read_range(path, offset, length)
+            chunk = src.read_range(offset, length)
             response = _put_to_storage(
                 part_urls[index],
                 chunk,
@@ -641,14 +761,121 @@ class UploadsApi(_GeneratedUploadsApi):
         return [part for part in results if part is not None]
 
 
-def _read_range(path: str, offset: int, length: int) -> bytes:
-    """Read exactly ``length`` bytes starting at ``offset``. Each multipart part
-    task opens its own handle so tasks never share a cursor and a retry re-reads
-    the same range cleanly.
+class _Source:
+    """Random-access view over the bytes to upload, plus the total ``size``.
+
+    Abstracts the three accepted inputs (a path, raw bytes, or a seekable file
+    object) behind :meth:`read_range` (positioned read of one part, used
+    concurrently for multipart) and :meth:`reader` (a fresh stream over the whole
+    content, used for the single-``PUT`` path).
     """
-    with open(path, "rb") as fileobj:
-        fileobj.seek(offset)
-        return fileobj.read(length)
+
+    size: int
+
+    def read_range(self, offset: int, length: int) -> bytes:
+        raise NotImplementedError
+
+    @contextmanager
+    def reader(self) -> Iterator[BinaryIO]:
+        raise NotImplementedError
+        yield  # pragma: no cover - makes this a generator for the type checker
+
+
+class _PathSource(_Source):
+    """A filesystem path. Each read opens its own handle so concurrent part
+    reads never share a cursor and a retry re-reads its range cleanly.
+    """
+
+    def __init__(self, path: "os.PathLike[str] | str") -> None:
+        self._path = os.fspath(path)
+        self.size = os.stat(self._path).st_size
+
+    @property
+    def default_filename(self) -> str:
+        return os.path.basename(self._path)
+
+    def read_range(self, offset: int, length: int) -> bytes:
+        with open(self._path, "rb") as fileobj:
+            fileobj.seek(offset)
+            return fileobj.read(length)
+
+    @contextmanager
+    def reader(self) -> Iterator[BinaryIO]:
+        fileobj = open(self._path, "rb")
+        try:
+            yield fileobj
+        finally:
+            fileobj.close()
+
+
+class _BytesSource(_Source):
+    """Raw in-memory bytes. Slicing is cheap and thread-safe."""
+
+    def __init__(self, data: bytes) -> None:
+        self._data = data
+        self.size = len(data)
+
+    def read_range(self, offset: int, length: int) -> bytes:
+        return self._data[offset:offset + length]
+
+    @contextmanager
+    def reader(self) -> Iterator[BinaryIO]:
+        yield io.BytesIO(self._data)
+
+
+class _FileObjSource(_Source):
+    """A user-owned, seekable binary file object. A lock serializes the
+    seek+read of each part (cheap, in-memory) so concurrent part tasks never
+    corrupt the shared cursor; the slow ``PUT`` s still run concurrently. The
+    file object is never closed (the caller owns it).
+    """
+
+    def __init__(self, fileobj: BinaryIO, size: int) -> None:
+        self._file = fileobj
+        self.size = size
+        self._lock = threading.Lock()
+
+    def read_range(self, offset: int, length: int) -> bytes:
+        with self._lock:
+            self._file.seek(offset)
+            return self._file.read(length)
+
+    @contextmanager
+    def reader(self) -> Iterator[BinaryIO]:
+        self._file.seek(0)
+        yield self._file
+
+
+def _make_source(source: UploadSource, size: Optional[int]) -> _Source:
+    """Normalize an upload input into a :class:`_Source`.
+
+    Accepts a path, ``bytes`` / ``bytearray``, or a seekable binary file object.
+    A non-seekable stream (or any other type) raises ``TypeError`` pointing at
+    :meth:`UploadsApi.upload_stream`, which streams to the legacy endpoint.
+    """
+    if isinstance(source, (bytes, bytearray)):
+        return _BytesSource(bytes(source))
+    if isinstance(source, (str, os.PathLike)):
+        return _PathSource(source)
+    if hasattr(source, "read"):
+        seekable = getattr(source, "seekable", None)
+        if not (callable(seekable) and source.seekable()):
+            raise TypeError(
+                "upload_file needs a seekable file object (it does positioned "
+                "reads for multipart). For a non-seekable stream use "
+                "upload_stream, which sends to POST /v1/files in one request."
+            )
+        if size is None:
+            current = source.tell()
+            size = source.seek(0, io.SEEK_END) - current
+            source.seek(current)
+        return _FileObjSource(source, size)
+    raise TypeError(
+        f"upload_file accepts a path, bytes, or a seekable binary file object, "
+        f"not {type(source).__name__}. (Did you mean the generated "
+        f"hotdata.api.uploads_api.UploadsApi.upload_file(body=...) raw op, or "
+        f"upload_stream?)"
+    )
 
 
 __all__ = [
@@ -667,6 +894,7 @@ __all__ = [
     "UploadError",
     "UploadOptions",
     "UploadProgress",
+    "UploadSource",
     "UploadsApi",
     "auto_part_size_hint",
     "default_part_retry",

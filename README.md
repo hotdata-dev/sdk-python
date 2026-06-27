@@ -113,20 +113,34 @@ with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
     print(finalized.upload_id)
 ```
 
-The SDK picks single vs. multipart from the file size, auto-scales the part size,
-and bounds part concurrency to a peak-memory budget (override with `part_size` /
-`max_concurrency`). Storage `PUT`s go through a dedicated, header-isolated
-connection pool, so the SDK's auth and workspace headers never reach object
-storage (which would otherwise reject the upload).
+`upload_file` accepts a path, raw `bytes`, or a seekable binary file object
+(`size` is inferred for all three). The SDK picks single vs. multipart from the
+size, auto-scales the part size, and bounds part concurrency to a peak-memory
+budget (override with `part_size` / `max_concurrency` / `part_retry`). Storage
+`PUT`s go through a dedicated, header-isolated connection pool, so the SDK's auth
+and workspace headers never reach object storage (which would otherwise reject
+the upload).
 
-It raises `hotdata.uploads.StorageError` if storage rejects a `PUT`,
-`MalformedSessionError` if the session response is inconsistent, and the usual
-`hotdata.exceptions.ApiException` if opening the session or finalizing fails —
-for example a `501` `PRESIGN_UNSUPPORTED`, meaning the backend cannot issue
-upload URLs. In that case send the raw bytes to the legacy `POST /v1/files`
-endpoint, which the generated client still exposes as
-`hotdata.api.uploads_api.UploadsApi.upload_file(body=...)` (the enhanced
-`upload_file` above takes a file path and shadows it).
+Failures surface as a typed hierarchy under `hotdata.uploads.UploadError`:
+`StorageError` (storage returned a non-2xx), `StorageTransportError` (the PUT
+failed before any response), `MissingETagError`, `MalformedSessionError`, and
+`SizeLimitError`. Opening the session or finalizing raises the usual
+`hotdata.exceptions.ApiException` — for example a `501` `PRESIGN_UNSUPPORTED`,
+meaning the backend cannot issue upload URLs.
+
+For that fallback (or to upload from a non-seekable stream), use `upload_stream`,
+which sends the bytes to the legacy `POST /v1/files` endpoint in one request,
+streaming a file object without buffering it in memory:
+
+```python
+with open("data.parquet", "rb") as f:
+    resp = uploads.upload_stream(f, content_type="application/parquet")
+print(resp.id)
+```
+
+Note `upload_file` shadows the generated raw-body `upload_file(body=...)`; that
+raw operation is still reachable at
+`hotdata.api.uploads_api.UploadsApi.upload_file`.
 
 ## API reference
 

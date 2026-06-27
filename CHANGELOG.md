@@ -22,7 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   headers reach object storage. Failures surface as a typed hierarchy under
   `UploadError`: `StorageError` (non-2xx from storage), `StorageTransportError`
   (transport failure before any response), `MissingETagError`,
-  `MalformedSessionError`, and `SizeLimitError`.
+  `MalformedSessionError`, and `SizeLimitError`. `upload_file` accepts a path,
+  raw `bytes`, or a seekable binary file object.
+- `hotdata.uploads.UploadsApi.upload_stream` uploads an arbitrary byte source
+  (`bytes` or a binary file object, streamed without buffering) to the legacy
+  `POST /v1/files` endpoint — the fallback when presigned uploads are
+  unsupported or the source is a non-seekable stream.
 
 ### Changed
 
