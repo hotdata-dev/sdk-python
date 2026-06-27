@@ -60,7 +60,7 @@ _CLIENT_ID = "hotdata-python-sdk"
 _MAX_ATTEMPTS = 3       # one initial attempt + up to two retries
 _BACKOFF_BASE = 0.1     # seconds -- first retry waits ~this, doubling thereafter
 _BACKOFF_MAX = 2.0      # cap on a single backoff so a flapping host can't stall us
-_BACKOFF_JITTER = 0.5   # +/- fraction of jitter added to spread retries out
+_BACKOFF_JITTER = 0.5   # additive jitter fraction (delay in [base, 1.5*base]) to spread retries out
 
 # Env var that disables exchange entirely. Used as a hard escape hatch during
 # the rollout window and for local/dev setups. Only affirmative values opt out
