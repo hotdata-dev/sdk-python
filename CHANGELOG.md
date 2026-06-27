@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `hotdata.uploads.UploadsApi` (the default `hotdata.UploadsApi`) gains
+  `upload_file(path, ...)`, a transparent direct-to-storage upload that
+  orchestrates the presigned flow end to end: it opens a session
+  (`POST /v1/uploads`), `PUT`s the bytes **straight to object storage** (a single
+  `PUT` for a small file, concurrent part `PUT`s for a large one), and finalizes
+  (`POST /v1/uploads/{id}/finalize`), returning the `FinalizeUploadResponse`. The
+  bytes never round-trip through the API. Supports a progress callback, an
+  auto-scaled (or caller-set) part size, bounded concurrency with a peak-memory
+  budget, and idempotent per-part retry. Storage `PUT`s go through a dedicated,
+  header-isolated pool so no SDK auth/workspace headers reach object storage.
+
 ### Changed
 
 - feat(uploads): add file upload endpoints

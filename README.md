@@ -89,6 +89,45 @@ with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
 
 Both methods accept `offset` and `limit` for pagination. They raise `hotdata.arrow.ResultNotReadyError` if the result is still pending or processing — poll `results.get_result(result_id)` until `status == "ready"` first.
 
+## File uploads
+
+`hotdata.uploads.UploadsApi` (also the default `hotdata.UploadsApi`) adds
+`upload_file`, which uploads a local file **directly to object storage** and
+finalizes it in one call. It opens an upload session, `PUT`s the bytes straight
+to storage — a single `PUT` for a small file, concurrent part `PUT`s for a large
+one — then finalizes. The bytes never round-trip through the API.
+
+```python
+from hotdata import ApiClient, Configuration, UploadsApi
+
+with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
+    uploads = UploadsApi(client)
+
+    finalized = uploads.upload_file(
+        "data.parquet",
+        content_type="application/parquet",
+        progress=lambda done, total: print(f"{done}/{total} bytes"),
+    )
+
+    # Pass finalized.upload_id to the managed-table load endpoint.
+    print(finalized.upload_id)
+```
+
+The SDK picks single vs. multipart from the file size, auto-scales the part size,
+and bounds part concurrency to a peak-memory budget (override with `part_size` /
+`max_concurrency`). Storage `PUT`s go through a dedicated, header-isolated
+connection pool, so the SDK's auth and workspace headers never reach object
+storage (which would otherwise reject the upload).
+
+It raises `hotdata.uploads.StorageError` if storage rejects a `PUT`,
+`MalformedSessionError` if the session response is inconsistent, and the usual
+`hotdata.exceptions.ApiException` if opening the session or finalizing fails —
+for example a `501` `PRESIGN_UNSUPPORTED`, meaning the backend cannot issue
+upload URLs. In that case send the raw bytes to the legacy `POST /v1/files`
+endpoint, which the generated client still exposes as
+`hotdata.api.uploads_api.UploadsApi.upload_file(body=...)` (the enhanced
+`upload_file` above takes a file path and shadows it).
+
 ## API reference
 
 Generated Markdown for every operation and model is in [`docs/`](https://github.com/hotdata-dev/sdk-python/tree/main/docs):

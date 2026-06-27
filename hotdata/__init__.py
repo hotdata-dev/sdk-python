@@ -322,7 +322,9 @@ from hotdata.models.workspace_usage_response import WorkspaceUsageResponse as Wo
 # --- hand-applied: prefer the enhanced clients over the generated ones
 # (re-applied by scripts/patch_query_exports.py after regeneration).
 # hotdata.query.QueryApi adds 429 retry + truncation auto-follow;
-# hotdata.arrow.ResultsApi adds Arrow IPC result fetch. The raw generated
-# classes remain importable from hotdata.api.query_api / hotdata.api.results_api.
+# hotdata.arrow.ResultsApi adds Arrow IPC result fetch;
+# hotdata.uploads.UploadsApi adds transparent presigned direct-to-storage
+# uploads. The raw generated classes remain importable from hotdata.api.*.
 from hotdata.query import QueryApi as QueryApi  # noqa: E402,F811
 from hotdata.arrow import ResultsApi as ResultsApi  # noqa: E402,F811
+from hotdata.uploads import UploadsApi as UploadsApi  # noqa: E402,F811
