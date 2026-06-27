@@ -544,6 +544,33 @@ def test_concurrent_callers_trigger_exactly_one_mint() -> None:
     assert len(pool.calls) == 1
 
 
+def test_valid_cached_jwt_served_without_blocking_on_mint_lock() -> None:
+    """A caller holding a still-valid cached JWT must not block behind an
+    in-flight (possibly retrying) mint that holds the single-flight lock. The
+    fast path reads the cache lock-free, so a degraded token endpoint stalling
+    one minting thread cannot serialize callers that need no mint."""
+    pool = _FakePool([_mint_response(access_token="eyJ.cached.jwt", expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+
+    # Prime the cache with a long-lived JWT.
+    assert mgr.bearer_value() == "eyJ.cached.jwt"
+
+    # Simulate a mint in flight on another thread by holding the lock.
+    mgr._lock.acquire()
+    try:
+        result: List[str] = []
+        t = threading.Thread(target=lambda: result.append(mgr.bearer_value()))
+        t.start()
+        t.join(timeout=2.0)
+        assert not t.is_alive(), "fast path must not block on the held mint lock"
+        assert result == ["eyJ.cached.jwt"]
+    finally:
+        mgr._lock.release()
+
+    # The cached JWT was reused; no second mint happened.
+    assert len(pool.calls) == 1
+
+
 # --------------------------------------------------------------------------
 # Deepcopy round-trip (the lock + pool gotcha)
 # --------------------------------------------------------------------------

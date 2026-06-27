@@ -210,8 +210,18 @@ class _TokenManager:
         """
         if not self._needs_exchange:
             return self._credential            # already a JWT (or opt-out) -> unchanged
+        # Lock-free fast path: a still-valid cached JWT needs no mint and must
+        # not block behind an in-flight (possibly retrying) mint that holds the
+        # lock for up to several timeouts. Attribute reads are atomic under the
+        # GIL; the worst a benign jwt/exp race can do is fall through to re-check
+        # under the lock, and the _LEEWAY margin keeps a token read here valid on
+        # the wire even if it is about to be rotated.
+        jwt = self._jwt
+        if jwt and time.time() < self._exp - _LEEWAY:
+            return jwt
         with self._lock:
-            # Fast path: a still-valid cached JWT, no network call.
+            # Re-check under the lock: another thread may have minted a fresh JWT
+            # while we waited (double-checked locking).
             if self._jwt and time.time() < self._exp - _LEEWAY:
                 return self._jwt
             # Prefer the refresh token; on failure, drop it and re-mint below.
