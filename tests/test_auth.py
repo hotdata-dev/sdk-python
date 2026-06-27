@@ -34,11 +34,13 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qs
 
 import pytest
+import urllib3
 
 from hotdata import Configuration
 from hotdata._auth import (
     _CLIENT_ID,
     _LEEWAY,
+    _MAX_ATTEMPTS,
     TokenExchangeError,
     _TokenManager,
     _pool_from_config,
@@ -101,8 +103,14 @@ class _FakePool:
                 }
             )
             if len(self._responses) > 1:
-                return self._responses.pop(0)
-            return self._responses[0]
+                item = self._responses.pop(0)
+            else:
+                item = self._responses[0]
+        # A scripted *exception* is raised (models a transport error); anything
+        # else is returned as the response.
+        if isinstance(item, BaseException):
+            raise item
+        return item
 
 
 def _config(host: str = "https://api.hotdata.test") -> Configuration:
@@ -293,6 +301,107 @@ def test_non_200_api_token_mint_raises_token_exchange_error() -> None:
 
     assert len(pool.calls) == 1
     assert _form(pool.calls[0]["body"])["grant_type"] == ["api_token"]
+
+
+# --------------------------------------------------------------------------
+# Transient-failure retry (#113)
+# --------------------------------------------------------------------------
+
+
+def test_transient_5xx_is_retried_then_succeeds() -> None:
+    """A momentary 500 on the token endpoint must be retried, not surfaced --
+    an immediate re-attempt succeeds (the CI failure mode from #113)."""
+    sleeps: List[float] = []
+    pool = _FakePool(
+        [
+            _FakeResponse(500, b"upstream hiccup"),
+            _mint_response(access_token="eyJ.recovered.jwt"),
+        ]
+    )
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=sleeps.append)
+
+    assert mgr.bearer_value() == "eyJ.recovered.jwt"
+    # Two pool hits: the failed 500 and the successful retry.
+    assert len(pool.calls) == 2
+    # Backoff slept exactly once, between the two attempts.
+    assert len(sleeps) == 1
+    assert sleeps[0] > 0
+
+
+def test_transport_error_is_retried_then_succeeds() -> None:
+    """A transport error (e.g. a dropped connection) before any response is
+    transient and must be retried."""
+    sleeps: List[float] = []
+    pool = _FakePool(
+        [
+            urllib3.exceptions.ProtocolError("Connection aborted."),
+            _mint_response(access_token="eyJ.recovered.jwt"),
+        ]
+    )
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=sleeps.append)
+
+    assert mgr.bearer_value() == "eyJ.recovered.jwt"
+    assert len(pool.calls) == 2
+    assert len(sleeps) == 1
+
+
+def test_4xx_is_not_retried() -> None:
+    """A 4xx (bad/expired credential) is not transient -- it must fail on the
+    first attempt with no retry."""
+    sleeps: List[float] = []
+    pool = _FakePool([_FakeResponse(401, {"error": "invalid_grant"})])
+    mgr = _TokenManager("hd_bad_token", _config(), pool=pool, sleep=sleeps.append)
+
+    with pytest.raises(TokenExchangeError):
+        mgr.bearer_value()
+
+    assert len(pool.calls) == 1
+    assert sleeps == []
+
+
+def test_retries_are_bounded_then_surface_last_error() -> None:
+    """When 5xx persists, retries stop at the bounded budget and the final
+    error preserves the last status/body."""
+    sleeps: List[float] = []
+    pool = _FakePool([_FakeResponse(503, b"still overloaded")])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=sleeps.append)
+
+    with pytest.raises(TokenExchangeError) as excinfo:
+        mgr.bearer_value()
+
+    assert len(pool.calls) == _MAX_ATTEMPTS
+    assert len(sleeps) == _MAX_ATTEMPTS - 1
+    msg = str(excinfo.value)
+    assert "503" in msg
+    assert "still overloaded" in msg
+
+
+def test_refresh_path_retries_transient_failures_before_remint() -> None:
+    """The retry budget wraps the refresh grant too: a transient 5xx on refresh
+    is retried, and only a fully-exhausted refresh falls back to a re-mint."""
+    sleeps: List[float] = []
+    short_lived = _mint_response(
+        access_token="eyJ.short.jwt",
+        refresh_token="rt_first",
+        expires_in=_LEEWAY - 5,
+    )
+    # Every refresh attempt 500s (budget exhausted) -> fall back to api_token.
+    refresh_500 = _FakeResponse(500, b"refresh upstream error")
+    remint = _mint_response(access_token="eyJ.reminted.jwt", expires_in=300)
+    pool = _FakePool(
+        [short_lived]
+        + [refresh_500] * _MAX_ATTEMPTS
+        + [remint]
+    )
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=sleeps.append)
+
+    assert mgr.bearer_value() == "eyJ.short.jwt"
+    assert mgr.bearer_value() == "eyJ.reminted.jwt"
+
+    # 1 initial mint + _MAX_ATTEMPTS refresh tries + 1 successful re-mint.
+    assert len(pool.calls) == 1 + _MAX_ATTEMPTS + 1
+    grants = [_form(c["body"])["grant_type"][0] for c in pool.calls]
+    assert grants == ["api_token"] + ["refresh_token"] * _MAX_ATTEMPTS + ["api_token"]
 
 
 # --------------------------------------------------------------------------
