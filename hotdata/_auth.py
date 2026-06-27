@@ -275,7 +275,17 @@ class _TokenManager:
             last = attempt == _MAX_ATTEMPTS - 1
             try:
                 resp = pool.request(
-                    "POST", url, body=body, headers=headers, timeout=_TIMEOUT
+                    "POST",
+                    url,
+                    body=body,
+                    headers=headers,
+                    timeout=_TIMEOUT,
+                    # Disable urllib3's own per-request retries so this loop is
+                    # the sole arbiter of the attempt budget. Otherwise urllib3's
+                    # default (Retry(3)) would retry connection errors *inside*
+                    # each attempt, multiplying the effective transport-attempt
+                    # count well past _MAX_ATTEMPTS.
+                    retries=False,
                 )
             except urllib3.exceptions.HTTPError:
                 # Transport-level failure (connection/read error): transient, but

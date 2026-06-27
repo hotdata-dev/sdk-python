@@ -89,6 +89,7 @@ class _FakePool:
         body: Optional[Any] = None,
         headers: Optional[Dict[str, str]] = None,
         timeout: Optional[float] = None,
+        retries: Any = None,
     ) -> _FakeResponse:
         if self._pre_request is not None:
             self._pre_request()
@@ -100,6 +101,7 @@ class _FakePool:
                     "body": body,
                     "headers": dict(headers or {}),
                     "timeout": timeout,
+                    "retries": retries,
                 }
             )
             if len(self._responses) > 1:
@@ -343,6 +345,61 @@ def test_transport_error_is_retried_then_succeeds() -> None:
     assert mgr.bearer_value() == "eyJ.recovered.jwt"
     assert len(pool.calls) == 2
     assert len(sleeps) == 1
+
+
+def test_exchange_disables_urllib3_internal_retries() -> None:
+    """The explicit loop must be the *sole* arbiter of the attempt budget, so
+    the request passes ``retries=False`` to stop urllib3 from retrying
+    connection errors inside each attempt (which would multiply the effective
+    transport-attempt count past _MAX_ATTEMPTS)."""
+    pool = _FakePool([_mint_response()])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=lambda _: None)
+
+    mgr.bearer_value()
+
+    assert pool.calls[0]["retries"] is False
+
+
+def test_persistent_transport_error_exhausts_then_raises() -> None:
+    """Three persistent transport errors exhaust the budget and surface as a
+    TokenExchangeError (the raised HTTPError is wrapped by _mint)."""
+    sleeps: List[float] = []
+    pool = _FakePool([urllib3.exceptions.ProtocolError("Connection aborted.")])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=sleeps.append)
+
+    with pytest.raises(TokenExchangeError):
+        mgr.bearer_value()
+
+    assert len(pool.calls) == _MAX_ATTEMPTS
+    assert len(sleeps) == _MAX_ATTEMPTS - 1
+
+
+def test_refresh_path_retries_transport_errors_before_remint() -> None:
+    """The retry budget wraps transport errors on the refresh grant too: every
+    refresh attempt drops the connection, so the budget is exhausted and the
+    manager falls back to a re-mint rather than failing."""
+    sleeps: List[float] = []
+    short_lived = _mint_response(
+        access_token="eyJ.short.jwt",
+        refresh_token="rt_first",
+        expires_in=_LEEWAY - 5,
+    )
+    remint = _mint_response(access_token="eyJ.reminted.jwt", expires_in=300)
+    pool = _FakePool(
+        [short_lived]
+        + [urllib3.exceptions.ProtocolError("Connection aborted.")] * _MAX_ATTEMPTS
+        + [remint]
+    )
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=sleeps.append)
+
+    assert mgr.bearer_value() == "eyJ.short.jwt"
+    assert mgr.bearer_value() == "eyJ.reminted.jwt"
+
+    # 1 initial mint + _MAX_ATTEMPTS refresh tries (all transport errors) + the
+    # successful re-mint.
+    assert len(pool.calls) == 1 + _MAX_ATTEMPTS + 1
+    grants = [_form(c["body"])["grant_type"][0] for c in pool.calls]
+    assert grants == ["api_token"] + ["refresh_token"] * _MAX_ATTEMPTS + ["api_token"]
 
 
 def test_4xx_is_not_retried() -> None:
