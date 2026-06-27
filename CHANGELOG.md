@@ -17,8 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`POST /v1/uploads/{id}/finalize`), returning the `FinalizeUploadResponse`. The
   bytes never round-trip through the API. Supports a progress callback, an
   auto-scaled (or caller-set) part size, bounded concurrency with a peak-memory
-  budget, and idempotent per-part retry. Storage `PUT`s go through a dedicated,
-  header-isolated pool so no SDK auth/workspace headers reach object storage.
+  budget, and idempotent per-part retry (tunable via `part_retry`). Storage
+  `PUT`s go through a dedicated, header-isolated pool so no SDK auth/workspace
+  headers reach object storage. Failures surface as a typed hierarchy under
+  `UploadError`: `StorageError` (non-2xx from storage), `StorageTransportError`
+  (transport failure before any response), `MissingETagError`,
+  `MalformedSessionError`, and `SizeLimitError`.
 
 ### Changed
 

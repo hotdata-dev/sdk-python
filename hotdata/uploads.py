@@ -45,7 +45,7 @@ import io
 import logging
 import os
 import threading
-from concurrent.futures import FIRST_EXCEPTION, ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import Any, BinaryIO, Callable, Dict, List, Optional, Union
 
@@ -92,6 +92,11 @@ MAX_PART_SIZE = 5 * 1024 * MIB
 #: ceiling: when the server returns a very large ``part_size`` a single in-flight
 #: part may already exceed the budget, so it caps *concurrency*, not part size.
 UPLOAD_MEMORY_BUDGET = 256 * MIB
+
+#: The wire models sizes as a signed 64-bit integer. A declared size or part-size
+#: hint beyond this is rejected up front rather than silently sent. Only reachable
+#: for pathological sizes (~8 EiB), mirroring the Rust SDK's ``SizeOverflow``.
+_MAX_WIRE_INT = 2**63 - 1
 
 #: Progress callback: ``(bytes_done_total, total)``, where ``total`` is the full
 #: declared file size. ``bytes_done_total`` is monotonically non-decreasing and
@@ -167,6 +172,10 @@ class UploadOptions:
     max_concurrency: Optional[int] = None
     #: Optional progress callback invoked with ``(bytes_done_total, total)``.
     progress: Optional[UploadProgress] = None
+    #: ``urllib3`` retry policy for multipart part ``PUT`` s (idempotent, so safe
+    #: to retry). ``None`` uses :func:`default_part_retry`. The single-``PUT``
+    #: path streams an un-replayable body and is always sent without retry.
+    part_retry: Optional[Retry] = None
 
 
 # --- Errors ---------------------------------------------------------------
@@ -190,6 +199,37 @@ class MalformedSessionError(UploadError):
     ``part_urls`` / ``part_size``, or a ``part_urls`` count that does not match
     how the file slices into parts).
     """
+
+
+class SizeLimitError(UploadError):
+    """A size (the file's declared size, or the part-size hint) does not fit the
+    wire's signed 64-bit field. Only reachable for pathological sizes beyond
+    ~8 EiB.
+    """
+
+    def __init__(self, *, what: str, value: int) -> None:
+        self.what = what
+        self.value = value
+        super().__init__(f"{what} ({value} bytes) exceeds the maximum supported size")
+
+
+class StorageTransportError(UploadError):
+    """A storage ``PUT`` failed at the transport layer (connection refused,
+    reset, TLS error, DNS failure, or retries exhausted) before any HTTP status
+    was returned. The underlying ``urllib3`` error is the exception ``__cause__``.
+
+    Distinct from :class:`StorageError`, which is a completed request that
+    returned a non-2xx HTTP status.
+    """
+
+    def __init__(self, *, url: str, part_number: Optional[int]) -> None:
+        self.url = url
+        self.part_number = part_number
+        if part_number is None:
+            msg = "the upload transfer to storage failed before any response"
+        else:
+            msg = f"the transfer of part {part_number} to storage failed before any response"
+        super().__init__(msg)
 
 
 class StorageError(UploadError):
@@ -242,13 +282,14 @@ def _storage_pool() -> urllib3.PoolManager:
     return _STORAGE_POOL
 
 
-def _part_retry() -> Retry:
-    """Retry policy for multipart part ``PUT`` s.
+def default_part_retry() -> Retry:
+    """The default retry policy for multipart part ``PUT`` s.
 
     A part ``PUT`` is idempotent — storage overwrites a part by number — so a
     retried part cannot corrupt the upload. Retry connection errors and the
     transient 429/5xx statuses storage may return under load. The single-``PUT``
-    path streams an un-replayable body and so is sent with ``retries=False``.
+    path streams an un-replayable body and so is always sent without retry.
+    Override per upload via :attr:`UploadOptions.part_retry`.
     """
     return Retry(
         total=3,
@@ -269,15 +310,34 @@ def _storage_headers(session_headers: Dict[str, str], content_length: int) -> Di
     return headers
 
 
-def _check_storage_status(response: Any, part_number: Optional[int]) -> None:
+def _put_to_storage(
+    url: str,
+    body: Any,
+    headers: Dict[str, str],
+    retries: Any,
+    part_number: Optional[int],
+) -> Any:
+    """``PUT`` ``body`` to a presigned storage ``url`` on the bare, header-isolated
+    pool, returning the response. Wraps a transport failure as
+    :class:`StorageTransportError` and a non-2xx status as :class:`StorageError`.
+    """
+    _log.debug("storage PUT %s (content-length=%s)", url, headers.get("Content-Length"))
+    try:
+        response = _storage_pool().request(
+            "PUT", url, body=body, headers=headers, retries=retries
+        )
+    except urllib3.exceptions.HTTPError as exc:
+        raise StorageTransportError(url=url, part_number=part_number) from exc
     status = int(response.status)
+    _log.debug("storage PUT %s -> %s", url, status)
     if status >= 400:
         data = getattr(response, "data", b"") or b""
         if isinstance(data, (bytes, bytearray)):
-            body = bytes(data).decode("utf-8", errors="replace")
+            error_body = bytes(data).decode("utf-8", errors="replace")
         else:
-            body = str(data)
-        raise StorageError(status=status, part_number=part_number, body=body)
+            error_body = str(data)
+        raise StorageError(status=status, part_number=part_number, body=error_body)
+    return response
 
 
 class _ProgressReader(io.RawIOBase):
@@ -334,6 +394,7 @@ class UploadsApi(_GeneratedUploadsApi):
         part_size: Optional[int] = None,
         max_concurrency: Optional[int] = None,
         progress: Optional[UploadProgress] = None,
+        part_retry: Optional[Retry] = None,
         options: Optional[UploadOptions] = None,
         _request_timeout: Any = None,
     ) -> FinalizeUploadResponse:
@@ -360,11 +421,17 @@ class UploadsApi(_GeneratedUploadsApi):
             upload (default :data:`DEFAULT_MAX_CONCURRENCY`, further bounded by a
             peak-memory budget).
         :param progress: Callback invoked with ``(bytes_done_total, total)``.
+        :param part_retry: ``urllib3`` retry policy for multipart part ``PUT`` s;
+            defaults to :func:`default_part_retry`.
         :param options: An :class:`UploadOptions` bundle; individual keyword
             arguments take precedence over its fields.
+        :raises SizeLimitError: the file is larger than the wire's 64-bit field.
         :raises MalformedSessionError: the session response was inconsistent.
         :raises StorageError: a storage ``PUT`` returned a non-2xx status.
+        :raises StorageTransportError: a storage ``PUT`` failed before any
+            response (connection/TLS/DNS error, or retries exhausted).
         :raises MissingETagError: a part ``PUT`` returned no ``ETag``.
+        :raises OSError: the local file could not be opened or read.
         :raises hotdata.exceptions.ApiException: opening the session or
             finalizing failed (e.g. ``501`` ``PRESIGN_UNSUPPORTED`` — the storage
             backend cannot issue upload URLs; use ``POST /v1/files`` instead).
@@ -380,6 +447,7 @@ class UploadsApi(_GeneratedUploadsApi):
             max_concurrency if max_concurrency is not None else opts.max_concurrency
         )
         progress = progress if progress is not None else opts.progress
+        part_retry = part_retry if part_retry is not None else opts.part_retry
 
         fspath = os.fspath(path)
         total = os.stat(fspath).st_size
@@ -389,6 +457,13 @@ class UploadsApi(_GeneratedUploadsApi):
         # Part-size hint: honor an explicit value, else auto-scale from the
         # declared size. The server clamps it regardless.
         part_size_hint = part_size if part_size is not None else auto_part_size_hint(total)
+
+        # The wire models sizes as a signed i64; reject a pathological size up
+        # front rather than silently sending an out-of-range value.
+        if total > _MAX_WIRE_INT:
+            raise SizeLimitError(what="declared_size_bytes", value=total)
+        if part_size_hint > _MAX_WIRE_INT:
+            raise SizeLimitError(what="part_size", value=part_size_hint)
 
         session = self.create_upload_session_handler(
             CreateUploadRequest(
@@ -411,7 +486,8 @@ class UploadsApi(_GeneratedUploadsApi):
             parts: Optional[List[FinalizeUploadPart]] = None
         elif session.mode == "multipart":
             cap = max_concurrency if max_concurrency is not None else DEFAULT_MAX_CONCURRENCY
-            parts = self._upload_multipart(session, fspath, total, cap, progress)
+            retry = part_retry if part_retry is not None else default_part_retry()
+            parts = self._upload_multipart(session, fspath, total, cap, retry, progress)
         else:
             raise MalformedSessionError(f"unknown upload mode {session.mode!r}")
 
@@ -425,10 +501,15 @@ class UploadsApi(_GeneratedUploadsApi):
         # null}`; constructing WITHOUT the field leaves it unset so it drops out
         # and the body is `{}`. So build the single-mode body field-free.
         #
-        # Finalize is exactly-once on the server, but it is safe under the SDK's
-        # default retry: that policy only retries a POST when the connection was
-        # reset *before* the request reached the server (so the server did no
-        # work) — it never replays a finalize the server actually processed.
+        # Finalize is exactly-once on the server. It is safe under the SDK's
+        # DEFAULT retry policy: that policy does no status retries (status=0), and
+        # urllib3 gates read-error retries (which include any ProtocolError, e.g.
+        # a post-response reset) by allowed_methods, which excludes POST — so a
+        # finalize the server already processed is never replayed. Only a
+        # pre-response reset (server did no work) is retried, which is safe. NOTE:
+        # a caller who overrides Configuration.retries with a policy that retries
+        # POST on a status/read error could double-finalize and see a spurious
+        # "already finalized" error; the default is the safe path.
         if parts is None:
             finalize_body = FinalizeUploadRequest()
         else:
@@ -462,14 +543,13 @@ class UploadsApi(_GeneratedUploadsApi):
 
         with open(path, "rb") as fileobj:
             body = _ProgressReader(fileobj, total, progress)
-            response = _storage_pool().request(
-                "PUT",
+            _put_to_storage(
                 url,
-                body=body,
-                headers=_storage_headers(session.headers, total),
+                body,
+                _storage_headers(session.headers, total),
                 retries=False,
+                part_number=None,
             )
-        _check_storage_status(response, part_number=None)
 
         # Guarantee a terminal tick at exactly `total`, even if the last chunk
         # boundary or an empty file left the counter short.
@@ -482,6 +562,7 @@ class UploadsApi(_GeneratedUploadsApi):
         path: str,
         total: int,
         max_concurrency: int,
+        part_retry: Retry,
         progress: Optional[UploadProgress],
     ) -> List[FinalizeUploadPart]:
         """Multipart path: slice the file into ``part_size``-byte chunks (the
@@ -511,7 +592,6 @@ class UploadsApi(_GeneratedUploadsApi):
             )
 
         in_flight = effective_in_flight(max_concurrency, part_size)
-        retry = _part_retry()
         done = [0]  # boxed running byte total; guarded by `lock`
         lock = threading.Lock()
 
@@ -520,14 +600,13 @@ class UploadsApi(_GeneratedUploadsApi):
             offset = index * part_size
             length = min(part_size, total - offset)
             chunk = _read_range(path, offset, length)
-            response = _storage_pool().request(
-                "PUT",
+            response = _put_to_storage(
                 part_urls[index],
-                body=chunk,
-                headers=_storage_headers(session.headers, length),
-                retries=retry,
+                chunk,
+                _storage_headers(session.headers, length),
+                retries=part_retry,
+                part_number=part_number,
             )
-            _check_storage_status(response, part_number=part_number)
             etag = response.headers.get("ETag")
             if not etag:
                 raise MissingETagError(part_number=part_number)
@@ -539,20 +618,23 @@ class UploadsApi(_GeneratedUploadsApi):
             return FinalizeUploadPart(e_tag=etag, part_number=part_number)
 
         results: List[Optional[FinalizeUploadPart]] = [None] * len(part_urls)
-        with ThreadPoolExecutor(max_workers=in_flight) as executor:
+        executor = ThreadPoolExecutor(max_workers=in_flight)
+        try:
             futures = {
                 executor.submit(upload_part, i): i for i in range(len(part_urls))
             }
-            done_set, _ = wait(futures, return_when=FIRST_EXCEPTION)
-            # Surface the first failure (and let the context manager join the
-            # rest). A part PUT is idempotent, so an in-flight straggler that
-            # also fails or succeeds does no harm.
-            for future in done_set:
+            # Surface the first failure as soon as it lands rather than waiting
+            # for in-flight stragglers to drain. A part PUT is idempotent, so any
+            # straggler still running when we bail does no harm.
+            for future in as_completed(futures):
                 exc = future.exception()
                 if exc is not None:
                     raise exc
-            for future, index in futures.items():
-                results[index] = future.result()
+                results[futures[future]] = future.result()
+        finally:
+            # cancel_futures drops parts that have not started; already-running
+            # ones can't be cancelled (threads) but we no longer wait on them.
+            executor.shutdown(wait=False, cancel_futures=True)
 
         # results is indexed by 0-based part position, so it is already ascending
         # by part_number with no duplicates.
@@ -579,11 +661,14 @@ __all__ = [
     "UPLOAD_MEMORY_BUDGET",
     "MalformedSessionError",
     "MissingETagError",
+    "SizeLimitError",
     "StorageError",
+    "StorageTransportError",
     "UploadError",
     "UploadOptions",
     "UploadProgress",
     "UploadsApi",
     "auto_part_size_hint",
+    "default_part_retry",
     "effective_in_flight",
 ]

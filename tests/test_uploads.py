@@ -17,13 +17,18 @@ body shape, progress reporting, and the error paths.
 
 from __future__ import annotations
 
+import os
 import threading
 from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
+import urllib3
+from urllib3.util.retry import Retry
+
 import hotdata.uploads as uploads_mod
 from hotdata import UploadsApi as ExportedUploadsApi
+from hotdata.exceptions import ApiException
 from hotdata.uploads import (
     DEFAULT_PART_SIZE,
     MAX_PART_SIZE,
@@ -33,7 +38,9 @@ from hotdata.uploads import (
     UPLOAD_MEMORY_BUDGET,
     MalformedSessionError,
     MissingETagError,
+    SizeLimitError,
     StorageError,
+    StorageTransportError,
     UploadOptions,
     UploadsApi,
     auto_part_size_hint,
@@ -551,3 +558,382 @@ def test_exported_uploads_api_is_enhanced() -> None:
     # `from hotdata import UploadsApi` resolves to the ergonomic subclass.
     assert ExportedUploadsApi is UploadsApi
     assert hasattr(ExportedUploadsApi, "upload_file")
+
+
+# --- Session/finalize API error paths -------------------------------------
+
+
+def test_create_session_501_propagates_as_api_exception(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    # A 501 PRESIGN_UNSUPPORTED from POST /v1/uploads surfaces as ApiException
+    # (the documented fallback signal), and no storage PUT is attempted.
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"x" * 10)
+    api = _make_api()
+
+    def boom(create_upload_request: Any, **kwargs: Any) -> Any:
+        raise ApiException(status=501, reason="PRESIGN_UNSUPPORTED")
+
+    monkeypatch.setattr(api, "create_upload_session_handler", boom)
+    with pytest.raises(ApiException) as ei:
+        api.upload_file(str(src))
+    assert ei.value.status == 501
+    assert fake_pool.calls == []  # never reached storage
+
+
+def test_finalize_is_called_exactly_once(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"x" * 10)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    capture: List[Tuple[Any, ...]] = []
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, capture)
+    api.upload_file(str(src))
+    finalize_calls = [c for c in capture if c[0] == "finalize"]
+    assert len(finalize_calls) == 1
+
+
+# --- Transport / size / retry plumbing ------------------------------------
+
+
+def test_storage_transport_error_is_wrapped(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"x" * 10)
+
+    class _ExplodingPool:
+        def request(self, *a: Any, **k: Any) -> Any:
+            raise urllib3.exceptions.ProtocolError("connection aborted")
+
+    monkeypatch.setattr(uploads_mod, "_STORAGE_POOL", _ExplodingPool())
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    with pytest.raises(StorageTransportError) as ei:
+        api.upload_file(str(src))
+    assert isinstance(ei.value.__cause__, urllib3.exceptions.HTTPError)
+    assert ei.value.part_number is None
+
+
+def test_size_limit_guard_on_part_size_hint(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"x" * 10)
+    api = _make_api()
+    # create should never be reached — the guard fires first.
+    monkeypatch.setattr(
+        api,
+        "create_upload_session_handler",
+        lambda *a, **k: pytest.fail("create should not be called"),
+    )
+    with pytest.raises(SizeLimitError) as ei:
+        api.upload_file(str(src), part_size=2**63)
+    assert ei.value.what == "part_size"
+
+
+def test_size_limit_guard_on_declared_size(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"x" * 10)
+    api = _make_api()
+
+    real_stat = os.stat
+
+    class _HugeStat:
+        st_size = 2**63
+
+    monkeypatch.setattr(
+        uploads_mod.os,
+        "stat",
+        lambda p: _HugeStat() if str(p) == str(src) else real_stat(p),
+    )
+    with pytest.raises(SizeLimitError) as ei:
+        api.upload_file(str(src))
+    assert ei.value.what == "declared_size_bytes"
+
+
+def test_custom_part_retry_is_forwarded(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    part_size = 5 * MIB
+    content = b"a" * part_size
+    src = tmp_path / "f.bin"
+    src.write_bytes(content)
+    url = "https://storage.test/p1"
+    fake_pool.responses[url] = _FakeResponse(200, etag='"e1"')
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="multipart",
+        part_size=part_size,
+        part_urls=[url],
+        upload_id="u",
+    )
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+
+    custom = Retry(total=7)
+    api.upload_file(str(src), part_retry=custom)
+    assert fake_pool.calls[0]["retries"] is custom
+
+
+def test_default_part_retry_used_when_unset(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    part_size = 5 * MIB
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"a" * part_size)
+    url = "https://storage.test/p1"
+    fake_pool.responses[url] = _FakeResponse(200, etag='"e1"')
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="multipart",
+        part_size=part_size,
+        part_urls=[url],
+        upload_id="u",
+    )
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    api.upload_file(str(src))
+    retries = fake_pool.calls[0]["retries"]
+    assert isinstance(retries, Retry)
+    # The default policy retries idempotent PUTs on transient statuses.
+    assert 429 in retries.status_forcelist
+
+
+# --- Byte-granular progress (single PUT) ----------------------------------
+
+
+def test_single_put_progress_is_byte_granular(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    # A body larger than the read block size produces multiple intermediate
+    # progress ticks rather than jumping 0 -> total.
+    content = b"z" * (300 * 1024)
+    src = tmp_path / "big_single.bin"
+    src.write_bytes(content)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    ticks: List[Tuple[int, int]] = []
+    api.upload_file(str(src), progress=lambda d, t: ticks.append((d, t)))
+
+    intermediate = [d for d, t in ticks if 0 < d < t]
+    assert len(intermediate) >= 2, ticks
+    assert ticks[-1] == (len(content), len(content))
+    assert [d for d, _ in ticks] == sorted(d for d, _ in ticks)
+
+
+# --- Concurrency is bounded and actually reached --------------------------
+
+
+class _ConcurrencyProbePool:
+    """Fake pool that measures peak simultaneous in-flight PUTs via a barrier.
+
+    Sized so each wave has exactly ``parties`` threads; the barrier forces all
+    ``parties`` to be in flight at once, and the executor's worker cap forbids
+    more — so the recorded peak equals the effective concurrency.
+    """
+
+    def __init__(self, parties: int) -> None:
+        self.barrier = threading.Barrier(parties, timeout=5)
+        self.active = 0
+        self.peak = 0
+        self.lock = threading.Lock()
+
+    def request(self, method: str, url: str, **kwargs: Any) -> _FakeResponse:
+        with self.lock:
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+        try:
+            self.barrier.wait()
+        finally:
+            with self.lock:
+                self.active -= 1
+        return _FakeResponse(200, etag='"etag"')
+
+
+def _multipart_session(part_urls: List[str], part_size: int) -> UploadSessionResponse:
+    return UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="multipart",
+        part_size=part_size,
+        part_urls=part_urls,
+        upload_id="u",
+    )
+
+
+def test_multipart_concurrency_is_bounded_and_reached(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Any
+) -> None:
+    part_size = 5 * MIB
+    # 4 parts, max_concurrency=2 -> effective in-flight is 2; two waves of 2.
+    content = b"a" * (4 * part_size)
+    src = tmp_path / "mp.bin"
+    src.write_bytes(content)
+    part_urls = [f"https://storage.test/p{i}" for i in range(1, 5)]
+    probe = _ConcurrencyProbePool(parties=2)
+    monkeypatch.setattr(uploads_mod, "_STORAGE_POOL", probe)
+    api = _make_api()
+    _patch_session(monkeypatch, api, _multipart_session(part_urls, part_size), [])
+
+    assert effective_in_flight(2, part_size) == 2
+    api.upload_file(str(src), max_concurrency=2)
+    assert probe.peak == 2
+
+
+def test_multipart_serial_when_max_concurrency_one(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Any
+) -> None:
+    part_size = 5 * MIB
+    content = b"a" * (3 * part_size)
+    src = tmp_path / "mp1.bin"
+    src.write_bytes(content)
+    part_urls = [f"https://storage.test/p{i}" for i in range(1, 4)]
+    probe = _ConcurrencyProbePool(parties=1)  # barrier of 1 -> never blocks
+    monkeypatch.setattr(uploads_mod, "_STORAGE_POOL", probe)
+    api = _make_api()
+    _patch_session(monkeypatch, api, _multipart_session(part_urls, part_size), [])
+    api.upload_file(str(src), max_concurrency=1)
+    assert probe.peak == 1
+
+
+# --- More malformed-session cases -----------------------------------------
+
+
+def test_multipart_empty_part_urls_raises(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"a" * (5 * MIB))
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="multipart",
+        part_size=5 * MIB,
+        part_urls=[],
+        upload_id="u",
+    )
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    with pytest.raises(MalformedSessionError, match="part_urls"):
+        api.upload_file(str(src))
+
+
+def test_multipart_nonpositive_part_size_raises(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"a" * 10)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="multipart",
+        part_size=0,
+        part_urls=["https://storage.test/p1"],
+        upload_id="u",
+    )
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    with pytest.raises(MalformedSessionError, match="part_size"):
+        api.upload_file(str(src))
+
+
+# --- Header isolation under a poisoned main client ------------------------
+
+
+def test_poisoned_main_client_headers_do_not_reach_storage(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin"
+    src.write_bytes(b"x" * 10)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    api = _make_api()
+    # Install auth/scope/UA defaults on the SDK client — they must NOT leak onto
+    # the storage PUT, which goes through the dedicated bare pool.
+    api.api_client.set_default_header("Authorization", "Bearer SECRET")
+    api.api_client.set_default_header("X-Workspace-Id", "ws_secret")
+    api.api_client.set_default_header("User-Agent", "hotdata-sdk/test")
+    _patch_session(monkeypatch, api, session, [])
+    api.upload_file(str(src))
+    hdrs = fake_pool.calls[0]["headers"]
+    assert "Authorization" not in hdrs
+    assert "X-Workspace-Id" not in hdrs
+    assert "User-Agent" not in hdrs
+    assert hdrs["Content-Length"] == "10"
+
+
+# --- Wire-level create body -----------------------------------------------
+
+
+def test_auto_part_size_hint_lands_on_wire(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    content = b"x" * (200 * 1024)
+    src = tmp_path / "f.bin"
+    src.write_bytes(content)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    capture: List[Tuple[Any, ...]] = []
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, capture)
+    api.upload_file(str(src))
+    create_req = capture[0][1]
+    assert create_req.part_size == auto_part_size_hint(len(content))
+    assert create_req.part_size == DEFAULT_PART_SIZE
+
+
+def test_content_encoding_forwarded(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
+) -> None:
+    src = tmp_path / "f.bin.gz"
+    src.write_bytes(b"x" * 10)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    capture: List[Tuple[Any, ...]] = []
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, capture)
+    api.upload_file(str(src), content_encoding="gzip")
+    assert capture[0][1].content_encoding == "gzip"
