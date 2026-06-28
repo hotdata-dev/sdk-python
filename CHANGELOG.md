@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-28
+
 ### Added
 
 - `hotdata.UploadsApi` gains `upload_file(source, ...)`, a transparent
@@ -23,14 +25,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `hotdata.UploadsApi.upload_stream` uploads `bytes` or a binary stream
   (streamed without buffering) in a single request — the fallback for when
   direct-to-storage uploads aren't available or the source isn't seekable.
+- Table loads now accept CSV and JSON source files in addition to Parquet.
 
 ### Changed
 
-- feat(uploads): add file upload endpoints
-- docs: remove stale datasets references, refresh MCP + CLI reference
-- feat(tables): add csv and json file format support for table loads
-- Regenerate the client from the updated Hotdata OpenAPI spec
-- chore: remove datasets API and related job types
+- Regenerated the client from the updated Hotdata OpenAPI spec.
+- Documentation: removed stale datasets references and refreshed the MCP + CLI
+  reference.
+
+### Removed
+
+- The datasets API and its related job types have been removed.
 
 ## [0.4.1] - 2026-06-19
 
