@@ -1308,3 +1308,50 @@ def test_multipart_short_read_raises(
     _patch_session(monkeypatch, api, session, [])
     with pytest.raises(UploadError, match="returned 0 bytes"):
         api.upload_file(fobj, size=2 * part_size)
+
+
+def test_single_short_read_raises(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool
+) -> None:
+    # Declare more bytes than the source actually has on the single-PUT path:
+    # the source runs out before `Content-Length`, so it must fail loudly
+    # before finalizing rather than PUT a body short of its declared length.
+    content = b"a" * 100
+    fobj = io.BytesIO(content)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    capture: List[Tuple[Any, ...]] = []
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, capture)
+    with pytest.raises(UploadError, match="100 bytes.*declared size is 200"):
+        api.upload_file(fobj, size=200)
+    # The short body must not have been finalized.
+    assert not any(c[0] == "finalize" for c in capture)
+
+
+def test_single_over_read_caps_at_declared_size(
+    monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool
+) -> None:
+    # Declare fewer bytes than the source has on the single-PUT path: the PUT
+    # must send exactly the declared count, never spilling extra bytes past
+    # `Content-Length` (which would corrupt the pooled connection).
+    content = b"b" * 200
+    fobj = io.BytesIO(content)
+    session = UploadSessionResponse(
+        finalize_token="t",
+        headers={},
+        mode="single",
+        upload_id="u",
+        url="https://storage.test/put",
+    )
+    api = _make_api()
+    _patch_session(monkeypatch, api, session, [])
+    api.upload_file(fobj, size=50)
+    call = fake_pool.calls[0]
+    assert call["body"] == b"b" * 50
+    assert call["headers"]["Content-Length"] == "50"

@@ -393,16 +393,27 @@ class _ProgressReader(io.RawIOBase):
         self._progress = progress
         self._done = 0
 
+    @property
+    def bytes_read(self) -> int:
+        """Total bytes actually pulled from the source so far."""
+        return self._done
+
     def readable(self) -> bool:
         return True
 
     def readinto(self, b: Any) -> int:
-        chunk = self._file.read(len(b))
+        # Never read past the declared size: a source longer than `total` (a
+        # growing file, or a wrong explicit `size`) must not spill extra bytes
+        # past `Content-Length` and corrupt the pooled connection.
+        remaining = self._total - self._done
+        if remaining <= 0:
+            return 0
+        chunk = self._file.read(min(len(b), remaining))
         if not chunk:
             return 0
         n = len(chunk)
         b[:n] = chunk
-        self._done = min(self._done + n, self._total)
+        self._done += n
         if self._progress is not None:
             self._progress(self._done, self._total)
         return n
@@ -709,6 +720,15 @@ class UploadsApi(_GeneratedUploadsApi):
                 retries=False,
                 part_number=None,
             )
+            # The source ran out before its declared size: we PUT a body shorter
+            # than `Content-Length`. Fail loudly before finalizing rather than
+            # commit a truncated object (mirrors the multipart short-read guard).
+            if body.bytes_read != total:
+                raise UploadError(
+                    f"source provided {body.bytes_read} bytes but the declared "
+                    f"size is {total}; it may have changed size or the declared "
+                    f"size is wrong"
+                )
 
         # Guarantee a terminal tick at exactly `total`, even if the last chunk
         # boundary or an empty file left the counter short.
