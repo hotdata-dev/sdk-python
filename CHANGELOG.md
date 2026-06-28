@@ -9,25 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `hotdata.uploads.UploadsApi` (the default `hotdata.UploadsApi`) gains
-  `upload_file(path, ...)`, a transparent direct-to-storage upload that
-  orchestrates the presigned flow end to end: it opens a session
-  (`POST /v1/uploads`), `PUT`s the bytes **straight to object storage** (a single
-  `PUT` for a small file, concurrent part `PUT`s for a large one), and finalizes
-  (`POST /v1/uploads/{id}/finalize`), returning the `FinalizeUploadResponse`. The
+- `hotdata.UploadsApi` gains `upload_file(source, ...)`, a transparent
+  direct-to-storage upload. Give it a file path, raw `bytes`, or a seekable
+  binary file object and it opens an upload session, sends the data **straight
+  to object storage** (a single request for a small file, concurrent multipart
+  for a large one), and finalizes — returning the `FinalizeUploadResponse`. Your
   bytes never round-trip through the API. Supports a progress callback, an
   auto-scaled (or caller-set) part size, bounded concurrency with a peak-memory
-  budget, and idempotent per-part retry (tunable via `part_retry`). Storage
-  `PUT`s go through a dedicated, header-isolated pool so no SDK auth/workspace
-  headers reach object storage. Failures surface as a typed hierarchy under
-  `UploadError`: `StorageError` (non-2xx from storage), `StorageTransportError`
-  (transport failure before any response), `MissingETagError`,
-  `MalformedSessionError`, and `SizeLimitError`. `upload_file` accepts a path,
-  raw `bytes`, or a seekable binary file object.
-- `hotdata.uploads.UploadsApi.upload_stream` uploads an arbitrary byte source
-  (`bytes` or a binary file object, streamed without buffering) to the legacy
-  `POST /v1/files` endpoint — the fallback when presigned uploads are
-  unsupported or the source is a non-seekable stream.
+  budget, and idempotent per-part retry (tunable via `part_retry`). Failures
+  raise a typed hierarchy under `UploadError`: `StorageError`,
+  `StorageTransportError`, `MissingETagError`, `MalformedSessionError`, and
+  `SizeLimitError`.
+- `hotdata.UploadsApi.upload_stream` uploads `bytes` or a binary stream
+  (streamed without buffering) in a single request — the fallback for when
+  direct-to-storage uploads aren't available or the source isn't seekable.
 
 ### Changed
 
