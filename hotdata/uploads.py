@@ -799,10 +799,14 @@ class UploadsApi(_GeneratedUploadsApi):
             if not etag:
                 raise MissingETagError(part_number=part_number)
             if progress is not None:
+                # Fire the callback under the lock so delivery order matches the
+                # computed order: releasing the lock first would let two workers
+                # race and deliver ticks out of order, breaking the documented
+                # monotonically-non-decreasing guarantee. Callbacks are expected
+                # to be cheap (and do their own locking), so serializing is fine.
                 with lock:
                     done[0] = min(done[0] + length, total)
-                    current = done[0]
-                progress(current, total)
+                    progress(done[0], total)
             return FinalizeUploadPart(e_tag=etag, part_number=part_number)
 
         results: List[Optional[FinalizeUploadPart]] = [None] * len(part_urls)
