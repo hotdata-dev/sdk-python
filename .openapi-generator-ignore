@@ -8,11 +8,13 @@ setup.py
 # never emits or overwrites them, but they are listed here as the source of
 # truth for "hand-maintained, don't touch": _auth.py (JWT exchange), arrow.py
 # (Arrow IPC result fetch), query.py (429 retry + truncation auto-follow, #688),
-# _retry.py (pre-response connection-reset retry on all methods, #118).
+# _retry.py (pre-response connection-reset retry on all methods, #118),
+# uploads.py (transparent presigned direct-to-storage upload flow).
 hotdata/_auth.py
 hotdata/arrow.py
 hotdata/query.py
 hotdata/_retry.py
+hotdata/uploads.py
 
 # Hand-written test for the patched ApiClient.close()/context-manager behavior
 # (re-applied by scripts/patch_api_client_close.py). It lives in the generated

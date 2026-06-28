@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `hotdata.UploadsApi` gains `upload_file(source, ...)`, a transparent
+  direct-to-storage upload. Give it a file path, raw `bytes`, or a seekable
+  binary file object and it opens an upload session, sends the data **straight
+  to object storage** (a single request for a small file, concurrent multipart
+  for a large one), and finalizes — returning the `FinalizeUploadResponse`. Your
+  bytes never round-trip through the API. Supports a progress callback, an
+  auto-scaled (or caller-set) part size, bounded concurrency with a peak-memory
+  budget, and idempotent per-part retry (tunable via `part_retry`). Failures
+  raise a typed hierarchy under `UploadError`: `StorageError`,
+  `StorageTransportError`, `MissingETagError`, `MalformedSessionError`, and
+  `SizeLimitError`.
+- `hotdata.UploadsApi.upload_stream` uploads `bytes` or a binary stream
+  (streamed without buffering) in a single request — the fallback for when
+  direct-to-storage uploads aren't available or the source isn't seekable.
+
 ### Changed
 
 - feat(uploads): add file upload endpoints
