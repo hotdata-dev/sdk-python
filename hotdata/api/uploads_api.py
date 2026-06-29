@@ -25,6 +25,8 @@ from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse
 from hotdata.models.list_uploads_response import ListUploadsResponse
+from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest
+from hotdata.models.mint_upload_parts_response import MintUploadPartsResponse
 from hotdata.models.upload_response import UploadResponse
 from hotdata.models.upload_session_response import UploadSessionResponse
 
@@ -65,7 +67,7 @@ class UploadsApi:
     ) -> UploadSessionResponse:
         """Create upload session
 
-        Create an upload session for a file you will send directly to storage. Based on the declared size, the response is one of two shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). In both cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
+        Create an upload session for a file you will send directly to storage. The response is one of three shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file with a known size (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). For a file whose size you do not know up front, omit `declared_size_bytes`: the response is `mode: multipart` with a `part_size` but NO `part_urls`. As you stream, call `POST /v1/uploads/{upload_id}/parts` with a batch of `part_numbers` to mint per-part `PUT` URLs, `PUT` each part and keep its `ETag`, then finalize as for any multipart upload. In all cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
 
         :param create_upload_request: (required)
         :type create_upload_request: CreateUploadRequest
@@ -134,7 +136,7 @@ class UploadsApi:
     ) -> ApiResponse[UploadSessionResponse]:
         """Create upload session
 
-        Create an upload session for a file you will send directly to storage. Based on the declared size, the response is one of two shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). In both cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
+        Create an upload session for a file you will send directly to storage. The response is one of three shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file with a known size (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). For a file whose size you do not know up front, omit `declared_size_bytes`: the response is `mode: multipart` with a `part_size` but NO `part_urls`. As you stream, call `POST /v1/uploads/{upload_id}/parts` with a batch of `part_numbers` to mint per-part `PUT` URLs, `PUT` each part and keep its `ETag`, then finalize as for any multipart upload. In all cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
 
         :param create_upload_request: (required)
         :type create_upload_request: CreateUploadRequest
@@ -203,7 +205,7 @@ class UploadsApi:
     ) -> RESTResponseType:
         """Create upload session
 
-        Create an upload session for a file you will send directly to storage. Based on the declared size, the response is one of two shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). In both cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
+        Create an upload session for a file you will send directly to storage. The response is one of three shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file with a known size (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). For a file whose size you do not know up front, omit `declared_size_bytes`: the response is `mode: multipart` with a `part_size` but NO `part_urls`. As you stream, call `POST /v1/uploads/{upload_id}/parts` with a batch of `part_numbers` to mint per-part `PUT` URLs, `PUT` each part and keep its `ETag`, then finalize as for any multipart upload. In all cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.  You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.  If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs; send the file to the `POST /v1/files` endpoint instead.
 
         :param create_upload_request: (required)
         :type create_upload_request: CreateUploadRequest
@@ -629,7 +631,7 @@ class UploadsApi:
     ) -> FinalizeUploadResponse:
         """Finalize upload
 
-        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. The uploaded file's size is validated against the size declared at create time; a mismatch is rejected. Finalize is exactly-once: a second finalize of the same upload is rejected.
+        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. When you declared a size at create time, the uploaded file's size is validated against it and a mismatch is rejected. An upload created without a declared size is finalized from its uploaded parts; it must be non-empty and is rejected if it exceeds the server's maximum upload size. Finalize is exactly-once: a second finalize of the same upload is rejected.
 
         :param upload_id: Upload session ID returned at create time (required)
         :type upload_id: str
@@ -706,7 +708,7 @@ class UploadsApi:
     ) -> ApiResponse[FinalizeUploadResponse]:
         """Finalize upload
 
-        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. The uploaded file's size is validated against the size declared at create time; a mismatch is rejected. Finalize is exactly-once: a second finalize of the same upload is rejected.
+        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. When you declared a size at create time, the uploaded file's size is validated against it and a mismatch is rejected. An upload created without a declared size is finalized from its uploaded parts; it must be non-empty and is rejected if it exceeds the server's maximum upload size. Finalize is exactly-once: a second finalize of the same upload is rejected.
 
         :param upload_id: Upload session ID returned at create time (required)
         :type upload_id: str
@@ -783,7 +785,7 @@ class UploadsApi:
     ) -> RESTResponseType:
         """Finalize upload
 
-        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. The uploaded file's size is validated against the size declared at create time; a mismatch is rejected. Finalize is exactly-once: a second finalize of the same upload is rejected.
+        Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. When you declared a size at create time, the uploaded file's size is validated against it and a mismatch is rejected. An upload created without a declared size is finalized from its uploaded parts; it must be non-empty and is rejected if it exceeds the server's maximum upload size. Finalize is exactly-once: a second finalize of the same upload is rejected.
 
         :param upload_id: Upload session ID returned at create time (required)
         :type upload_id: str
@@ -1165,6 +1167,320 @@ class UploadsApi:
         return self.api_client.param_serialize(
             method='GET',
             resource_path='/v1/files',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def mint_upload_parts_handler(
+        self,
+        upload_id: Annotated[StrictStr, Field(description="Upload session ID returned at create time")],
+        x_upload_finalize_token: Annotated[StrictStr, Field(description="One-time finalize token returned when the session was created")],
+        mint_upload_parts_request: MintUploadPartsRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> MintUploadPartsResponse:
+        """Mint upload part URLs
+
+        Mint short-lived presigned URLs for specific parts of a multi-part upload. This is required for a streaming (unknown-size) upload — created by omitting the declared size — which mints no part URLs up front. It also works for a known-size multi-part upload: use it to re-mint a part whose URL expired before you uploaded that part. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header, and the 1-based `part_numbers` you want URLs for. `PUT` each part's bytes to its URL, keep each response's `ETag`, then pass the `{part_number, e_tag}` list to finalize. You may mint parts in batches as you upload, and re-mint a part number whose URL expired before you finished uploading it.
+
+        :param upload_id: Upload session ID returned at create time (required)
+        :type upload_id: str
+        :param x_upload_finalize_token: One-time finalize token returned when the session was created (required)
+        :type x_upload_finalize_token: str
+        :param mint_upload_parts_request: (required)
+        :type mint_upload_parts_request: MintUploadPartsRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._mint_upload_parts_handler_serialize(
+            upload_id=upload_id,
+            x_upload_finalize_token=x_upload_finalize_token,
+            mint_upload_parts_request=mint_upload_parts_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "MintUploadPartsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def mint_upload_parts_handler_with_http_info(
+        self,
+        upload_id: Annotated[StrictStr, Field(description="Upload session ID returned at create time")],
+        x_upload_finalize_token: Annotated[StrictStr, Field(description="One-time finalize token returned when the session was created")],
+        mint_upload_parts_request: MintUploadPartsRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[MintUploadPartsResponse]:
+        """Mint upload part URLs
+
+        Mint short-lived presigned URLs for specific parts of a multi-part upload. This is required for a streaming (unknown-size) upload — created by omitting the declared size — which mints no part URLs up front. It also works for a known-size multi-part upload: use it to re-mint a part whose URL expired before you uploaded that part. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header, and the 1-based `part_numbers` you want URLs for. `PUT` each part's bytes to its URL, keep each response's `ETag`, then pass the `{part_number, e_tag}` list to finalize. You may mint parts in batches as you upload, and re-mint a part number whose URL expired before you finished uploading it.
+
+        :param upload_id: Upload session ID returned at create time (required)
+        :type upload_id: str
+        :param x_upload_finalize_token: One-time finalize token returned when the session was created (required)
+        :type x_upload_finalize_token: str
+        :param mint_upload_parts_request: (required)
+        :type mint_upload_parts_request: MintUploadPartsRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._mint_upload_parts_handler_serialize(
+            upload_id=upload_id,
+            x_upload_finalize_token=x_upload_finalize_token,
+            mint_upload_parts_request=mint_upload_parts_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "MintUploadPartsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def mint_upload_parts_handler_without_preload_content(
+        self,
+        upload_id: Annotated[StrictStr, Field(description="Upload session ID returned at create time")],
+        x_upload_finalize_token: Annotated[StrictStr, Field(description="One-time finalize token returned when the session was created")],
+        mint_upload_parts_request: MintUploadPartsRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Mint upload part URLs
+
+        Mint short-lived presigned URLs for specific parts of a multi-part upload. This is required for a streaming (unknown-size) upload — created by omitting the declared size — which mints no part URLs up front. It also works for a known-size multi-part upload: use it to re-mint a part whose URL expired before you uploaded that part. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header, and the 1-based `part_numbers` you want URLs for. `PUT` each part's bytes to its URL, keep each response's `ETag`, then pass the `{part_number, e_tag}` list to finalize. You may mint parts in batches as you upload, and re-mint a part number whose URL expired before you finished uploading it.
+
+        :param upload_id: Upload session ID returned at create time (required)
+        :type upload_id: str
+        :param x_upload_finalize_token: One-time finalize token returned when the session was created (required)
+        :type x_upload_finalize_token: str
+        :param mint_upload_parts_request: (required)
+        :type mint_upload_parts_request: MintUploadPartsRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._mint_upload_parts_handler_serialize(
+            upload_id=upload_id,
+            x_upload_finalize_token=x_upload_finalize_token,
+            mint_upload_parts_request=mint_upload_parts_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "MintUploadPartsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '501': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _mint_upload_parts_handler_serialize(
+        self,
+        upload_id,
+        x_upload_finalize_token,
+        mint_upload_parts_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if upload_id is not None:
+            _path_params['upload_id'] = upload_id
+        # process the query parameters
+        # process the header parameters
+        if x_upload_finalize_token is not None:
+            _header_params['X-Upload-Finalize-Token'] = x_upload_finalize_token
+        # process the form parameters
+        # process the body parameter
+        if mint_upload_parts_request is not None:
+            _body_params = mint_upload_parts_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/v1/uploads/{upload_id}/parts',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

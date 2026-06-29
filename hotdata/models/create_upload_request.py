@@ -32,7 +32,7 @@ class CreateUploadRequest(BaseModel):
     checksum_value: Optional[StrictStr] = Field(default=None, description="Integrity checksum value, paired with `checksum_algo`. Optional.")
     content_encoding: Optional[StrictStr] = Field(default=None, description="Content encoding to record for the uploaded file (for example `gzip`). Optional.")
     content_type: Optional[StrictStr] = Field(default=None, description="Content type to record for the uploaded file (for example the Parquet, CSV, or JSON MIME type). Optional.")
-    declared_size_bytes: Annotated[int, Field(strict=True, ge=0)] = Field(description="The exact size, in bytes, of the file you will upload. Validated at create time against the maximum allowed size, and again at finalize against the bytes actually stored — a mismatch fails the finalize.")
+    declared_size_bytes: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="The exact size, in bytes, of the file you will upload. Optional. When provided, it is validated at create time against the maximum allowed size, and again at finalize against the bytes actually stored — a mismatch fails the finalize. Omit it to create a streaming (unknown-size) upload: the session is always multi-part and returns no part URLs up front; instead you mint part URLs on demand from `POST /v1/uploads/{upload_id}/parts` as you upload, and finalize validates only that the file is non-empty.")
     filename: Optional[StrictStr] = Field(default=None, description="Original file name, recorded with the upload for your own bookkeeping. Optional and advisory — it does not affect where the bytes are stored or how they are loaded.")
     part_size: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Preferred size, in bytes, of each part for a large (multi-part) upload. Optional hint — the service clamps it to the allowed part-size range and to the maximum number of parts, and ignores it for small files uploaded with a single `PUT`. Omit to let the service choose.")
     __properties: ClassVar[List[str]] = ["checksum_algo", "checksum_value", "content_encoding", "content_type", "declared_size_bytes", "filename", "part_size"]
@@ -95,6 +95,11 @@ class CreateUploadRequest(BaseModel):
         # and model_fields_set contains the field
         if self.content_type is None and "content_type" in self.model_fields_set:
             _dict['content_type'] = None
+
+        # set to None if declared_size_bytes (nullable) is None
+        # and model_fields_set contains the field
+        if self.declared_size_bytes is None and "declared_size_bytes" in self.model_fields_set:
+            _dict['declared_size_bytes'] = None
 
         # set to None if filename (nullable) is None
         # and model_fields_set contains the field
