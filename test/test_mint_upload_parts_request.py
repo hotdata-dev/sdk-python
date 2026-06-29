@@ -15,10 +15,10 @@
 
 import unittest
 
-from hotdata.models.create_upload_request import CreateUploadRequest
+from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest
 
-class TestCreateUploadRequest(unittest.TestCase):
-    """CreateUploadRequest unit test stubs"""
+class TestMintUploadPartsRequest(unittest.TestCase):
+    """MintUploadPartsRequest unit test stubs"""
 
     def setUp(self):
         pass
@@ -26,31 +26,30 @@ class TestCreateUploadRequest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> CreateUploadRequest:
-        """Test CreateUploadRequest
+    def make_instance(self, include_optional) -> MintUploadPartsRequest:
+        """Test MintUploadPartsRequest
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `CreateUploadRequest`
+        # uncomment below to create an instance of `MintUploadPartsRequest`
         """
-        model = CreateUploadRequest()
+        model = MintUploadPartsRequest()
         if include_optional:
-            return CreateUploadRequest(
-                checksum_algo = '',
-                checksum_value = '',
-                content_encoding = '',
-                content_type = '',
-                declared_size_bytes = 0,
-                filename = '',
-                part_size = 0
+            return MintUploadPartsRequest(
+                part_numbers = [
+                    56
+                    ]
             )
         else:
-            return CreateUploadRequest(
+            return MintUploadPartsRequest(
+                part_numbers = [
+                    56
+                    ],
         )
         """
 
-    def testCreateUploadRequest(self):
-        """Test CreateUploadRequest"""
+    def testMintUploadPartsRequest(self):
+        """Test MintUploadPartsRequest"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

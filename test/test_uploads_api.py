@@ -55,6 +55,13 @@ class TestUploadsApi(unittest.TestCase):
         """
         pass
 
+    def test_mint_upload_parts_handler(self) -> None:
+        """Test case for mint_upload_parts_handler
+
+        Mint upload part URLs
+        """
+        pass
+
     def test_upload_file(self) -> None:
         """Test case for upload_file
 

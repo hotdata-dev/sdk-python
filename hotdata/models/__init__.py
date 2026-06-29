@@ -97,6 +97,9 @@ from hotdata.models.load_managed_table_request import LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
 from hotdata.models.managed_schema_response import ManagedSchemaResponse
 from hotdata.models.managed_table_response import ManagedTableResponse
+from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest
+from hotdata.models.mint_upload_parts_response import MintUploadPartsResponse
+from hotdata.models.minted_upload_part_response import MintedUploadPartResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse

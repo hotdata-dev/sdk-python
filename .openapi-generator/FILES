@@ -92,6 +92,9 @@ docs/LoadManagedTableRequest.md
 docs/LoadManagedTableResponse.md
 docs/ManagedSchemaResponse.md
 docs/ManagedTableResponse.md
+docs/MintUploadPartsRequest.md
+docs/MintUploadPartsResponse.md
+docs/MintedUploadPartResponse.md
 docs/NumericProfileDetail.md
 docs/QueryApi.md
 docs/QueryRequest.md
@@ -242,6 +245,9 @@ hotdata/models/load_managed_table_request.py
 hotdata/models/load_managed_table_response.py
 hotdata/models/managed_schema_response.py
 hotdata/models/managed_table_response.py
+hotdata/models/mint_upload_parts_request.py
+hotdata/models/mint_upload_parts_response.py
+hotdata/models/minted_upload_part_response.py
 hotdata/models/numeric_profile_detail.py
 hotdata/models/query_request.py
 hotdata/models/query_response.py
@@ -371,6 +377,9 @@ test/test_load_managed_table_request.py
 test/test_load_managed_table_response.py
 test/test_managed_schema_response.py
 test/test_managed_table_response.py
+test/test_mint_upload_parts_request.py
+test/test_mint_upload_parts_response.py
+test/test_minted_upload_part_response.py
 test/test_numeric_profile_detail.py
 test/test_query_api.py
 test/test_query_request.py

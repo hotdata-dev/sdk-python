@@ -133,6 +133,9 @@ __all__ = [
     "LoadManagedTableResponse",
     "ManagedSchemaResponse",
     "ManagedTableResponse",
+    "MintUploadPartsRequest",
+    "MintUploadPartsResponse",
+    "MintedUploadPartResponse",
     "NumericProfileDetail",
     "QueryRequest",
     "QueryResponse",
@@ -283,6 +286,9 @@ from hotdata.models.load_managed_table_request import LoadManagedTableRequest as
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse as LoadManagedTableResponse
 from hotdata.models.managed_schema_response import ManagedSchemaResponse as ManagedSchemaResponse
 from hotdata.models.managed_table_response import ManagedTableResponse as ManagedTableResponse
+from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest as MintUploadPartsRequest
+from hotdata.models.mint_upload_parts_response import MintUploadPartsResponse as MintUploadPartsResponse
+from hotdata.models.minted_upload_part_response import MintedUploadPartResponse as MintedUploadPartResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail as NumericProfileDetail
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
