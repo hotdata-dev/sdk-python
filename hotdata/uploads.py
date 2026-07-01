@@ -46,20 +46,30 @@ import io
 import logging
 import os
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, BinaryIO, Callable, Dict, Iterator, List, Optional, Union
+from typing import Any, BinaryIO, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import urllib3
 from urllib3.util.retry import Retry
 
+from hotdata._retry import ConnectionResetRetry
+from hotdata._upload_watchdog import (
+    _Arming,
+    _Watchdog,
+    install_watchdog_connection_classes,
+    set_active_arming,
+)
 from hotdata.api.uploads_api import UploadsApi as _GeneratedUploadsApi
 from hotdata.api_client import ApiClient
+from hotdata.exceptions import ApiException
 from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.finalize_upload_part import FinalizeUploadPart
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse
+from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest
 from hotdata.models.upload_response import UploadResponse
 from hotdata.models.upload_session_response import UploadSessionResponse
 from hotdata.rest import RESTResponse
@@ -188,10 +198,21 @@ class UploadOptions:
     max_concurrency: Optional[int] = None
     #: Optional progress callback invoked with ``(bytes_done_total, total)``.
     progress: Optional[UploadProgress] = None
-    #: ``urllib3`` retry policy for multipart part ``PUT`` s (idempotent, so safe
-    #: to retry). ``None`` uses :func:`default_part_retry`. The single-``PUT``
-    #: path streams an un-replayable body and is always sent without retry.
+    #: ``urllib3`` retry policy for part ``PUT`` s — the INNER retry tier (429 +
+    #: pre-response reset; 5xx propagates to the whole-upload re-sweep). ``None``
+    #: uses :func:`default_part_retry`. A custom policy that puts ``5xx`` back in
+    #: its ``status_forcelist`` shifts the tier boundary. The single-``PUT``
+    #: small-file path streams an un-replayable body and is always sent without
+    #: retry regardless.
     part_retry: Optional[Retry] = None
+    #: Extra whole-upload re-sweep rounds beyond the initial pass (Item 1).
+    #: ``None`` uses :data:`DEFAULT_MAX_EXTRA_ROUNDS` (3). ``0`` disables the
+    #: re-sweep (a single failure sinks the upload — the legacy behavior).
+    max_extra_rounds: Optional[int] = None
+    #: Base delay (seconds) for the capped-exponential backoff between re-sweep
+    #: rounds. ``None`` uses :data:`DEFAULT_ROUND_BASE_DELAY` (2s). Set to ``0``
+    #: in tests for instant rounds.
+    round_base_delay: Optional[float] = None
 
 
 # --- Errors ---------------------------------------------------------------
@@ -268,8 +289,11 @@ class StorageError(UploadError):
 
 
 class MissingETagError(UploadError):
-    """Storage accepted a part ``PUT`` but returned no ``ETag`` header, so the
-    part cannot be finalized.
+    """Storage accepted a part ``PUT`` but returned no usable ``ETag`` header
+    (absent, or empty/whitespace-only), so the part cannot be finalized.
+
+    Retryable (not terminal): a momentary backend hiccup that drops the header
+    shouldn't be permanent, so the re-sweep re-``PUT`` s to pick up a real ETag.
     """
 
     def __init__(self, *, part_number: int) -> None:
@@ -277,6 +301,255 @@ class MissingETagError(UploadError):
         super().__init__(
             f"storage returned no ETag for part {part_number}; cannot finalize"
         )
+
+
+# --- Error classification (Item 2) ----------------------------------------
+
+
+def _is_retryable(exc: BaseException) -> bool:
+    """Whether the outer whole-upload re-sweep should retry a per-part failure.
+
+    A deliberate **allowlist** of genuinely-transient transport / storage / mint
+    conditions — each curable by a later round at lower concurrency (and, for a
+    fresh minted URL, by re-minting). Everything NOT listed is non-retryable and
+    fails the upload fast: a deterministic local short-read (a generic
+    :class:`UploadError`), a contract/sizing violation
+    (:class:`MalformedSessionError`, :class:`SizeLimitError`), a progress-callback
+    exception (raised *after* a successful ``PUT`` — re-running would duplicate the
+    write), or anything unexpected. Retrying those would burn the round budget for
+    nothing or, worse, double-``PUT``.
+    """
+    if isinstance(exc, (StorageTransportError, MissingETagError)):
+        return True
+    if isinstance(exc, StorageError):
+        return True  # incl. 5xx (outer tier owns it) and 403 (eager URL expiry)
+    if isinstance(exc, ApiException):
+        return True  # a per-part mint round-trip failure — a re-mint may cure it
+    return False
+
+
+def _parse_etag(headers: Any, part_number: int) -> str:
+    """Extract a real, non-empty ``ETag`` from a part ``PUT`` response (Item 7).
+
+    A missing header OR an empty / whitespace-only value is rejected as
+    :class:`MissingETagError` (retryable). Otherwise the value is returned
+    verbatim, quotes included — finalize must carry exactly what storage gave.
+    """
+    etag = headers.get("ETag")
+    if etag is None or not str(etag).strip():
+        raise MissingETagError(part_number=part_number)
+    return etag
+
+
+# --- Whole-upload re-sweep (Item 1) ---------------------------------------
+
+#: Outer-tier (whole-upload re-sweep) defaults, mirroring the Rust SDK. Round 0
+#: is the initial full pass; up to :data:`DEFAULT_MAX_EXTRA_ROUNDS` re-sweeps
+#: follow, each re-running only the parts still failing, at halving concurrency.
+DEFAULT_MAX_EXTRA_ROUNDS = 3
+#: Capped-exponential backoff before re-sweep round N: ``base * 2**(N-1)``.
+DEFAULT_ROUND_BASE_DELAY = 2.0
+#: Clamp on the round-delay shift so it can't overflow.
+_ROUND_DELAY_SHIFT_CAP = 16
+
+
+@dataclass
+class _PartPlan:
+    """One part's work unit, keyed by its 1-based ``part_number``. Byte range is
+    derived from the part number (``offset = index * part_size``), never from
+    arrival/queue position, so a reordered mint response can't shift offsets
+    (Item 6).
+    """
+
+    index: int          # 0-based position
+    part_number: int    # 1-based
+    offset: int
+    length: int
+
+
+def _round_in_flight(base: int, round_idx: int) -> int:
+    """In-flight cap for re-sweep round ``round_idx``: halve each round, floor 1
+    (``max(base >> round, 1)``). 8 → 8,4,2,1,1,…  A saturated jittery uplink
+    resets fewer connections when fewer are in flight, so lowering concurrency
+    each round directly targets that failure mode.
+    """
+    if round_idx >= base.bit_length():
+        return 1
+    return max(base >> round_idx, 1)
+
+
+def _round_delay(round_idx: int, base_delay: float = DEFAULT_ROUND_BASE_DELAY) -> float:
+    """Capped-exponential backoff before round ``round_idx`` (>=1):
+    ``base_delay * 2**(round_idx - 1)``, shift clamped so it can't overflow.
+    """
+    shift = min(round_idx - 1, _ROUND_DELAY_SHIFT_CAP)
+    return base_delay * (2 ** shift)
+
+
+def _upload_parts_resilient(
+    plans: List[_PartPlan],
+    upload_one: Callable[[_PartPlan], FinalizeUploadPart],
+    *,
+    base_in_flight: int,
+    max_extra_rounds: int = DEFAULT_MAX_EXTRA_ROUNDS,
+    round_base_delay: float = DEFAULT_ROUND_BASE_DELAY,
+    on_part_done: Optional[Callable[[_PartPlan], None]] = None,
+    on_terminal: Optional[Callable[[], None]] = None,
+    sleep: Callable[[float], None] = time.sleep,
+) -> List[FinalizeUploadPart]:
+    """Run every part's ``upload_one`` work unit with whole-upload re-sweep.
+
+    Round 0 is the initial full pass at ``base_in_flight`` concurrency. Each
+    subsequent round (up to ``max_extra_rounds``) waits a capped-exponential
+    backoff, halves concurrency, and re-runs ONLY the parts that failed the
+    previous round with a *retryable* error; completed parts keep their ETags.
+
+    Invariants: every healthy part is attempted exactly once; a part failing K
+    rounds is attempted ``K+1`` times (capped); a **terminal** (non-retryable,
+    see :func:`_is_retryable`) error fails fast — the round stops dispatching new
+    parts and the error is raised after in-flight workers drain. If parts still
+    fail after the last round, the last underlying retryable error is raised
+    (its cause preserved). A part slot that is never filled is a hard
+    :class:`MalformedSessionError` — finalize never gets a silently-short list.
+
+    ``on_part_done`` is invoked once per successfully-completed part (used for
+    exactly-once progress): a re-swept part that failed earlier rounds did not
+    fire it, so bytes are never double-counted.
+    """
+    results: Dict[int, FinalizeUploadPart] = {}
+    counted: set = set()
+    lock = threading.Lock()
+    pending = list(plans)
+
+    last_error: Optional[BaseException] = None
+
+    for round_idx in range(0, 1 + max_extra_rounds):
+        if not pending:
+            break
+        if round_idx > 0:
+            sleep(_round_delay(round_idx, round_base_delay))
+        in_flight = _round_in_flight(base_in_flight, round_idx)
+        failures: Dict[int, BaseException] = {}
+        terminal: List[BaseException] = []
+        stop = threading.Event()
+
+        def _fail_terminal(exc: BaseException) -> None:
+            with lock:
+                terminal.append(exc)
+            stop.set()
+            # Actively cancel in-flight siblings (terminal fast-fail, Q-B) so the
+            # round-boundary join doesn't wait out a stalled sibling's full
+            # per-part timeout. No-op if the caller wired no canceller.
+            if on_terminal is not None:
+                on_terminal()
+
+        def run_one(plan: _PartPlan) -> None:
+            if stop.is_set():
+                # A terminal error elsewhere in the round: don't dispatch new work.
+                failures[plan.part_number] = _NotDispatched()
+                return
+            try:
+                part = upload_one(plan)
+            except BaseException as exc:  # noqa: BLE001 - classified below
+                if not _is_retryable(exc):
+                    _fail_terminal(exc)
+                    return
+                with lock:
+                    failures[plan.part_number] = exc
+                return
+            if part is None:
+                with lock:
+                    failures[plan.part_number] = MalformedSessionError(
+                        f"part {plan.part_number} was never uploaded"
+                    )
+                return
+            # Record success first, then fire the progress callback. A callback
+            # exception is NOT a transport failure and the PUT already succeeded —
+            # re-running would duplicate the write — so it is TERMINAL (abort the
+            # upload, do not finalize), never retried (Codex #4).
+            with lock:
+                results[plan.part_number] = part
+                fire = on_part_done is not None and plan.part_number not in counted
+                if fire:
+                    counted.add(plan.part_number)
+            if fire:
+                try:
+                    on_part_done(plan)
+                except BaseException as exc:  # noqa: BLE001 - callback bug → abort
+                    _fail_terminal(exc)
+
+        executor = ThreadPoolExecutor(max_workers=in_flight)
+        try:
+            # Bounded-wave dispatch: never submit more than `in_flight` at once,
+            # so the per-round cap actually bounds concurrency AND a terminal
+            # error stops not-yet-started parts from being dispatched.
+            it = iter(pending)
+            futures: set = set()
+            for plan in _take(it, in_flight):
+                futures.add(executor.submit(run_one, plan))
+            while futures:
+                done, futures = _wait_first(futures)
+                # Surface any unexpected exception that escaped run_one (it should
+                # classify everything itself; this is defense-in-depth so a future
+                # exception can never be silently swallowed).
+                for fut in done:
+                    exc = fut.exception()
+                    if exc is not None:
+                        _fail_terminal(exc)
+                for plan in _take(it, len(done)):
+                    if stop.is_set():
+                        break
+                    futures.add(executor.submit(run_one, plan))
+        finally:
+            # Round-boundary join: by the time this returns, no worker from this
+            # round is still touching the source / firing progress. The watchdog
+            # (Item 3) makes a stalled worker terminable so this stays bounded.
+            executor.shutdown(wait=True)
+
+        if terminal:
+            raise terminal[0]
+
+        # Track the most recent real failure to surface on exhaustion.
+        for exc in failures.values():
+            if not isinstance(exc, _NotDispatched):
+                last_error = exc
+        pending = [p for p in pending if p.part_number in failures]
+
+    if pending:
+        # Exhausted the round budget with parts still failing: surface the last
+        # underlying error so the caller's normal mapping applies.
+        if last_error is not None:
+            raise last_error
+        raise StorageTransportError(url="", part_number=pending[0].part_number)
+
+    # Completeness: every plan's slot must be filled.
+    missing = [p.part_number for p in plans if p.part_number not in results]
+    if missing:
+        raise MalformedSessionError(f"part {missing[0]} was never uploaded")
+
+    return [results[pn] for pn in sorted(results)]
+
+
+class _NotDispatched(Exception):
+    """Sentinel failure for a part skipped because the round was aborting on a
+    terminal error; it is re-queued but never surfaced as the cause.
+    """
+
+
+def _take(it: Iterator[_PartPlan], n: int) -> List[_PartPlan]:
+    out: List[_PartPlan] = []
+    for _ in range(n):
+        try:
+            out.append(next(it))
+        except StopIteration:
+            break
+    return out
+
+
+def _wait_first(futures: set) -> Tuple[set, set]:
+    """Block until at least one future completes; return ``(done, still_running)``."""
+    done, not_done = wait(futures, return_when=FIRST_COMPLETED)
+    return done, not_done
 
 
 # --- Storage transport ----------------------------------------------------
@@ -294,26 +567,124 @@ def _storage_pool() -> urllib3.PoolManager:
     if _STORAGE_POOL is None:
         with _STORAGE_POOL_LOCK:
             if _STORAGE_POOL is None:
-                _STORAGE_POOL = urllib3.PoolManager()
+                pool = urllib3.PoolManager()
+                # Install the stall-cancellation connection subclass at creation
+                # time — BEFORE any request can populate `manager.pools` with a
+                # host pool carrying the stock connection class (Codex #2). The
+                # single-PUT path uses this same pool, so an early single-PUT must
+                # not leave an un-hooked cached pool for a later multipart PUT.
+                install_watchdog_connection_classes(pool)
+                _STORAGE_POOL = pool
     return _STORAGE_POOL
 
 
+#: Per-part transfer-timeout shape (Item 3). A part ``PUT`` attempt is killed (into
+#: the outer re-sweep) only if it cannot sustain even ``PART_TIMEOUT_MIN_BYTES_PER_SEC``
+#: — a true stall, never a slow-but-progressing transfer. Size-scaled so a large
+#: part legitimately gets longer, capped so a stalled giant part can't hang for hours.
+PART_TIMEOUT_BASE = 60.0
+PART_TIMEOUT_MIN_BYTES_PER_SEC = 64 * 1024
+PART_TIMEOUT_MAX = 30 * 60.0
+
+#: Per-sleep cap for the inner part retry's *exponential* backoff path.
+PART_RETRY_BACKOFF_MAX = 120.0
+
+#: Cap on a server-sent ``Retry-After`` for a part ``PUT`` (the per-part
+#: retry-window deadline analog). ``backoff_max`` only bounds the exponential
+#: backoff path; urllib3 honors ``Retry-After`` UNCAPPED. A multi-minute storage
+#: ``Retry-After`` would stall the whole-upload re-sweep's round-boundary join, so
+#: :class:`_RetryAfterCappedRetry` clamps it. Flat 120s, independent of part size
+#: — NOT tied to :func:`_part_put_timeout` (the per-attempt transfer budget, up to
+#: 30 min): tying the sleep cap to that would let a big part honor a 30-min
+#: ``Retry-After`` and reintroduce the stall.
+MAX_RETRY_AFTER_SECONDS = 120.0
+
+
+class _RetryAfterCappedRetry(ConnectionResetRetry):
+    """A part-pool retry that caps a server ``Retry-After`` at
+    :data:`MAX_RETRY_AFTER_SECONDS`.
+
+    Overriding ``get_retry_after`` (NOT ``sleep`` / ``sleep_for_retry``, whose
+    shape changed across urllib3 1.26→2.x) is forward-compatible: it returns
+    seconds in both versions, and ``Retry.sleep`` consults it. ``None`` (no
+    ``Retry-After`` header) passes through untouched so the exponential backoff
+    path is unaffected.
+    """
+
+    def get_retry_after(self, response: Any) -> Any:
+        retry_after = super().get_retry_after(response)
+        if retry_after is None:
+            return None
+        return min(retry_after, MAX_RETRY_AFTER_SECONDS)
+
+#: Inactivity (connect, read) timeout for the per-part mint call (Item 4 / Codex #5).
+#: NOTE: this is an INACTIVITY timeout, not a strict wall-clock bound — a slow-trickle
+#: mint response could in principle evade it (same urllib3 limitation as a read
+#: timeout). It bounds a mint *in practice* so a stalled mint can't hang the
+#: round-boundary join; it is not a hard wall-clock guarantee. A mint trickle-stall
+#: is far rarer than a storage one, so a mint watchdog is deliberately not built.
+MINT_TIMEOUT = (10.0, 30.0)
+
+
+def _part_put_timeout(content_length: int) -> float:
+    """The size-scaled per-attempt transfer cap for one part ``PUT`` (Item 3).
+
+    ``min(BASE + content_length / MIN_BYTES_PER_SEC, MAX)``: 8 MiB → 188s, 64 MiB
+    → ~18 min, ≥ ~111 MiB → the 30-min cap, 0 bytes → the 60s base. This is the
+    ONLY bound on a single in-flight PUT; the watchdog enforces it by shutting the
+    socket down. Pure and total.
+    """
+    return min(
+        PART_TIMEOUT_BASE + content_length / PART_TIMEOUT_MIN_BYTES_PER_SEC,
+        PART_TIMEOUT_MAX,
+    )
+
+
 def default_part_retry() -> Retry:
-    """The default retry policy for multipart part ``PUT`` s.
+    """The default INNER retry policy for multipart part ``PUT`` s (Item 5).
 
     A part ``PUT`` is idempotent — storage overwrites a part by number — so a
-    retried part cannot corrupt the upload. Retry connection errors and the
-    transient 429/5xx statuses storage may return under load. The single-``PUT``
-    path streams an un-replayable body and so is always sent without retry.
-    Override per upload via :attr:`UploadOptions.part_retry`.
+    retried part cannot corrupt the upload. This is the *inner* tier of the
+    two-tier model: it retries genuinely-momentary conditions in place —
+
+    * HTTP ``429`` admission-shedding, honoring ``Retry-After``;
+    * pre-response connection resets on any method (via the
+      :class:`~hotdata._retry.ConnectionResetRetry` base), which includes the
+      watchdog's ``ProtocolError(RemoteDisconnected)`` when a stalled part is
+      cancelled (Item 3) — so a watchdog-cancelled part is re-attempted.
+
+    Storage ``5xx`` is deliberately **excluded** from ``status_forcelist`` so it
+    is NOT inner-retried; it propagates to the whole-upload re-sweep (the outer
+    tier), which owns its recovery with reduced concurrency. Redirects are not
+    followed: a ``3xx`` on a presigned ``PUT`` would re-issue to a different URL
+    and invalidate the signature, so it surfaces as an error instead.
+
+    ``backoff_max`` caps a pathological ``Retry-After`` so the re-sweep's
+    round-boundary join can't stall on an unbounded sleep.
+
+    Override per upload via :attr:`UploadOptions.part_retry`; a custom policy that
+    puts ``5xx`` back in its ``status_forcelist`` shifts the tier boundary (the
+    caller's explicit choice).
     """
-    return Retry(
+    kwargs: Dict[str, Any] = dict(
         total=3,
         backoff_factor=0.2,
-        status_forcelist=(429, 500, 502, 503, 504),
+        status_forcelist=(429,),
         allowed_methods=frozenset({"PUT"}),
         raise_on_status=False,
+        respect_retry_after_header=True,
+        redirect=False,
     )
+    # urllib3 >= 2 takes backoff_max as a constructor arg; 1.26 only honors the
+    # instance/class attribute `DEFAULT_BACKOFF_MAX` (which `get_backoff_time`
+    # reads — NOT the deprecated `BACKOFF_MAX` alias). Set it the version-portable
+    # way so the per-sleep cap is explicit regardless of urllib3 version.
+    try:
+        return _RetryAfterCappedRetry(backoff_max=PART_RETRY_BACKOFF_MAX, **kwargs)
+    except TypeError:
+        retry = _RetryAfterCappedRetry(**kwargs)
+        retry.DEFAULT_BACKOFF_MAX = PART_RETRY_BACKOFF_MAX  # type: ignore[attr-defined]
+        return retry
 
 
 def _to_timeout(request_timeout: Any) -> Any:
@@ -360,7 +731,12 @@ def _put_to_storage(
         raise StorageTransportError(url=url, part_number=part_number) from exc
     status = int(response.status)
     _log.debug("storage PUT %s -> %s", url, status)
-    if status >= 400:
+    # Any non-2xx is an error, INCLUDING a 3xx (Codex #6): with redirects disabled
+    # on the part pool, urllib3 returns the 3xx response rather than following it,
+    # and following a redirect on a presigned PUT would re-issue to a different URL
+    # and invalidate the signature. So a storage 3xx surfaces as StorageError, not
+    # a silent success.
+    if not 200 <= status < 300:
         data = getattr(response, "data", b"") or b""
         if isinstance(data, (bytes, bytearray)):
             error_body = bytes(data).decode("utf-8", errors="replace")
@@ -437,6 +813,8 @@ class UploadsApi(_GeneratedUploadsApi):
         max_concurrency: Optional[int] = None,
         progress: Optional[UploadProgress] = None,
         part_retry: Optional[Retry] = None,
+        max_extra_rounds: Optional[int] = None,
+        round_base_delay: Optional[float] = None,
         options: Optional[UploadOptions] = None,
         _request_timeout: Any = None,
     ) -> FinalizeUploadResponse:
@@ -499,6 +877,12 @@ class UploadsApi(_GeneratedUploadsApi):
         )
         progress = progress if progress is not None else opts.progress
         part_retry = part_retry if part_retry is not None else opts.part_retry
+        max_extra_rounds = (
+            max_extra_rounds if max_extra_rounds is not None else opts.max_extra_rounds
+        )
+        round_base_delay = (
+            round_base_delay if round_base_delay is not None else opts.round_base_delay
+        )
 
         src = _make_source(source, size)
         total = src.size
@@ -538,7 +922,22 @@ class UploadsApi(_GeneratedUploadsApi):
         elif session.mode == "multipart":
             cap = max_concurrency if max_concurrency is not None else DEFAULT_MAX_CONCURRENCY
             retry = part_retry if part_retry is not None else default_part_retry()
-            parts = self._upload_multipart(session, src, total, cap, retry, progress)
+            parts = self._upload_multipart(
+                session,
+                src,
+                total,
+                cap,
+                retry,
+                progress,
+                max_extra_rounds=(
+                    max_extra_rounds if max_extra_rounds is not None
+                    else DEFAULT_MAX_EXTRA_ROUNDS
+                ),
+                round_base_delay=(
+                    round_base_delay if round_base_delay is not None
+                    else DEFAULT_ROUND_BASE_DELAY
+                ),
+            )
         else:
             raise MalformedSessionError(f"unknown upload mode {session.mode!r}")
 
@@ -743,96 +1142,172 @@ class UploadsApi(_GeneratedUploadsApi):
         max_concurrency: int,
         part_retry: Retry,
         progress: Optional[UploadProgress],
+        *,
+        max_extra_rounds: int = DEFAULT_MAX_EXTRA_ROUNDS,
+        round_base_delay: float = DEFAULT_ROUND_BASE_DELAY,
     ) -> List[FinalizeUploadPart]:
-        """Multipart path: slice the file into ``part_size``-byte chunks (the
-        last is the remainder), ``PUT`` each chunk to its ``part_urls[i - 1]``
-        with bounded concurrency, and collect ``(part_number, e_tag)`` per part.
+        """Resilient multipart path: ``PUT`` each ``part_size``-byte chunk to
+        storage with the whole-upload re-sweep (Item 1) — a single part's
+        transient failure never discards the upload.
 
-        Returns the parts sorted ascending by part number, ready for finalize.
+        URL acquisition is per-path: a *known-size* (eager) session carries
+        ``part_urls``; a *streaming* session (``part_urls`` absent) mints each
+        part's URL on demand via ``POST /v1/uploads/{id}/parts``. Both run through
+        the same re-sweep driver + per-part unit. A stalled ``PUT`` is cancelled
+        by the per-upload watchdog (Item 3). Returns the parts ascending by part
+        number, ready for finalize.
         """
-        part_urls = session.part_urls
         part_size = session.part_size
-        if not part_urls:
-            raise MalformedSessionError("multipart upload missing `part_urls`")
         if part_size is None or part_size <= 0:
             raise MalformedSessionError(
                 f"multipart upload has invalid `part_size` {part_size!r}"
             )
 
-        # The URL count must match the number of `part_size`-byte chunks the file
-        # splits into (last is the remainder). A mismatch means a session
-        # inconsistent with our declared size, so fail loudly.
+        part_urls = session.part_urls
+        # Streaming (mint-on-demand) is signalled by `part_urls` being ABSENT
+        # (None) on the wire. A present-but-empty list is a malformed known-size
+        # session (its URL count won't match), NOT streaming.
+        streaming = part_urls is None
         expected_parts = max(-(-total // part_size), 1)  # ceil, at least 1
-        if len(part_urls) != expected_parts:
+        if not streaming and len(part_urls) != expected_parts:
+            # A known-size session's URL count must match how the file slices.
             raise MalformedSessionError(
                 f"multipart upload returned {len(part_urls)} part URLs but the "
                 f"file ({total} bytes) splits into {expected_parts} parts of "
                 f"{part_size} bytes"
             )
 
-        in_flight = effective_in_flight(max_concurrency, part_size)
-        done = [0]  # boxed running byte total; guarded by `lock`
-        lock = threading.Lock()
-
-        def upload_part(index: int) -> FinalizeUploadPart:
-            part_number = index + 1
-            offset = index * part_size
-            length = min(part_size, total - offset)
-            chunk = src.read_range(offset, length)
-            if len(chunk) != length:
-                # The source returned fewer bytes than its declared size implies
-                # (a truncated file, or a wrong explicit `size`). Sending it would
-                # mismatch Content-Length, so fail loudly before the PUT.
-                raise UploadError(
-                    f"source returned {len(chunk)} bytes for part {part_number} "
-                    f"(expected {length} at offset {offset}); it may have changed "
-                    f"size or the declared size is wrong"
-                )
-            response = _put_to_storage(
-                part_urls[index],
-                chunk,
-                _storage_headers(session.headers, length),
-                retries=part_retry,
-                part_number=part_number,
+        plans = [
+            _PartPlan(
+                index=i,
+                part_number=i + 1,
+                offset=i * part_size,
+                length=min(part_size, total - i * part_size),
             )
-            etag = response.headers.get("ETag")
-            if not etag:
-                raise MissingETagError(part_number=part_number)
-            if progress is not None:
-                # Fire the callback under the lock so delivery order matches the
-                # computed order: releasing the lock first would let two workers
-                # race and deliver ticks out of order, breaking the documented
-                # monotonically-non-decreasing guarantee. Callbacks are expected
-                # to be cheap (and do their own locking), so serializing is fine.
-                with lock:
-                    done[0] = min(done[0] + length, total)
-                    progress(done[0], total)
-            return FinalizeUploadPart(e_tag=etag, part_number=part_number)
+            for i in range(expected_parts)
+        ]
 
-        results: List[Optional[FinalizeUploadPart]] = [None] * len(part_urls)
-        executor = ThreadPoolExecutor(max_workers=in_flight)
+        in_flight = effective_in_flight(max_concurrency, part_size)
+        progress_lock = threading.Lock()
+        done = [0]  # boxed running byte total; guarded by `progress_lock`
+
+        # Install the cancellation hook on the storage pool, and run one watchdog
+        # for this whole upload. Both are torn down in `finally`.
+        pool = _storage_pool()
+        install_watchdog_connection_classes(pool)
+        watchdog = _Watchdog()
+
+        def upload_one(plan: _PartPlan) -> FinalizeUploadPart:
+            chunk = src.read_range(plan.offset, plan.length)
+            if len(chunk) != plan.length:
+                # Deterministic local short-read (truncated source / wrong size):
+                # a generic UploadError, which the driver classifies non-retryable.
+                raise UploadError(
+                    f"source returned {len(chunk)} bytes for part {plan.part_number} "
+                    f"(expected {plan.length} at offset {plan.offset}); it may have "
+                    f"changed size or the declared size is wrong"
+                )
+
+            url = self._part_url(session, plan, streaming)
+            headers = _storage_headers(session.headers, plan.length)
+
+            # Publish a per-attempt arming: the connection subclass arms a FRESH
+            # watchdog handle on each urllib3 attempt (initial + internal retries,
+            # reused keep-alive conns included), with this part's transfer budget.
+            arming = _Arming(watchdog, _part_put_timeout(plan.length))
+            set_active_arming(arming)
+            try:
+                try:
+                    response = _put_to_storage(
+                        url, chunk, headers, retries=part_retry, part_number=plan.part_number
+                    )
+                except StorageError as exc:
+                    # Eager-path URL expiry: a 403 (ONLY) gets ONE inline re-mint
+                    # + retry of the fresh URL. A 5xx is NOT an expiry signal — it
+                    # propagates to the outer re-sweep (the tier boundary).
+                    if not streaming and exc.status == 403:
+                        fresh = self._mint_part(session, plan.part_number)
+                        response = _put_to_storage(
+                            fresh, chunk, headers, retries=part_retry,
+                            part_number=plan.part_number,
+                        )
+                    else:
+                        raise
+            finally:
+                # Defensively disarm every handle this part armed (the subclass
+                # already disarms each attempt's handle on supersede and after its
+                # response; this catches the error path where getresponse() never
+                # returned). A completed/failed part can't be shut down later.
+                for handle in arming.all:
+                    handle.finish()
+                    watchdog.disarm(handle)
+                set_active_arming(None)
+
+            etag = _parse_etag(response.headers, plan.part_number)
+            return FinalizeUploadPart(e_tag=etag, part_number=plan.part_number)
+
+        def on_part_done(plan: _PartPlan) -> None:
+            if progress is None:
+                return
+            with progress_lock:
+                done[0] = min(done[0] + plan.length, total)
+                progress(done[0], total)
+
         try:
-            futures = {
-                executor.submit(upload_part, i): i for i in range(len(part_urls))
-            }
-            # Surface the first failure as soon as it lands rather than waiting
-            # for in-flight stragglers to drain. A part PUT is idempotent, so any
-            # straggler still running when we bail does no harm.
-            for future in as_completed(futures):
-                exc = future.exception()
-                if exc is not None:
-                    raise exc
-                results[futures[future]] = future.result()
+            return _upload_parts_resilient(
+                plans,
+                upload_one,
+                base_in_flight=in_flight,
+                max_extra_rounds=max_extra_rounds,
+                round_base_delay=round_base_delay,
+                on_part_done=on_part_done,
+                on_terminal=watchdog.cancel_all,
+            )
         finally:
-            # cancel_futures drops parts that have not started; wait=True then
-            # blocks for the few already-running workers so that, by the time
-            # this returns (or re-raises), no background thread is still reading
-            # the (possibly caller-owned) source or firing the progress callback.
-            executor.shutdown(wait=True, cancel_futures=True)
+            watchdog.shutdown()
 
-        # results is indexed by 0-based part position, so it is already ascending
-        # by part_number with no duplicates.
-        return [part for part in results if part is not None]
+    def _part_url(
+        self, session: UploadSessionResponse, plan: _PartPlan, streaming: bool
+    ) -> str:
+        """Resolve the storage URL for ``plan``: the eager ``part_urls`` entry
+        for a known-size session, or a freshly minted URL for a streaming one.
+        """
+        if not streaming:
+            return session.part_urls[plan.index]
+        return self._mint_part(session, plan.part_number)
+
+    def _mint_part(self, session: UploadSessionResponse, part_number: int) -> str:
+        """Mint a fresh presigned URL for one part (streaming path, and the
+        eager-path 403 re-mint). Validates the response is for the requested part
+        number (Item 6); carries a finite (inactivity) timeout (Item 4 / Codex #5).
+        """
+        resp = self.mint_upload_parts_handler(
+            session.upload_id,
+            session.finalize_token,
+            MintUploadPartsRequest(part_numbers=[part_number]),
+            _request_timeout=MINT_TIMEOUT,
+        )
+        # Strict validation (Item 6): we requested exactly one part number, so the
+        # response must contain exactly that one. Reject a DUPLICATE (two entries
+        # for the part — ambiguous, and a plain dict would silently collapse it),
+        # an EXTRA/UNREQUESTED part number (contract violation), or a MISSING one.
+        parts = resp.parts or []
+        numbers = [p.part_number for p in parts]
+        if numbers.count(part_number) > 1:
+            raise MalformedSessionError(
+                f"mint returned duplicate URLs for part {part_number}"
+            )
+        extra = [n for n in numbers if n != part_number]
+        if extra:
+            raise MalformedSessionError(
+                f"mint returned URLs for parts that were not requested: {sorted(set(extra))}"
+            )
+        url = next((p.url for p in parts if p.part_number == part_number), None)
+        if not url:
+            raise MalformedSessionError(
+                f"mint did not return a URL for part {part_number}"
+            )
+        return url
 
 
 class _Source:
@@ -959,7 +1434,9 @@ def _make_source(source: UploadSource, size: Optional[int]) -> _Source:
 
 __all__ = [
     "DEFAULT_MAX_CONCURRENCY",
+    "DEFAULT_MAX_EXTRA_ROUNDS",
     "DEFAULT_PART_SIZE",
+    "DEFAULT_ROUND_BASE_DELAY",
     "MAX_PART_SIZE",
     "MIB",
     "MIN_PART_SIZE",

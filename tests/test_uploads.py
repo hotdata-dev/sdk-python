@@ -861,7 +861,10 @@ def test_multipart_empty_part_urls_raises(
     )
     api = _make_api()
     _patch_session(monkeypatch, api, session, [])
-    with pytest.raises(MalformedSessionError, match="part_urls"):
+    # A present-but-empty part_urls is a malformed known-size session (its URL
+    # count won't match how the file slices) — NOT a streaming session (which is
+    # signalled by part_urls being absent/None). It surfaces as a count mismatch.
+    with pytest.raises(MalformedSessionError, match="0 part URLs"):
         api.upload_file(str(src))
 
 
