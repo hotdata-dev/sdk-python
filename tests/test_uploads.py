@@ -582,11 +582,13 @@ def test_exported_uploads_api_is_enhanced() -> None:
 # --- Session/finalize API error paths -------------------------------------
 
 
-def test_create_session_501_propagates_as_api_exception(
+def test_create_session_501_wrapped_as_session_create_error(
     monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
 ) -> None:
-    # A 501 PRESIGN_UNSUPPORTED from POST /v1/uploads surfaces as ApiException
-    # (the documented fallback signal), and no storage PUT is attempted.
+    # A 501 PRESIGN_UNSUPPORTED from POST /v1/uploads surfaces as a
+    # SessionCreateError (an UploadError, so `except UploadError` catches the whole
+    # flow) that still exposes .status == 501 (the documented fallback signal) and
+    # chains the ApiException as __cause__. No storage PUT is attempted.
     src = tmp_path / "f.bin"
     src.write_bytes(b"x" * 10)
     api = _make_api()
@@ -595,9 +597,11 @@ def test_create_session_501_propagates_as_api_exception(
         raise ApiException(status=501, reason="PRESIGN_UNSUPPORTED")
 
     monkeypatch.setattr(api, "create_upload_session_handler", boom)
-    with pytest.raises(ApiException) as ei:
+    with pytest.raises(uploads_mod.SessionCreateError) as ei:
         api.upload_file(str(src))
+    assert isinstance(ei.value, uploads_mod.UploadError)
     assert ei.value.status == 501
+    assert isinstance(ei.value.__cause__, ApiException)
     assert fake_pool.calls == []  # never reached storage
 
 
@@ -667,9 +671,13 @@ def test_size_limit_guard_on_part_size_hint(
     assert ei.value.what == "part_size"
 
 
-def test_size_limit_guard_on_declared_size(
+def test_huge_declared_size_streams_instead_of_declaring(
     monkeypatch: pytest.MonkeyPatch, fake_pool: _FakeStoragePool, tmp_path: Any
 ) -> None:
+    # A file larger than STREAMING_THRESHOLD takes the streaming path, which OMITS
+    # declared_size_bytes — so an over-i64 size is never sent (and so never an
+    # obstacle), mirroring the Rust SDK. The part-size hint is still range-guarded
+    # (see test_size_limit_guard_on_part_size_hint).
     src = tmp_path / "f.bin"
     src.write_bytes(b"x" * 10)
     api = _make_api()
@@ -684,9 +692,20 @@ def test_size_limit_guard_on_declared_size(
         "stat",
         lambda p: _HugeStat() if str(p) == str(src) else real_stat(p),
     )
-    with pytest.raises(SizeLimitError) as ei:
+
+    captured: List[Any] = []
+
+    class _Stop(Exception):
+        pass
+
+    def capture_create(create_upload_request: Any, **kwargs: Any) -> Any:
+        captured.append(create_upload_request)
+        raise _Stop()  # short-circuit; we only care about the create request
+
+    monkeypatch.setattr(api, "create_upload_session_handler", capture_create)
+    with pytest.raises(_Stop):
         api.upload_file(str(src))
-    assert ei.value.what == "declared_size_bytes"
+    assert captured[0].declared_size_bytes is None
 
 
 def test_custom_part_retry_is_forwarded(

@@ -101,6 +101,16 @@ DEFAULT_MAX_CONCURRENCY = 10
 #: actual size. See :func:`auto_part_size_hint`.
 DEFAULT_PART_SIZE = 8 * MIB
 
+#: A file larger than this is uploaded via a *streaming* (just-in-time mint)
+#: session: :meth:`UploadsApi.upload_file` OMITS ``declared_size_bytes`` so the
+#: server mints NO part URLs up front and the client mints each part's URL moments
+#: before its ``PUT``. A presigned URL then cannot expire mid-transfer no matter
+#: how long a slow large upload runs — the failure mode of the eager known-size
+#: path, whose URLs share a fixed (~30-minute) TTL. A file at or below this stays
+#: on the known-size path (single quick ``PUT`` / eager fast path) by declaring its
+#: size. Mirrors the Rust SDK's ``STREAMING_THRESHOLD`` (also 8 MiB).
+STREAMING_THRESHOLD = DEFAULT_PART_SIZE
+
 #: Target ceiling on part count when auto-scaling the part-size hint for very
 #: large files, with headroom under S3's hard 10,000-part limit.
 TARGET_MAX_PARTS = 9000
@@ -213,21 +223,46 @@ class UploadOptions:
     #: rounds. ``None`` uses :data:`DEFAULT_ROUND_BASE_DELAY` (2s). Set to ``0``
     #: in tests for instant rounds.
     round_base_delay: Optional[float] = None
+    #: Timeout for the control-plane API calls (create session / finalize / mint):
+    #: a number of seconds or a ``(connect, read)`` tuple. Storage ``PUT`` timeouts
+    #: are automatic and size-scaled (see :func:`_part_put_timeout`) and are not
+    #: affected by this.
+    request_timeout: Any = None
+    #: Optional :class:`threading.Event`; setting it aborts an in-flight upload
+    #: (in-flight part ``PUT`` s are cancelled and the upload is not finalized),
+    #: raising :class:`UploadCancelledError`. The upload is not resumable.
+    cancel_event: Optional[threading.Event] = None
 
 
 # --- Errors ---------------------------------------------------------------
 
 
 class UploadError(Exception):
-    """Base class for errors raised by :meth:`UploadsApi.upload_file` while
-    driving the direct-to-storage flow.
+    """Base class for **every** error raised by :meth:`UploadsApi.upload_file`.
 
-    Opening the session or finalizing fails with the generated client's
-    :class:`~hotdata.exceptions.ApiException` instead (e.g. a ``501``
-    ``PRESIGN_UNSUPPORTED`` when the storage backend cannot issue upload URLs);
-    only the storage transfer and session-consistency failures raise
-    ``UploadError`` subclasses.
+    A single ``except UploadError`` catches the whole flow: opening the session
+    (:class:`SessionCreateError`), the storage transfer
+    (:class:`StorageError` / :class:`StorageTransportError` /
+    :class:`MissingETagError`), minting part URLs (:class:`MintPartError`),
+    finalizing (:class:`FinalizeError`), a session-consistency problem
+    (:class:`MalformedSessionError`), a size overflow (:class:`SizeLimitError`),
+    or caller cancellation (:class:`UploadCancelledError`). The phase errors that
+    wrap a control-plane call chain the underlying
+    :class:`~hotdata.exceptions.ApiException` as ``__cause__`` (and expose it as
+    ``api_exception`` / its HTTP ``status``), so a specific status such as a
+    ``501`` ``PRESIGN_UNSUPPORTED`` stays detectable.
+
+    ``OSError`` (local file could not be read) is the one failure that is NOT an
+    ``UploadError`` — it is a plain filesystem error, not an upload-flow error.
     """
+
+    #: ``True`` when a *retryable* failure survived every whole-upload re-sweep
+    #: round (retries exhausted), as opposed to a one-shot terminal reject. Lets a
+    #: caller distinguish "give up and alert" from "worth scheduling a later try".
+    exhausted: bool = False
+    #: Number of re-sweep rounds attempted before this error was surfaced
+    #: (``None`` when not raised from the re-sweep driver).
+    rounds_attempted: Optional[int] = None
 
 
 class MalformedSessionError(UploadError):
@@ -303,6 +338,57 @@ class MissingETagError(UploadError):
         )
 
 
+class _ApiPhaseError(UploadError):
+    """Base for the upload phases that wrap a control-plane
+    :class:`~hotdata.exceptions.ApiException`. Exposes the wrapped exception as
+    ``api_exception`` and its HTTP ``status`` while chaining it as ``__cause__``,
+    so ``except UploadError`` catches the whole flow yet a specific status stays
+    detectable.
+    """
+
+    _phase = "the upload"
+
+    def __init__(self, api_exception: ApiException) -> None:
+        self.api_exception = api_exception
+        self.status = getattr(api_exception, "status", None)
+        super().__init__(f"{self._phase} failed: {api_exception}")
+
+
+class SessionCreateError(_ApiPhaseError):
+    """Opening the upload session (``POST /v1/uploads``) failed. A ``501``
+    ``PRESIGN_UNSUPPORTED`` (``status == 501``) means the backend cannot issue
+    presigned URLs — fall back to :meth:`UploadsApi.upload_stream`.
+    """
+
+    _phase = "opening the upload session"
+
+
+class MintPartError(_ApiPhaseError):
+    """Minting a part URL (``POST /v1/uploads/{id}/parts``) failed. Retryable —
+    the whole-upload re-sweep re-mints on a later round.
+    """
+
+    _phase = "minting a part URL"
+
+
+class FinalizeError(_ApiPhaseError):
+    """Finalizing the upload (``POST /v1/uploads/{id}/finalize``) failed after the
+    bytes were stored. Not retried automatically (finalize is exactly-once).
+    """
+
+    _phase = "finalizing the upload"
+
+
+class UploadCancelledError(UploadError):
+    """The caller's ``cancel_event`` was set, so the upload was aborted. In-flight
+    part ``PUT`` s are cancelled and the upload is not finalized. The upload is not
+    resumable — a later :meth:`UploadsApi.upload_file` opens a fresh session.
+    """
+
+    def __init__(self) -> None:
+        super().__init__("upload cancelled by caller")
+
+
 # --- Error classification (Item 2) ----------------------------------------
 
 
@@ -319,11 +405,13 @@ def _is_retryable(exc: BaseException) -> bool:
     write), or anything unexpected. Retrying those would burn the round budget for
     nothing or, worse, double-``PUT``.
     """
+    if isinstance(exc, UploadCancelledError):
+        return False  # caller asked to stop; never retry
     if isinstance(exc, (StorageTransportError, MissingETagError)):
         return True
     if isinstance(exc, StorageError):
         return True  # incl. 5xx (outer tier owns it) and 403 (eager URL expiry)
-    if isinstance(exc, ApiException):
+    if isinstance(exc, (MintPartError, ApiException)):
         return True  # a per-part mint round-trip failure — a re-mint may cure it
     return False
 
@@ -395,6 +483,7 @@ def _upload_parts_resilient(
     round_base_delay: float = DEFAULT_ROUND_BASE_DELAY,
     on_part_done: Optional[Callable[[_PartPlan], None]] = None,
     on_terminal: Optional[Callable[[], None]] = None,
+    cancel_event: Optional[threading.Event] = None,
     sleep: Callable[[float], None] = time.sleep,
 ) -> List[FinalizeUploadPart]:
     """Run every part's ``upload_one`` work unit with whole-upload re-sweep.
@@ -447,6 +536,11 @@ def _upload_parts_resilient(
             if stop.is_set():
                 # A terminal error elsewhere in the round: don't dispatch new work.
                 failures[plan.part_number] = _NotDispatched()
+                return
+            if cancel_event is not None and cancel_event.is_set():
+                # Caller asked to stop: fail fast (terminal), cancelling in-flight
+                # siblings, so the upload aborts without finalizing.
+                _fail_terminal(UploadCancelledError())
                 return
             try:
                 part = upload_one(plan)
@@ -517,10 +611,19 @@ def _upload_parts_resilient(
 
     if pending:
         # Exhausted the round budget with parts still failing: surface the last
-        # underlying error so the caller's normal mapping applies.
+        # underlying error so the caller's normal mapping applies, tagging it as
+        # retries-exhausted (Ergo #6) so a caller can tell "gave up after N rounds"
+        # from a one-shot terminal reject.
+        rounds = 1 + max_extra_rounds
         if last_error is not None:
+            if isinstance(last_error, UploadError):
+                last_error.exhausted = True
+                last_error.rounds_attempted = rounds
             raise last_error
-        raise StorageTransportError(url="", part_number=pending[0].part_number)
+        exc = StorageTransportError(url="", part_number=pending[0].part_number)
+        exc.exhausted = True
+        exc.rounds_attempted = rounds
+        raise exc
 
     # Completeness: every plan's slot must be filled.
     missing = [p.part_number for p in plans if p.part_number not in results]
@@ -554,10 +657,18 @@ def _wait_first(futures: set) -> Tuple[set, set]:
 
 # --- Storage transport ----------------------------------------------------
 
+#: Bound on TCP+TLS establishment for a storage ``PUT`` (Item 3). Only the
+#: *connect* phase is bounded — a dead/black-holed endpoint fails fast into the
+#: whole-upload re-sweep instead of blocking on the OS SYN timeout (~75s). The
+#: *read* phase is deliberately left unbounded (``read=None``): a large upload
+#: legitimately takes minutes, and the per-part watchdog (not a read timeout) owns
+#: stall detection once bytes start flowing. Mirrors the Rust SDK's 30s connect
+#: timeout.
+STORAGE_CONNECT_TIMEOUT = 30.0
+
 # A dedicated, process-wide, *bare* pool for storage PUTs. Deliberately NOT the
 # SDK's ApiClient pool: a host app may have installed auth / workspace headers
-# there, which storage would reject. Built lazily and reused. No request
-# timeout: a large upload legitimately takes minutes.
+# there, which storage would reject. Built lazily and reused.
 _STORAGE_POOL: Optional[urllib3.PoolManager] = None
 _STORAGE_POOL_LOCK = threading.Lock()
 
@@ -567,7 +678,14 @@ def _storage_pool() -> urllib3.PoolManager:
     if _STORAGE_POOL is None:
         with _STORAGE_POOL_LOCK:
             if _STORAGE_POOL is None:
-                pool = urllib3.PoolManager()
+                # Bound connect only; leave read unbounded (see
+                # STORAGE_CONNECT_TIMEOUT). The pool-level default flows to every
+                # PUT unless a per-request timeout overrides it.
+                pool = urllib3.PoolManager(
+                    timeout=urllib3.Timeout(
+                        connect=STORAGE_CONNECT_TIMEOUT, read=None
+                    )
+                )
                 # Install the stall-cancellation connection subclass at creation
                 # time — BEFORE any request can populate `manager.pools` with a
                 # host pool carrying the stock connection class (Codex #2). The
@@ -815,6 +933,8 @@ class UploadsApi(_GeneratedUploadsApi):
         part_retry: Optional[Retry] = None,
         max_extra_rounds: Optional[int] = None,
         round_base_delay: Optional[float] = None,
+        request_timeout: Any = None,
+        cancel_event: Optional[threading.Event] = None,
         options: Optional[UploadOptions] = None,
         _request_timeout: Any = None,
     ) -> FinalizeUploadResponse:
@@ -849,21 +969,41 @@ class UploadsApi(_GeneratedUploadsApi):
         :param max_concurrency: Max in-flight part ``PUT`` s for a multipart
             upload (default :data:`DEFAULT_MAX_CONCURRENCY`, further bounded by a
             peak-memory budget).
-        :param progress: Callback invoked with ``(bytes_done_total, total)``.
+        :param progress: Callback invoked with ``(bytes_done_total, total)`` — a
+            *cumulative* byte count (not a delta). For multipart it fires from
+            worker threads, so a callback touching shared state must lock; see
+            :func:`tqdm_progress` for a ready-made thread-safe tqdm adapter.
         :param part_retry: ``urllib3`` retry policy for multipart part ``PUT`` s;
             defaults to :func:`default_part_retry`.
+        :param request_timeout: Timeout for the control-plane API calls (create
+            session / finalize / mint): a number of seconds or ``(connect, read)``.
+            Storage ``PUT`` timeouts are automatic and size-scaled and are not
+            affected by this.
+        :param cancel_event: Optional :class:`threading.Event`; setting it aborts
+            the upload (in-flight part ``PUT`` s are cancelled and the upload is not
+            finalized), raising :class:`UploadCancelledError`. Not resumable.
         :param options: An :class:`UploadOptions` bundle; individual keyword
             arguments take precedence over its fields.
-        :raises SizeLimitError: the file is larger than the wire's 64-bit field.
+
+        Every failure is a :class:`UploadError` subclass, so one ``except
+        UploadError`` catches the whole flow (the sole exception is ``OSError`` for
+        a local read failure):
+
+        :raises SessionCreateError: opening the session failed (e.g. a ``501``
+            ``PRESIGN_UNSUPPORTED`` — check ``.status``; fall back to
+            :meth:`upload_stream`). Wraps the ``ApiException`` as ``__cause__``.
+        :raises SizeLimitError: the part-size hint exceeds the wire's 64-bit field.
         :raises MalformedSessionError: the session response was inconsistent.
-        :raises StorageError: a storage ``PUT`` returned a non-2xx status.
+        :raises StorageError: a storage ``PUT`` returned a non-2xx status. Its
+            ``exhausted`` flag is ``True`` if it survived every re-sweep round.
         :raises StorageTransportError: a storage ``PUT`` failed before any
             response (connection/TLS/DNS error, or retries exhausted).
         :raises MissingETagError: a part ``PUT`` returned no ``ETag``.
+        :raises MintPartError: minting a part URL failed. Wraps the ``ApiException``.
+        :raises FinalizeError: finalizing failed after the bytes were stored.
+            Wraps the ``ApiException``.
+        :raises UploadCancelledError: ``cancel_event`` was set.
         :raises OSError: the local file could not be opened or read.
-        :raises hotdata.exceptions.ApiException: opening the session or
-            finalizing failed (e.g. ``501`` ``PRESIGN_UNSUPPORTED`` — the storage
-            backend cannot issue upload URLs; use ``POST /v1/files`` instead).
         """
         opts = options or UploadOptions()
         content_type = content_type if content_type is not None else opts.content_type
@@ -883,6 +1023,20 @@ class UploadsApi(_GeneratedUploadsApi):
         round_base_delay = (
             round_base_delay if round_base_delay is not None else opts.round_base_delay
         )
+        request_timeout = (
+            request_timeout if request_timeout is not None else opts.request_timeout
+        )
+        cancel_event = cancel_event if cancel_event is not None else opts.cancel_event
+
+        # `request_timeout` is the public control-plane timeout knob; `_request_timeout`
+        # is the historical (leading-underscore) alias. The public name wins when both
+        # are given. It governs the create-session / finalize / mint API calls only —
+        # storage PUT timeouts are automatic and size-scaled (see `_part_put_timeout`).
+        timeout = request_timeout if request_timeout is not None else _request_timeout
+
+        # Fail fast if the caller already cancelled before any work started.
+        if cancel_event is not None and cancel_event.is_set():
+            raise UploadCancelledError()
 
         src = _make_source(source, size)
         total = src.size
@@ -893,22 +1047,36 @@ class UploadsApi(_GeneratedUploadsApi):
         # declared size. The server clamps it regardless.
         part_size_hint = part_size if part_size is not None else auto_part_size_hint(total)
 
-        # The wire models sizes as a signed i64; reject a pathological size up
-        # front rather than silently sending an out-of-range value.
-        if total > _MAX_WIRE_INT:
-            raise SizeLimitError(what="declared_size_bytes", value=total)
+        # Choose the session shape by size (Item 4). A large file OMITS
+        # `declared_size_bytes` so the server opens a STREAMING session (no part
+        # URLs up front); the client then mints each part's URL just before its
+        # PUT, so a presigned URL cannot expire mid-transfer. A small file DECLARES
+        # its size to keep the known-size path (single-PUT / eager fast path). The
+        # i64 wire-range guard applies only when the size is actually sent — a
+        # streamed file's size never reaches the wire, so it is never an obstacle
+        # (matches the Rust SDK). The part-size hint is always sent, so it is
+        # always range-checked.
         if part_size_hint > _MAX_WIRE_INT:
             raise SizeLimitError(what="part_size", value=part_size_hint)
 
-        session = self.create_upload_session_handler(
-            CreateUploadRequest(
-                content_type=content_type,
-                content_encoding=content_encoding,
-                filename=filename,
-                declared_size_bytes=total,
-                part_size=part_size_hint,
-            ),
-            _request_timeout=_request_timeout,
+        create_kwargs: Dict[str, Any] = dict(
+            content_type=content_type,
+            content_encoding=content_encoding,
+            filename=filename,
+            part_size=part_size_hint,
+        )
+        if total <= STREAMING_THRESHOLD:
+            if total > _MAX_WIRE_INT:  # unreachable given the threshold; explicit
+                raise SizeLimitError(what="declared_size_bytes", value=total)
+            create_kwargs["declared_size_bytes"] = total
+        # else: OMIT declared_size_bytes entirely (do NOT pass None). Passing None
+        # sets the field in pydantic's `model_fields_set`, serializing to
+        # `"declared_size_bytes": null`; the server needs the field ABSENT to open
+        # a streaming session, so the field is left off the constructor call.
+
+        session = self._create_session(
+            CreateUploadRequest(**create_kwargs),
+            _request_timeout=timeout,
         )
 
         # Report initial progress so a 0-byte file (or an instant single PUT)
@@ -917,7 +1085,7 @@ class UploadsApi(_GeneratedUploadsApi):
             progress(0, total)
 
         if session.mode == "single":
-            self._upload_single(session, src, total, progress)
+            self._upload_single(session, src, total, progress, cancel_event)
             parts: Optional[List[FinalizeUploadPart]] = None
         elif session.mode == "multipart":
             cap = max_concurrency if max_concurrency is not None else DEFAULT_MAX_CONCURRENCY
@@ -937,6 +1105,7 @@ class UploadsApi(_GeneratedUploadsApi):
                     round_base_delay if round_base_delay is not None
                     else DEFAULT_ROUND_BASE_DELAY
                 ),
+                cancel_event=cancel_event,
             )
         else:
             raise MalformedSessionError(f"unknown upload mode {session.mode!r}")
@@ -958,7 +1127,7 @@ class UploadsApi(_GeneratedUploadsApi):
             session.upload_id,
             session.finalize_token,
             finalize_body,
-            _request_timeout,
+            timeout,
         )
 
     def upload_stream(
@@ -1062,6 +1231,21 @@ class UploadsApi(_GeneratedUploadsApi):
 
     # -- internals ---------------------------------------------------------
 
+    def _create_session(
+        self, request: CreateUploadRequest, *, _request_timeout: Any
+    ) -> UploadSessionResponse:
+        """Open the upload session, mapping a control-plane failure to
+        :class:`SessionCreateError` so the whole flow catches under
+        :class:`UploadError` (Ergo #2). The ``ApiException`` is chained as
+        ``__cause__`` and exposed via ``.api_exception`` / ``.status``.
+        """
+        try:
+            return self.create_upload_session_handler(
+                request, _request_timeout=_request_timeout
+            )
+        except ApiException as exc:
+            raise SessionCreateError(exc) from exc
+
     def _finalize_handler(
         self,
         upload_id: str,
@@ -1089,6 +1273,10 @@ class UploadsApi(_GeneratedUploadsApi):
                 body,
                 _request_timeout=_request_timeout,
             )
+        except ApiException as exc:
+            # Bytes are already stored; only the finalize confirmation failed. Map
+            # to FinalizeError so `except UploadError` catches it (Ergo #2).
+            raise FinalizeError(exc) from exc
         finally:
             finalize_client.close()
 
@@ -1098,6 +1286,7 @@ class UploadsApi(_GeneratedUploadsApi):
         src: _Source,
         total: int,
         progress: Optional[UploadProgress],
+        cancel_event: Optional[threading.Event] = None,
     ) -> None:
         """Single-``PUT`` path: stream the whole source to ``session.url``,
         invoking the progress callback incrementally as chunks are sent.
@@ -1109,6 +1298,9 @@ class UploadsApi(_GeneratedUploadsApi):
         url = session.url
         if not url:
             raise MalformedSessionError("single upload missing `url`")
+
+        if cancel_event is not None and cancel_event.is_set():
+            raise UploadCancelledError()
 
         with src.reader() as fileobj:
             body = _ProgressReader(fileobj, total, progress)
@@ -1145,6 +1337,7 @@ class UploadsApi(_GeneratedUploadsApi):
         *,
         max_extra_rounds: int = DEFAULT_MAX_EXTRA_ROUNDS,
         round_base_delay: float = DEFAULT_ROUND_BASE_DELAY,
+        cancel_event: Optional[threading.Event] = None,
     ) -> List[FinalizeUploadPart]:
         """Resilient multipart path: ``PUT`` each ``part_size``-byte chunk to
         storage with the whole-upload re-sweep (Item 1) — a single part's
@@ -1262,6 +1455,7 @@ class UploadsApi(_GeneratedUploadsApi):
                 round_base_delay=round_base_delay,
                 on_part_done=on_part_done,
                 on_terminal=watchdog.cancel_all,
+                cancel_event=cancel_event,
             )
         finally:
             watchdog.shutdown()
@@ -1281,12 +1475,18 @@ class UploadsApi(_GeneratedUploadsApi):
         eager-path 403 re-mint). Validates the response is for the requested part
         number (Item 6); carries a finite (inactivity) timeout (Item 4 / Codex #5).
         """
-        resp = self.mint_upload_parts_handler(
-            session.upload_id,
-            session.finalize_token,
-            MintUploadPartsRequest(part_numbers=[part_number]),
-            _request_timeout=MINT_TIMEOUT,
-        )
+        try:
+            resp = self.mint_upload_parts_handler(
+                session.upload_id,
+                session.finalize_token,
+                MintUploadPartsRequest(part_numbers=[part_number]),
+                _request_timeout=MINT_TIMEOUT,
+            )
+        except ApiException as exc:
+            # A mint round-trip failure is retryable (the re-sweep re-mints on a
+            # later round); wrap it so `except UploadError` catches it (Ergo #2)
+            # while `_is_retryable` still classifies it as retryable.
+            raise MintPartError(exc) from exc
         # Strict validation (Item 6): we requested exactly one part number, so the
         # response must contain exactly that one. Reject a DUPLICATE (two entries
         # for the part — ambiguous, and a plain dict would silently collapse it),
@@ -1404,6 +1604,31 @@ class _FileObjSource(_Source):
         yield self._file
 
 
+def tqdm_progress(bar: Any, *, lock: Optional[threading.Lock] = None) -> UploadProgress:
+    """Adapt :meth:`UploadsApi.upload_file`'s progress callback to a ``tqdm``-style
+    progress bar.
+
+    ``upload_file`` reports the **cumulative** bytes done, but a tqdm bar's
+    ``update(n)`` wants a **delta** — and multipart fires the callback from worker
+    threads, so the update must be serialized. This wraps both concerns, so the
+    obvious usage is correct and thread-safe::
+
+        from tqdm import tqdm
+        with tqdm(total=size, unit="B", unit_scale=True) as bar:
+            uploads.upload_file(path, progress=tqdm_progress(bar))
+
+    Works with any object exposing ``.n`` and ``update(n)`` (tqdm, or a compatible
+    shim). Pass your own ``lock`` to share one bar with other writers.
+    """
+    guard = lock if lock is not None else threading.Lock()
+
+    def _cb(done: int, total: int) -> None:
+        with guard:
+            bar.update(done - bar.n)
+
+    return _cb
+
+
 def _make_source(source: UploadSource, size: Optional[int]) -> _Source:
     """Normalize an upload input into a :class:`_Source`.
 
@@ -1440,13 +1665,19 @@ __all__ = [
     "MAX_PART_SIZE",
     "MIB",
     "MIN_PART_SIZE",
+    "STORAGE_CONNECT_TIMEOUT",
+    "STREAMING_THRESHOLD",
     "TARGET_MAX_PARTS",
     "UPLOAD_MEMORY_BUDGET",
+    "FinalizeError",
     "MalformedSessionError",
+    "MintPartError",
     "MissingETagError",
+    "SessionCreateError",
     "SizeLimitError",
     "StorageError",
     "StorageTransportError",
+    "UploadCancelledError",
     "UploadError",
     "UploadOptions",
     "UploadProgress",
@@ -1455,4 +1686,5 @@ __all__ = [
     "auto_part_size_hint",
     "default_part_retry",
     "effective_in_flight",
+    "tqdm_progress",
 ]

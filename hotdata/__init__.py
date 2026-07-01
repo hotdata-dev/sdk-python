@@ -334,3 +334,38 @@ from hotdata.models.workspace_usage_response import WorkspaceUsageResponse as Wo
 from hotdata.query import QueryApi as QueryApi  # noqa: E402,F811
 from hotdata.arrow import ResultsApi as ResultsApi  # noqa: E402,F811
 from hotdata.uploads import UploadsApi as UploadsApi  # noqa: E402,F811
+# The upload error hierarchy + option/helper types, so `from hotdata import
+# UploadError` / `StorageError` / ... works (they otherwise live only under
+# hotdata.uploads and are invisible to autocomplete on `hotdata.`).
+from hotdata.uploads import (  # noqa: E402,F401
+    UploadError as UploadError,
+    SessionCreateError as SessionCreateError,
+    MalformedSessionError as MalformedSessionError,
+    SizeLimitError as SizeLimitError,
+    StorageError as StorageError,
+    StorageTransportError as StorageTransportError,
+    MissingETagError as MissingETagError,
+    MintPartError as MintPartError,
+    FinalizeError as FinalizeError,
+    UploadCancelledError as UploadCancelledError,
+    UploadOptions as UploadOptions,
+    UploadProgress as UploadProgress,
+    UploadSource as UploadSource,
+    tqdm_progress as tqdm_progress,
+)
+__all__ += [  # noqa: F405
+    "UploadError",
+    "SessionCreateError",
+    "MalformedSessionError",
+    "SizeLimitError",
+    "StorageError",
+    "StorageTransportError",
+    "MissingETagError",
+    "MintPartError",
+    "FinalizeError",
+    "UploadCancelledError",
+    "UploadOptions",
+    "UploadProgress",
+    "UploadSource",
+    "tqdm_progress",
+]

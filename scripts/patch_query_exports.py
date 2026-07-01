@@ -35,6 +35,41 @@ OVERRIDE = (
     "from hotdata.query import QueryApi as QueryApi  # noqa: E402,F811\n"
     "from hotdata.arrow import ResultsApi as ResultsApi  # noqa: E402,F811\n"
     "from hotdata.uploads import UploadsApi as UploadsApi  # noqa: E402,F811\n"
+    "# The upload error hierarchy + option/helper types, so `from hotdata import\n"
+    "# UploadError` / `StorageError` / ... works (they otherwise live only under\n"
+    "# hotdata.uploads and are invisible to autocomplete on `hotdata.`).\n"
+    "from hotdata.uploads import (  # noqa: E402,F401\n"
+    "    UploadError as UploadError,\n"
+    "    SessionCreateError as SessionCreateError,\n"
+    "    MalformedSessionError as MalformedSessionError,\n"
+    "    SizeLimitError as SizeLimitError,\n"
+    "    StorageError as StorageError,\n"
+    "    StorageTransportError as StorageTransportError,\n"
+    "    MissingETagError as MissingETagError,\n"
+    "    MintPartError as MintPartError,\n"
+    "    FinalizeError as FinalizeError,\n"
+    "    UploadCancelledError as UploadCancelledError,\n"
+    "    UploadOptions as UploadOptions,\n"
+    "    UploadProgress as UploadProgress,\n"
+    "    UploadSource as UploadSource,\n"
+    "    tqdm_progress as tqdm_progress,\n"
+    ")\n"
+    "__all__ += [  # noqa: F405\n"
+    '    "UploadError",\n'
+    '    "SessionCreateError",\n'
+    '    "MalformedSessionError",\n'
+    '    "SizeLimitError",\n'
+    '    "StorageError",\n'
+    '    "StorageTransportError",\n'
+    '    "MissingETagError",\n'
+    '    "MintPartError",\n'
+    '    "FinalizeError",\n'
+    '    "UploadCancelledError",\n'
+    '    "UploadOptions",\n'
+    '    "UploadProgress",\n'
+    '    "UploadSource",\n'
+    '    "tqdm_progress",\n'
+    "]\n"
 )
 
 
