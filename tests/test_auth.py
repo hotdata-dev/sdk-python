@@ -807,3 +807,109 @@ def test_auth_settings_reads_token_once(monkeypatch: pytest.MonkeyPatch) -> None
 
     assert _bearer_from(auth) == "Bearer eyJ.once.jwt"
     assert count["n"] == 1
+
+
+# --------------------------------------------------------------------------
+# Item 9 -- token-exchange success-path body-read retry
+#
+# A connection dropped while reading the body of a 200 is a transport-level,
+# transient failure and must be retried within the attempt budget, exactly like
+# a pre-response connection error. A valid-but-malformed JSON body, in contrast,
+# is a definitive rejection and must NOT be retried. The truncated-body case
+# genuinely requires a raw socket: no fake pool can send a valid 200 status line
+# and then drop mid-body, which is the precise condition under test.
+# --------------------------------------------------------------------------
+
+
+def _raw_token_server(bodies: List[Optional[bytes]]):
+    """Start a raw TCP server that serves one scripted response per connection.
+
+    Each element of ``bodies`` is the raw bytes to send for that connection
+    (already including status line + headers), or ``None`` to send a truncated
+    200 -- a Content-Length promising more than is sent, then an immediate close.
+    Returns ``(port, accepted)`` where ``accepted["n"]`` counts connections.
+    """
+    import socket
+
+    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    srv.bind(("127.0.0.1", 0))
+    srv.listen(len(bodies) + 1)
+    port = srv.getsockname()[1]
+    accepted = {"n": 0}
+
+    def serve() -> None:
+        for raw in bodies:
+            try:
+                conn, _ = srv.accept()
+            except OSError:
+                break
+            accepted["n"] += 1
+            try:
+                conn.recv(65536)  # drain the request
+                if raw is None:
+                    # 200 promising 100 body bytes, then only a few + close.
+                    conn.sendall(
+                        b"HTTP/1.1 200 OK\r\nContent-Length: 100\r\n\r\n{\"access"
+                    )
+                else:
+                    conn.sendall(raw)
+            except OSError:
+                pass
+            finally:
+                try:
+                    conn.close()
+                except OSError:
+                    pass
+        try:
+            srv.close()
+        except OSError:
+            pass
+
+    threading.Thread(target=serve, daemon=True).start()
+    return port, accepted
+
+
+def _full_token_response(access_token: str = "eyJ.real.jwt") -> bytes:
+    payload = json.dumps(
+        {"access_token": access_token, "token_type": "Bearer", "expires_in": 300}
+    ).encode()
+    return (
+        b"HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%b" % (len(payload), payload)
+    )
+
+
+def test_truncated_200_body_is_retried_then_succeeds() -> None:
+    """A 200 whose body is truncated mid-read (connection dropped) is transient:
+    the exchange retries on a fresh connection and returns the token.
+
+    Uses a real socket + real PoolManager -- the whole point is a genuine
+    valid-status-line-then-truncated-body transport failure, which surfaces as a
+    urllib3 ``ProtocolError`` from ``pool.request()`` (the body is preloaded) and
+    is caught + retried by ``_exchange``'s transport-error branch.
+    """
+    sleeps: List[float] = []
+    port, accepted = _raw_token_server([None, _full_token_response("eyJ.real.jwt")])
+    mgr = _TokenManager(
+        "hd_secret_token",
+        _config(host=f"http://127.0.0.1:{port}"),
+        pool=urllib3.PoolManager(),
+        sleep=sleeps.append,
+    )
+
+    assert mgr.bearer_value() == "eyJ.real.jwt"
+    assert accepted["n"] == 2  # first (truncated) retried on a second connection
+    assert len(sleeps) == 1
+
+
+def test_malformed_json_200_body_is_not_retried() -> None:
+    """A complete 200 whose body is valid bytes but invalid JSON is a definitive
+    rejection -- it must NOT be retried, and must surface as TokenExchangeError."""
+    sleeps: List[float] = []
+    pool = _FakePool([_FakeResponse(200, b"{ not valid json ")])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool, sleep=sleeps.append)
+
+    with pytest.raises(TokenExchangeError):
+        mgr.bearer_value()
+    assert len(pool.calls) == 1  # parse error is fatal, not retried
+    assert sleeps == []
