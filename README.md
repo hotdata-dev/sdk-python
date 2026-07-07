@@ -77,17 +77,21 @@ from hotdata.arrow import ResultsApi
 with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
     results = ResultsApi(client)
 
+    # Results are scoped to a database via the required `X-Database-Id` header,
+    # so pass the id of the database the query ran in.
+    database_id = "your_database_id"
+
     # Buffered: returns a pyarrow.Table.
-    table = results.get_result_arrow(result_id)
+    table = results.get_result_arrow(result_id, database_id)
 
     # Streaming: yields a pyarrow.RecordBatchStreamReader without
     # materializing the full table in memory.
-    with results.stream_result_arrow(result_id) as reader:
+    with results.stream_result_arrow(result_id, database_id) as reader:
         for batch in reader:
             ...
 ```
 
-Both methods accept `offset` and `limit` for pagination. They raise `hotdata.arrow.ResultNotReadyError` if the result is still pending or processing — poll `results.get_result(result_id)` until `status == "ready"` first.
+Both methods accept `offset` and `limit` for pagination. They raise `hotdata.arrow.ResultNotReadyError` if the result is still pending or processing — poll `results.get_result(result_id, database_id)` until `status == "ready"` first.
 
 ## File uploads
 

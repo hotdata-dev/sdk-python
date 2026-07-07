@@ -148,7 +148,7 @@ def test_get_result_arrow_returns_table(monkeypatch: pytest.MonkeyPatch) -> None
     _install_fake_response(monkeypatch, fake, captured)
 
     results, _ = _make_results_api()
-    got = results.get_result_arrow("res_123")
+    got = results.get_result_arrow("res_123", "db_x")
 
     assert got.equals(table)
     # Connection is drained (not just released) so a partially-read body can't
@@ -166,6 +166,8 @@ def test_get_result_arrow_returns_table(monkeypatch: pytest.MonkeyPatch) -> None
     assert "format=arrow" in call["url"]
     # Accept header overrides the JSON default.
     assert call["headers"]["Accept"] == ARROW_STREAM_MEDIA_TYPE
+    # Results are database-scoped: the required X-Database-Id header is sent.
+    assert call["headers"]["X-Database-Id"] == "db_x"
 
 
 def test_get_result_arrow_forwards_offset_and_limit(
@@ -180,7 +182,7 @@ def test_get_result_arrow_forwards_offset_and_limit(
     _install_fake_response(monkeypatch, fake, captured)
 
     results, _ = _make_results_api()
-    results.get_result_arrow("res_123", offset=10, limit=100)
+    results.get_result_arrow("res_123", "db_x", offset=10, limit=100)
 
     url = captured[0]["url"]
     assert "offset=10" in url
@@ -199,7 +201,7 @@ def test_stream_result_arrow_yields_reader(
     _install_fake_response(monkeypatch, fake, [])
 
     results, _ = _make_results_api()
-    with results.stream_result_arrow("res_123") as reader:
+    with results.stream_result_arrow("res_123", "db_x") as reader:
         batches = list(reader)
         assert batches, "expected at least one RecordBatch"
         roundtrip = pa.Table.from_batches(batches, schema=reader.schema)
@@ -232,7 +234,7 @@ def test_get_result_arrow_raises_when_not_ready(
 
     results, _ = _make_results_api()
     with pytest.raises(ResultNotReadyError) as ei:
-        results.get_result_arrow("res_pending")
+        results.get_result_arrow("res_pending", "db_x")
 
     assert ei.value.status == "processing"
     assert ei.value.result_id == "res_pending"
@@ -252,7 +254,7 @@ def test_get_result_arrow_raises_api_exception_on_404(
 
     results, _ = _make_results_api()
     with pytest.raises(ApiException) as ei:
-        results.get_result_arrow("res_missing")
+        results.get_result_arrow("res_missing", "db_x")
 
     assert ei.value.status == 404
     assert fake.release_conn_called
@@ -278,7 +280,7 @@ def test_get_result_arrow_raises_api_exception_on_409_failed(
 
     results, _ = _make_results_api()
     with pytest.raises(ApiException) as ei:
-        results.get_result_arrow("res_failed")
+        results.get_result_arrow("res_failed", "db_x")
 
     assert ei.value.status == 409
 

@@ -87,6 +87,7 @@ class ResultsApi(_GeneratedResultsApi):
     def get_result_arrow(
         self,
         id: str,
+        x_database_id: str,
         *,
         offset: Optional[int] = None,
         limit: Optional[int] = None,
@@ -99,6 +100,9 @@ class ResultsApi(_GeneratedResultsApi):
         iterate batches without materializing the whole table.
 
         :param id: Result ID.
+        :param x_database_id: Database the result belongs to. Results are scoped
+            to a database via the required ``X-Database-Id`` header — pass the
+            same database the query ran in.
         :param offset: Rows to skip (default: 0).
         :param limit: Maximum rows to return (default: unbounded).
         :raises ResultNotReadyError: result is still pending or processing.
@@ -106,7 +110,8 @@ class ResultsApi(_GeneratedResultsApi):
             (400 invalid params, 404 not found, 409 failed result).
         """
         ipc = _import_pyarrow()
-        response = self._call_arrow(id=id, offset=offset, limit=limit,
+        response = self._call_arrow(id=id, x_database_id=x_database_id,
+                                    offset=offset, limit=limit,
                                     _request_timeout=_request_timeout)
         try:
             return ipc.open_stream(response).read_all()
@@ -117,6 +122,7 @@ class ResultsApi(_GeneratedResultsApi):
     def stream_result_arrow(
         self,
         id: str,
+        x_database_id: str,
         *,
         offset: Optional[int] = None,
         limit: Optional[int] = None,
@@ -132,15 +138,22 @@ class ResultsApi(_GeneratedResultsApi):
 
         Example::
 
-            with results.stream_result_arrow(result_id) as reader:
+            with results.stream_result_arrow(result_id, database_id) as reader:
                 for batch in reader:
                     process(batch)
 
+        :param id: Result ID.
+        :param x_database_id: Database the result belongs to. Results are scoped
+            to a database via the required ``X-Database-Id`` header — pass the
+            same database the query ran in.
+        :param offset: Rows to skip (default: 0).
+        :param limit: Maximum rows to return (default: unbounded).
         :raises ResultNotReadyError: result is still pending or processing.
         :raises hotdata.exceptions.ApiException: for other HTTP errors.
         """
         ipc = _import_pyarrow()
-        response = self._call_arrow(id=id, offset=offset, limit=limit,
+        response = self._call_arrow(id=id, x_database_id=x_database_id,
+                                    offset=offset, limit=limit,
                                     _request_timeout=_request_timeout)
         try:
             yield ipc.open_stream(response)
@@ -151,6 +164,7 @@ class ResultsApi(_GeneratedResultsApi):
         self,
         *,
         id: str,
+        x_database_id: str,
         offset: Optional[int],
         limit: Optional[int],
         _request_timeout: Any,
@@ -158,9 +172,12 @@ class ResultsApi(_GeneratedResultsApi):
         # Build the request via the generator's private serialize helper so
         # path/query/auth handling stays in lockstep with the generated client.
         # Override only what we need: the Accept header and the format query.
+        # `GET /v1/results/{id}` is database-scoped, so the required
+        # X-Database-Id header flows through the generated serializer too.
         headers: Dict[str, Any] = {"Accept": ARROW_STREAM_MEDIA_TYPE}
         params = self._get_result_serialize(
             id=id,
+            x_database_id=x_database_id,
             offset=offset,
             limit=limit,
             format=ResultsFormatQuery.ARROW,

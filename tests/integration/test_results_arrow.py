@@ -70,7 +70,7 @@ def test_results_arrow(
     deadline = time.monotonic() + POLL_TIMEOUT_S
     run = None
     while time.monotonic() < deadline:
-        run = query_runs_api.get_query_run(query_run_id)
+        run = query_runs_api.get_query_run(query_run_id, x_database_id=database_id)
         if run.status in TERMINAL_STATUSES:
             break
         time.sleep(POLL_INTERVAL_S)
@@ -85,7 +85,7 @@ def test_results_arrow(
     # ResultNotReadyError on 202.
     deadline = time.monotonic() + POLL_TIMEOUT_S
     while time.monotonic() < deadline:
-        result = results_api.get_result(result_id)
+        result = results_api.get_result(result_id, x_database_id=database_id)
         if result.status == "ready":
             break
         time.sleep(POLL_INTERVAL_S)
@@ -93,7 +93,7 @@ def test_results_arrow(
         pytest.fail(f"result {result_id} never became ready")
 
     # Buffered: returns a full pyarrow.Table.
-    table = results_api.get_result_arrow(result_id)
+    table = results_api.get_result_arrow(result_id, database_id)
     assert isinstance(table, pa.Table)
     assert table.num_rows == 2
     assert set(table.column_names) == {"x", "msg"}
@@ -101,11 +101,11 @@ def test_results_arrow(
     assert table.column("msg").to_pylist() == ["hello", "world"]
 
     # Streaming: same data via RecordBatchStreamReader.
-    with results_api.stream_result_arrow(result_id) as reader:
+    with results_api.stream_result_arrow(result_id, database_id) as reader:
         streamed = pa.Table.from_batches(list(reader), schema=reader.schema)
     assert streamed.equals(table)
 
     # Pagination forwards correctly.
-    sliced = results_api.get_result_arrow(result_id, offset=1, limit=1)
+    sliced = results_api.get_result_arrow(result_id, database_id, offset=1, limit=1)
     assert sliced.num_rows == 1
     assert sliced.column("x").to_pylist() == [2]
