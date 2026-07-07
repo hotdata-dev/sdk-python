@@ -121,18 +121,40 @@ with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
 (`size` is inferred for all three; a file object is read from its current
 position to the end). The SDK picks single vs. multipart from the size,
 auto-scales the part size, and bounds part concurrency to a peak-memory budget
-(override with `part_size` / `max_concurrency` / `part_retry`). Storage `PUT`s go
-through a dedicated, header-isolated connection pool, so the SDK's auth and
-workspace headers never reach object storage (which would otherwise reject the
-upload). Finalize is sent with retries disabled so the exactly-once call is never
-accidentally replayed.
+(override with `part_size` / `max_concurrency` / `part_retry`). A file larger than
+8 MiB uploads via a **streaming** session — the SDK mints each part's URL just
+before its `PUT`, so a presigned URL can't expire mid-transfer on a slow upload.
+Storage `PUT`s go through a dedicated, header-isolated connection pool (auth and
+workspace headers never reach object storage, which would otherwise reject the
+upload) with a 30s connect timeout so a dead endpoint fails fast. Finalize is sent
+with retries disabled so the exactly-once call is never accidentally replayed.
 
-Failures surface as a typed hierarchy under `hotdata.uploads.UploadError`:
-`StorageError` (storage returned a non-2xx), `StorageTransportError` (the PUT
-failed before any response), `MissingETagError`, `MalformedSessionError`, and
-`SizeLimitError`. Opening the session or finalizing raises the usual
-`hotdata.exceptions.ApiException` — for example a `501` `PRESIGN_UNSUPPORTED`,
-meaning the backend cannot issue upload URLs.
+Every failure is a subclass of `hotdata.uploads.UploadError` (also importable as
+`from hotdata import UploadError`), so a single `except UploadError` catches the
+whole flow: `SessionCreateError` (opening the session — check `.status` for a
+`501` `PRESIGN_UNSUPPORTED`), `StorageError` (storage returned a non-2xx; `.exhausted`
+is `True` if it outlived every retry round), `StorageTransportError` (the PUT
+failed before any response), `MissingETagError`, `MintPartError` (minting a part
+URL), `FinalizeError`, `MalformedSessionError`, `SizeLimitError`, and
+`UploadCancelledError`. The phase errors that wrap a control-plane call chain the
+underlying `hotdata.exceptions.ApiException` as `__cause__` (and expose it as
+`.api_exception` / `.status`). A local file read error surfaces as `OSError`.
+
+The `progress` callback receives a **cumulative** `(bytes_done, total)` — for a
+tqdm bar (whose `update(n)` wants a delta, and which isn't thread-safe under
+multipart) use the ready-made adapter:
+
+```python
+from hotdata import tqdm_progress
+from tqdm import tqdm
+
+with tqdm(total=size, unit="B", unit_scale=True) as bar:
+    uploads.upload_file("data.parquet", progress=tqdm_progress(bar))
+```
+
+Pass a `threading.Event` as `cancel_event` to abort an in-flight upload; tune the
+control-plane calls with `request_timeout` (storage-PUT timeouts are automatic and
+size-scaled).
 
 For that fallback (or to upload from a non-seekable stream), use `upload_stream`,
 which sends the bytes to the legacy `POST /v1/files` endpoint in one request,
