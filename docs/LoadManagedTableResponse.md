@@ -1,6 +1,6 @@
 # LoadManagedTableResponse
 
-Response body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads`.
+Result of a managed-table load: row count after the load plus the published table schema. Returned inline (`200`) for a synchronous load, and as the `GET /v1/jobs/{id}` result payload for a completed background load.
 
 ## Properties
 
@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **arrow_schema_json** | **str** | Schema of the loaded table, as JSON. | 
 **connection_id** | **str** |  | 
-**row_count** | **int** | Total rows in the published parquet file. | 
+**row_count** | **int** | Total number of rows in the table after the load. | 
 **schema_name** | **str** |  | 
 **table_name** | **str** |  | 
 

@@ -7,6 +7,7 @@ Request body for POST /refresh
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **var_async** | **bool** | When true, submit the refresh as a background job and return immediately with a job ID for status polling. Only supported for data refresh operations. | [optional] 
+**async_after_ms** | **int** | If set (requires &#x60;async&#x60; &#x3D; true), wait up to this many milliseconds for the refresh to finish: if it completes in time the full result is returned, otherwise a &#x60;202&#x60; with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without &#x60;async&#x60; &#x3D; true, is rejected with 400. Only applies to data refresh. | [optional] 
 **connection_id** | **str** |  | [optional] 
 **data** | **bool** |  | [optional] 
 **include_uncached** | **bool** | Controls whether uncached tables are included in connection-wide data refresh.  - &#x60;false&#x60; (default): Only refresh tables that already have cached data.   This is the common case for keeping existing data up-to-date. - &#x60;true&#x60;: Also sync tables that haven&#39;t been cached yet, essentially performing   an initial sync for any new tables discovered since the connection was created.  This field only applies to connection-wide data refresh (when &#x60;data&#x3D;true&#x60; and &#x60;table_name&#x60; is not specified). It has no effect on single-table refresh or schema refresh operations. | [optional] 

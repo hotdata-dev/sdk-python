@@ -25,12 +25,12 @@ from typing_extensions import Self
 
 class AsyncQueryResponse(BaseModel):
     """
-    Response returned when a query is submitted asynchronously (202 Accepted).  Poll GET /query-runs/{id} to track progress. Once status is \"succeeded\", retrieve results via GET /results/{result_id}.
+    Response returned when a query is submitted asynchronously (202 Accepted).  Poll GET /query-runs/{id} to track progress, sending the same `X-Database-Id` header used to submit the query — the endpoint is scoped to that database and returns 400 without it. Once status is \"succeeded\", retrieve results via GET /results/{result_id}.
     """ # noqa: E501
     query_run_id: StrictStr = Field(description="Unique identifier for the query run.")
     reason: Optional[StrictStr] = Field(default=None, description="Human-readable reason why the query went async (e.g., caching tables for the first time).")
     status: StrictStr = Field(description="Current status of the query run.")
-    status_url: StrictStr = Field(description="URL to poll for query run status.")
+    status_url: StrictStr = Field(description="URL to poll for query run status. Requires the same `X-Database-Id` header used to submit the query.")
     __properties: ClassVar[List[str]] = ["query_run_id", "reason", "status", "status_url"]
 
     model_config = ConfigDict(

@@ -92,8 +92,10 @@ class RefreshApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "RefreshResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -161,8 +163,10 @@ class RefreshApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "RefreshResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -230,8 +234,10 @@ class RefreshApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "RefreshResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,

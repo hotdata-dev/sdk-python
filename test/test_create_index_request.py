@@ -37,6 +37,7 @@ class TestCreateIndexRequest(unittest.TestCase):
         if include_optional:
             return CreateIndexRequest(
                 var_async = True,
+                async_after_ms = 1000,
                 columns = [
                     ''
                     ],

@@ -45,6 +45,7 @@ class ResultsApi:
     def get_result(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Database the result belongs to (required)")],
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
         format: Annotated[Optional[ResultsFormatQuery], Field(description="`arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.")] = None,
@@ -67,6 +68,8 @@ class ResultsApi:
 
         :param id: Result ID (required)
         :type id: str
+        :param x_database_id: Database the result belongs to (required) (required)
+        :type x_database_id: str
         :param offset: Rows to skip (default: 0)
         :type offset: int
         :param limit: Maximum rows to return (default: unbounded)
@@ -97,6 +100,7 @@ class ResultsApi:
 
         _param = self._get_result_serialize(
             id=id,
+            x_database_id=x_database_id,
             offset=offset,
             limit=limit,
             format=format,
@@ -128,6 +132,7 @@ class ResultsApi:
     def get_result_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Database the result belongs to (required)")],
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
         format: Annotated[Optional[ResultsFormatQuery], Field(description="`arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.")] = None,
@@ -150,6 +155,8 @@ class ResultsApi:
 
         :param id: Result ID (required)
         :type id: str
+        :param x_database_id: Database the result belongs to (required) (required)
+        :type x_database_id: str
         :param offset: Rows to skip (default: 0)
         :type offset: int
         :param limit: Maximum rows to return (default: unbounded)
@@ -180,6 +187,7 @@ class ResultsApi:
 
         _param = self._get_result_serialize(
             id=id,
+            x_database_id=x_database_id,
             offset=offset,
             limit=limit,
             format=format,
@@ -211,6 +219,7 @@ class ResultsApi:
     def get_result_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Database the result belongs to (required)")],
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
         format: Annotated[Optional[ResultsFormatQuery], Field(description="`arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.")] = None,
@@ -233,6 +242,8 @@ class ResultsApi:
 
         :param id: Result ID (required)
         :type id: str
+        :param x_database_id: Database the result belongs to (required) (required)
+        :type x_database_id: str
         :param offset: Rows to skip (default: 0)
         :type offset: int
         :param limit: Maximum rows to return (default: unbounded)
@@ -263,6 +274,7 @@ class ResultsApi:
 
         _param = self._get_result_serialize(
             id=id,
+            x_database_id=x_database_id,
             offset=offset,
             limit=limit,
             format=format,
@@ -289,6 +301,7 @@ class ResultsApi:
     def _get_result_serialize(
         self,
         id,
+        x_database_id,
         offset,
         limit,
         format,
@@ -329,6 +342,8 @@ class ResultsApi:
             _query_params.append(('format', format.value))
             
         # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
         # process the form parameters
         # process the body parameter
 
@@ -374,6 +389,7 @@ class ResultsApi:
     @validate_call
     def list_results(
         self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope the results to (required)")],
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results (default: 100, max: 1000)")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset (default: 0)")] = None,
         _request_timeout: Union[
@@ -391,7 +407,10 @@ class ResultsApi:
     ) -> ListResultsResponse:
         """List results
 
+        List stored results for the database named by the required X-Database-Id header.
 
+        :param x_database_id: Database to scope the results to (required) (required)
+        :type x_database_id: str
         :param limit: Maximum number of results (default: 100, max: 1000)
         :type limit: int
         :param offset: Pagination offset (default: 0)
@@ -419,6 +438,7 @@ class ResultsApi:
         """ # noqa: E501
 
         _param = self._list_results_serialize(
+            x_database_id=x_database_id,
             limit=limit,
             offset=offset,
             _request_auth=_request_auth,
@@ -429,6 +449,8 @@ class ResultsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListResultsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -444,6 +466,7 @@ class ResultsApi:
     @validate_call
     def list_results_with_http_info(
         self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope the results to (required)")],
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results (default: 100, max: 1000)")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset (default: 0)")] = None,
         _request_timeout: Union[
@@ -461,7 +484,10 @@ class ResultsApi:
     ) -> ApiResponse[ListResultsResponse]:
         """List results
 
+        List stored results for the database named by the required X-Database-Id header.
 
+        :param x_database_id: Database to scope the results to (required) (required)
+        :type x_database_id: str
         :param limit: Maximum number of results (default: 100, max: 1000)
         :type limit: int
         :param offset: Pagination offset (default: 0)
@@ -489,6 +515,7 @@ class ResultsApi:
         """ # noqa: E501
 
         _param = self._list_results_serialize(
+            x_database_id=x_database_id,
             limit=limit,
             offset=offset,
             _request_auth=_request_auth,
@@ -499,6 +526,8 @@ class ResultsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListResultsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -514,6 +543,7 @@ class ResultsApi:
     @validate_call
     def list_results_without_preload_content(
         self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope the results to (required)")],
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results (default: 100, max: 1000)")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset (default: 0)")] = None,
         _request_timeout: Union[
@@ -531,7 +561,10 @@ class ResultsApi:
     ) -> RESTResponseType:
         """List results
 
+        List stored results for the database named by the required X-Database-Id header.
 
+        :param x_database_id: Database to scope the results to (required) (required)
+        :type x_database_id: str
         :param limit: Maximum number of results (default: 100, max: 1000)
         :type limit: int
         :param offset: Pagination offset (default: 0)
@@ -559,6 +592,7 @@ class ResultsApi:
         """ # noqa: E501
 
         _param = self._list_results_serialize(
+            x_database_id=x_database_id,
             limit=limit,
             offset=offset,
             _request_auth=_request_auth,
@@ -569,6 +603,8 @@ class ResultsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListResultsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -579,6 +615,7 @@ class ResultsApi:
 
     def _list_results_serialize(
         self,
+        x_database_id,
         limit,
         offset,
         _request_auth,
@@ -612,6 +649,8 @@ class ResultsApi:
             _query_params.append(('offset', offset))
             
         # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
         # process the form parameters
         # process the body parameter
 

@@ -2317,7 +2317,7 @@ class DatabasesApi:
     ) -> LoadManagedTableResponse:
         """Load database table from upload
 
-        Publish a previously-uploaded file as the new contents of a table on the database's default catalog. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. CSV, JSON, and Parquet uploads are supported; the format is auto-detected or set via `format`. Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
+        Publish a previously-uploaded file as the new contents of a table on the database's default catalog. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. CSV, JSON, and Parquet uploads are supported; the format is auto-detected or set via `format`. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the upload is applied: `replace` overwrites the table's contents, `append` inserts the uploaded rows on top of the existing data. Concurrent loads against the same upload return 409. Set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2362,6 +2362,7 @@ class DatabasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "LoadManagedTableResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
@@ -2399,7 +2400,7 @@ class DatabasesApi:
     ) -> ApiResponse[LoadManagedTableResponse]:
         """Load database table from upload
 
-        Publish a previously-uploaded file as the new contents of a table on the database's default catalog. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. CSV, JSON, and Parquet uploads are supported; the format is auto-detected or set via `format`. Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
+        Publish a previously-uploaded file as the new contents of a table on the database's default catalog. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. CSV, JSON, and Parquet uploads are supported; the format is auto-detected or set via `format`. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the upload is applied: `replace` overwrites the table's contents, `append` inserts the uploaded rows on top of the existing data. Concurrent loads against the same upload return 409. Set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2444,6 +2445,7 @@ class DatabasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "LoadManagedTableResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
@@ -2481,7 +2483,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Load database table from upload
 
-        Publish a previously-uploaded file as the new contents of a table on the database's default catalog. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. CSV, JSON, and Parquet uploads are supported; the format is auto-detected or set via `format`. Only `mode = \"replace\"` is supported. Concurrent loads against the same upload return 409.
+        Publish a previously-uploaded file as the new contents of a table on the database's default catalog. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. CSV, JSON, and Parquet uploads are supported; the format is auto-detected or set via `format`. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the upload is applied: `replace` overwrites the table's contents, `append` inserts the uploaded rows on top of the existing data. Concurrent loads against the same upload return 409. Set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2526,6 +2528,7 @@ class DatabasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "LoadManagedTableResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",

@@ -97,8 +97,10 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Refresh completed |  -  |
+**202** | Refresh accepted and running in the background; poll the returned job for status |  -  |
 **400** | Invalid request |  -  |
 **404** | Connection not found |  -  |
+**409** | A column&#39;s type changed incompatibly and can&#39;t be applied automatically (only widening to a larger compatible type is). The existing data is unchanged and remains queryable. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

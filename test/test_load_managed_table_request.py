@@ -36,6 +36,8 @@ class TestLoadManagedTableRequest(unittest.TestCase):
         model = LoadManagedTableRequest()
         if include_optional:
             return LoadManagedTableRequest(
+                var_async = True,
+                async_after_ms = 1000,
                 format = '',
                 mode = '',
                 upload_id = ''

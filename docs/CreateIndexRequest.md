@@ -7,6 +7,7 @@ Request body for POST .../indexes
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **var_async** | **bool** | When true, create the index as a background job and return a job ID for polling. | [optional] 
+**async_after_ms** | **int** | If set (requires &#x60;async&#x60; &#x3D; true), wait up to this many milliseconds for the index build to finish: if it completes in time the index is returned (201), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without &#x60;async&#x60; &#x3D; true, is rejected with 400. | [optional] 
 **columns** | **List[str]** | Columns to index. Required for all index types. | 
 **description** | **str** | User-facing description of the embedding (e.g., \&quot;product descriptions\&quot;). | [optional] 
 **dimensions** | **int** | Output vector dimensions. Some models support multiple dimension sizes (e.g., OpenAI text-embedding-3-small supports 512 or 1536). If omitted, the model&#39;s default dimensions are used | [optional] 

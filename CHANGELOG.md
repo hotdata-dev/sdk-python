@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat: support async table loads and append mode
 - feat(uploads): support streaming uploads with on-demand part URLs
 
 ## [0.5.0] - 2026-06-28
