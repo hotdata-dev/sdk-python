@@ -56,7 +56,7 @@ def test_query_async_polling(
     deadline = time.monotonic() + POLL_TIMEOUT_S
     run = None
     while time.monotonic() < deadline:
-        run = query_runs_api.get_query_run(query_run_id)
+        run = query_runs_api.get_query_run(query_run_id, x_database_id=database_id)
         if run.status in TERMINAL_STATUSES:
             break
         time.sleep(POLL_INTERVAL_S)
@@ -70,13 +70,13 @@ def test_query_async_polling(
     )
     assert run.row_count == 1
 
-    runs_listing = query_runs_api.list_query_runs(limit=50)
+    runs_listing = query_runs_api.list_query_runs(x_database_id=database_id, limit=50)
     assert any(r.id == query_run_id for r in runs_listing.query_runs), (
         f"query run {query_run_id} not surfaced by list_query_runs"
     )
 
     if run.result_id:
-        result = results_api.get_result(run.result_id)
+        result = results_api.get_result(run.result_id, x_database_id=database_id)
         assert result.result_id == run.result_id
         assert result.status in {"ready", "processing"}
         if result.status == "ready":
@@ -85,7 +85,7 @@ def test_query_async_polling(
 
         # ResultInfo (list_results) exposes the id as `id`, not `result_id` —
         # only GetResultResponse uses `result_id`.
-        results_listing = results_api.list_results(limit=50)
+        results_listing = results_api.list_results(x_database_id=database_id, limit=50)
         assert any(r.id == run.result_id for r in results_listing.results), (
             f"result {run.result_id} not surfaced by list_results"
         )

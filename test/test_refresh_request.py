@@ -37,6 +37,7 @@ class TestRefreshRequest(unittest.TestCase):
         if include_optional:
             return RefreshRequest(
                 var_async = True,
+                async_after_ms = 1000,
                 connection_id = '',
                 data = True,
                 include_uncached = True,

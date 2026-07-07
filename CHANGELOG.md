@@ -9,7 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat: support async table loads and append mode
 - feat(uploads): support streaming uploads with on-demand part URLs
+- **Breaking:** results and query runs are now scoped to a database via the
+  required `X-Database-Id` header. The generated `ResultsApi` / `QueryRunsApi`
+  methods (`get_result`, `list_results`, `get_query_run`, `list_query_runs`)
+  gain a required `x_database_id` argument, and the hand-written ergonomic
+  helpers match: `hotdata.arrow.ResultsApi.get_result_arrow` /
+  `stream_result_arrow` and `hotdata.query.QueryApi.wait_for_result` take the
+  database id, and `QueryApi.query`'s truncation auto-follow forwards the
+  query's database scope (the `X-Database-Id` header, or the request-body
+  `database_id` when no header is set) to its result and query-run fetches.
 
 ## [0.5.0] - 2026-06-28
 

@@ -378,6 +378,77 @@ def test_wait_for_result_times_out() -> None:
     assert ei.value.status == "processing"
 
 
+# --- database-scoped auto-follow ----------------------------------------------
+
+
+def test_autofollow_forwards_x_database_id_header() -> None:
+    # Results and query runs are database-scoped (the required X-Database-Id
+    # header). A truncated result followed via query(..., x_database_id=...) must
+    # carry that database id on every follow-up request: the readiness poll, the
+    # query-run total lookup, and each page fetch.
+    preview = _preview(truncated=True, total=None, rows=[[1]])
+    full = [[1]]
+    seen_result_dbs: List[Any] = []
+    seen_run_dbs: List[Any] = []
+
+    def get_result(result_id, offset=None, limit=None, format=None, **kw):
+        seen_result_dbs.append(kw.get("x_database_id"))
+        if format is None:  # readiness poll
+            return _result(status="ready")
+        return _result(status="ready", rows=full[offset:offset + limit])
+
+    def get_query_run(query_run_id, **kw):
+        seen_run_dbs.append(kw.get("x_database_id"))
+        return SimpleNamespace(row_count=1)
+
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch.object(_GeneratedQueryApi, "query", return_value=preview)
+        )
+        stack.enter_context(
+            patch.object(_ResultsApi, "get_result", side_effect=get_result)
+        )
+        stack.enter_context(
+            patch.object(_QueryRunsApi, "get_query_run", side_effect=get_query_run)
+        )
+        stack.enter_context(patch("hotdata.query.time.sleep"))
+        out = _api(poll=PollPolicy(page_size=1000)).query(REQ, x_database_id="db_x")
+
+    assert out.rows == full
+    # Every follow-up request carried the header database id.
+    assert seen_result_dbs and all(db == "db_x" for db in seen_result_dbs)
+    assert seen_run_dbs == ["db_x"]
+
+
+def test_autofollow_uses_body_database_id_when_no_header() -> None:
+    # When no header is passed, the effective database for auto-follow falls back
+    # to the request-body database_id (the spec requires exactly one database
+    # source on /v1/query): query() sends that on the follow-up fetches.
+    preview = _preview(truncated=True, total=1, rows=[[1]])
+    full = [[1]]
+    seen_result_dbs: List[Any] = []
+
+    def get_result(result_id, offset=None, limit=None, format=None, **kw):
+        seen_result_dbs.append(kw.get("x_database_id"))
+        if format is None:
+            return _result(status="ready")
+        return _result(status="ready", rows=full[offset:offset + limit])
+
+    req_with_db = QueryRequest(sql="SELECT 1 AS x", database_id="db_body")
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch.object(_GeneratedQueryApi, "query", return_value=preview)
+        )
+        stack.enter_context(
+            patch.object(_ResultsApi, "get_result", side_effect=get_result)
+        )
+        stack.enter_context(patch("hotdata.query.time.sleep"))
+        out = _api(poll=PollPolicy(page_size=1000)).query(req_with_db)
+
+    assert out.rows == full
+    assert seen_result_dbs and all(db == "db_body" for db in seen_result_dbs)
+
+
 # --- forward-compatible deserialization --------------------------------------
 
 

@@ -65,7 +65,9 @@ class TestJobResult(unittest.TestCase):
                 metric = '',
                 source_column = '',
                 status = 'ready',
-                updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f')
+                updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                arrow_schema_json = '',
+                row_count = 0
             )
         else:
             return JobResult(
@@ -85,6 +87,8 @@ class TestJobResult(unittest.TestCase):
                 index_type = '',
                 status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                arrow_schema_json = '',
+                row_count = 0,
         )
         """
 

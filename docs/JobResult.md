@@ -24,6 +24,8 @@ Name | Type | Description | Notes
 **source_column** | **str** | Source text column for an embedding-backed vector index. A query searches it via &#x60;vector_distance(&lt;source_column&gt;, …)&#x60;; the indexed &#x60;columns&#x60; hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes. | [optional] 
 **status** | [**IndexStatus**](IndexStatus.md) |  | 
 **updated_at** | **datetime** |  | 
+**arrow_schema_json** | **str** | Schema of the loaded table, as JSON. | 
+**row_count** | **int** | Total number of rows in the table after the load. | 
 
 ## Example
 

@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **get_result**
-> GetResultResponse get_result(id, offset=offset, limit=limit, format=format)
+> GetResultResponse get_result(id, x_database_id, offset=offset, limit=limit, format=format)
 
 Get result
 
@@ -78,13 +78,14 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.ResultsApi(api_client)
     id = 'id_example' # str | Result ID
+    x_database_id = 'x_database_id_example' # str | Database the result belongs to (required)
     offset = 56 # int | Rows to skip (default: 0) (optional)
     limit = 56 # int | Maximum rows to return (default: unbounded) (optional)
     format = hotdata.ResultsFormatQuery() # ResultsFormatQuery | `arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`. (optional)
 
     try:
         # Get result
-        api_response = api_instance.get_result(id, offset=offset, limit=limit, format=format)
+        api_response = api_instance.get_result(id, x_database_id, offset=offset, limit=limit, format=format)
         print("The response of ResultsApi->get_result:\n")
         pprint(api_response)
     except Exception as e:
@@ -99,6 +100,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Result ID | 
+ **x_database_id** | **str**| Database the result belongs to (required) | 
  **offset** | **int**| Rows to skip (default: 0) | [optional] 
  **limit** | **int**| Maximum rows to return (default: unbounded) | [optional] 
  **format** | [**ResultsFormatQuery**](.md)| &#x60;arrow&#x60;, &#x60;json&#x60;, &#x60;csv&#x60;, &#x60;md&#x60;, or &#x60;parquet&#x60; — overrides the &#x60;Accept&#x60; header. &#x60;markdown&#x60; is also accepted at runtime as an alias for &#x60;md&#x60;. | [optional] 
@@ -129,9 +131,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_results**
-> ListResultsResponse list_results(limit=limit, offset=offset)
+> ListResultsResponse list_results(x_database_id, limit=limit, offset=offset)
 
 List results
+
+List stored results for the database named by the required X-Database-Id header.
 
 ### Example
 
@@ -177,12 +181,13 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.ResultsApi(api_client)
+    x_database_id = 'x_database_id_example' # str | Database to scope the results to (required)
     limit = 56 # int | Maximum number of results (default: 100, max: 1000) (optional)
     offset = 56 # int | Pagination offset (default: 0) (optional)
 
     try:
         # List results
-        api_response = api_instance.list_results(limit=limit, offset=offset)
+        api_response = api_instance.list_results(x_database_id, limit=limit, offset=offset)
         print("The response of ResultsApi->list_results:\n")
         pprint(api_response)
     except Exception as e:
@@ -196,6 +201,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **x_database_id** | **str**| Database to scope the results to (required) | 
  **limit** | **int**| Maximum number of results (default: 100, max: 1000) | [optional] 
  **offset** | **int**| Pagination offset (default: 0) | [optional] 
 
@@ -217,6 +223,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of results |  -  |
+**400** | Missing or malformed X-Database-Id header |  -  |
+**404** | Database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

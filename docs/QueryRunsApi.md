@@ -9,11 +9,11 @@ Method | HTTP request | Description
 
 
 # **get_query_run**
-> QueryRunInfo get_query_run(id)
+> QueryRunInfo get_query_run(id, x_database_id)
 
 Get query run
 
-Get the status and details of a specific query run by ID.
+Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
 
 ### Example
 
@@ -53,10 +53,11 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.QueryRunsApi(api_client)
     id = 'id_example' # str | Query run ID
+    x_database_id = 'x_database_id_example' # str | Database the query run belongs to (required)
 
     try:
         # Get query run
-        api_response = api_instance.get_query_run(id)
+        api_response = api_instance.get_query_run(id, x_database_id)
         print("The response of QueryRunsApi->get_query_run:\n")
         pprint(api_response)
     except Exception as e:
@@ -71,6 +72,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Query run ID | 
+ **x_database_id** | **str**| Database the query run belongs to (required) | 
 
 ### Return type
 
@@ -90,14 +92,17 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Query run details |  -  |
-**404** | Query run not found |  -  |
+**400** | Missing or malformed X-Database-Id header |  -  |
+**404** | Query run or database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_query_runs**
-> ListQueryRunsResponse list_query_runs(limit=limit, cursor=cursor, status=status, saved_query_id=saved_query_id)
+> ListQueryRunsResponse list_query_runs(x_database_id, limit=limit, cursor=cursor, status=status, saved_query_id=saved_query_id)
 
 List query runs
+
+List query runs for the database named by the required X-Database-Id header.
 
 ### Example
 
@@ -136,6 +141,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.QueryRunsApi(api_client)
+    x_database_id = 'x_database_id_example' # str | Database to scope the query runs to (required)
     limit = 56 # int | Maximum number of results (optional)
     cursor = 'cursor_example' # str | Pagination cursor (optional)
     status = 'status_example' # str | Filter by status (comma-separated, e.g. status=running,failed) (optional)
@@ -143,7 +149,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
     try:
         # List query runs
-        api_response = api_instance.list_query_runs(limit=limit, cursor=cursor, status=status, saved_query_id=saved_query_id)
+        api_response = api_instance.list_query_runs(x_database_id, limit=limit, cursor=cursor, status=status, saved_query_id=saved_query_id)
         print("The response of QueryRunsApi->list_query_runs:\n")
         pprint(api_response)
     except Exception as e:
@@ -157,6 +163,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **x_database_id** | **str**| Database to scope the query runs to (required) | 
  **limit** | **int**| Maximum number of results | [optional] 
  **cursor** | **str**| Pagination cursor | [optional] 
  **status** | **str**| Filter by status (comma-separated, e.g. status&#x3D;running,failed) | [optional] 
@@ -180,6 +187,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of query runs |  -  |
+**400** | Missing or malformed X-Database-Id header |  -  |
+**404** | Database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

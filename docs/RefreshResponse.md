@@ -21,9 +21,6 @@ Name | Type | Description | Notes
 **tables_failed** | **int** |  | 
 **tables_refreshed** | **int** |  | 
 **total_rows** | **int** |  | 
-**id** | **str** | Job ID for status polling. | 
-**status** | [**JobStatus**](JobStatus.md) | Current status of the submitted job. | 
-**status_url** | **str** | URL to poll for job status. | 
 
 ## Example
 

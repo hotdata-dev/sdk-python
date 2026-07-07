@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,12 +29,13 @@ class RefreshRequest(BaseModel):
     Request body for POST /refresh
     """ # noqa: E501
     var_async: Optional[StrictBool] = Field(default=None, description="When true, submit the refresh as a background job and return immediately with a job ID for status polling. Only supported for data refresh operations.", alias="async")
+    async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the refresh to finish: if it completes in time the full result is returned, otherwise a `202` with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400. Only applies to data refresh.")
     connection_id: Optional[StrictStr] = None
     data: Optional[StrictBool] = None
     include_uncached: Optional[StrictBool] = Field(default=None, description="Controls whether uncached tables are included in connection-wide data refresh.  - `false` (default): Only refresh tables that already have cached data.   This is the common case for keeping existing data up-to-date. - `true`: Also sync tables that haven't been cached yet, essentially performing   an initial sync for any new tables discovered since the connection was created.  This field only applies to connection-wide data refresh (when `data=true` and `table_name` is not specified). It has no effect on single-table refresh or schema refresh operations.")
     schema_name: Optional[StrictStr] = None
     table_name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["async", "connection_id", "data", "include_uncached", "schema_name", "table_name"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "connection_id", "data", "include_uncached", "schema_name", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -74,6 +76,11 @@ class RefreshRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if async_after_ms (nullable) is None
+        # and model_fields_set contains the field
+        if self.async_after_ms is None and "async_after_ms" in self.model_fields_set:
+            _dict['async_after_ms'] = None
+
         # set to None if connection_id (nullable) is None
         # and model_fields_set contains the field
         if self.connection_id is None and "connection_id" in self.model_fields_set:
@@ -102,6 +109,7 @@ class RefreshRequest(BaseModel):
 
         _obj = cls.model_validate({
             "async": obj.get("async"),
+            "async_after_ms": obj.get("async_after_ms"),
             "connection_id": obj.get("connection_id"),
             "data": obj.get("data"),
             "include_uncached": obj.get("include_uncached"),

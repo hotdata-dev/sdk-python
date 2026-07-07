@@ -26,11 +26,11 @@ from typing_extensions import Self
 
 class LoadManagedTableResponse(BaseModel):
     """
-    Response body for `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads`.
+    Result of a managed-table load: row count after the load plus the published table schema. Returned inline (`200`) for a synchronous load, and as the `GET /v1/jobs/{id}` result payload for a completed background load.
     """ # noqa: E501
     arrow_schema_json: StrictStr = Field(description="Schema of the loaded table, as JSON.")
     connection_id: StrictStr
-    row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Total rows in the published parquet file.")
+    row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Total number of rows in the table after the load.")
     schema_name: StrictStr
     table_name: StrictStr
     __properties: ClassVar[List[str]] = ["arrow_schema_json", "connection_id", "row_count", "schema_name", "table_name"]

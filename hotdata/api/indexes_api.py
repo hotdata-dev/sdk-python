@@ -109,6 +109,7 @@ class IndexesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "IndexInfoResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '500': "ApiErrorResponse",
@@ -191,6 +192,7 @@ class IndexesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "IndexInfoResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '500': "ApiErrorResponse",
@@ -273,6 +275,7 @@ class IndexesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "IndexInfoResponse",
+            '202': "SubmitJobResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '500': "ApiErrorResponse",

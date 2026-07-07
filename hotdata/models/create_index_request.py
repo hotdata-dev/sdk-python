@@ -29,6 +29,7 @@ class CreateIndexRequest(BaseModel):
     Request body for POST .../indexes
     """ # noqa: E501
     var_async: Optional[StrictBool] = Field(default=None, description="When true, create the index as a background job and return a job ID for polling.", alias="async")
+    async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the index build to finish: if it completes in time the index is returned (201), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
     columns: List[StrictStr] = Field(description="Columns to index. Required for all index types.")
     description: Optional[StrictStr] = Field(default=None, description="User-facing description of the embedding (e.g., \"product descriptions\").")
     dimensions: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Output vector dimensions. Some models support multiple dimension sizes (e.g., OpenAI text-embedding-3-small supports 512 or 1536). If omitted, the model's default dimensions are used")
@@ -37,7 +38,7 @@ class CreateIndexRequest(BaseModel):
     index_type: Optional[StrictStr] = Field(default=None, description="Index type: \"sorted\" (default), \"bm25\", or \"vector\"")
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric for vector indexes: \"l2\", \"cosine\", or \"dot\". When omitted, defaults to \"l2\" for float array columns or the provider's preferred metric for text columns with auto-embedding.")
     output_column: Optional[StrictStr] = Field(default=None, description="Custom name for the generated embedding column. Defaults to `{column}_embedding`.")
-    __properties: ClassVar[List[str]] = ["async", "columns", "description", "dimensions", "embedding_provider_id", "index_name", "index_type", "metric", "output_column"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "columns", "description", "dimensions", "embedding_provider_id", "index_name", "index_type", "metric", "output_column"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -78,6 +79,11 @@ class CreateIndexRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if async_after_ms (nullable) is None
+        # and model_fields_set contains the field
+        if self.async_after_ms is None and "async_after_ms" in self.model_fields_set:
+            _dict['async_after_ms'] = None
+
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
@@ -116,6 +122,7 @@ class CreateIndexRequest(BaseModel):
 
         _obj = cls.model_validate({
             "async": obj.get("async"),
+            "async_after_ms": obj.get("async_after_ms"),
             "columns": obj.get("columns"),
             "description": obj.get("description"),
             "dimensions": obj.get("dimensions"),

@@ -337,11 +337,20 @@ class QueryApi(_GeneratedQueryApi):
             return response
         if not follow or not response.truncated:
             return response
-        return self._materialize_full(response, row_guard, byte_guard)
+        # Auto-follow re-fetches the persisted result and the query run, both of
+        # which are scoped to a database via the required X-Database-Id header.
+        # /v1/query takes exactly one database source, so the effective database
+        # is the header value when present, otherwise the request-body
+        # database_id.
+        effective_db = x_database_id or query_request.database_id or ""
+        return self._materialize_full(
+            response, effective_db, row_guard, byte_guard
+        )
 
     def wait_for_result(
         self,
         result_id: str,
+        x_database_id: str,
         *,
         results_api: Optional[_ResultsApi] = None,
     ) -> Any:
@@ -355,6 +364,10 @@ class QueryApi(_GeneratedQueryApi):
         every poll, materializing the whole result into memory before the size
         guards can act.
 
+        :param result_id: Result ID to poll.
+        :param x_database_id: Database the result belongs to. Results are scoped
+            to a database via the required ``X-Database-Id`` header — pass the
+            same database the query ran in.
         :raises ResultFailedError: the result failed (delivered as HTTP 409).
         :raises ResultTimeoutError: ``ready`` not reached within the poll deadline.
         """
@@ -365,7 +378,7 @@ class QueryApi(_GeneratedQueryApi):
         last_status = "pending"
         while True:
             try:
-                result = api.get_result(result_id, limit=0)
+                result = api.get_result(result_id, x_database_id=x_database_id, limit=0)
             except ApiException as exc:
                 # A failed result is delivered as HTTP 409: the generated client
                 # raises (response_deserialize raises on any non-2xx) rather than
@@ -449,6 +462,7 @@ class QueryApi(_GeneratedQueryApi):
     def _materialize_full(
         self,
         preview: QueryResponse,
+        x_database_id: str,
         max_auto_rows: Optional[int],
         max_auto_bytes: Optional[int],
     ) -> QueryResponse:
@@ -456,9 +470,11 @@ class QueryApi(_GeneratedQueryApi):
             raise ResultUnavailableError(warning=preview.warning)
 
         results_api = _ResultsApi(self.api_client)
-        self.wait_for_result(preview.result_id, results_api=results_api)
+        self.wait_for_result(
+            preview.result_id, x_database_id, results_api=results_api
+        )
 
-        total = self._authoritative_total(preview)
+        total = self._authoritative_total(preview, x_database_id)
         # Auto-follow does extra round-trips (poll + paginate) and materializes
         # the full result; log it so the hidden work behind one query() call is
         # observable without being noisy (info, not a warning).
@@ -477,7 +493,12 @@ class QueryApi(_GeneratedQueryApi):
             )
 
         rows = self._fetch_all_rows(
-            preview.result_id, total, max_auto_rows, max_auto_bytes, results_api
+            preview.result_id,
+            x_database_id,
+            total,
+            max_auto_rows,
+            max_auto_bytes,
+            results_api,
         )
         # Replace the bounded preview with the full row set. truncated /
         # total_row_count stay as the server reported them so the caller can
@@ -487,15 +508,22 @@ class QueryApi(_GeneratedQueryApi):
             preview.total_row_count = total
         return preview
 
-    def _authoritative_total(self, preview: QueryResponse) -> Optional[int]:
+    def _authoritative_total(
+        self, preview: QueryResponse, x_database_id: str
+    ) -> Optional[int]:
         """The grand total row count. ``total_row_count`` is null while a
         truncated result is still persisting, so fall back to the query-run
         record, which carries the authoritative count once the run succeeds.
+
+        The query run is scoped to a database via the required ``X-Database-Id``
+        header, so ``x_database_id`` is forwarded to the lookup.
         """
         if preview.total_row_count is not None:
             return preview.total_row_count
         try:
-            run = _QueryRunsApi(self.api_client).get_query_run(preview.query_run_id)
+            run = _QueryRunsApi(self.api_client).get_query_run(
+                preview.query_run_id, x_database_id=x_database_id
+            )
         except ApiException:
             return None
         return run.row_count
@@ -503,6 +531,7 @@ class QueryApi(_GeneratedQueryApi):
     def _fetch_all_rows(
         self,
         result_id: str,
+        x_database_id: str,
         total: Optional[int],
         max_auto_rows: Optional[int],
         max_auto_bytes: Optional[int],
@@ -515,6 +544,7 @@ class QueryApi(_GeneratedQueryApi):
         while True:
             page = results_api.get_result(
                 result_id,
+                x_database_id=x_database_id,
                 offset=offset,
                 limit=page_size,
                 format=ResultsFormatQuery.JSON,

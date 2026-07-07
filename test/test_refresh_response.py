@@ -60,10 +60,7 @@ class TestRefreshResponse(unittest.TestCase):
                     ],
                 tables_failed = 0,
                 tables_refreshed = 0,
-                total_rows = 0,
-                id = '',
-                status = 'pending',
-                status_url = ''
+                total_rows = 0
             )
         else:
             return RefreshResponse(
@@ -80,9 +77,6 @@ class TestRefreshResponse(unittest.TestCase):
                 tables_failed = 0,
                 tables_refreshed = 0,
                 total_rows = 0,
-                id = '',
-                status = 'pending',
-                status_url = '',
         )
         """
 

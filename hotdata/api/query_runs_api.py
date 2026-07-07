@@ -44,6 +44,7 @@ class QueryRunsApi:
     def get_query_run(
         self,
         id: Annotated[StrictStr, Field(description="Query run ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Database the query run belongs to (required)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -59,10 +60,12 @@ class QueryRunsApi:
     ) -> QueryRunInfo:
         """Get query run
 
-        Get the status and details of a specific query run by ID.
+        Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
 
         :param id: Query run ID (required)
         :type id: str
+        :param x_database_id: Database the query run belongs to (required) (required)
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -87,6 +90,7 @@ class QueryRunsApi:
 
         _param = self._get_query_run_serialize(
             id=id,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -95,6 +99,7 @@ class QueryRunsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryRunInfo",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -112,6 +117,7 @@ class QueryRunsApi:
     def get_query_run_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Query run ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Database the query run belongs to (required)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -127,10 +133,12 @@ class QueryRunsApi:
     ) -> ApiResponse[QueryRunInfo]:
         """Get query run
 
-        Get the status and details of a specific query run by ID.
+        Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
 
         :param id: Query run ID (required)
         :type id: str
+        :param x_database_id: Database the query run belongs to (required) (required)
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -155,6 +163,7 @@ class QueryRunsApi:
 
         _param = self._get_query_run_serialize(
             id=id,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -163,6 +172,7 @@ class QueryRunsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryRunInfo",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -180,6 +190,7 @@ class QueryRunsApi:
     def get_query_run_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Query run ID")],
+        x_database_id: Annotated[StrictStr, Field(description="Database the query run belongs to (required)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -195,10 +206,12 @@ class QueryRunsApi:
     ) -> RESTResponseType:
         """Get query run
 
-        Get the status and details of a specific query run by ID.
+        Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
 
         :param id: Query run ID (required)
         :type id: str
+        :param x_database_id: Database the query run belongs to (required) (required)
+        :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -223,6 +236,7 @@ class QueryRunsApi:
 
         _param = self._get_query_run_serialize(
             id=id,
+            x_database_id=x_database_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -231,6 +245,7 @@ class QueryRunsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "QueryRunInfo",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -243,6 +258,7 @@ class QueryRunsApi:
     def _get_query_run_serialize(
         self,
         id,
+        x_database_id,
         _request_auth,
         _content_type,
         _headers,
@@ -268,6 +284,8 @@ class QueryRunsApi:
             _path_params['id'] = id
         # process the query parameters
         # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
         # process the form parameters
         # process the body parameter
 
@@ -308,6 +326,7 @@ class QueryRunsApi:
     @validate_call
     def list_query_runs(
         self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope the query runs to (required)")],
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
         status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=running,failed)")] = None,
@@ -327,7 +346,10 @@ class QueryRunsApi:
     ) -> ListQueryRunsResponse:
         """List query runs
 
+        List query runs for the database named by the required X-Database-Id header.
 
+        :param x_database_id: Database to scope the query runs to (required) (required)
+        :type x_database_id: str
         :param limit: Maximum number of results
         :type limit: int
         :param cursor: Pagination cursor
@@ -359,6 +381,7 @@ class QueryRunsApi:
         """ # noqa: E501
 
         _param = self._list_query_runs_serialize(
+            x_database_id=x_database_id,
             limit=limit,
             cursor=cursor,
             status=status,
@@ -371,6 +394,8 @@ class QueryRunsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListQueryRunsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -386,6 +411,7 @@ class QueryRunsApi:
     @validate_call
     def list_query_runs_with_http_info(
         self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope the query runs to (required)")],
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
         status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=running,failed)")] = None,
@@ -405,7 +431,10 @@ class QueryRunsApi:
     ) -> ApiResponse[ListQueryRunsResponse]:
         """List query runs
 
+        List query runs for the database named by the required X-Database-Id header.
 
+        :param x_database_id: Database to scope the query runs to (required) (required)
+        :type x_database_id: str
         :param limit: Maximum number of results
         :type limit: int
         :param cursor: Pagination cursor
@@ -437,6 +466,7 @@ class QueryRunsApi:
         """ # noqa: E501
 
         _param = self._list_query_runs_serialize(
+            x_database_id=x_database_id,
             limit=limit,
             cursor=cursor,
             status=status,
@@ -449,6 +479,8 @@ class QueryRunsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListQueryRunsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -464,6 +496,7 @@ class QueryRunsApi:
     @validate_call
     def list_query_runs_without_preload_content(
         self,
+        x_database_id: Annotated[StrictStr, Field(description="Database to scope the query runs to (required)")],
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
         status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=running,failed)")] = None,
@@ -483,7 +516,10 @@ class QueryRunsApi:
     ) -> RESTResponseType:
         """List query runs
 
+        List query runs for the database named by the required X-Database-Id header.
 
+        :param x_database_id: Database to scope the query runs to (required) (required)
+        :type x_database_id: str
         :param limit: Maximum number of results
         :type limit: int
         :param cursor: Pagination cursor
@@ -515,6 +551,7 @@ class QueryRunsApi:
         """ # noqa: E501
 
         _param = self._list_query_runs_serialize(
+            x_database_id=x_database_id,
             limit=limit,
             cursor=cursor,
             status=status,
@@ -527,6 +564,8 @@ class QueryRunsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListQueryRunsResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -537,6 +576,7 @@ class QueryRunsApi:
 
     def _list_query_runs_serialize(
         self,
+        x_database_id,
         limit,
         cursor,
         status,
@@ -580,6 +620,8 @@ class QueryRunsApi:
             _query_params.append(('saved_query_id', saved_query_id))
             
         # process the header parameters
+        if x_database_id is not None:
+            _header_params['X-Database-Id'] = x_database_id
         # process the form parameters
         # process the body parameter
 

@@ -99,6 +99,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Index created |  -  |
+**202** | Index build accepted and running in the background; poll the returned job for status |  -  |
 **400** | Invalid request |  -  |
 **404** | Table not found |  -  |
 **500** | Internal server error |  -  |
