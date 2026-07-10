@@ -40,12 +40,12 @@ class TestLoadManagedTableRequest(unittest.TestCase):
                 async_after_ms = 1000,
                 format = '',
                 mode = '',
+                result_id = '',
                 upload_id = ''
             )
         else:
             return LoadManagedTableRequest(
                 mode = '',
-                upload_id = '',
         )
         """
 

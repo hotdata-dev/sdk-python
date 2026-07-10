@@ -41,6 +41,7 @@ class TestDatabaseDetailResponse(unittest.TestCase):
                         alias = '', 
                         connection_id = '', )
                     ],
+                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 default_catalog = '',
                 default_connection_id = '',
                 expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),

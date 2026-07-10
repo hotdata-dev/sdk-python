@@ -93,7 +93,7 @@ class TestConnectionsApi(unittest.TestCase):
     def test_load_managed_table(self) -> None:
         """Test case for load_managed_table
 
-        Load managed table from upload
+        Load managed table from upload or query result
         """
         pass
 

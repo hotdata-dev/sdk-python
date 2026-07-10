@@ -30,12 +30,13 @@ class DatabaseDetailResponse(BaseModel):
     Response body for GET /databases/{database_id}
     """ # noqa: E501
     attachments: List[DatabaseAttachmentInfo]
+    created_at: Optional[datetime] = Field(default=None, description="When the database was created.")
     default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope (`default` unless overridden at create time).")
     default_connection_id: StrictStr
     expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["attachments", "default_catalog", "default_connection_id", "expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["attachments", "created_at", "default_catalog", "default_connection_id", "expires_at", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -83,6 +84,11 @@ class DatabaseDetailResponse(BaseModel):
                 if _item_attachments:
                     _items.append(_item_attachments.to_dict())
             _dict['attachments'] = _items
+        # set to None if created_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.created_at is None and "created_at" in self.model_fields_set:
+            _dict['created_at'] = None
+
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
@@ -106,6 +112,7 @@ class DatabaseDetailResponse(BaseModel):
 
         _obj = cls.model_validate({
             "attachments": [DatabaseAttachmentInfo.from_dict(_item) for _item in obj["attachments"]] if obj.get("attachments") is not None else None,
+            "created_at": obj.get("created_at"),
             "default_catalog": obj.get("default_catalog"),
             "default_connection_id": obj.get("default_connection_id"),
             "expires_at": obj.get("expires_at"),

@@ -26,14 +26,15 @@ from typing_extensions import Self
 
 class LoadManagedTableRequest(BaseModel):
     """
-    Request body for the managed-table load endpoints — the connection-scoped `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads` and the database-scoped equivalent.  Publishes a previously-uploaded file to the named table. CSV and JSON uploads are converted to columnar storage on load; Parquet uploads are published directly. `mode` selects whether the upload replaces the table's contents or is appended on top of them.
+    Request body for the managed-table load endpoints — the connection-scoped `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads` and the database-scoped equivalent.  Publishes data to the named table from one of two sources: a previously uploaded file (`upload_id`) or a persisted query result (`result_id`). Provide exactly one. CSV and JSON uploads are converted to columnar storage on load; Parquet uploads and query results are published directly. `mode` selects whether the data replaces the table's contents or is appended on top of them.
     """ # noqa: E501
     var_async: Optional[StrictBool] = Field(default=None, description="When true, run the load as a background job and return a job ID to poll instead of blocking until it finishes. Recommended for large uploads, which can take longer than an HTTP request should stay open.", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the load to finish: if it completes in time the full result is returned (200), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
-    format: Optional[StrictStr] = Field(default=None, description="File format of the upload: `\"csv\"`, `\"json\"`, or `\"parquet\"`. Optional — when omitted, the format is auto-detected from the upload's `Content-Type` and, failing that, from the file contents. Provide it explicitly to override detection or when the contents are ambiguous. `\"json\"` expects newline-delimited JSON (one object per line), not a JSON array.")
-    mode: StrictStr = Field(description="How the upload is applied: `\"replace\"` overwrites the table's contents, `\"append\"` inserts the uploaded rows on top of the existing data.")
-    upload_id: StrictStr = Field(description="ID of a previously-staged upload (see `POST /v1/files`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409.")
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "format", "mode", "upload_id"]
+    format: Optional[StrictStr] = Field(default=None, description="File format of the upload: `\"csv\"`, `\"json\"`, or `\"parquet\"`. Optional — when omitted, the format is auto-detected from the upload's `Content-Type` and, failing that, from the file contents. Provide it explicitly to override detection or when the contents are ambiguous. `\"json\"` expects newline-delimited JSON (one object per line), not a JSON array. Only applies to `upload_id`; query results are always parquet.")
+    mode: StrictStr = Field(description="How the data is applied: `\"replace\"` overwrites the table's contents, `\"append\"` inserts the new rows on top of the existing data.")
+    result_id: Optional[StrictStr] = Field(default=None, description="ID of a persisted query result (see `GET /v1/results/{result_id}`) to publish as the table's contents. The result is copied into the table, so the table keeps its data even after the result expires. A result can be loaded into any number of tables. Provide either this or `upload_id`, not both.")
+    upload_id: Optional[StrictStr] = Field(default=None, description="ID of a previously-staged upload (see `POST /v1/files`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409. Provide either this or `result_id`, not both.")
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "format", "mode", "result_id", "upload_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -84,6 +85,16 @@ class LoadManagedTableRequest(BaseModel):
         if self.format is None and "format" in self.model_fields_set:
             _dict['format'] = None
 
+        # set to None if result_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.result_id is None and "result_id" in self.model_fields_set:
+            _dict['result_id'] = None
+
+        # set to None if upload_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.upload_id is None and "upload_id" in self.model_fields_set:
+            _dict['upload_id'] = None
+
         return _dict
 
     @classmethod
@@ -100,6 +111,7 @@ class LoadManagedTableRequest(BaseModel):
             "async_after_ms": obj.get("async_after_ms"),
             "format": obj.get("format"),
             "mode": obj.get("mode"),
+            "result_id": obj.get("result_id"),
             "upload_id": obj.get("upload_id")
         })
         return _obj

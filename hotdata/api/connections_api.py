@@ -2601,9 +2601,9 @@ class ConnectionsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> LoadManagedTableResponse:
-        """Load managed table from upload
+        """Load managed table from upload or query result
 
-        Publish a previously-uploaded file as the new contents of a managed table. CSV, JSON, and Parquet uploads are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the upload is applied: `replace` overwrites the table's contents, `append` inserts the uploaded rows on top of the existing data. Concurrent loads against the same upload return 409. Set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID.
+        Publish data as the new contents of a managed table from one of two sources — provide exactly one. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2684,9 +2684,9 @@ class ConnectionsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[LoadManagedTableResponse]:
-        """Load managed table from upload
+        """Load managed table from upload or query result
 
-        Publish a previously-uploaded file as the new contents of a managed table. CSV, JSON, and Parquet uploads are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the upload is applied: `replace` overwrites the table's contents, `append` inserts the uploaded rows on top of the existing data. Concurrent loads against the same upload return 409. Set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID.
+        Publish data as the new contents of a managed table from one of two sources — provide exactly one. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2767,9 +2767,9 @@ class ConnectionsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Load managed table from upload
+        """Load managed table from upload or query result
 
-        Publish a previously-uploaded file as the new contents of a managed table. CSV, JSON, and Parquet uploads are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the upload is applied: `replace` overwrites the table's contents, `append` inserts the uploaded rows on top of the existing data. Concurrent loads against the same upload return 409. Set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID.
+        Publish data as the new contents of a managed table from one of two sources — provide exactly one. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str

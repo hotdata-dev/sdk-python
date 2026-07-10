@@ -6,6 +6,7 @@ Summary item in GET /databases
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**created_at** | **datetime** | When the database was created. | [optional] 
 **default_catalog** | **str** | Name the database&#39;s default catalog answers to inside its query scope. | 
 **expires_at** | **datetime** |  | [optional] 
 **id** | **str** |  | 

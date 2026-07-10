@@ -28,11 +28,12 @@ class DatabaseSummary(BaseModel):
     """
     Summary item in GET /databases
     """ # noqa: E501
+    created_at: Optional[datetime] = Field(default=None, description="When the database was created.")
     default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope.")
     expires_at: Optional[datetime] = None
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["default_catalog", "expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["created_at", "default_catalog", "expires_at", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -73,6 +74,11 @@ class DatabaseSummary(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if created_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.created_at is None and "created_at" in self.model_fields_set:
+            _dict['created_at'] = None
+
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
@@ -95,6 +101,7 @@ class DatabaseSummary(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "created_at": obj.get("created_at"),
             "default_catalog": obj.get("default_catalog"),
             "expires_at": obj.get("expires_at"),
             "id": obj.get("id"),
