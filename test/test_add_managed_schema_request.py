@@ -39,6 +39,9 @@ class TestAddManagedSchemaRequest(unittest.TestCase):
                 name = '',
                 tables = [
                     hotdata.models.add_managed_table_decl.AddManagedTableDecl(
+                        key = [
+                            ''
+                            ], 
                         name = '', )
                     ]
             )

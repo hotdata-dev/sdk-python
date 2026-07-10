@@ -36,6 +36,9 @@ class TestAddManagedTableDecl(unittest.TestCase):
         model = AddManagedTableDecl()
         if include_optional:
             return AddManagedTableDecl(
+                key = [
+                    ''
+                    ],
                 name = ''
             )
         else:

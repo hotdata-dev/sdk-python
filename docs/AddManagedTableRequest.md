@@ -6,6 +6,7 @@ Request body for adding a table to an existing schema: `POST /v1/connections/{id
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**key** | **List[str]** | Columns that uniquely identify a row, enabling the key-based load modes (&#x60;delete&#x60;, &#x60;update&#x60;, &#x60;upsert&#x60;) on this table: those loads match rows by these columns&#39; values. Omit (the default) to declare no key; the table can still be loaded with &#x60;replace&#x60; and &#x60;append&#x60;, but key-based modes are then rejected. | [optional] 
 **name** | **str** |  | 
 
 ## Example
