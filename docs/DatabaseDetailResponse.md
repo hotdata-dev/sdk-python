@@ -7,6 +7,7 @@ Response body for GET /databases/{database_id}
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **attachments** | [**List[DatabaseAttachmentInfo]**](DatabaseAttachmentInfo.md) |  | 
+**created_at** | **datetime** | When the database was created. | [optional] 
 **default_catalog** | **str** | Name the database&#39;s default catalog answers to inside its query scope (&#x60;default&#x60; unless overridden at create time). | 
 **default_connection_id** | **str** |  | 
 **expires_at** | **datetime** | When this database expires. | [optional] 

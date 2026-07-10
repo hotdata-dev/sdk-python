@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- feat(tables): support loading from query results
+
 ## [0.6.0] - 2026-07-07
 
 ### Changed
