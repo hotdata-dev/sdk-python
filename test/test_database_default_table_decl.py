@@ -36,6 +36,9 @@ class TestDatabaseDefaultTableDecl(unittest.TestCase):
         model = DatabaseDefaultTableDecl()
         if include_optional:
             return DatabaseDefaultTableDecl(
+                key = [
+                    ''
+                    ],
                 name = ''
             )
         else:

@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,8 +27,9 @@ class AddManagedTableDecl(BaseModel):
     """
     One table declaration inside an add-schema request body.
     """ # noqa: E501
+    key: Optional[List[StrictStr]] = Field(default=None, description="Columns that uniquely identify a row, enabling the key-based load modes (`delete`, `update`, `upsert`) on this table: those loads match rows by these columns' values. Omit (the default) to declare no key; the table can still be loaded with `replace` and `append`, but key-based modes are then rejected.")
     name: StrictStr
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["key", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -81,6 +82,7 @@ class AddManagedTableDecl(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "key": obj.get("key"),
             "name": obj.get("name")
         })
         return _obj

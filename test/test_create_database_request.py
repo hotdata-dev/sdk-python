@@ -44,6 +44,9 @@ class TestCreateDatabaseRequest(unittest.TestCase):
                         name = '', 
                         tables = [
                             hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
+                                key = [
+                                    ''
+                                    ], 
                                 name = '', )
                             ], )
                     ]

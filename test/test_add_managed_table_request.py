@@ -36,6 +36,9 @@ class TestAddManagedTableRequest(unittest.TestCase):
         model = AddManagedTableRequest()
         if include_optional:
             return AddManagedTableRequest(
+                key = [
+                    ''
+                    ],
                 name = ''
             )
         else:
