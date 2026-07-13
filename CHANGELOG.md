@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat(databases): add default_schema field to database objects
 - feat(schemas): add key field to table definitions
 - feat(tables): support loading from query results
 
