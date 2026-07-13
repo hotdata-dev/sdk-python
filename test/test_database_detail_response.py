@@ -44,6 +44,7 @@ class TestDatabaseDetailResponse(unittest.TestCase):
                 created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 default_catalog = '',
                 default_connection_id = '',
+                default_schema = '',
                 expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 id = '',
                 name = ''
@@ -57,6 +58,7 @@ class TestDatabaseDetailResponse(unittest.TestCase):
                     ],
                 default_catalog = '',
                 default_connection_id = '',
+                default_schema = '',
                 id = '',
         )
         """

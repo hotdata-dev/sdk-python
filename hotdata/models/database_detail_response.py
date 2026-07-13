@@ -33,10 +33,11 @@ class DatabaseDetailResponse(BaseModel):
     created_at: Optional[datetime] = Field(default=None, description="When the database was created.")
     default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope (`default` unless overridden at create time).")
     default_connection_id: StrictStr
+    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
     expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["attachments", "created_at", "default_catalog", "default_connection_id", "expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["attachments", "created_at", "default_catalog", "default_connection_id", "default_schema", "expires_at", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -115,6 +116,7 @@ class DatabaseDetailResponse(BaseModel):
             "created_at": obj.get("created_at"),
             "default_catalog": obj.get("default_catalog"),
             "default_connection_id": obj.get("default_connection_id"),
+            "default_schema": obj.get("default_schema"),
             "expires_at": obj.get("expires_at"),
             "id": obj.get("id"),
             "name": obj.get("name")

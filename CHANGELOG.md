@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore(api): exclude datasets from public OpenAPI spec + docs cleanup
 - feat(schemas): add key field to table definitions
 - feat(tables): support loading from query results
 
