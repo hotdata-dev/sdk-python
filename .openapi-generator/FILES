@@ -58,6 +58,7 @@ docs/ExecuteSavedQueryRequest.md
 docs/FinalizeUploadPart.md
 docs/FinalizeUploadRequest.md
 docs/FinalizeUploadResponse.md
+docs/ForkDatabaseRequest.md
 docs/GetConnectionResponse.md
 docs/GetDatabaseContextResponse.md
 docs/GetResultResponse.md
@@ -214,6 +215,7 @@ hotdata/models/execute_saved_query_request.py
 hotdata/models/finalize_upload_part.py
 hotdata/models/finalize_upload_request.py
 hotdata/models/finalize_upload_response.py
+hotdata/models/fork_database_request.py
 hotdata/models/get_connection_response.py
 hotdata/models/get_database_context_response.py
 hotdata/models/get_result_response.py
@@ -343,6 +345,7 @@ test/test_execute_saved_query_request.py
 test/test_finalize_upload_part.py
 test/test_finalize_upload_request.py
 test/test_finalize_upload_response.py
+test/test_fork_database_request.py
 test/test_get_connection_response.py
 test/test_get_database_context_response.py
 test/test_get_result_response.py

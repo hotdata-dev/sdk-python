@@ -18,26 +18,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from hotdata.models.database_attachment_info import DatabaseAttachmentInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
-class DatabaseDetailResponse(BaseModel):
+class ForkDatabaseRequest(BaseModel):
     """
-    Response body for GET /databases/{database_id}
+    Request body for POST /databases/{database_id}/fork
     """ # noqa: E501
-    attachments: List[DatabaseAttachmentInfo]
-    created_at: Optional[datetime] = Field(default=None, description="When the database was created.")
-    default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope (`default` unless overridden at create time).")
-    default_connection_id: StrictStr
-    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
-    expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
-    id: StrictStr
-    name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["attachments", "created_at", "default_catalog", "default_connection_id", "default_schema", "expires_at", "id", "name"]
+    expires_at: Optional[StrictStr] = Field(default=None, description="When the fork expires. Accepts either an RFC 3339 timestamp (e.g. `\"2026-06-01T00:00:00Z\"`) or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days) — for example `\"24h\"` or `\"7d\"`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires.")
+    name: Optional[StrictStr] = Field(default=None, description="Optional display label for the fork. When omitted, the source database's name (if any) is carried over.")
+    __properties: ClassVar[List[str]] = ["expires_at", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -57,7 +49,7 @@ class DatabaseDetailResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of DatabaseDetailResponse from a JSON string"""
+        """Create an instance of ForkDatabaseRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -78,18 +70,6 @@ class DatabaseDetailResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in attachments (list)
-        _items = []
-        if self.attachments:
-            for _item_attachments in self.attachments:
-                if _item_attachments:
-                    _items.append(_item_attachments.to_dict())
-            _dict['attachments'] = _items
-        # set to None if created_at (nullable) is None
-        # and model_fields_set contains the field
-        if self.created_at is None and "created_at" in self.model_fields_set:
-            _dict['created_at'] = None
-
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
@@ -104,7 +84,7 @@ class DatabaseDetailResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of DatabaseDetailResponse from a dict"""
+        """Create an instance of ForkDatabaseRequest from a dict"""
         if obj is None:
             return None
 
@@ -112,13 +92,7 @@ class DatabaseDetailResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "attachments": [DatabaseAttachmentInfo.from_dict(_item) for _item in obj["attachments"]] if obj.get("attachments") is not None else None,
-            "created_at": obj.get("created_at"),
-            "default_catalog": obj.get("default_catalog"),
-            "default_connection_id": obj.get("default_connection_id"),
-            "default_schema": obj.get("default_schema"),
             "expires_at": obj.get("expires_at"),
-            "id": obj.get("id"),
             "name": obj.get("name")
         })
         return _obj

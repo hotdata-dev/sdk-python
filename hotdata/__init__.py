@@ -102,6 +102,7 @@ __all__ = [
     "FinalizeUploadPart",
     "FinalizeUploadRequest",
     "FinalizeUploadResponse",
+    "ForkDatabaseRequest",
     "GetConnectionResponse",
     "GetDatabaseContextResponse",
     "GetResultResponse",
@@ -255,6 +256,7 @@ from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest 
 from hotdata.models.finalize_upload_part import FinalizeUploadPart as FinalizeUploadPart
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest as FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse as FinalizeUploadResponse
+from hotdata.models.fork_database_request import ForkDatabaseRequest as ForkDatabaseRequest
 from hotdata.models.get_connection_response import GetConnectionResponse as GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse as GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse

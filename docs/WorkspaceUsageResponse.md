@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **bytes_scanned** | **int** | Sum of &#x60;bytes_scanned&#x60; across all completed/failed query runs since &#x60;since&#x60;. Null bytes (queries that touched no row data) contribute 0. | 
 **query_count** | **int** | Number of query runs (succeeded + failed) since &#x60;since&#x60;. | 
 **since** | **datetime** | The period start used for this response (echoed back for the caller to verify). | 
-**storage_bytes** | **int** | The workspace&#39;s current stored-data footprint in bytes, measured at request time: managed-database and dataset data, plus un-consumed uploads, connection caches, and search-index artifacts. | 
+**storage_bytes** | **int** | The workspace&#39;s current stored-data footprint in bytes, measured at request time: managed-database data, plus un-consumed uploads, connection caches, and search-index artifacts. | 
 **storage_captured_at** | **datetime** | When &#x60;storage_bytes&#x60; was measured (the time this response was produced). | [optional] 
 
 ## Example

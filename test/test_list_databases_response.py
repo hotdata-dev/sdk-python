@@ -40,6 +40,7 @@ class TestListDatabasesResponse(unittest.TestCase):
                     hotdata.models.database_summary.DatabaseSummary(
                         created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         default_catalog = '', 
+                        default_schema = '', 
                         expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         id = '', 
                         name = '', )
@@ -51,6 +52,7 @@ class TestListDatabasesResponse(unittest.TestCase):
                     hotdata.models.database_summary.DatabaseSummary(
                         created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         default_catalog = '', 
+                        default_schema = '', 
                         expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         id = '', 
                         name = '', )

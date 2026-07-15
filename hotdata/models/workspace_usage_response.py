@@ -31,7 +31,7 @@ class WorkspaceUsageResponse(BaseModel):
     bytes_scanned: StrictInt = Field(description="Sum of `bytes_scanned` across all completed/failed query runs since `since`. Null bytes (queries that touched no row data) contribute 0.")
     query_count: StrictInt = Field(description="Number of query runs (succeeded + failed) since `since`.")
     since: datetime = Field(description="The period start used for this response (echoed back for the caller to verify).")
-    storage_bytes: StrictInt = Field(description="The workspace's current stored-data footprint in bytes, measured at request time: managed-database and dataset data, plus un-consumed uploads, connection caches, and search-index artifacts.")
+    storage_bytes: StrictInt = Field(description="The workspace's current stored-data footprint in bytes, measured at request time: managed-database data, plus un-consumed uploads, connection caches, and search-index artifacts.")
     storage_captured_at: Optional[datetime] = Field(default=None, description="When `storage_bytes` was measured (the time this response was produced).")
     __properties: ClassVar[List[str]] = ["bytes_scanned", "query_count", "since", "storage_bytes", "storage_captured_at"]
 

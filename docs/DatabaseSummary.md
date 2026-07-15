@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **created_at** | **datetime** | When the database was created. | [optional] 
 **default_catalog** | **str** | Name the database&#39;s default catalog answers to inside its query scope. | 
+**default_schema** | **str** | Schema that unqualified table names resolve to inside this database&#39;s query scope. &#x60;main&#x60; unless the database declares a single schema or a &#x60;default_schema&#x60; was set at create time. | 
 **expires_at** | **datetime** |  | [optional] 
 **id** | **str** |  | 
 **name** | **str** |  | [optional] 

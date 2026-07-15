@@ -37,6 +37,7 @@ class TestCreateDatabaseRequest(unittest.TestCase):
         if include_optional:
             return CreateDatabaseRequest(
                 default_catalog = '',
+                default_schema = '',
                 expires_at = '',
                 name = '',
                 schemas = [
