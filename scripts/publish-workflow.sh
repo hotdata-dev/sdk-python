@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate publish.yml for a package. Usage: publish-workflow.sh hotdata-runtime
+# Generate publish.yml for a package. Usage: publish-workflow.sh hotdata-framework
 set -euo pipefail
 pkg="${1:?package name}"
 cat <<EOF
