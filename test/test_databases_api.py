@@ -69,6 +69,13 @@ class TestDatabasesApi(unittest.TestCase):
         """
         pass
 
+    def test_fork_database(self) -> None:
+        """Test case for fork_database
+
+        Fork database
+        """
+        pass
+
     def test_get_database(self) -> None:
         """Test case for get_database
 

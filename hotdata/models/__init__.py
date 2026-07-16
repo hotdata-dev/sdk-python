@@ -66,6 +66,7 @@ from hotdata.models.execute_saved_query_request import ExecuteSavedQueryRequest
 from hotdata.models.finalize_upload_part import FinalizeUploadPart
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse
+from hotdata.models.fork_database_request import ForkDatabaseRequest
 from hotdata.models.get_connection_response import GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse

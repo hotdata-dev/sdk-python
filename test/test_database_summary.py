@@ -38,6 +38,7 @@ class TestDatabaseSummary(unittest.TestCase):
             return DatabaseSummary(
                 created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 default_catalog = '',
+                default_schema = '',
                 expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 id = '',
                 name = ''
@@ -45,6 +46,7 @@ class TestDatabaseSummary(unittest.TestCase):
         else:
             return DatabaseSummary(
                 default_catalog = '',
+                default_schema = '',
                 id = '',
         )
         """
