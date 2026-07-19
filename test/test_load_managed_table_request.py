@@ -39,6 +39,9 @@ class TestLoadManagedTableRequest(unittest.TestCase):
                 var_async = True,
                 async_after_ms = 1000,
                 format = '',
+                key = [
+                    ''
+                    ],
                 mode = '',
                 result_id = '',
                 upload_id = ''
