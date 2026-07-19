@@ -31,10 +31,11 @@ class LoadManagedTableRequest(BaseModel):
     var_async: Optional[StrictBool] = Field(default=None, description="When true, run the load as a background job and return a job ID to poll instead of blocking until it finishes. Recommended for large uploads, which can take longer than an HTTP request should stay open.", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the load to finish: if it completes in time the full result is returned (200), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
     format: Optional[StrictStr] = Field(default=None, description="File format of the upload: `\"csv\"`, `\"json\"`, or `\"parquet\"`. Optional — when omitted, the format is auto-detected from the upload's `Content-Type` and, failing that, from the file contents. Provide it explicitly to override detection or when the contents are ambiguous. `\"json\"` expects newline-delimited JSON (one object per line), not a JSON array. Only applies to `upload_id`; query results are always parquet.")
+    key: Optional[List[StrictStr]] = Field(default=None, description="Key columns identifying rows for `\"delete\"`, `\"update\"`, and `\"upsert\"` loads — the columns whose values decide which existing row an incoming row removes, updates, or replaces. Omit to use the key the table was created with. Keep the key consistent across loads of the same table: changing it re-targets which rows are matched. Ignored for `\"replace\"` and `\"append\"`.")
     mode: StrictStr = Field(description="How the data is applied: `\"replace\"` overwrites the table's contents, `\"append\"` inserts the new rows on top of the existing data.")
     result_id: Optional[StrictStr] = Field(default=None, description="ID of a persisted query result (see `GET /v1/results/{result_id}`) to publish as the table's contents. The result is copied into the table, so the table keeps its data even after the result expires. A result can be loaded into any number of tables. Provide either this or `upload_id`, not both.")
     upload_id: Optional[StrictStr] = Field(default=None, description="ID of a previously-staged upload (see `POST /v1/files`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409. Provide either this or `result_id`, not both.")
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "format", "mode", "result_id", "upload_id"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "format", "key", "mode", "result_id", "upload_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,6 +86,11 @@ class LoadManagedTableRequest(BaseModel):
         if self.format is None and "format" in self.model_fields_set:
             _dict['format'] = None
 
+        # set to None if key (nullable) is None
+        # and model_fields_set contains the field
+        if self.key is None and "key" in self.model_fields_set:
+            _dict['key'] = None
+
         # set to None if result_id (nullable) is None
         # and model_fields_set contains the field
         if self.result_id is None and "result_id" in self.model_fields_set:
@@ -110,6 +116,7 @@ class LoadManagedTableRequest(BaseModel):
             "async": obj.get("async"),
             "async_after_ms": obj.get("async_after_ms"),
             "format": obj.get("format"),
+            "key": obj.get("key"),
             "mode": obj.get("mode"),
             "result_id": obj.get("result_id"),
             "upload_id": obj.get("upload_id")

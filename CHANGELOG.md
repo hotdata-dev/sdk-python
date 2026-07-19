@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat(loads): add key parameter to load requests
 - feat(databases): add fork endpoint
 
 ## [0.7.0] - 2026-07-14
