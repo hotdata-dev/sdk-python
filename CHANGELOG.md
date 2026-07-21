@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
+### Removed
 
-- chore: remove files endpoints in favor of uploads
+- The legacy `POST /v1/files` upload endpoints have been removed in favor of the
+  presigned upload flow. This drops `hotdata.UploadsApi.upload_stream`, the raw
+  `upload_file(body=...)` / `list_uploads` operations, and the `UploadResponse`,
+  `UploadInfo`, and `ListUploadsResponse` models. Use
+  `hotdata.UploadsApi.upload_file(source, ...)` (direct-to-storage) instead.
 
 ## [0.8.0] - 2026-07-20
 

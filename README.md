@@ -156,20 +156,6 @@ Pass a `threading.Event` as `cancel_event` to abort an in-flight upload; tune th
 control-plane calls with `request_timeout` (storage-PUT timeouts are automatic and
 size-scaled).
 
-For that fallback (or to upload from a non-seekable stream), use `upload_stream`,
-which sends the bytes to the legacy `POST /v1/files` endpoint in one request,
-streaming a file object without buffering it in memory:
-
-```python
-with open("data.parquet", "rb") as f:
-    resp = uploads.upload_stream(f, content_type="application/parquet")
-print(resp.id)
-```
-
-Note `upload_file` shadows the generated raw-body `upload_file(body=...)`; that
-raw operation is still reachable at
-`hotdata.api.uploads_api.UploadsApi.upload_file`.
-
 ## API reference
 
 Generated Markdown for every operation and model is in [`docs/`](https://github.com/hotdata-dev/sdk-python/tree/main/docs):

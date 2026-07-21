@@ -25,10 +25,10 @@ from hotdata.api.jobs_api import JobsApi
 from hotdata.api.refresh_api import RefreshApi
 from hotdata.api.saved_queries_api import SavedQueriesApi
 from hotdata.api.secrets_api import SecretsApi
-from hotdata.api.uploads_api import UploadsApi
 from hotdata.api.workspaces_api import WorkspacesApi
 from hotdata.exceptions import ApiException
 from hotdata.models.create_database_request import CreateDatabaseRequest
+from hotdata.uploads import UploadsApi
 
 
 REQUIRED_ENV = ("HOTDATA_SDK_TEST_API_KEY", "HOTDATA_SDK_TEST_WORKSPACE_ID")
