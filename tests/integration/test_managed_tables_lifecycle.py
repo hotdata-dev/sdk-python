@@ -36,10 +36,10 @@ import pyarrow.parquet as pq
 
 from hotdata.api.connections_api import ConnectionsApi
 from hotdata.api.databases_api import DatabasesApi
-from hotdata.api.uploads_api import UploadsApi
 from hotdata.models.add_managed_schema_request import AddManagedSchemaRequest
 from hotdata.models.add_managed_table_request import AddManagedTableRequest
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
+from hotdata.uploads import UploadsApi
 
 
 def _parquet_bytes() -> bytes:
@@ -69,15 +69,15 @@ def test_managed_tables_lifecycle(
     )
 
     upload = uploads_api.upload_file(
-        body=_parquet_bytes(), _content_type="application/parquet"
+        _parquet_bytes(), content_type="application/parquet"
     )
-    assert upload.id
+    assert upload.upload_id
 
     loaded = connections_api.load_managed_table(
         connection_id,
         schema_name,
         table_name,
-        LoadManagedTableRequest(mode="replace", upload_id=upload.id),
+        LoadManagedTableRequest(mode="replace", upload_id=upload.upload_id),
     )
     assert loaded.schema_name == schema_name
     assert loaded.table_name == table_name

@@ -18,7 +18,6 @@ body shape, progress reporting, and the error paths.
 from __future__ import annotations
 
 import io
-import json
 import os
 import threading
 from typing import Any, Dict, List, Optional, Tuple
@@ -50,7 +49,6 @@ from hotdata.uploads import (
     effective_in_flight,
 )
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse
-from hotdata.models.upload_response import UploadResponse
 from hotdata.models.upload_session_response import UploadSessionResponse
 
 
@@ -75,20 +73,6 @@ class _FakeResponse:
             headers["ETag"] = etag
         self.headers = _FakeHeaders(headers)
         self.data = body
-
-
-class _FakeUrllib3Response:
-    """Minimal urllib3.HTTPResponse stand-in for the API transport (not storage):
-    enough for rest.RESTResponse + ApiClient.response_deserialize.
-    """
-
-    def __init__(self, status: int, data: bytes, headers: Dict[str, str]):
-        self.status = status
-        self.reason = "OK" if 200 <= status < 300 else "Error"
-        self.data = data
-        # A plain dict (lowercased keys): ApiResponse validates headers as a dict,
-        # and response_deserialize looks up 'content-type'.
-        self.headers = {k.lower(): v for k, v in headers.items()}
 
 
 class _FakeStoragePool:
@@ -1072,7 +1056,7 @@ def test_upload_file_non_seekable_stream_raises(fake_pool: _FakeStoragePool) -> 
             return False
 
     api = _make_api()
-    with pytest.raises(TypeError, match="upload_stream"):
+    with pytest.raises(TypeError, match="seekable file object"):
         api.upload_file(_NonSeekable())  # type: ignore[arg-type]
 
 
@@ -1080,143 +1064,6 @@ def test_upload_file_bad_type_raises(fake_pool: _FakeStoragePool) -> None:
     api = _make_api()
     with pytest.raises(TypeError, match="path, bytes, or a seekable"):
         api.upload_file(12345)  # type: ignore[arg-type]
-
-
-# --- upload_stream (legacy POST /v1/files) --------------------------------
-
-
-def _upload_response_json() -> bytes:
-    return json.dumps(
-        {
-            "content_type": "application/parquet",
-            "created_at": "2026-01-01T00:00:00Z",
-            "id": "file_123",
-            "size_bytes": 5,
-            "status": "ready",
-        }
-    ).encode()
-
-
-def test_upload_stream_bytes_posts_to_v1_files(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", "1")
-    from hotdata import rest
-
-    captured: Dict[str, Any] = {}
-
-    def fake_request(
-        self: Any,
-        method: str,
-        url: str,
-        headers: Any = None,
-        body: Any = None,
-        post_params: Any = None,
-        _request_timeout: Any = None,
-    ) -> Any:
-        captured.update(method=method, url=url, body=body, headers=dict(headers or {}))
-        resp = _FakeUrllib3Response(
-            201, _upload_response_json(), {"content-type": "application/json"}
-        )
-        return rest.RESTResponse(resp)
-
-    monkeypatch.setattr(rest.RESTClientObject, "request", fake_request)
-    api = _make_api()
-    out = api.upload_stream(b"hello", content_type="application/parquet")
-    assert captured["method"] == "POST"
-    assert captured["url"].endswith("/v1/files")
-    assert captured["body"] == b"hello"
-    assert captured["headers"]["Content-Type"] == "application/parquet"
-    assert isinstance(out, UploadResponse)
-    assert out.id == "file_123"
-
-
-def test_upload_stream_file_object_streams_with_inferred_length(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", "1")
-    api = _make_api()
-
-    captured: Dict[str, Any] = {}
-
-    class _FakePoolManager:
-        def request(self, method: str, url: str, **kwargs: Any) -> Any:
-            body = kwargs["body"]
-            captured.update(
-                method=method,
-                url=url,
-                headers=dict(kwargs.get("headers") or {}),
-                streamed=body.read(),
-                preload_content=kwargs.get("preload_content"),
-            )
-            return _FakeUrllib3Response(
-                201, _upload_response_json(), {"content-type": "application/json"}
-            )
-
-    monkeypatch.setattr(api.api_client.rest_client, "pool_manager", _FakePoolManager())
-
-    payload = b"streamed-from-a-file-object"
-    out = api.upload_stream(io.BytesIO(payload))
-    assert captured["method"] == "POST"
-    assert captured["url"].endswith("/v1/files")
-    # Length inferred from the seekable stream -> framed (not chunked).
-    assert captured["headers"]["Content-Length"] == str(len(payload))
-    assert captured["streamed"] == payload
-    assert captured["preload_content"] is False
-    # Default content type when unset.
-    assert captured["headers"]["Content-Type"] == "application/octet-stream"
-    # The SDK's User-Agent and scope auth ride the streamed request too.
-    assert "User-Agent" in captured["headers"]
-    assert captured["headers"]["X-Workspace-Id"] == "ws_test"
-    assert isinstance(out, UploadResponse)
-
-
-def test_upload_stream_bad_type_raises() -> None:
-    api = _make_api()
-    with pytest.raises(TypeError, match="bytes or a readable"):
-        api.upload_stream(12345)  # type: ignore[arg-type]
-
-
-def _make_api_with_session(session_id: str) -> UploadsApi:
-    from hotdata import ApiClient, Configuration
-
-    config = Configuration(
-        host="https://api.hotdata.test",
-        api_key="test-key",
-        workspace_id="ws_test",
-        session_id=session_id,
-    )
-    return UploadsApi(ApiClient(config))
-
-
-def test_upload_stream_sends_session_and_workspace_scope(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv("HOTDATA_DISABLE_JWT_EXCHANGE", "1")
-    from hotdata import rest
-
-    captured: Dict[str, Any] = {}
-
-    def fake_request(
-        self: Any,
-        method: str,
-        url: str,
-        headers: Any = None,
-        body: Any = None,
-        post_params: Any = None,
-        _request_timeout: Any = None,
-    ) -> Any:
-        captured["headers"] = dict(headers or {})
-        resp = _FakeUrllib3Response(
-            201, _upload_response_json(), {"content-type": "application/json"}
-        )
-        return rest.RESTResponse(resp)
-
-    monkeypatch.setattr(rest.RESTClientObject, "request", fake_request)
-    api = _make_api_with_session("sb_xyz")
-    api.upload_stream(b"hi")
-    assert captured["headers"]["X-Session-Id"] == "sb_xyz"
-    assert captured["headers"]["X-Workspace-Id"] == "ws_test"
 
 
 # --- Finalize hardening ----------------------------------------------------

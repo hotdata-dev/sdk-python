@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **key** | **List[str]** | Key columns identifying rows for &#x60;\&quot;delete\&quot;&#x60;, &#x60;\&quot;update\&quot;&#x60;, and &#x60;\&quot;upsert\&quot;&#x60; loads — the columns whose values decide which existing row an incoming row removes, updates, or replaces. Omit to use the key the table was created with. Keep the key consistent across loads of the same table: changing it re-targets which rows are matched. Ignored for &#x60;\&quot;replace\&quot;&#x60; and &#x60;\&quot;append\&quot;&#x60;. | [optional] 
 **mode** | **str** | How the data is applied: &#x60;\&quot;replace\&quot;&#x60; overwrites the table&#39;s contents, &#x60;\&quot;append\&quot;&#x60; inserts the new rows on top of the existing data. | 
 **result_id** | **str** | ID of a persisted query result (see &#x60;GET /v1/results/{result_id}&#x60;) to publish as the table&#39;s contents. The result is copied into the table, so the table keeps its data even after the result expires. A result can be loaded into any number of tables. Provide either this or &#x60;upload_id&#x60;, not both. | [optional] 
-**upload_id** | **str** | ID of a previously-staged upload (see &#x60;POST /v1/files&#x60;). The upload is claimed atomically; concurrent loads against the same &#x60;upload_id&#x60; return 409. Provide either this or &#x60;result_id&#x60;, not both. | [optional] 
+**upload_id** | **str** | ID of a previously-staged upload (see &#x60;POST /v1/uploads&#x60;). The upload is claimed atomically; concurrent loads against the same &#x60;upload_id&#x60; return 409. Provide either this or &#x60;result_id&#x60;, not both. | [optional] 
 
 ## Example
 

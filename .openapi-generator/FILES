@@ -87,7 +87,6 @@ docs/ListResultsResponse.md
 docs/ListSavedQueriesResponse.md
 docs/ListSavedQueryVersionsResponse.md
 docs/ListSecretsResponse.md
-docs/ListUploadsResponse.md
 docs/ListWorkspacesResponse.md
 docs/LoadManagedTableRequest.md
 docs/LoadManagedTableResponse.md
@@ -128,8 +127,6 @@ docs/UpdateEmbeddingProviderResponse.md
 docs/UpdateSavedQueryRequest.md
 docs/UpdateSecretRequest.md
 docs/UpdateSecretResponse.md
-docs/UploadInfo.md
-docs/UploadResponse.md
 docs/UploadSessionResponse.md
 docs/UploadsApi.md
 docs/UpsertDatabaseContextRequest.md
@@ -241,7 +238,6 @@ hotdata/models/list_results_response.py
 hotdata/models/list_saved_queries_response.py
 hotdata/models/list_saved_query_versions_response.py
 hotdata/models/list_secrets_response.py
-hotdata/models/list_uploads_response.py
 hotdata/models/list_workspaces_response.py
 hotdata/models/load_managed_table_request.py
 hotdata/models/load_managed_table_response.py
@@ -276,8 +272,6 @@ hotdata/models/update_embedding_provider_response.py
 hotdata/models/update_saved_query_request.py
 hotdata/models/update_secret_request.py
 hotdata/models/update_secret_response.py
-hotdata/models/upload_info.py
-hotdata/models/upload_response.py
 hotdata/models/upload_session_response.py
 hotdata/models/upsert_database_context_request.py
 hotdata/models/upsert_database_context_response.py
@@ -374,7 +368,6 @@ test/test_list_results_response.py
 test/test_list_saved_queries_response.py
 test/test_list_saved_query_versions_response.py
 test/test_list_secrets_response.py
-test/test_list_uploads_response.py
 test/test_list_workspaces_response.py
 test/test_load_managed_table_request.py
 test/test_load_managed_table_response.py
@@ -415,8 +408,6 @@ test/test_update_embedding_provider_response.py
 test/test_update_saved_query_request.py
 test/test_update_secret_request.py
 test/test_update_secret_response.py
-test/test_upload_info.py
-test/test_upload_response.py
 test/test_upload_session_response.py
 test/test_uploads_api.py
 test/test_upsert_database_context_request.py

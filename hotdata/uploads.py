@@ -70,16 +70,7 @@ from hotdata.models.finalize_upload_part import FinalizeUploadPart
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse
 from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest
-from hotdata.models.upload_response import UploadResponse
 from hotdata.models.upload_session_response import UploadSessionResponse
-from hotdata.rest import RESTResponse
-
-#: Response-type map for the legacy ``POST /v1/files`` op, mirroring the
-#: generated ``upload_file`` handler.
-_UPLOAD_FILE_RESPONSE_TYPES: Dict[str, Optional[str]] = {
-    "201": "UploadResponse",
-    "400": "ApiErrorResponse",
-}
 
 #: The accepted input types for :meth:`UploadsApi.upload_file`: a filesystem
 #: path, raw bytes, or a seekable binary file object.
@@ -356,8 +347,9 @@ class _ApiPhaseError(UploadError):
 
 class SessionCreateError(_ApiPhaseError):
     """Opening the upload session (``POST /v1/uploads``) failed. A ``501``
-    ``PRESIGN_UNSUPPORTED`` (``status == 501``) means the backend cannot issue
-    presigned URLs — fall back to :meth:`UploadsApi.upload_stream`.
+    ``PRESIGN_UNSUPPORTED`` (``status == 501``) means the configured storage
+    backend cannot issue presigned upload URLs (e.g. a local-filesystem
+    development backend).
     """
 
     _phase = "opening the upload session"
@@ -805,20 +797,6 @@ def default_part_retry() -> Retry:
         return retry
 
 
-def _to_timeout(request_timeout: Any) -> Any:
-    """Convert the SDK's ``_request_timeout`` (a number or ``(connect, read)``
-    tuple) into a :class:`urllib3.Timeout`, or ``None`` for the pool default —
-    matching the generated REST client's conversion.
-    """
-    if not request_timeout:
-        return None
-    if isinstance(request_timeout, (int, float)):
-        return urllib3.Timeout(total=request_timeout)
-    if isinstance(request_timeout, tuple) and len(request_timeout) == 2:
-        return urllib3.Timeout(connect=request_timeout[0], read=request_timeout[1])
-    return None
-
-
 def _storage_headers(session_headers: Dict[str, str], content_length: int) -> Dict[str, str]:
     """Build the bare PUT headers: an explicit ``Content-Length`` plus the
     server-provided session headers replayed verbatim (currently always empty;
@@ -948,8 +926,8 @@ class UploadsApi(_GeneratedUploadsApi):
         bytes never round-trip through the API.
 
         ``source`` may be a filesystem path, raw ``bytes`` / ``bytearray``, or a
-        seekable binary file object. A non-seekable stream is not accepted here
-        (multipart needs positioned reads) — use :meth:`upload_stream` for that.
+        seekable binary file object. A non-seekable stream is not accepted
+        (multipart needs positioned reads) — buffer it into ``bytes`` first.
         A file object is uploaded from its current position to the end (its
         cursor is consumed, not restored); pass ``size`` only if its length
         cannot be inferred by seeking.
@@ -990,8 +968,9 @@ class UploadsApi(_GeneratedUploadsApi):
         a local read failure):
 
         :raises SessionCreateError: opening the session failed (e.g. a ``501``
-            ``PRESIGN_UNSUPPORTED`` — check ``.status``; fall back to
-            :meth:`upload_stream`). Wraps the ``ApiException`` as ``__cause__``.
+            ``PRESIGN_UNSUPPORTED`` — the storage backend cannot issue presigned
+            upload URLs; check ``.status``). Wraps the ``ApiException`` as
+            ``__cause__``.
         :raises SizeLimitError: the part-size hint exceeds the wire's 64-bit field.
         :raises MalformedSessionError: the session response was inconsistent.
         :raises StorageError: a storage ``PUT`` returned a non-2xx status. Its
@@ -1129,105 +1108,6 @@ class UploadsApi(_GeneratedUploadsApi):
             finalize_body,
             timeout,
         )
-
-    def upload_stream(
-        self,
-        body: Union[bytes, bytearray, BinaryIO],
-        *,
-        content_type: Optional[str] = None,
-        content_length: Optional[int] = None,
-        _request_timeout: Any = None,
-    ) -> UploadResponse:
-        """Stream an arbitrary byte source to the legacy ``POST /v1/files`` raw
-        upload endpoint, returning the
-        :class:`~hotdata.models.upload_response.UploadResponse`.
-
-        Use this when the presigned :meth:`upload_file` path is unavailable
-        (e.g. a ``501`` ``PRESIGN_UNSUPPORTED``) or when the bytes come from a
-        non-seekable stream that :meth:`upload_file` cannot use. The body is sent
-        through the SDK's authenticated client (workspace + bearer headers) — not
-        the bare storage pool — because this request goes to the API, not object
-        storage.
-
-        ``body`` may be ``bytes`` / ``bytearray`` or a readable binary file
-        object. A file object is streamed without being buffered into memory; set
-        ``content_length`` (or pass a seekable file, whose length is inferred) so
-        the server can reject an oversized upload before reading the body.
-
-        :param body: The bytes or binary stream to upload.
-        :param content_type: Content type for the body; defaults to
-            ``application/octet-stream``.
-        :param content_length: Explicit body length in bytes. Inferred from
-            ``bytes`` length or a seekable file; required for a non-seekable
-            stream to avoid chunked transfer.
-        :raises hotdata.exceptions.ApiException: the upload was rejected.
-        """
-        if not isinstance(body, (bytes, bytearray)) and not hasattr(body, "read"):
-            raise TypeError(
-                f"upload_stream accepts bytes or a readable binary file object, "
-                f"not {type(body).__name__}"
-            )
-
-        # The generated /v1/files op carries only WorkspaceId + BearerAuth; add
-        # the X-Session-Id scope header here when a session is configured so
-        # sandbox-scoped uploads keep their session context (matches the Rust SDK).
-        scope_headers: Dict[str, str] = {}
-        session_id = self.api_client.configuration.session_id
-        if session_id:
-            scope_headers["X-Session-Id"] = session_id
-
-        if isinstance(body, (bytes, bytearray)):
-            # bytes go through the generated serialize + transport unchanged;
-            # urllib3 sets Content-Length from the buffer length automatically.
-            data = bytes(body)
-            params = self._upload_file_serialize(
-                body=data,
-                _request_auth=None,
-                _content_type=content_type,
-                _headers=scope_headers or None,
-                _host_index=0,
-            )
-            response_data = self.api_client.call_api(*params, _request_timeout=_request_timeout)
-            response_data.read()
-            return self.api_client.response_deserialize(
-                response_data=response_data,
-                response_types_map=_UPLOAD_FILE_RESPONSE_TYPES,
-            ).data
-
-        # A file object: infer its length when seekable so the request is framed
-        # (not chunked), then stream it through the SDK's authenticated pool.
-        if content_length is None:
-            seekable = getattr(body, "seekable", None)
-            if callable(seekable) and body.seekable():
-                current = body.tell()
-                content_length = body.seek(0, io.SEEK_END) - current
-                body.seek(current)
-        headers: Dict[str, str] = dict(scope_headers)
-        if content_length is not None:
-            headers["Content-Length"] = str(content_length)
-        method, url, header_params, _body, _post = self._upload_file_serialize(
-            body=None,
-            _request_auth=None,
-            _content_type=content_type,
-            _headers=headers or None,
-            _host_index=0,
-        )
-        # Stream via the SDK's configured pool (auth + TLS/proxy), bypassing the
-        # generated rest layer, which buffers and rejects file-like bodies.
-        raw = self.api_client.rest_client.pool_manager.request(
-            method,
-            url,
-            body=body,
-            headers=header_params,
-            preload_content=False,
-            timeout=_to_timeout(_request_timeout),
-        )
-        rest_response = RESTResponse(raw)
-        rest_response.read()
-        return self.api_client.response_deserialize(
-            response_data=rest_response,
-            response_types_map=_UPLOAD_FILE_RESPONSE_TYPES,
-        ).data
 
     # -- internals ---------------------------------------------------------
 
@@ -1633,8 +1513,7 @@ def _make_source(source: UploadSource, size: Optional[int]) -> _Source:
     """Normalize an upload input into a :class:`_Source`.
 
     Accepts a path, ``bytes`` / ``bytearray``, or a seekable binary file object.
-    A non-seekable stream (or any other type) raises ``TypeError`` pointing at
-    :meth:`UploadsApi.upload_stream`, which streams to the legacy endpoint.
+    A non-seekable stream (or any other type) raises ``TypeError``.
     """
     if isinstance(source, (bytes, bytearray)):
         return _BytesSource(bytes(source))
@@ -1645,15 +1524,13 @@ def _make_source(source: UploadSource, size: Optional[int]) -> _Source:
         if not (callable(seekable) and source.seekable()):
             raise TypeError(
                 "upload_file needs a seekable file object (it does positioned "
-                "reads for multipart). For a non-seekable stream use "
-                "upload_stream, which sends to POST /v1/files in one request."
+                "reads for multipart). Buffer a non-seekable stream into bytes "
+                "first."
             )
         return _FileObjSource(source, size)
     raise TypeError(
         f"upload_file accepts a path, bytes, or a seekable binary file object, "
-        f"not {type(source).__name__}. (Did you mean the generated "
-        f"hotdata.api.uploads_api.UploadsApi.upload_file(body=...) raw op, or "
-        f"upload_stream?)"
+        f"not {type(source).__name__}."
     )
 
 
