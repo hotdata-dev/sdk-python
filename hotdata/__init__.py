@@ -128,7 +128,6 @@ __all__ = [
     "ListSavedQueriesResponse",
     "ListSavedQueryVersionsResponse",
     "ListSecretsResponse",
-    "ListUploadsResponse",
     "ListWorkspacesResponse",
     "LoadManagedTableRequest",
     "LoadManagedTableResponse",
@@ -163,8 +162,6 @@ __all__ = [
     "UpdateSavedQueryRequest",
     "UpdateSecretRequest",
     "UpdateSecretResponse",
-    "UploadInfo",
-    "UploadResponse",
     "UploadSessionResponse",
     "UpsertDatabaseContextRequest",
     "UpsertDatabaseContextResponse",
@@ -282,7 +279,6 @@ from hotdata.models.list_results_response import ListResultsResponse as ListResu
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse as ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse as ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse as ListSecretsResponse
-from hotdata.models.list_uploads_response import ListUploadsResponse as ListUploadsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest as LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse as LoadManagedTableResponse
@@ -317,8 +313,6 @@ from hotdata.models.update_embedding_provider_response import UpdateEmbeddingPro
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest as UpdateSavedQueryRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest as UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse as UpdateSecretResponse
-from hotdata.models.upload_info import UploadInfo as UploadInfo
-from hotdata.models.upload_response import UploadResponse as UploadResponse
 from hotdata.models.upload_session_response import UploadSessionResponse as UploadSessionResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest as UpsertDatabaseContextRequest
 from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse as UpsertDatabaseContextResponse

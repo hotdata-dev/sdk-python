@@ -92,7 +92,6 @@ from hotdata.models.list_results_response import ListResultsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse
 from hotdata.models.list_secrets_response import ListSecretsResponse
-from hotdata.models.list_uploads_response import ListUploadsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
@@ -127,8 +126,6 @@ from hotdata.models.update_embedding_provider_response import UpdateEmbeddingPro
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest
 from hotdata.models.update_secret_request import UpdateSecretRequest
 from hotdata.models.update_secret_response import UpdateSecretResponse
-from hotdata.models.upload_info import UploadInfo
-from hotdata.models.upload_response import UploadResponse
 from hotdata.models.upload_session_response import UploadSessionResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest
 from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse

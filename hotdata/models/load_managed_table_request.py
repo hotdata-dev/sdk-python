@@ -34,7 +34,7 @@ class LoadManagedTableRequest(BaseModel):
     key: Optional[List[StrictStr]] = Field(default=None, description="Key columns identifying rows for `\"delete\"`, `\"update\"`, and `\"upsert\"` loads — the columns whose values decide which existing row an incoming row removes, updates, or replaces. Omit to use the key the table was created with. Keep the key consistent across loads of the same table: changing it re-targets which rows are matched. Ignored for `\"replace\"` and `\"append\"`.")
     mode: StrictStr = Field(description="How the data is applied: `\"replace\"` overwrites the table's contents, `\"append\"` inserts the new rows on top of the existing data.")
     result_id: Optional[StrictStr] = Field(default=None, description="ID of a persisted query result (see `GET /v1/results/{result_id}`) to publish as the table's contents. The result is copied into the table, so the table keeps its data even after the result expires. A result can be loaded into any number of tables. Provide either this or `upload_id`, not both.")
-    upload_id: Optional[StrictStr] = Field(default=None, description="ID of a previously-staged upload (see `POST /v1/files`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409. Provide either this or `result_id`, not both.")
+    upload_id: Optional[StrictStr] = Field(default=None, description="ID of a previously-staged upload (see `POST /v1/uploads`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409. Provide either this or `result_id`, not both.")
     __properties: ClassVar[List[str]] = ["async", "async_after_ms", "format", "key", "mode", "result_id", "upload_id"]
 
     model_config = ConfigDict(
