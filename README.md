@@ -4,7 +4,7 @@ Official Python client for the [Hotdata](https://www.hotdata.dev) HTTP API: work
 
 ## Requirements
 
-Python 3.9+
+Python 3.10+
 
 ## Install
 
