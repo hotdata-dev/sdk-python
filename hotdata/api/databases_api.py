@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
+from typing import Optional
 from typing_extensions import Annotated
 from hotdata.models.add_managed_schema_request import AddManagedSchemaRequest
 from hotdata.models.add_managed_table_request import AddManagedTableRequest
@@ -2351,6 +2352,8 @@ class DatabasesApi:
     @validate_call
     def list_databases(
         self,
+        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2366,7 +2369,12 @@ class DatabasesApi:
     ) -> ListDatabasesResponse:
         """List databases
 
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page.
 
+        :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
+        :type limit: int
+        :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
+        :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2390,6 +2398,8 @@ class DatabasesApi:
         """ # noqa: E501
 
         _param = self._list_databases_serialize(
+            limit=limit,
+            cursor=cursor,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2413,6 +2423,8 @@ class DatabasesApi:
     @validate_call
     def list_databases_with_http_info(
         self,
+        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2428,7 +2440,12 @@ class DatabasesApi:
     ) -> ApiResponse[ListDatabasesResponse]:
         """List databases
 
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page.
 
+        :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
+        :type limit: int
+        :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
+        :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2452,6 +2469,8 @@ class DatabasesApi:
         """ # noqa: E501
 
         _param = self._list_databases_serialize(
+            limit=limit,
+            cursor=cursor,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2475,6 +2494,8 @@ class DatabasesApi:
     @validate_call
     def list_databases_without_preload_content(
         self,
+        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2490,7 +2511,12 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """List databases
 
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page.
 
+        :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
+        :type limit: int
+        :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
+        :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2514,6 +2540,8 @@ class DatabasesApi:
         """ # noqa: E501
 
         _param = self._list_databases_serialize(
+            limit=limit,
+            cursor=cursor,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2532,6 +2560,8 @@ class DatabasesApi:
 
     def _list_databases_serialize(
         self,
+        limit,
+        cursor,
         _request_auth,
         _content_type,
         _headers,
@@ -2554,6 +2584,14 @@ class DatabasesApi:
 
         # process the path parameters
         # process the query parameters
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if cursor is not None:
+            
+            _query_params.append(('cursor', cursor))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
