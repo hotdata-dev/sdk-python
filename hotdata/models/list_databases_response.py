@@ -18,18 +18,23 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from hotdata.models.database_summary import DatabaseSummary
 from typing import Optional, Set
 from typing_extensions import Self
 
 class ListDatabasesResponse(BaseModel):
     """
-    Response body for GET /databases
+    Response body for GET /databases. Results are returned one page at a time, newest first. When `has_more` is true, pass `next_cursor` back as the `cursor` query parameter to fetch the following page.
     """ # noqa: E501
+    count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of databases returned in this page.")
     databases: List[DatabaseSummary]
-    __properties: ClassVar[List[str]] = ["databases"]
+    has_more: StrictBool = Field(description="Whether more databases exist beyond this page.")
+    limit: Annotated[int, Field(strict=True, ge=0)] = Field(description="Page size applied to this response (after clamping to the maximum).")
+    next_cursor: Optional[StrictStr] = Field(default=None, description="Opaque cursor for the next page; present only when `has_more` is true.")
+    __properties: ClassVar[List[str]] = ["count", "databases", "has_more", "limit", "next_cursor"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -77,6 +82,11 @@ class ListDatabasesResponse(BaseModel):
                 if _item_databases:
                     _items.append(_item_databases.to_dict())
             _dict['databases'] = _items
+        # set to None if next_cursor (nullable) is None
+        # and model_fields_set contains the field
+        if self.next_cursor is None and "next_cursor" in self.model_fields_set:
+            _dict['next_cursor'] = None
+
         return _dict
 
     @classmethod
@@ -89,7 +99,11 @@ class ListDatabasesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "databases": [DatabaseSummary.from_dict(_item) for _item in obj["databases"]] if obj.get("databases") is not None else None
+            "count": obj.get("count"),
+            "databases": [DatabaseSummary.from_dict(_item) for _item in obj["databases"]] if obj.get("databases") is not None else None,
+            "has_more": obj.get("has_more"),
+            "limit": obj.get("limit"),
+            "next_cursor": obj.get("next_cursor")
         })
         return _obj
 

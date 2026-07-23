@@ -36,18 +36,7 @@ class TestListDatabasesResponse(unittest.TestCase):
         model = ListDatabasesResponse()
         if include_optional:
             return ListDatabasesResponse(
-                databases = [
-                    hotdata.models.database_summary.DatabaseSummary(
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        default_catalog = '', 
-                        default_schema = '', 
-                        expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        id = '', 
-                        name = '', )
-                    ]
-            )
-        else:
-            return ListDatabasesResponse(
+                count = 0,
                 databases = [
                     hotdata.models.database_summary.DatabaseSummary(
                         created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
@@ -57,6 +46,24 @@ class TestListDatabasesResponse(unittest.TestCase):
                         id = '', 
                         name = '', )
                     ],
+                has_more = True,
+                limit = 0,
+                next_cursor = ''
+            )
+        else:
+            return ListDatabasesResponse(
+                count = 0,
+                databases = [
+                    hotdata.models.database_summary.DatabaseSummary(
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        default_catalog = '', 
+                        default_schema = '', 
+                        expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        id = '', 
+                        name = '', )
+                    ],
+                has_more = True,
+                limit = 0,
         )
         """
 

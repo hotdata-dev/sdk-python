@@ -720,9 +720,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_databases**
-> ListDatabasesResponse list_databases()
+> ListDatabasesResponse list_databases(limit=limit, cursor=cursor)
 
 List databases
+
+List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page.
 
 ### Example
 
@@ -761,10 +763,12 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.DatabasesApi(api_client)
+    limit = 56 # int | Maximum number of databases to return in this page (1–100). Values outside the range are clamped. (optional)
+    cursor = 'cursor_example' # str | Opaque pagination cursor from a previous response's `next_cursor`. (optional)
 
     try:
         # List databases
-        api_response = api_instance.list_databases()
+        api_response = api_instance.list_databases(limit=limit, cursor=cursor)
         print("The response of DatabasesApi->list_databases:\n")
         pprint(api_response)
     except Exception as e:
@@ -775,7 +779,11 @@ with hotdata.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **limit** | **int**| Maximum number of databases to return in this page (1–100). Values outside the range are clamped. | [optional] 
+ **cursor** | **str**| Opaque pagination cursor from a previous response&#39;s &#x60;next_cursor&#x60;. | [optional] 
 
 ### Return type
 
@@ -794,7 +802,7 @@ This endpoint does not need any parameter.
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | List of databases |  -  |
+**200** | One page of databases |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
