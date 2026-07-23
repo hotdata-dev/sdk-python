@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- chore(databases): make pagination fields nullable
+
 ### Removed
 
 - The legacy `POST /v1/files` upload endpoints have been removed in favor of the
