@@ -2354,6 +2354,7 @@ class DatabasesApi:
         self,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2369,12 +2370,14 @@ class DatabasesApi:
     ) -> ListDatabasesResponse:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page.
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive).
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
         :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
         :type cursor: str
+        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
+        :type search: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2400,6 +2403,7 @@ class DatabasesApi:
         _param = self._list_databases_serialize(
             limit=limit,
             cursor=cursor,
+            search=search,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2425,6 +2429,7 @@ class DatabasesApi:
         self,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2440,12 +2445,14 @@ class DatabasesApi:
     ) -> ApiResponse[ListDatabasesResponse]:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page.
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive).
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
         :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
         :type cursor: str
+        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
+        :type search: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2471,6 +2478,7 @@ class DatabasesApi:
         _param = self._list_databases_serialize(
             limit=limit,
             cursor=cursor,
+            search=search,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2496,6 +2504,7 @@ class DatabasesApi:
         self,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2511,12 +2520,14 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page.
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive).
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
         :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
         :type cursor: str
+        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
+        :type search: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2542,6 +2553,7 @@ class DatabasesApi:
         _param = self._list_databases_serialize(
             limit=limit,
             cursor=cursor,
+            search=search,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2562,6 +2574,7 @@ class DatabasesApi:
         self,
         limit,
         cursor,
+        search,
         _request_auth,
         _content_type,
         _headers,
@@ -2591,6 +2604,10 @@ class DatabasesApi:
         if cursor is not None:
             
             _query_params.append(('cursor', cursor))
+            
+        if search is not None:
+            
+            _query_params.append(('search', search))
             
         # process the header parameters
         # process the form parameters
