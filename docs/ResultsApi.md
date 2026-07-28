@@ -35,7 +35,6 @@ IEEE special floats (`±Inf`, `NaN`) have no canonical JSON representation. For 
 ### Example
 
 * Api Key Authentication (WorkspaceId):
-* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -61,12 +60,6 @@ configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
-
-# Configure API key authorization: SessionId
-configuration.api_key['SessionId'] = os.environ["API_KEY"]
-
-# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -111,7 +104,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -140,7 +133,6 @@ List stored results for the database named by the required X-Database-Id header.
 ### Example
 
 * Api Key Authentication (WorkspaceId):
-* Api Key Authentication (SessionId):
 * Bearer Authentication (BearerAuth):
 
 ```python
@@ -165,12 +157,6 @@ configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
-
-# Configure API key authorization: SessionId
-configuration.api_key['SessionId'] = os.environ["API_KEY"]
-
-# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-# configuration.api_key_prefix['SessionId'] = 'Bearer'
 
 # Configure Bearer authorization: BearerAuth
 configuration = hotdata.Configuration(
@@ -211,7 +197,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[WorkspaceId](../README.md#WorkspaceId), [SessionId](../README.md#SessionId), [BearerAuth](../README.md#BearerAuth)
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

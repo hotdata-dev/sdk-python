@@ -364,7 +364,6 @@ class ResultsApi:
         # authentication setting
         _auth_settings: List[str] = [
             'WorkspaceId', 
-            'SessionId', 
             'BearerAuth'
         ]
 
@@ -667,7 +666,6 @@ class ResultsApi:
         # authentication setting
         _auth_settings: List[str] = [
             'WorkspaceId', 
-            'SessionId', 
             'BearerAuth'
         ]
 
