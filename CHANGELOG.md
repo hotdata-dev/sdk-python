@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - chore(query-runs): clarify user_public_id documentation
 - feat(databases): add search parameter to list endpoint
 - chore(databases): make pagination fields nullable
+- feat(databases): add pagination support to list endpoint.
+  `DatabasesApi.list_databases` gains `limit` and `cursor`, and the response
+  gains `count`, `has_more`, and `next_cursor`. Note the behavior change: a call
+  with no `limit` now returns a single page rather than every database, so
+  callers that relied on one call seeing everything should follow `next_cursor`
+  while `has_more` is true.
 
 ### Removed
 
