@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **Breaking:** sandbox session scoping is gone. The `SessionId` security scheme
+  no longer exists in the Hotdata OpenAPI spec, so `X-Session-Id` is no longer
+  sent on `/v1/query` or the results endpoints. `Configuration`'s `session_id`
+  keyword argument and property are removed along with it — passing
+  `session_id=` now raises `TypeError` instead of silently setting a header
+  nothing reads. The server stopped enforcing session scoping before this
+  release, so requests behave the same with or without the value; drop it from
+  your `Configuration(...)` calls.
 - The legacy `POST /v1/files` upload endpoints have been removed in favor of the
   presigned upload flow. This drops `hotdata.UploadsApi.upload_stream`, the raw
   `upload_file(body=...)` / `list_uploads` operations, and the `UploadResponse`,

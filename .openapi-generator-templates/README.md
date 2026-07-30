@@ -8,13 +8,12 @@ Two Hotdata-specific DX tweaks applied to the Python `configuration.mustache`:
    with `api_key`. Internal `auth_settings()` is patched to read
    `self.api_key`.
 
-2. **`workspace_id` and `session_id` are first-class kwargs and
-   attributes.** Stock openapi-generator exposes apiKey security schemes
-   only via an opaque `api_key: Dict[str, str]` dict keyed by scheme name.
-   That's a footgun — callers have to know the generator's
-   `apiKey`-security machinery to set a workspace scope. The template
-   adds typed `workspace_id` / `session_id` kwargs (and properties) that
-   store into a renamed `self.api_keys` dict.
+2. **`workspace_id` is a first-class kwarg and attribute.** Stock
+   openapi-generator exposes apiKey security schemes only via an opaque
+   `api_key: Dict[str, str]` dict keyed by scheme name. That's a footgun
+   — callers have to know the generator's `apiKey`-security machinery to
+   set a workspace scope. The template adds a typed `workspace_id` kwarg
+   (and property) that stores into a renamed `self.api_keys` dict.
 
 Net caller DX:
 
@@ -22,9 +21,14 @@ Net caller DX:
 cfg = hotdata.Configuration(
     api_key="sk_live_...",
     workspace_id="ws_abc",
-    session_id="sb_xyz",
 )
 ```
+
+Because these kwargs are hand-added, they don't disappear when a security
+scheme leaves the spec — `auth_settings()` and the per-operation
+`_auth_settings` lists do, leaving the kwarg behind as a silent no-op. When
+a scheme is dropped upstream, drop its kwarg/property here in the same
+change. `tests/test_config_auth_surface.py` fails if the two drift apart.
 
 ## Drift tripwire
 
