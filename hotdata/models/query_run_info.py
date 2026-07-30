@@ -45,7 +45,7 @@ class QueryRunInfo(BaseModel):
     sql_text: StrictStr
     status: StrictStr
     trace_id: Optional[StrictStr] = None
-    user_public_id: Optional[StrictStr] = Field(default=None, description="Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: `user_{first_10_hex_chars}`.")
+    user_public_id: Optional[StrictStr] = Field(default=None, description="Who ran this query: the account id from the access token the request was made with. Use it to group a caller's query history.  Requests made with a credential that identifies no account instead record an opaque `user_`-prefixed identifier, which is stable for that credential but cannot be resolved to an account.")
     warning_message: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["bytes_scanned", "completed_at", "created_at", "error_message", "execution_time_ms", "id", "result_id", "row_count", "rows_scanned", "saved_query_id", "saved_query_version", "server_processing_ms", "snapshot_id", "sql_hash", "sql_text", "status", "trace_id", "user_public_id", "warning_message"]
 
