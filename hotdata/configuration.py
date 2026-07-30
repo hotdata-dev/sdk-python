@@ -115,7 +115,6 @@ AuthSettings = TypedDict(
     {
         "BearerAuth": BearerAuthSetting,
         "WorkspaceId": APIKeyAuthSetting,
-        "SessionId": APIKeyAuthSetting,
     },
     total=False,
 )
@@ -597,15 +596,6 @@ conf = hotdata.Configuration(
                 'key': 'X-Workspace-Id',
                 'value': self.get_api_key_with_prefix(
                     'WorkspaceId',
-                ),
-            }
-        if 'SessionId' in self.api_keys:
-            auth['SessionId'] = {
-                'type': 'api_key',
-                'in': 'header',
-                'key': 'X-Session-Id',
-                'value': self.get_api_key_with_prefix(
-                    'SessionId',
                 ),
             }
         return auth

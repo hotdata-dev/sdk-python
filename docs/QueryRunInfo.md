@@ -23,7 +23,7 @@ Name | Type | Description | Notes
 **sql_text** | **str** |  | 
 **status** | **str** |  | 
 **trace_id** | **str** |  | [optional] 
-**user_public_id** | **str** | Caller identity derived from the Authorization Bearer token (SHA-256 hash). Format: &#x60;user_{first_10_hex_chars}&#x60;. | [optional] 
+**user_public_id** | **str** | Who ran this query: the account id from the access token the request was made with. Use it to group a caller&#39;s query history.  Requests made with a credential that identifies no account instead record an opaque &#x60;user_&#x60;-prefixed identifier, which is stable for that credential but cannot be resolved to an account. | [optional] 
 **warning_message** | **str** |  | [optional] 
 
 ## Example
