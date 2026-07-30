@@ -142,11 +142,8 @@ class Configuration:
     :param api_key: Hotdata API key, sent as `Authorization: Bearer <key>`.
     :param workspace_id: Public id of the target workspace, sent as
       `X-Workspace-Id`.
-    :param session_id: Public id of an active sandbox, sent as `X-Session-Id`.
-      Scopes reads and writes to the sandbox for per-run isolation. Obtain
-      one by calling `SandboxesApi.create_sandbox`.
     :param api_keys: Escape hatch for raw apiKey-scheme values, keyed by
-      security scheme name. Prefer `workspace_id` / `session_id`.
+      security scheme name. Prefer `workspace_id`.
     :param api_key_prefix: Dict to store API prefix (e.g. Bearer).
       The dict key is the name of the security scheme in the OAS specification.
       The dict value is an API key prefix when generating the auth data.
@@ -172,12 +169,11 @@ class Configuration:
 
     :Example:
 
-    Workspace / sandbox scoping example:
+    Workspace scoping example:
 
 conf = hotdata.Configuration(
     api_key='sk_live_...',
     workspace_id='ws_abc',
-    session_id='sb_xyz',
 )
     """
 
@@ -188,7 +184,6 @@ conf = hotdata.Configuration(
         host: Optional[str]=None,
         api_key: Optional[str]=None,
         workspace_id: Optional[str]=None,
-        session_id: Optional[str]=None,
         api_keys: Optional[Dict[str, str]]=None,
         api_key_prefix: Optional[Dict[str, str]]=None,
         username: Optional[str]=None,
@@ -232,13 +227,11 @@ conf = hotdata.Configuration(
         from hotdata._auth import _TokenManager
         self._token_manager = _TokenManager(api_key, self) if api_key is not None else None
         """Hotdata API key, sent as `Authorization: Bearer <key>`."""
-        # apiKey-security values (X-Workspace-Id, X-Session-Id), keyed by
-        # scheme name. Read by the generated `auth_settings()` below.
+        # apiKey-security values (X-Workspace-Id), keyed by scheme name. Read by
+        # the generated `auth_settings()` below.
         self.api_keys = dict(api_keys) if api_keys else {}
         if workspace_id is not None:
             self.api_keys["WorkspaceId"] = workspace_id
-        if session_id is not None:
-            self.api_keys["SessionId"] = session_id
         self.api_key_prefix = {}
         if api_key_prefix:
             self.api_key_prefix = api_key_prefix
@@ -539,22 +532,6 @@ conf = hotdata.Configuration(
             self.api_keys.pop("WorkspaceId", None)
         else:
             self.api_keys["WorkspaceId"] = value
-
-    @property
-    def session_id(self) -> Optional[str]:
-        """Public id of the active sandbox (sent as `X-Session-Id`).
-
-        Scopes reads and writes to the sandbox for per-run isolation.
-        Obtain a sandbox id by calling `SandboxesApi.create_sandbox`.
-        """
-        return self.api_keys.get("SessionId")
-
-    @session_id.setter
-    def session_id(self, value: Optional[str]) -> None:
-        if value is None:
-            self.api_keys.pop("SessionId", None)
-        else:
-            self.api_keys["SessionId"] = value
 
     def get_basic_auth_token(self) -> Optional[str]:
         """Gets HTTP basic authentication header (string).
