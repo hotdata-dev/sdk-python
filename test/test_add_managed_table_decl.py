@@ -39,7 +39,18 @@ class TestAddManagedTableDecl(unittest.TestCase):
                 key = [
                     ''
                     ],
-                name = ''
+                name = '',
+                partition_by = [
+                    hotdata.models.table_partition_key.TablePartitionKey(
+                        column = '', 
+                        transform = '', )
+                    ],
+                sorted_by = [
+                    hotdata.models.table_sort_key.TableSortKey(
+                        column = '', 
+                        direction = '', 
+                        nulls = '', )
+                    ]
             )
         else:
             return AddManagedTableDecl(

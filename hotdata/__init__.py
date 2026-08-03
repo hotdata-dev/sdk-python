@@ -152,9 +152,11 @@ __all__ = [
     "SecretMetadataResponse",
     "SubmitJobResponse",
     "TableInfo",
+    "TablePartitionKey",
     "TableProfileResponse",
     "TableRefreshError",
     "TableRefreshResult",
+    "TableSortKey",
     "TemporalProfileDetail",
     "TextProfileDetail",
     "UpdateEmbeddingProviderRequest",
@@ -303,9 +305,11 @@ from hotdata.models.schema_refresh_result import SchemaRefreshResult as SchemaRe
 from hotdata.models.secret_metadata_response import SecretMetadataResponse as SecretMetadataResponse
 from hotdata.models.submit_job_response import SubmitJobResponse as SubmitJobResponse
 from hotdata.models.table_info import TableInfo as TableInfo
+from hotdata.models.table_partition_key import TablePartitionKey as TablePartitionKey
 from hotdata.models.table_profile_response import TableProfileResponse as TableProfileResponse
 from hotdata.models.table_refresh_error import TableRefreshError as TableRefreshError
 from hotdata.models.table_refresh_result import TableRefreshResult as TableRefreshResult
+from hotdata.models.table_sort_key import TableSortKey as TableSortKey
 from hotdata.models.temporal_profile_detail import TemporalProfileDetail as TemporalProfileDetail
 from hotdata.models.text_profile_detail import TextProfileDetail as TextProfileDetail
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest as UpdateEmbeddingProviderRequest
