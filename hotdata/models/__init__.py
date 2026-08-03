@@ -116,9 +116,11 @@ from hotdata.models.schema_refresh_result import SchemaRefreshResult
 from hotdata.models.secret_metadata_response import SecretMetadataResponse
 from hotdata.models.submit_job_response import SubmitJobResponse
 from hotdata.models.table_info import TableInfo
+from hotdata.models.table_partition_key import TablePartitionKey
 from hotdata.models.table_profile_response import TableProfileResponse
 from hotdata.models.table_refresh_error import TableRefreshError
 from hotdata.models.table_refresh_result import TableRefreshResult
+from hotdata.models.table_sort_key import TableSortKey
 from hotdata.models.temporal_profile_detail import TemporalProfileDetail
 from hotdata.models.text_profile_detail import TextProfileDetail
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest

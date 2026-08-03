@@ -117,9 +117,11 @@ docs/SecretMetadataResponse.md
 docs/SecretsApi.md
 docs/SubmitJobResponse.md
 docs/TableInfo.md
+docs/TablePartitionKey.md
 docs/TableProfileResponse.md
 docs/TableRefreshError.md
 docs/TableRefreshResult.md
+docs/TableSortKey.md
 docs/TemporalProfileDetail.md
 docs/TextProfileDetail.md
 docs/UpdateEmbeddingProviderRequest.md
@@ -262,9 +264,11 @@ hotdata/models/schema_refresh_result.py
 hotdata/models/secret_metadata_response.py
 hotdata/models/submit_job_response.py
 hotdata/models/table_info.py
+hotdata/models/table_partition_key.py
 hotdata/models/table_profile_response.py
 hotdata/models/table_refresh_error.py
 hotdata/models/table_refresh_result.py
+hotdata/models/table_sort_key.py
 hotdata/models/temporal_profile_detail.py
 hotdata/models/text_profile_detail.py
 hotdata/models/update_embedding_provider_request.py
@@ -398,9 +402,11 @@ test/test_secret_metadata_response.py
 test/test_secrets_api.py
 test/test_submit_job_response.py
 test/test_table_info.py
+test/test_table_partition_key.py
 test/test_table_profile_response.py
 test/test_table_refresh_error.py
 test/test_table_refresh_result.py
+test/test_table_sort_key.py
 test/test_temporal_profile_detail.py
 test/test_text_profile_detail.py
 test/test_update_embedding_provider_request.py

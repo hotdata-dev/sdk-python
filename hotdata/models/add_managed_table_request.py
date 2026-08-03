@@ -20,6 +20,8 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.table_partition_key import TablePartitionKey
+from hotdata.models.table_sort_key import TableSortKey
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,7 +31,9 @@ class AddManagedTableRequest(BaseModel):
     """ # noqa: E501
     key: Optional[List[StrictStr]] = Field(default=None, description="Columns that uniquely identify a row, enabling the key-based load modes (`delete`, `update`, `upsert`) on this table: those loads match rows by these columns' values. Omit (the default) to declare no key; the table can still be loaded with `replace` and `append`, but key-based modes are then rejected.")
     name: StrictStr
-    __properties: ClassVar[List[str]] = ["key", "name"]
+    partition_by: Optional[List[TablePartitionKey]] = Field(default=None, description="Partition keys for this table, applied in order. Omit for no partitioning. Declared when the table is created and fixed thereafter.")
+    sorted_by: Optional[List[TableSortKey]] = Field(default=None, description="Sort keys for this table, applied in order. Omit for no sort order. Declared when the table is created and fixed thereafter.")
+    __properties: ClassVar[List[str]] = ["key", "name", "partition_by", "sorted_by"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,6 +74,20 @@ class AddManagedTableRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in partition_by (list)
+        _items = []
+        if self.partition_by:
+            for _item_partition_by in self.partition_by:
+                if _item_partition_by:
+                    _items.append(_item_partition_by.to_dict())
+            _dict['partition_by'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in sorted_by (list)
+        _items = []
+        if self.sorted_by:
+            for _item_sorted_by in self.sorted_by:
+                if _item_sorted_by:
+                    _items.append(_item_sorted_by.to_dict())
+            _dict['sorted_by'] = _items
         return _dict
 
     @classmethod
@@ -83,7 +101,9 @@ class AddManagedTableRequest(BaseModel):
 
         _obj = cls.model_validate({
             "key": obj.get("key"),
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "partition_by": [TablePartitionKey.from_dict(_item) for _item in obj["partition_by"]] if obj.get("partition_by") is not None else None,
+            "sorted_by": [TableSortKey.from_dict(_item) for _item in obj["sorted_by"]] if obj.get("sorted_by") is not None else None
         })
         return _obj
 
