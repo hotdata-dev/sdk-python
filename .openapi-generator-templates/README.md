@@ -6,7 +6,10 @@ Two Hotdata-specific DX tweaks applied to the Python `configuration.mustache`:
    (`--api-key`, `HOTDATA_API_KEY`). Stock openapi-generator calls the
    bearer token `access_token`; we drop that name entirely and replace it
    with `api_key`. Internal `auth_settings()` is patched to read
-   `self.api_key`.
+   `self.api_key`. The token is sent verbatim: the API-token → JWT key
+   exchange this template used to wire up (a `_TokenManager` minting from
+   `/v1/auth/jwt`) is deprecated and gone, so `api_key` is a plain
+   attribute again.
 
 2. **`workspace_id` is a first-class kwarg and attribute.** Stock
    openapi-generator exposes apiKey security schemes only via an opaque

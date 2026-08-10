@@ -48,7 +48,7 @@ jobs:
       # models dropped from the spec don't linger as orphaned files. The package
       # lives in hotdata/, so the previous `rm -rf src/` was a no-op and removed
       # APIs (e.g. the sandbox endpoints) kept shipping as dead modules. The
-      # hand-written modules (hotdata/_auth.py, hotdata/arrow.py) live at the
+      # hand-written modules (hotdata/arrow.py, hotdata/uploads.py) live at the
       # package root and are untouched; the integration tests in tests/ (plural)
       # are distinct from the generated test/ (singular) unit tests.
       #
@@ -198,22 +198,28 @@ jobs:
       - name: Patch default client exports (enhanced query/results)
         run: python3 scripts/patch_query_exports.py
 
-      - name: Verify JWT-exchange code survived regeneration
+      # The API-token -> JWT key exchange is deprecated: the configured API token
+      # is the bearer credential and goes on the wire verbatim. This check is the
+      # inverse of the old "did the exchange survive?" guard — it fails if the
+      # exchange machinery reappears (a stale template, a bad merge) so a regen
+      # can't quietly start minting JWTs again.
+      - name: Verify API-token auth survived regeneration
         run: |
           python3 - <<'PY'
           import ast, pathlib, sys
 
           errors = []
 
-          # 1. The hand-written, regen-immune auth module must survive.
-          if not pathlib.Path("hotdata/_auth.py").is_file():
-              errors.append("hotdata/_auth.py is missing (regen overwrote/dropped it)")
+          # 1. The exchange module must stay deleted.
+          if pathlib.Path("hotdata/_auth.py").is_file():
+              errors.append("hotdata/_auth.py is back (JWT exchange was removed)")
 
           config = pathlib.Path("hotdata/configuration.py")
           if not config.is_file():
               errors.append("hotdata/configuration.py is missing")
           else:
-              tree = ast.parse(config.read_text())
+              source = config.read_text()
+              tree = ast.parse(source)
               cls = next(
                   (n for n in tree.body
                    if isinstance(n, ast.ClassDef) and n.name == "Configuration"),
@@ -222,9 +228,14 @@ jobs:
               if cls is None:
                   errors.append("Configuration class not found in configuration.py")
               else:
-                  # 2. api_key must be a property (decorated getter), so every
-                  #    request transparently exchanges for a fresh JWT.
-                  api_key_is_property = any(
+                  # 2. No exchange machinery anywhere in the generated module.
+                  for needle in ("_TokenManager", "_token_manager", "/v1/auth/jwt"):
+                      if needle in source:
+                          errors.append(f"configuration.py references {needle}")
+
+                  # 3. api_key must NOT be a property: a getter is what turned
+                  #    every read into a mint.
+                  if any(
                       isinstance(n, ast.FunctionDef)
                       and n.name == "api_key"
                       and any(
@@ -232,50 +243,27 @@ jobs:
                           for d in n.decorator_list
                       )
                       for n in cls.body
-                  )
-                  if not api_key_is_property:
-                      errors.append("Configuration.api_key is not a @property (template drift)")
+                  ):
+                      errors.append("Configuration.api_key is a @property again (template drift)")
 
-                  # 3. The token manager must be created eagerly in __init__
-                  #    (lazy creation has a concurrent-first-request race).
+                  # 4. api_key must be assigned as a plain attribute in __init__,
+                  #    otherwise the credential never reaches auth_settings().
                   init = next(
                       (n for n in cls.body
                        if isinstance(n, ast.FunctionDef) and n.name == "__init__"),
                       None,
                   )
-                  init_src = ast.get_source_segment(config.read_text(), init) if init else ""
-                  if "self._token_manager = _TokenManager(" not in (init_src or ""):
-                      errors.append("eager self._token_manager assignment missing from __init__")
-
-                  # 4. __deepcopy__ must skip _token_manager (lock + PoolManager
-                  #    are not deepcopy-able) and rebuild it.
-                  deepcopy = next(
-                      (n for n in cls.body
-                       if isinstance(n, ast.FunctionDef) and n.name == "__deepcopy__"),
-                      None,
-                  )
-                  if deepcopy is None:
-                      errors.append("__deepcopy__ missing from Configuration")
-                  else:
-                      # Look for _token_manager as a real identifier/string in the
-                      # body (AST, so comments mentioning it don't count) — proves
-                      # the lock/PoolManager skip-and-rebuild actually survived.
-                      refs = any(
-                          (isinstance(n, ast.Constant) and n.value == "_token_manager")
-                          or (isinstance(n, ast.Attribute) and n.attr == "_token_manager")
-                          for n in ast.walk(deepcopy)
-                      )
-                      if not refs:
-                          errors.append("__deepcopy__ does not skip/rebuild _token_manager")
+                  init_src = ast.get_source_segment(source, init) if init else ""
+                  if "self.api_key = api_key" not in (init_src or ""):
+                      errors.append("self.api_key = api_key assignment missing from __init__")
 
           if errors:
-              print("::error::JWT-exchange regen-safety check failed:")
+              print("::error::API-token auth regen-safety check failed:")
               for e in errors:
                   print(f"  - {e}")
               sys.exit(1)
-          print("JWT-exchange code survived regeneration: "
-                "_auth.py present, api_key property, eager _token_manager, "
-                "__deepcopy__ handling all intact.")
+          print("API-token auth survived regeneration: no _auth.py, no token "
+                "manager, api_key is a plain attribute set in __init__.")
           PY
 
       - name: Clean up generated artifacts

@@ -6,11 +6,10 @@ setup.py
 # Hand-written enhancement modules layered over the generated client. They live
 # at the package root (outside hotdata/api and hotdata/models) so the generator
 # never emits or overwrites them, but they are listed here as the source of
-# truth for "hand-maintained, don't touch": _auth.py (JWT exchange), arrow.py
-# (Arrow IPC result fetch), query.py (429 retry + truncation auto-follow, #688),
-# _retry.py (pre-response connection-reset retry on all methods, #118),
-# uploads.py (transparent presigned direct-to-storage upload flow).
-hotdata/_auth.py
+# truth for "hand-maintained, don't touch": arrow.py (Arrow IPC result fetch),
+# query.py (429 retry + truncation auto-follow, #688), _retry.py (pre-response
+# connection-reset retry on all methods, #118), uploads.py (transparent
+# presigned direct-to-storage upload flow).
 hotdata/arrow.py
 hotdata/query.py
 hotdata/_retry.py
