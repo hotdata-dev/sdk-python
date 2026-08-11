@@ -23,7 +23,12 @@ resolve_python() {
   if command -v python3 >/dev/null 2>&1 && python3 -c "import tomllib" >/dev/null 2>&1; then
     echo python3
   elif command -v uv >/dev/null 2>&1; then
-    echo "uv run --no-project --python 3.12 python"
+    # `>=3.11` not `3.12`: an exact request downloads a managed interpreter when
+    # the machine's uv-visible one is 3.11 or 3.13, and fails outright under
+    # UV_PYTHON_DOWNLOADS=never. It reads like a redirect but is not one —
+    # $PY_BIN is expanded unquoted for word splitting, and bash does not rescan
+    # expansion results for redirection operators, so uv receives it literally.
+    echo "uv run --no-project --python >=3.11 python"
   else
     die "need python3 >= 3.11 (for tomllib) or uv; python3 is $(command -v python3 >/dev/null 2>&1 && python3 -V 2>&1 || echo absent)"
   fi
@@ -128,10 +133,10 @@ update_changelog() {
 }
 
 cmd_prepare() {
-  PY_BIN="$(resolve_python)"
   local bump="${1:-}"
   [[ -n "$bump" ]] || { usage; die "missing bump kind or explicit version"; }
   need gh
+  PY_BIN="$(resolve_python)"
   ensure_clean
 
   local current new base branch pkg
@@ -179,8 +184,8 @@ After merge, run \`./scripts/release.sh publish\` from a clean \`${base}\` check
 }
 
 cmd_publish() {
-  PY_BIN="$(resolve_python)"
   need gh
+  PY_BIN="$(resolve_python)"
   ensure_clean
 
   local base ver tag
