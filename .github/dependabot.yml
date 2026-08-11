@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Action pins had no watcher, which is how gh-action-pypi-publish sat at
+  # v1.13.0 until its bundled twine broke a sibling repo's release at upload
+  # time. No `allow` filter: the point is to see every stale pin.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
