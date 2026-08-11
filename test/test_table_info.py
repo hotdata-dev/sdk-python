@@ -44,14 +44,36 @@ class TestTableInfo(unittest.TestCase):
                     ],
                 connection = '',
                 last_sync = '',
+                partition_by = [
+                    hotdata.models.table_partition_key.TablePartitionKey(
+                        column = '', 
+                        transform = '', )
+                    ],
                 var_schema = '',
+                sorted_by = [
+                    hotdata.models.table_sort_key.TableSortKey(
+                        column = '', 
+                        direction = '', 
+                        nulls = '', )
+                    ],
                 synced = True,
                 table = ''
             )
         else:
             return TableInfo(
                 connection = '',
+                partition_by = [
+                    hotdata.models.table_partition_key.TablePartitionKey(
+                        column = '', 
+                        transform = '', )
+                    ],
                 var_schema = '',
+                sorted_by = [
+                    hotdata.models.table_sort_key.TableSortKey(
+                        column = '', 
+                        direction = '', 
+                        nulls = '', )
+                    ],
                 synced = True,
                 table = '',
         )

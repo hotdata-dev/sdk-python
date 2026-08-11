@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat(information-schema): `TableInfo` now reports the table's declared storage
+  layout via `partition_by` and `sorted_by`, so a caller can read back the layout
+  a table was created with — it is fixed at creation and cannot be altered, so
+  reading it is the only way to confirm what was actually applied. Both fields
+  are **required**: code that constructs `TableInfo` directly (test mocks,
+  fixtures) must now supply them, while code that only reads responses is
+  unaffected. Note the existing `feat(tables): add partition_by and sorted_by
+  configuration` entry below covers the *write* side — declaring a layout — which
+  is a different half of the same feature.
 - feat(tables): add partition_by and sorted_by configuration
 - chore(query-runs): clarify user_public_id documentation
 - feat(databases): add search parameter to list endpoint

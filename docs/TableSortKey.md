@@ -7,8 +7,8 @@ One key of a table's sort order.  Rows are written in this order, which keeps th
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **column** | **str** |  | 
-**direction** | **str** | &#x60;asc&#x60; (the default) or &#x60;desc&#x60;. | [optional] 
-**nulls** | **str** | Where nulls are placed: &#x60;first&#x60; or &#x60;last&#x60;. Defaults to the SQL default for the chosen direction. | [optional] 
+**direction** | **str** | &#x60;asc&#x60; (the default) or &#x60;desc&#x60;. Null when the table was declared without an explicit direction for this key. | [optional] 
+**nulls** | **str** | Where nulls are placed: &#x60;first&#x60; or &#x60;last&#x60;. Defaults to the SQL default for the chosen direction. Null when the table was declared without an explicit placement for this key. | [optional] 
 
 ## Example
 
