@@ -21,6 +21,8 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from hotdata.models.column_info import ColumnInfo
+from hotdata.models.table_partition_key import TablePartitionKey
+from hotdata.models.table_sort_key import TableSortKey
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,10 +33,12 @@ class TableInfo(BaseModel):
     columns: Optional[List[ColumnInfo]] = None
     connection: StrictStr
     last_sync: Optional[StrictStr] = None
+    partition_by: List[TablePartitionKey] = Field(description="The table's partition keys, in the order they were declared when the table was created. Empty when the table is not partitioned.  A table's storage layout is fixed when the table is created and cannot be changed afterwards, so this is how to confirm a table really was created with the layout that was asked for. The field is always present: an empty array means \"no partitioning declared\", which is not the same as a response that omits the field entirely.  Reported for tables in a hotdata-managed database, which are the only ones whose layout is declared here. A table discovered from an external connection always reports an empty array — its layout belongs to the upstream system, so an empty array there means \"not known from here\", not \"confirmed unpartitioned\".")
     var_schema: StrictStr = Field(alias="schema")
+    sorted_by: List[TableSortKey] = Field(description="The table's sort keys, in the order they were declared when the table was created. Empty when no sort order was declared. Always present, and limited to tables in a hotdata-managed database, for the same reasons as `partition_by`.")
     synced: StrictBool
     table: StrictStr
-    __properties: ClassVar[List[str]] = ["columns", "connection", "last_sync", "schema", "synced", "table"]
+    __properties: ClassVar[List[str]] = ["columns", "connection", "last_sync", "partition_by", "schema", "sorted_by", "synced", "table"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -82,6 +86,20 @@ class TableInfo(BaseModel):
                 if _item_columns:
                     _items.append(_item_columns.to_dict())
             _dict['columns'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in partition_by (list)
+        _items = []
+        if self.partition_by:
+            for _item_partition_by in self.partition_by:
+                if _item_partition_by:
+                    _items.append(_item_partition_by.to_dict())
+            _dict['partition_by'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in sorted_by (list)
+        _items = []
+        if self.sorted_by:
+            for _item_sorted_by in self.sorted_by:
+                if _item_sorted_by:
+                    _items.append(_item_sorted_by.to_dict())
+            _dict['sorted_by'] = _items
         # set to None if columns (nullable) is None
         # and model_fields_set contains the field
         if self.columns is None and "columns" in self.model_fields_set:
@@ -107,7 +125,9 @@ class TableInfo(BaseModel):
             "columns": [ColumnInfo.from_dict(_item) for _item in obj["columns"]] if obj.get("columns") is not None else None,
             "connection": obj.get("connection"),
             "last_sync": obj.get("last_sync"),
+            "partition_by": [TablePartitionKey.from_dict(_item) for _item in obj["partition_by"]] if obj.get("partition_by") is not None else None,
             "schema": obj.get("schema"),
+            "sorted_by": [TableSortKey.from_dict(_item) for _item in obj["sorted_by"]] if obj.get("sorted_by") is not None else None,
             "synced": obj.get("synced"),
             "table": obj.get("table")
         })
