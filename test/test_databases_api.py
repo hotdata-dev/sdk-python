@@ -48,6 +48,20 @@ class TestDatabasesApi(unittest.TestCase):
         """
         pass
 
+    def test_bulk_create_databases(self) -> None:
+        """Test case for bulk_create_databases
+
+        Create many databases at once
+        """
+        pass
+
+    def test_count_databases(self) -> None:
+        """Test case for count_databases
+
+        Count databases
+        """
+        pass
+
     def test_create_database(self) -> None:
         """Test case for create_database
 
@@ -59,6 +73,13 @@ class TestDatabasesApi(unittest.TestCase):
         """Test case for delete_database
 
         Delete database
+        """
+        pass
+
+    def test_delete_database_batch(self) -> None:
+        """Test case for delete_database_batch
+
+        Delete a database batch
         """
         pass
 
@@ -80,6 +101,13 @@ class TestDatabasesApi(unittest.TestCase):
         """Test case for get_database
 
         Get database
+        """
+        pass
+
+    def test_get_database_batch(self) -> None:
+        """Test case for get_database_batch
+
+        Get a database batch
         """
         pass
 
