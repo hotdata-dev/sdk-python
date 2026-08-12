@@ -60,6 +60,8 @@ __all__ = [
     "BatchCreateUploadRequest",
     "BatchCreateUploadResponse",
     "BooleanProfileDetail",
+    "BulkCreateDatabasesRequest",
+    "BulkCreateDatabasesResult",
     "CategoricalProfileDetail",
     "CategoryValueInfo",
     "ColumnInfo",
@@ -90,11 +92,14 @@ __all__ = [
     "CreateWorkspaceRequest",
     "CreateWorkspaceResponse",
     "DatabaseAttachmentInfo",
+    "DatabaseBatchResponse",
     "DatabaseContextEntry",
+    "DatabaseCountResponse",
     "DatabaseDefaultSchemaDecl",
     "DatabaseDefaultTableDecl",
     "DatabaseDetailResponse",
     "DatabaseSummary",
+    "DeleteDatabaseBatchResponse",
     "DiscoveryStatus",
     "EmbeddingProviderResponse",
     "Error",
@@ -213,6 +218,8 @@ from hotdata.models.attach_database_catalog_request import AttachDatabaseCatalog
 from hotdata.models.batch_create_upload_request import BatchCreateUploadRequest as BatchCreateUploadRequest
 from hotdata.models.batch_create_upload_response import BatchCreateUploadResponse as BatchCreateUploadResponse
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail as BooleanProfileDetail
+from hotdata.models.bulk_create_databases_request import BulkCreateDatabasesRequest as BulkCreateDatabasesRequest
+from hotdata.models.bulk_create_databases_result import BulkCreateDatabasesResult as BulkCreateDatabasesResult
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail as CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo as CategoryValueInfo
 from hotdata.models.column_info import ColumnInfo as ColumnInfo
@@ -243,11 +250,14 @@ from hotdata.models.create_upload_request import CreateUploadRequest as CreateUp
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
 from hotdata.models.database_attachment_info import DatabaseAttachmentInfo as DatabaseAttachmentInfo
+from hotdata.models.database_batch_response import DatabaseBatchResponse as DatabaseBatchResponse
 from hotdata.models.database_context_entry import DatabaseContextEntry as DatabaseContextEntry
+from hotdata.models.database_count_response import DatabaseCountResponse as DatabaseCountResponse
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl as DatabaseDefaultSchemaDecl
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl as DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse as DatabaseDetailResponse
 from hotdata.models.database_summary import DatabaseSummary as DatabaseSummary
+from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse as DeleteDatabaseBatchResponse
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse as EmbeddingProviderResponse
 from hotdata.models.error import Error as Error

@@ -6,6 +6,8 @@ Background job types returned by the API.
 
 * `NOOP` (value: `'noop'`)
 
+* `BULK_CREATE_DATABASES` (value: `'bulk_create_databases'`)
+
 * `DATA_REFRESH_TABLE` (value: `'data_refresh_table'`)
 
 * `DATA_REFRESH_CONNECTION` (value: `'data_refresh_connection'`)
@@ -23,6 +25,10 @@ Background job types returned by the API.
 * `STALE_RESULT_CLEANUP` (value: `'stale_result_cleanup'`)
 
 * `RESULT_RETENTION` (value: `'result_retention'`)
+
+* `DUCKLAKE_COMPACTION` (value: `'ducklake_compaction'`)
+
+* `DUCKLAKE_TABLE_COMPACTION` (value: `'ducklake_table_compaction'`)
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

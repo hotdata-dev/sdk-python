@@ -22,9 +22,13 @@ from typing_extensions import Annotated
 from hotdata.models.add_managed_schema_request import AddManagedSchemaRequest
 from hotdata.models.add_managed_table_request import AddManagedTableRequest
 from hotdata.models.attach_database_catalog_request import AttachDatabaseCatalogRequest
+from hotdata.models.bulk_create_databases_request import BulkCreateDatabasesRequest
 from hotdata.models.create_database_request import CreateDatabaseRequest
 from hotdata.models.create_database_response import CreateDatabaseResponse
+from hotdata.models.database_batch_response import DatabaseBatchResponse
+from hotdata.models.database_count_response import DatabaseCountResponse
 from hotdata.models.database_detail_response import DatabaseDetailResponse
+from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse
 from hotdata.models.fork_database_request import ForkDatabaseRequest
 from hotdata.models.list_databases_response import ListDatabasesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
@@ -963,6 +967,568 @@ class DatabasesApi:
 
 
     @validate_call
+    def bulk_create_databases(
+        self,
+        bulk_create_databases_request: BulkCreateDatabasesRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> DatabaseBatchResponse:
+        """Create many databases at once
+
+        Create many databases from one template in a single request. The databases are created in the background: the response returns immediately with a batch and a job to poll.  The databases are not returned inline. List the ones a batch created with `GET /databases?batch=<batch_id>`; they also appear in the normal database listing alongside every other database.  Each database gets a default catalog and schema. Declare tables on all of them by passing `schemas`, in the same shape a single create accepts — a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load, with no follow-up call per database. Omit `schemas` and the databases are created empty. Either way, load data into them exactly as you would a database created individually.
+
+        :param bulk_create_databases_request: (required)
+        :type bulk_create_databases_request: BulkCreateDatabasesRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._bulk_create_databases_serialize(
+            bulk_create_databases_request=bulk_create_databases_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '202': "DatabaseBatchResponse",
+            '400': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def bulk_create_databases_with_http_info(
+        self,
+        bulk_create_databases_request: BulkCreateDatabasesRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[DatabaseBatchResponse]:
+        """Create many databases at once
+
+        Create many databases from one template in a single request. The databases are created in the background: the response returns immediately with a batch and a job to poll.  The databases are not returned inline. List the ones a batch created with `GET /databases?batch=<batch_id>`; they also appear in the normal database listing alongside every other database.  Each database gets a default catalog and schema. Declare tables on all of them by passing `schemas`, in the same shape a single create accepts — a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load, with no follow-up call per database. Omit `schemas` and the databases are created empty. Either way, load data into them exactly as you would a database created individually.
+
+        :param bulk_create_databases_request: (required)
+        :type bulk_create_databases_request: BulkCreateDatabasesRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._bulk_create_databases_serialize(
+            bulk_create_databases_request=bulk_create_databases_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '202': "DatabaseBatchResponse",
+            '400': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def bulk_create_databases_without_preload_content(
+        self,
+        bulk_create_databases_request: BulkCreateDatabasesRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Create many databases at once
+
+        Create many databases from one template in a single request. The databases are created in the background: the response returns immediately with a batch and a job to poll.  The databases are not returned inline. List the ones a batch created with `GET /databases?batch=<batch_id>`; they also appear in the normal database listing alongside every other database.  Each database gets a default catalog and schema. Declare tables on all of them by passing `schemas`, in the same shape a single create accepts — a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load, with no follow-up call per database. Omit `schemas` and the databases are created empty. Either way, load data into them exactly as you would a database created individually.
+
+        :param bulk_create_databases_request: (required)
+        :type bulk_create_databases_request: BulkCreateDatabasesRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._bulk_create_databases_serialize(
+            bulk_create_databases_request=bulk_create_databases_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '202': "DatabaseBatchResponse",
+            '400': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _bulk_create_databases_serialize(
+        self,
+        bulk_create_databases_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if bulk_create_databases_request is not None:
+            _body_params = bulk_create_databases_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/v1/databases/bulk',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def count_databases(
+        self,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> DatabaseCountResponse:
+        """Count databases
+
+        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+
+        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
+        :type search: str
+        :param batch: Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.
+        :type batch: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._count_databases_serialize(
+            search=search,
+            batch=batch,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseCountResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def count_databases_with_http_info(
+        self,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[DatabaseCountResponse]:
+        """Count databases
+
+        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+
+        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
+        :type search: str
+        :param batch: Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.
+        :type batch: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._count_databases_serialize(
+            search=search,
+            batch=batch,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseCountResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def count_databases_without_preload_content(
+        self,
+        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Count databases
+
+        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+
+        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
+        :type search: str
+        :param batch: Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.
+        :type batch: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._count_databases_serialize(
+            search=search,
+            batch=batch,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseCountResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _count_databases_serialize(
+        self,
+        search,
+        batch,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if search is not None:
+            
+            _query_params.append(('search', search))
+            
+        if batch is not None:
+            
+            _query_params.append(('batch', batch))
+            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/v1/databases/count',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
     def create_database(
         self,
         create_database_request: CreateDatabaseRequest,
@@ -1493,6 +2059,274 @@ class DatabasesApi:
         return self.api_client.param_serialize(
             method='DELETE',
             resource_path='/v1/databases/{database_id}',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def delete_database_batch(
+        self,
+        batch_id: Annotated[StrictStr, Field(description="Batch ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> DeleteDatabaseBatchResponse:
+        """Delete a database batch
+
+        Stop a batch that is still filling and delete the databases it created, then the batch itself.  Only batches whose databases hold no data can be removed this way. Tables that were declared but never loaded do not prevent it, so a batch created with `schemas` stays deletable. If any database in the batch has had data loaded into it, the request is rejected and those databases must be deleted one at a time — removing a database that holds data is per-database work that cannot be batched.
+
+        :param batch_id: Batch ID (required)
+        :type batch_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._delete_database_batch_serialize(
+            batch_id=batch_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DeleteDatabaseBatchResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def delete_database_batch_with_http_info(
+        self,
+        batch_id: Annotated[StrictStr, Field(description="Batch ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[DeleteDatabaseBatchResponse]:
+        """Delete a database batch
+
+        Stop a batch that is still filling and delete the databases it created, then the batch itself.  Only batches whose databases hold no data can be removed this way. Tables that were declared but never loaded do not prevent it, so a batch created with `schemas` stays deletable. If any database in the batch has had data loaded into it, the request is rejected and those databases must be deleted one at a time — removing a database that holds data is per-database work that cannot be batched.
+
+        :param batch_id: Batch ID (required)
+        :type batch_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._delete_database_batch_serialize(
+            batch_id=batch_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DeleteDatabaseBatchResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def delete_database_batch_without_preload_content(
+        self,
+        batch_id: Annotated[StrictStr, Field(description="Batch ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Delete a database batch
+
+        Stop a batch that is still filling and delete the databases it created, then the batch itself.  Only batches whose databases hold no data can be removed this way. Tables that were declared but never loaded do not prevent it, so a batch created with `schemas` stays deletable. If any database in the batch has had data loaded into it, the request is rejected and those databases must be deleted one at a time — removing a database that holds data is per-database work that cannot be batched.
+
+        :param batch_id: Batch ID (required)
+        :type batch_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._delete_database_batch_serialize(
+            batch_id=batch_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DeleteDatabaseBatchResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _delete_database_batch_serialize(
+        self,
+        batch_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if batch_id is not None:
+            _path_params['batch_id'] = batch_id
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='DELETE',
+            resource_path='/v1/databases/bulk/{batch_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2350,11 +3184,277 @@ class DatabasesApi:
 
 
     @validate_call
+    def get_database_batch(
+        self,
+        batch_id: Annotated[StrictStr, Field(description="Batch ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> DatabaseBatchResponse:
+        """Get a database batch
+
+        Fetch a batch by id: how many databases were requested and how many exist so far. Poll this to follow progress.
+
+        :param batch_id: Batch ID (required)
+        :type batch_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_database_batch_serialize(
+            batch_id=batch_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseBatchResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def get_database_batch_with_http_info(
+        self,
+        batch_id: Annotated[StrictStr, Field(description="Batch ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[DatabaseBatchResponse]:
+        """Get a database batch
+
+        Fetch a batch by id: how many databases were requested and how many exist so far. Poll this to follow progress.
+
+        :param batch_id: Batch ID (required)
+        :type batch_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_database_batch_serialize(
+            batch_id=batch_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseBatchResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def get_database_batch_without_preload_content(
+        self,
+        batch_id: Annotated[StrictStr, Field(description="Batch ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Get a database batch
+
+        Fetch a batch by id: how many databases were requested and how many exist so far. Poll this to follow progress.
+
+        :param batch_id: Batch ID (required)
+        :type batch_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_database_batch_serialize(
+            batch_id=batch_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseBatchResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _get_database_batch_serialize(
+        self,
+        batch_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if batch_id is not None:
+            _path_params['batch_id'] = batch_id
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/v1/databases/bulk/{batch_id}',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
     def list_databases(
         self,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
         search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2370,7 +3470,7 @@ class DatabasesApi:
     ) -> ListDatabasesResponse:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive).
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
@@ -2378,6 +3478,8 @@ class DatabasesApi:
         :type cursor: str
         :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
         :type search: str
+        :param batch: List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.
+        :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2404,6 +3506,7 @@ class DatabasesApi:
             limit=limit,
             cursor=cursor,
             search=search,
+            batch=batch,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2430,6 +3533,7 @@ class DatabasesApi:
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
         search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2445,7 +3549,7 @@ class DatabasesApi:
     ) -> ApiResponse[ListDatabasesResponse]:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive).
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
@@ -2453,6 +3557,8 @@ class DatabasesApi:
         :type cursor: str
         :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
         :type search: str
+        :param batch: List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.
+        :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2479,6 +3585,7 @@ class DatabasesApi:
             limit=limit,
             cursor=cursor,
             search=search,
+            batch=batch,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2505,6 +3612,7 @@ class DatabasesApi:
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
         cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
         search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2520,7 +3628,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive).
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
@@ -2528,6 +3636,8 @@ class DatabasesApi:
         :type cursor: str
         :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
         :type search: str
+        :param batch: List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.
+        :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2554,6 +3664,7 @@ class DatabasesApi:
             limit=limit,
             cursor=cursor,
             search=search,
+            batch=batch,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2575,6 +3686,7 @@ class DatabasesApi:
         limit,
         cursor,
         search,
+        batch,
         _request_auth,
         _content_type,
         _headers,
@@ -2608,6 +3720,10 @@ class DatabasesApi:
         if search is not None:
             
             _query_params.append(('search', search))
+            
+        if batch is not None:
+            
+            _query_params.append(('batch', batch))
             
         # process the header parameters
         # process the form parameters
