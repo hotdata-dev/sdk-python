@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat(loads): support inline csv data in table load requests
 - feat(databases): add bulk operations and count endpoint
 
 ## [0.9.0] - 2026-08-11
