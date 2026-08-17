@@ -15,6 +15,7 @@ docs/BulkCreateDatabasesRequest.md
 docs/BulkCreateDatabasesResult.md
 docs/CategoricalProfileDetail.md
 docs/CategoryValueInfo.md
+docs/ColumnDefinition.md
 docs/ColumnInfo.md
 docs/ColumnProfileDetail.md
 docs/ColumnProfileDetailOneOf.md
@@ -23,6 +24,7 @@ docs/ColumnProfileDetailOneOf2.md
 docs/ColumnProfileDetailOneOf3.md
 docs/ColumnProfileDetailOneOf4.md
 docs/ColumnProfileInfo.md
+docs/ColumnTypeSpec.md
 docs/ConnectionHealthResponse.md
 docs/ConnectionInfo.md
 docs/ConnectionRefreshResult.md
@@ -181,6 +183,7 @@ hotdata/models/bulk_create_databases_request.py
 hotdata/models/bulk_create_databases_result.py
 hotdata/models/categorical_profile_detail.py
 hotdata/models/category_value_info.py
+hotdata/models/column_definition.py
 hotdata/models/column_info.py
 hotdata/models/column_profile_detail.py
 hotdata/models/column_profile_detail_one_of.py
@@ -189,6 +192,7 @@ hotdata/models/column_profile_detail_one_of2.py
 hotdata/models/column_profile_detail_one_of3.py
 hotdata/models/column_profile_detail_one_of4.py
 hotdata/models/column_profile_info.py
+hotdata/models/column_type_spec.py
 hotdata/models/connection_health_response.py
 hotdata/models/connection_info.py
 hotdata/models/connection_refresh_result.py
@@ -310,6 +314,7 @@ test/test_bulk_create_databases_request.py
 test/test_bulk_create_databases_result.py
 test/test_categorical_profile_detail.py
 test/test_category_value_info.py
+test/test_column_definition.py
 test/test_column_info.py
 test/test_column_profile_detail.py
 test/test_column_profile_detail_one_of.py
@@ -318,6 +323,7 @@ test/test_column_profile_detail_one_of2.py
 test/test_column_profile_detail_one_of3.py
 test/test_column_profile_detail_one_of4.py
 test/test_column_profile_info.py
+test/test_column_type_spec.py
 test/test_connection_health_response.py
 test/test_connection_info.py
 test/test_connection_refresh_result.py

@@ -64,6 +64,7 @@ __all__ = [
     "BulkCreateDatabasesResult",
     "CategoricalProfileDetail",
     "CategoryValueInfo",
+    "ColumnDefinition",
     "ColumnInfo",
     "ColumnProfileDetail",
     "ColumnProfileDetailOneOf",
@@ -72,6 +73,7 @@ __all__ = [
     "ColumnProfileDetailOneOf3",
     "ColumnProfileDetailOneOf4",
     "ColumnProfileInfo",
+    "ColumnTypeSpec",
     "ConnectionHealthResponse",
     "ConnectionInfo",
     "ConnectionRefreshResult",
@@ -222,6 +224,7 @@ from hotdata.models.bulk_create_databases_request import BulkCreateDatabasesRequ
 from hotdata.models.bulk_create_databases_result import BulkCreateDatabasesResult as BulkCreateDatabasesResult
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail as CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo as CategoryValueInfo
+from hotdata.models.column_definition import ColumnDefinition as ColumnDefinition
 from hotdata.models.column_info import ColumnInfo as ColumnInfo
 from hotdata.models.column_profile_detail import ColumnProfileDetail as ColumnProfileDetail
 from hotdata.models.column_profile_detail_one_of import ColumnProfileDetailOneOf as ColumnProfileDetailOneOf
@@ -230,6 +233,7 @@ from hotdata.models.column_profile_detail_one_of2 import ColumnProfileDetailOneO
 from hotdata.models.column_profile_detail_one_of3 import ColumnProfileDetailOneOf3 as ColumnProfileDetailOneOf3
 from hotdata.models.column_profile_detail_one_of4 import ColumnProfileDetailOneOf4 as ColumnProfileDetailOneOf4
 from hotdata.models.column_profile_info import ColumnProfileInfo as ColumnProfileInfo
+from hotdata.models.column_type_spec import ColumnTypeSpec as ColumnTypeSpec
 from hotdata.models.connection_health_response import ConnectionHealthResponse as ConnectionHealthResponse
 from hotdata.models.connection_info import ConnectionInfo as ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult as ConnectionRefreshResult

@@ -38,6 +38,10 @@ class TestLoadManagedTableRequest(unittest.TestCase):
             return LoadManagedTableRequest(
                 var_async = True,
                 async_after_ms = 1000,
+                columns = {
+                    'key' : null
+                    },
+                data = '',
                 format = '',
                 key = [
                     ''

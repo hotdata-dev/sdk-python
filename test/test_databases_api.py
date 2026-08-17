@@ -121,7 +121,7 @@ class TestDatabasesApi(unittest.TestCase):
     def test_load_database_table(self) -> None:
         """Test case for load_database_table
 
-        Load database table from upload or query result
+        Load database table from inline data, upload, or query result
         """
         pass
 

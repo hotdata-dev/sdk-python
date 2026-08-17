@@ -3783,9 +3783,9 @@ class DatabasesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> LoadManagedTableResponse:
-        """Load database table from upload or query result
+        """Load database table from inline data, upload, or query result
 
-        Publish data as the new contents of a table on the database's default catalog, from one of two sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+        Publish data as the new contents of a table on the database's default catalog, from one of three sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3834,6 +3834,7 @@ class DatabasesApi:
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
+            '413': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -3866,9 +3867,9 @@ class DatabasesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[LoadManagedTableResponse]:
-        """Load database table from upload or query result
+        """Load database table from inline data, upload, or query result
 
-        Publish data as the new contents of a table on the database's default catalog, from one of two sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+        Publish data as the new contents of a table on the database's default catalog, from one of three sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3917,6 +3918,7 @@ class DatabasesApi:
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
+            '413': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -3949,9 +3951,9 @@ class DatabasesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Load database table from upload or query result
+        """Load database table from inline data, upload, or query result
 
-        Publish data as the new contents of a table on the database's default catalog, from one of two sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+        Publish data as the new contents of a table on the database's default catalog, from one of three sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -4000,6 +4002,7 @@ class DatabasesApi:
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
+            '413': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,

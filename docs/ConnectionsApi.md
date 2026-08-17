@@ -13,7 +13,7 @@ Method | HTTP request | Description
 [**get_connection**](ConnectionsApi.md#get_connection) | **GET** /v1/connections/{connection_id} | Get connection
 [**get_table_profile**](ConnectionsApi.md#get_table_profile) | **GET** /v1/connections/{connection_id}/tables/{schema}/{table}/profile | Get table profile
 [**list_connections**](ConnectionsApi.md#list_connections) | **GET** /v1/connections | List connections
-[**load_managed_table**](ConnectionsApi.md#load_managed_table) | **POST** /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads | Load managed table from upload or query result
+[**load_managed_table**](ConnectionsApi.md#load_managed_table) | **POST** /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads | Load managed table from inline data, upload, or query result
 [**purge_connection_cache**](ConnectionsApi.md#purge_connection_cache) | **DELETE** /v1/connections/{connection_id}/cache | Purge connection cache
 [**purge_table_cache**](ConnectionsApi.md#purge_table_cache) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/cache | Purge table cache
 
@@ -808,9 +808,9 @@ This endpoint does not need any parameter.
 # **load_managed_table**
 > LoadManagedTableResponse load_managed_table(connection_id, var_schema, table, load_managed_table_request)
 
-Load managed table from upload or query result
+Load managed table from inline data, upload, or query result
 
-Publish data as the new contents of a managed table from one of two sources — provide exactly one. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
 ### Example
 
@@ -856,7 +856,7 @@ with hotdata.ApiClient(configuration) as api_client:
     load_managed_table_request = hotdata.LoadManagedTableRequest() # LoadManagedTableRequest | 
 
     try:
-        # Load managed table from upload or query result
+        # Load managed table from inline data, upload, or query result
         api_response = api_instance.load_managed_table(connection_id, var_schema, table, load_managed_table_request)
         print("The response of ConnectionsApi->load_managed_table:\n")
         pprint(api_response)
@@ -894,10 +894,11 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Managed table loaded |  -  |
-**202** | Upload load accepted and running in the background; poll the returned job for status and result |  -  |
-**400** | Invalid request (bad mode, both or neither of &#x60;upload_id&#x60;/&#x60;result_id&#x60;, &#x60;format&#x60; combined with &#x60;result_id&#x60;, non-managed connection, invalid identifier, bad parquet, or the result failed to compute) |  -  |
+**202** | Load accepted and running in the background; poll the returned job for status and result |  -  |
+**400** | Invalid request (bad mode, none or several of &#x60;upload_id&#x60;/&#x60;result_id&#x60;/&#x60;data&#x60;, &#x60;format&#x60; combined with &#x60;result_id&#x60;, &#x60;columns&#x60; without &#x60;data&#x60;, a non-CSV inline &#x60;format&#x60;, unparseable inline data, non-managed connection, invalid identifier, bad parquet, or the result failed to compute) |  -  |
 **404** | Connection, upload, or result not found, or the table was deleted |  -  |
 **409** | Upload already consumed or in flight, the result is still being computed, or the incoming data changes a column&#39;s type incompatibly (only widening to a larger compatible type can be applied automatically); the existing data is unchanged and remains queryable |  -  |
+**413** | Inline &#x60;data&#x60; is over the 2 MiB limit (error code &#x60;INLINE_DATA_TOO_LARGE&#x60;); upload the data and load it by &#x60;upload_id&#x60; instead |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
