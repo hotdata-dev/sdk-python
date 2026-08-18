@@ -36,17 +36,15 @@ class TestCreateSavedQueryRequest(unittest.TestCase):
         model = CreateSavedQueryRequest()
         if include_optional:
             return CreateSavedQueryRequest(
-                description = '',
-                name = '',
-                sql = '',
-                tags = [
-                    ''
-                    ]
+                description = 'Ten highest-spending customers by order total',
+                name = 'top-customers',
+                sql = 'SELECT customer_id, sum(amount) AS total FROM orders GROUP BY customer_id ORDER BY total DESC LIMIT 10',
+                tags = [sales, weekly]
             )
         else:
             return CreateSavedQueryRequest(
-                name = '',
-                sql = '',
+                name = 'top-customers',
+                sql = 'SELECT customer_id, sum(amount) AS total FROM orders GROUP BY customer_id ORDER BY total DESC LIMIT 10',
         )
         """
 

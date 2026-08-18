@@ -36,13 +36,13 @@ class TestTableSortKey(unittest.TestCase):
         model = TableSortKey()
         if include_optional:
             return TableSortKey(
-                column = '',
-                direction = '',
-                nulls = ''
+                column = 'created_at',
+                direction = 'asc',
+                nulls = 'last'
             )
         else:
             return TableSortKey(
-                column = '',
+                column = 'created_at',
         )
         """
 

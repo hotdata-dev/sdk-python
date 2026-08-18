@@ -1,13 +1,13 @@
 # FinalizeUploadPart
 
-One part of a multi-part upload, supplied at finalize. Reserved for a future multi-part mode; single-`PUT` uploads have no parts.
+One part of a multi-part upload, supplied at finalize. Single-`PUT` uploads have no parts.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**e_tag** | **str** | The entity tag (ETag) storage returned for the uploaded part. | 
-**part_number** | **int** | 1-based part number, as reported by storage for the part. | 
+**e_tag** | **str** | The &#x60;ETag&#x60; response header returned by that part&#39;s &#x60;PUT&#x60;. | 
+**part_number** | **int** | The 1-based part number you uploaded this part as. | 
 
 ## Example
 

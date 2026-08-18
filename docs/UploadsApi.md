@@ -15,11 +15,11 @@ Method | HTTP request | Description
 
 Create upload session
 
-Create an upload session for a file you will send directly to storage. The response is one of three shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file with a known size (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across `part_urls.len()` (which can make a non-final part too small). For a file whose size you do not know up front, omit `declared_size_bytes`: the response is `mode: multipart` with a `part_size` but NO `part_urls`. As you stream, call `POST /v1/uploads/{upload_id}/parts` with a batch of `part_numbers` to mint per-part `PUT` URLs, `PUT` each part and keep its `ETag`, then finalize as for any multipart upload. In all cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.
+Create an upload session for a file you will upload directly to the URL the response carries, without sending it through this API. The response is one of three shapes. For a small file (`mode: single`) it contains a short-lived `url` to `PUT` the whole file to. For a large file with a known size (`mode: multipart`) it contains `part_urls` and `part_size`: split the file into `part_size`-byte chunks (the last is the remainder) and `PUT` chunk *i* (1-based) to `part_urls[i - 1]`, keeping each response's `ETag`. Slice by `part_size`, not by an even division across the number of part URLs (which can make a non-final part too small). For a file whose size you do not know up front, omit `declared_size_bytes`: the response is `mode: multipart` with a `part_size` but NO `part_urls`. As you stream, call `POST /v1/uploads/{upload_id}/parts` with a batch of `part_numbers` to mint per-part `PUT` URLs, `PUT` each part and keep its `ETag`, then finalize as for any multipart upload. In all cases the response also includes a one-time `finalize_token`. After uploading, call the finalize endpoint with the token (and, for multipart, the `{part_number, e_tag}` list) to make the upload usable as managed-table contents. The returned upload ID can then be passed to the managed-table load endpoint.
 
 You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.
 
-If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs (for example a local-filesystem development backend).
+A `501` with error code `PRESIGN_UNSUPPORTED` means this deployment cannot issue upload URLs; send the data inline on the load endpoint instead.
 
 ### Example
 
@@ -98,7 +98,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **201** | Upload session created |  -  |
 **400** | Invalid request (e.g. file too large, unsupported checksum algorithm) |  -  |
-**501** | Storage backend cannot issue upload URLs |  -  |
+**501** | This deployment cannot issue upload URLs |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -109,7 +109,7 @@ Create upload sessions in bulk
 
 Create upload sessions for several files in one request. Each file is planned independently and the response returns one session per requested file, in the same order. Each session is finalized separately via the finalize endpoint, so you can upload and finalize files at your own pace.
 
-If the response status is `501` with error code `PRESIGN_UNSUPPORTED`, the configured storage backend cannot issue upload URLs (for example a local-filesystem development backend).
+A `501` with error code `PRESIGN_UNSUPPORTED` means this deployment cannot issue upload URLs; send the data inline on the load endpoint instead.
 
 ### Example
 
@@ -188,7 +188,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **201** | Upload sessions created |  -  |
 **400** | Invalid request (e.g. a file too large, unsupported checksum algorithm) |  -  |
-**501** | Storage backend cannot issue upload URLs |  -  |
+**501** | This deployment cannot issue upload URLs |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -197,7 +197,7 @@ Name | Type | Description  | Notes
 
 Finalize upload
 
-Confirm that a file has been uploaded to storage and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. When you declared a size at create time, the uploaded file's size is validated against it and a mismatch is rejected. An upload created without a declared size is finalized from its uploaded parts; it must be non-empty and is rejected if it exceeds the server's maximum upload size. Finalize is exactly-once: a second finalize of the same upload is rejected.
+Confirm that a file has been uploaded and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. When you declared a size at create time, the uploaded file's size is validated against it and a mismatch is rejected. An upload created without a declared size is finalized from its uploaded parts; it must be non-empty and is rejected if it exceeds the server's maximum upload size. Finalize is exactly-once: a second finalize of the same upload is rejected.
 
 ### Example
 
@@ -279,7 +279,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Upload finalized |  -  |
-**400** | Invalid finalize token, uploaded size mismatch, missing object, or upload not finalizable |  -  |
+**400** | Invalid finalize token, uploaded size mismatch, missing file, or upload not finalizable |  -  |
 **404** | Upload session not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -289,7 +289,7 @@ Name | Type | Description  | Notes
 
 Mint upload part URLs
 
-Mint short-lived presigned URLs for specific parts of a multi-part upload. This is required for a streaming (unknown-size) upload — created by omitting the declared size — which mints no part URLs up front. It also works for a known-size multi-part upload: use it to re-mint a part whose URL expired before you uploaded that part. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header, and the 1-based `part_numbers` you want URLs for. `PUT` each part's bytes to its URL, keep each response's `ETag`, then pass the `{part_number, e_tag}` list to finalize. You may mint parts in batches as you upload, and re-mint a part number whose URL expired before you finished uploading it.
+Get short-lived upload URLs for specific parts of a multi-part upload. This is required for a streaming (unknown-size) upload — created by omitting the declared size — which mints no part URLs up front. It also works for a known-size multi-part upload: use it to re-mint a part whose URL expired before you uploaded that part. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header, and the 1-based `part_numbers` you want URLs for. `PUT` each part's bytes to its URL, keep each response's `ETag`, then pass the `{part_number, e_tag}` list to finalize. You may mint parts in batches as you upload, and re-mint a part number whose URL expired before you finished uploading it.
 
 ### Example
 
@@ -373,7 +373,7 @@ Name | Type | Description  | Notes
 **200** | Minted part URLs |  -  |
 **400** | Invalid finalize token, invalid part numbers, batch too large, or the upload is not a multi-part upload |  -  |
 **404** | Upload session not found |  -  |
-**501** | Storage backend cannot issue upload URLs |  -  |
+**501** | This deployment cannot issue upload URLs |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

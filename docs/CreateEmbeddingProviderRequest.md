@@ -7,7 +7,7 @@ Request body for POST /embedding-providers
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **api_key** | **str** | Inline API key. If provided, a secret is auto-created and referenced. Cannot be used together with &#x60;secret_name&#x60;. | [optional] 
-**config** | **object** |  | [optional] 
+**config** | **Dict[str, object]** | Provider-specific configuration (model name, base URL, dimensions, etc.) | [optional] 
 **name** | **str** |  | 
 **provider_type** | **str** | Provider type: \&quot;local\&quot; or \&quot;service\&quot; | 
 **secret_name** | **str** | Reference an existing secret by name (for service providers). | [optional] 

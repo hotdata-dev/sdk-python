@@ -25,7 +25,7 @@ Method | HTTP request | Description
 
 Add schema to database default catalog
 
-Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller addressing the internal default connection directly. Identifiers are normalized to lowercase.
+Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
 
 ### Example
 
@@ -555,7 +555,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **201** | Database created |  -  |
 **400** | Invalid request |  -  |
-**500** | Internal server error (e.g., managed-connection create succeeded but database row insert + rollback both failed) |  -  |
+**500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -900,7 +900,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Database forked |  -  |
-**400** | The source database can&#39;t be forked as-is (for example, it uses a storage backend that does not support forking, or one of its tables has rows that were individually deleted or updated) |  -  |
+**400** | The source database can&#39;t be forked as-is (for example, one of its tables has rows that were individually deleted or updated) |  -  |
 **404** | Source database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -1216,7 +1216,10 @@ with hotdata.ApiClient(configuration) as api_client:
     database_id = 'database_id_example' # str | Database ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
-    load_managed_table_request = hotdata.LoadManagedTableRequest() # LoadManagedTableRequest | 
+    load_managed_table_request = {data=order_id,customer_id,amount
+1001,42,1999
+1002,7,4550
+, mode=replace} # LoadManagedTableRequest | 
 
     try:
         # Load database table from inline data, upload, or query result

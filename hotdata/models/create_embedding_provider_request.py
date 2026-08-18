@@ -28,7 +28,7 @@ class CreateEmbeddingProviderRequest(BaseModel):
     Request body for POST /embedding-providers
     """ # noqa: E501
     api_key: Optional[StrictStr] = Field(default=None, description="Inline API key. If provided, a secret is auto-created and referenced. Cannot be used together with `secret_name`.")
-    config: Optional[Any] = None
+    config: Optional[Dict[str, Any]] = Field(default=None, description="Provider-specific configuration (model name, base URL, dimensions, etc.)")
     name: StrictStr
     provider_type: StrictStr = Field(description="Provider type: \"local\" or \"service\"")
     secret_name: Optional[StrictStr] = Field(default=None, description="Reference an existing secret by name (for service providers).")
@@ -77,11 +77,6 @@ class CreateEmbeddingProviderRequest(BaseModel):
         # and model_fields_set contains the field
         if self.api_key is None and "api_key" in self.model_fields_set:
             _dict['api_key'] = None
-
-        # set to None if config (nullable) is None
-        # and model_fields_set contains the field
-        if self.config is None and "config" in self.model_fields_set:
-            _dict['config'] = None
 
         # set to None if secret_name (nullable) is None
         # and model_fields_set contains the field

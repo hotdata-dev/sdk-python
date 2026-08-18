@@ -36,12 +36,12 @@ class TestAttachDatabaseCatalogRequest(unittest.TestCase):
         model = AttachDatabaseCatalogRequest()
         if include_optional:
             return AttachDatabaseCatalogRequest(
-                alias = '',
-                connection_id = ''
+                alias = 'warehouse',
+                connection_id = 'connk9p34y6n3wd25rq4f5zr37e3p3'
             )
         else:
             return AttachDatabaseCatalogRequest(
-                connection_id = '',
+                connection_id = 'connk9p34y6n3wd25rq4f5zr37e3p3',
         )
         """
 

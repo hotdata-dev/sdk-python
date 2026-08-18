@@ -36,38 +36,36 @@ class TestBulkCreateDatabasesRequest(unittest.TestCase):
         model = BulkCreateDatabasesRequest()
         if include_optional:
             return BulkCreateDatabasesRequest(
-                count = 1,
-                default_catalog = '',
-                default_schema = '',
-                expires_at = '',
-                idempotency_key = '',
-                name_template = '',
+                count = 100,
+                default_catalog = 'default',
+                default_schema = 'main',
+                expires_at = '7d',
+                idempotency_key = '3f6b1c1e-9a2b-4a5f-9a1e-2f0d6a7c8b91',
+                name_template = 'tenant-{index}',
                 schemas = [
                     hotdata.models.database_default_schema_decl.DatabaseDefaultSchemaDecl(
-                        name = '', 
+                        name = 'sales', 
                         tables = [
                             hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
-                                key = [
-                                    ''
-                                    ], 
-                                name = '', 
+                                key = [order_id], 
+                                name = 'orders', 
                                 partition_by = [
                                     hotdata.models.table_partition_key.TablePartitionKey(
-                                        column = '', 
-                                        transform = '', )
+                                        column = 'created_at', 
+                                        transform = 'day', )
                                     ], 
                                 sorted_by = [
                                     hotdata.models.table_sort_key.TableSortKey(
-                                        column = '', 
-                                        direction = '', 
-                                        nulls = '', )
+                                        column = 'created_at', 
+                                        direction = 'asc', 
+                                        nulls = 'last', )
                                     ], )
                             ], )
                     ]
             )
         else:
             return BulkCreateDatabasesRequest(
-                count = 1,
+                count = 100,
         )
         """
 

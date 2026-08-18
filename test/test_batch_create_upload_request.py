@@ -36,29 +36,11 @@ class TestBatchCreateUploadRequest(unittest.TestCase):
         model = BatchCreateUploadRequest()
         if include_optional:
             return BatchCreateUploadRequest(
-                uploads = [
-                    hotdata.models.create_upload_request.CreateUploadRequest(
-                        checksum_algo = '', 
-                        checksum_value = '', 
-                        content_encoding = '', 
-                        content_type = '', 
-                        declared_size_bytes = 0, 
-                        filename = '', 
-                        part_size = 0, )
-                    ]
+                uploads = [{content_type=text/csv, declared_size_bytes=4096, filename=orders.csv}, {content_type=text/csv, declared_size_bytes=2048, filename=customers.csv}]
             )
         else:
             return BatchCreateUploadRequest(
-                uploads = [
-                    hotdata.models.create_upload_request.CreateUploadRequest(
-                        checksum_algo = '', 
-                        checksum_value = '', 
-                        content_encoding = '', 
-                        content_type = '', 
-                        declared_size_bytes = 0, 
-                        filename = '', 
-                        part_size = 0, )
-                    ],
+                uploads = [{content_type=text/csv, declared_size_bytes=4096, filename=orders.csv}, {content_type=text/csv, declared_size_bytes=2048, filename=customers.csv}],
         )
         """
 

@@ -1,6 +1,6 @@
 # BulkCreateDatabasesResult
 
-What a bulk-create job reports when it finishes. Distinct from every other `JobResult` variant by its `batch_id` field, which matters because the enum is untagged and deserializes by trying arms in order.
+What a bulk-create job reports when it finishes.
 
 ## Properties
 
