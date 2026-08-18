@@ -1193,3 +1193,23 @@ def test_a_replayed_mint_stops_the_client_asking_again() -> None:
     )
     assert calls_after_replay > calls_after_first
 
+
+def test_a_claim_already_elapsed_is_declined_so_a_skewed_clock_still_works() -> None:
+    """A client whose clock runs fast reads every fresh token's `exp` as being in
+    the past. Honouring that would pin `_exp` permanently behind `now`, and since
+    the leeway margin can only suppress `(_exp - _LEEWAY, _exp)`, every request
+    would then run both grants forever. The server validates `exp` against its
+    own clock, so the token is fine and only this client disbelieves it."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(-600), expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    remaining = mgr._exp - time.time()
+    assert remaining > 0, f"pinned _exp in the past ({remaining:.0f}s)"
+    assert 290 <= remaining <= 301, remaining
+
+    # and the client is not stuck re-minting on every read
+    calls = len(pool.calls)
+    mgr.bearer_value()
+    mgr.bearer_value()
+    assert len(pool.calls) == calls, "kept minting under skew"
+

@@ -285,9 +285,10 @@ class _TokenManager:
         without paying for advice the server has said it does not have, and the
         401 retry remains the backstop for when the token really does die.
 
-        This also bounds clock skew. A client whose clock runs more than
-        `expires_in - _LEEWAY` fast computes `claim < now` on every mint and
-        would otherwise do both grants on every request, forever.
+        Clock skew is NOT handled here -- this margin only ever suppresses the
+        window `(_exp - _LEEWAY, _exp)`, and a skewed client's `_exp` is already
+        behind `now`, so nothing is left to suppress. `_mint` handles that case by
+        declining a claim that has already elapsed.
         """
         return 0 if self._replayed else _LEEWAY
 
@@ -363,9 +364,20 @@ class _TokenManager:
         # `min`, not "prefer the claim": a claim FURTHER out than `expires_in`
         # would extend the client's trust past what the server offered, which is
         # the opposite of the guarantee wanted here.
+        now = time.time()
+        by_expires_in = now + expires_in
         claim = _exp_from_jwt(token)
-        by_expires_in = time.time() + expires_in
-        self._exp = min(by_expires_in, claim) if claim is not None else by_expires_in
+        if claim is not None and claim > now:
+            self._exp = min(by_expires_in, claim)
+        else:
+            # No readable claim, or one ALREADY ELAPSED when the mint returned.
+            # An elapsed claim means the clocks disagree, not that the server
+            # handed back a corpse -- it validates `exp` against its own clock, so
+            # the token is fine and only this client disbelieves it. Honouring the
+            # claim here would set `_exp` permanently in the past, and every
+            # request would then run both grants forever. `expires_in` is always
+            # in the future, which is what makes it the safe fallback for skew.
+            self._exp = by_expires_in
         self._refresh = data.get("refresh_token") or self._refresh
         return True
 
