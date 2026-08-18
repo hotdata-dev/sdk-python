@@ -913,3 +913,327 @@ def test_malformed_json_200_body_is_not_retried() -> None:
         mgr.bearer_value()
     assert len(pool.calls) == 1  # parse error is fatal, not retried
     assert sleeps == []
+
+
+# --------------------------------------------------------------------------
+# Honest expiry: the JWT's own `exp` beats a promised `expires_in`
+# --------------------------------------------------------------------------
+
+
+def _jwt_with_exp(seconds_from_now: float, *, jti: str = "t1") -> str:
+    """A compact JWT whose payload carries a real `exp`. Unsigned -- the SDK
+    reads the claim to schedule refresh and never verifies it."""
+    import base64 as _b64
+
+    def seg(obj: Dict[str, Any]) -> str:
+        raw = json.dumps(obj).encode()
+        return _b64.urlsafe_b64encode(raw).decode().rstrip("=")
+
+    return ".".join((
+        seg({"alg": "RS256", "typ": "JWT"}),
+        seg({"exp": int(time.time() + seconds_from_now), "jti": jti}),
+        "sig",
+    ))
+
+
+def test_a_replayed_token_expires_when_the_claim_says_not_when_the_server_says() -> None:
+    """The bug this guards (hotdata-dev/sdk-python#146).
+
+    A mint endpoint that replays a cached JWT while still reporting the full TTL
+    hands back a token with seconds of life stamped as good for minutes. Trusting
+    `expires_in` pushes `_exp` past the token's real expiry -- and every refresh
+    pushes it further -- so the proactive check never fires and an expired token
+    goes on the wire. Observed in production against a workspace whose loads run
+    longer than one token lifetime.
+    """
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(45), expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    remaining = mgr._exp - time.time()
+    assert remaining < 60, (
+        f"trusted expires_in over the claim: believes {remaining:.0f}s of a 45s token"
+    )
+
+
+def test_a_claim_further_out_than_expires_in_does_not_extend_trust() -> None:
+    """`min`, not "prefer the claim". A token asserting more life than the server
+    offered must not widen the window the server granted."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(9000), expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    assert mgr._exp - time.time() <= 300 + 1
+
+
+def test_a_token_with_no_readable_claim_falls_back_to_expires_in() -> None:
+    """Opaque or malformed tokens keep the old behaviour rather than failing --
+    the claim is an improvement on `expires_in`, not a requirement."""
+    pool = _FakePool([_mint_response(access_token="not.a.jwt", expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    assert 290 <= mgr._exp - time.time() <= 301
+
+
+def test_invalidate_forces_an_api_token_mint_not_a_refresh() -> None:
+    """A refresh is exactly what would hand back the replayed token that was just
+    refused, so `invalidate` drops the refresh token with the JWT."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="a")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="b")),
+    ])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    first = mgr.bearer_value()
+    mgr.invalidate()
+    assert mgr._jwt is None and mgr._refresh is None
+    second = mgr.bearer_value()
+    assert second != first
+    assert _form(pool.calls[-1]["body"])["grant_type"] == ["api_token"]
+
+
+# --------------------------------------------------------------------------
+# Retry once on a 401 the SDK's own exchange caused
+# --------------------------------------------------------------------------
+
+
+class _DrainableResponse(_FakeResponse):
+    """A response that records whether its body was consumed.
+
+    `_FakeResponse` models only `.status`/`.data`, so a missing `read()` would
+    make the drain raise into a suppressed `except` and the test would pass
+    either way -- exactly the drift this asserts against."""
+
+    def __init__(self, status: int, payload: Any):
+        super().__init__(status, payload)
+        self.drained = False
+
+    def read(self):
+        self.drained = True
+        return self.data
+
+
+class _FakeRest:
+    """Rest client that 401s a scripted number of times, recording bearers."""
+
+    def __init__(self, fail_times: int):
+        self._left = fail_times
+        self.bearers: List[Optional[str]] = []
+        self.responses: List[_DrainableResponse] = []
+
+    def request(self, method, url, headers=None, body=None, post_params=None,
+                _request_timeout=None):
+        self.bearers.append((headers or {}).get("Authorization"))
+        status = 401 if self._left > 0 else 200
+        self._left -= 1
+        resp = _DrainableResponse(status, {})
+        self.responses.append(resp)
+        return resp
+
+
+def _client_with(rest, pool):
+    from hotdata.api_client import ApiClient
+
+    cfg = _config()
+    cfg.api_key = "hd_secret_token"
+    cfg._token_manager._pool = pool
+    api = ApiClient(cfg)
+    api.rest_client = rest
+    return api
+
+
+def test_a_401_on_an_exchanged_jwt_is_retried_once_with_a_fresh_token() -> None:
+    """The half of #146 the proactive check cannot cover: a token the client
+    still believed in but the server rejected. One re-mint, one retry."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="stale")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="fresh")),
+    ])
+    rest = _FakeRest(fail_times=1)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert resp.status == 200, "the 401 was not retried"
+    assert len(rest.bearers) == 2, rest.bearers
+    assert rest.bearers[0] != rest.bearers[1], "retried with the same token"
+
+
+def test_a_second_401_is_a_real_rejection_and_is_not_retried_again() -> None:
+    """Never loops. Retrying a genuine auth failure turns one clear error into a
+    slower one."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="a")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="b")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="c")),
+    ])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert resp.status == 401
+    assert len(rest.bearers) == 2, f"retried more than once: {len(rest.bearers)}"
+
+
+def test_a_failed_remint_leaves_the_original_401_for_the_caller() -> None:
+    """A revoked API token is the commonest cause of a 401, and re-minting from
+    it fails for the same reason. `invalidate` cleared the refresh token, so that
+    mint has no best-effort path -- it raises. Surfacing that would replace the
+    server's own 401, body and all, with an exchange error from a retry the
+    caller never asked for."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="ok")),
+        _FakeResponse(401, {"error": "invalid_grant"}),   # the re-mint is refused
+    ])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert resp.status == 401, "the caller lost the server's 401"
+    assert len(rest.bearers) == 1, "retried despite having no usable token"
+
+
+def test_a_caller_supplied_authorization_is_not_replaced_on_a_401() -> None:
+    """`_request_auth` overrides auth for a single request. A per-request
+    credential the server rejects is the caller's to deal with; swapping in a
+    managed token would answer a different question than the one asked, on the
+    failure path where it is hardest to notice."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(300, jti="managed"))])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    api.configuration.api_key  # prime the manager
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer caller-supplied"})
+    assert resp.status == 401
+    assert rest.bearers == ["Bearer caller-supplied"], rest.bearers
+
+
+def test_a_concurrent_refresh_is_not_clobbered() -> None:
+    """Several in-flight requests can carry the same doomed token and 401
+    together. Without compare-and-clear the second clears the fresh JWT the first
+    just minted, and they take turns invalidating each other's work."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(300, jti="a"))])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    first = mgr.bearer_value()
+    # another thread has already replaced it
+    with mgr._lock:
+        mgr._jwt, mgr._exp = "eyJ.someone.elses", time.time() + 300
+    assert mgr.invalidate(only_if=first) is False, "clobbered a fresher token"
+    assert mgr._jwt == "eyJ.someone.elses"
+    assert mgr.invalidate(only_if="eyJ.someone.elses") is True
+    assert mgr._jwt is None
+
+
+def test_a_401_with_no_header_params_does_not_crash() -> None:
+    """`header_params` is Optional on `call_api`. A direct caller that omits it
+    would otherwise crash on the retry path -- on failure, where it is least
+    likely to be noticed."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(300, jti="a"))])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x")
+    assert resp.status == 401
+    assert rest.bearers == [None], rest.bearers
+
+
+def test_the_discarded_401_is_drained_before_the_retry() -> None:
+    """urllib3 returns a connection to the pool only once the body is read or
+    released. A client 401ing on every request is precisely the case this PR
+    targets, and also the one that would exhaust the pool fastest."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="a")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="b")),
+    ])
+    rest = _FakeRest(fail_times=1)
+    api = _client_with(rest, pool)
+    api.call_api("GET", "https://api.hotdata.test/v1/x",
+                 header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert rest.responses[0].drained, "the 401 was abandoned un-read"
+
+
+def test_a_sibling_that_lost_the_rotation_race_retries_with_the_winners_token() -> None:
+    """N threads carry one doomed token and 401 together. The winner mints; the
+    losers' headers no longer match the current token. Without telling "already
+    rotated" apart from "never ours", one recovers and N-1 fail -- the stampede
+    the compare-and-clear was added for, arriving by the other door."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="old")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="new")),
+    ])
+    rest = _FakeRest(fail_times=1)
+    api = _client_with(rest, pool)
+    old_token = api.configuration.api_key          # what the "sibling" carried
+    api.configuration._token_manager.invalidate(only_if=old_token)
+    new_token = api.configuration.api_key          # the winner's mint
+    assert new_token != old_token
+
+    mints_before = len(pool.calls)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + old_token})
+    assert resp.status == 200, "the sibling was not retried"
+    assert rest.bearers[-1] == "Bearer " + new_token, rest.bearers
+    assert len(pool.calls) == mints_before, "minted again instead of reusing"
+
+
+def test_a_replayed_mint_stops_the_client_asking_again() -> None:
+    """A server that hands back the token we already hold has said it has nothing
+    newer. Refreshing anyway costs two round trips per request, under the lock,
+    for the whole leeway window of every cycle -- and clock skew makes that
+    permanent rather than periodic."""
+    same = _jwt_with_exp(10, jti="replayed")       # inside _LEEWAY already
+    pool = _FakePool([_mint_response(access_token=same, expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    assert mgr._replayed is False, "the first mint is not a replay"
+    calls_after_first = len(pool.calls)
+    mgr.bearer_value()                              # replay detected here
+    assert mgr._replayed is True
+    calls_after_replay = len(pool.calls)
+    mgr.bearer_value()
+    mgr.bearer_value()
+    assert len(pool.calls) == calls_after_replay, (
+        f"kept re-minting a token the server will not improve "
+        f"({len(pool.calls) - calls_after_replay} extra round trips)"
+    )
+    assert calls_after_replay > calls_after_first
+
+
+def test_a_claim_already_elapsed_is_declined_so_a_skewed_clock_still_works() -> None:
+    """A client whose clock runs fast reads every fresh token's `exp` as being in
+    the past. Honouring that would pin `_exp` permanently behind `now`, and since
+    the leeway margin can only suppress `(_exp - _LEEWAY, _exp)`, every request
+    would then run both grants forever. The server validates `exp` against its
+    own clock, so the token is fine and only this client disbelieves it."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(-600), expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    remaining = mgr._exp - time.time()
+    assert remaining > 0, f"pinned _exp in the past ({remaining:.0f}s)"
+    assert 290 <= remaining <= 301, remaining
+
+    # and the client is not stuck re-minting on every read
+    calls = len(pool.calls)
+    mgr.bearer_value()
+    mgr.bearer_value()
+    assert len(pool.calls) == calls, "kept minting under skew"
+
+
+def test_a_replayed_token_that_finally_elapsed_is_not_given_a_fresh_lease() -> None:
+    """The other cause of an elapsed claim, which wants the opposite answer to
+    skew. When the server keeps replaying one cached token, its `exp` eventually
+    passes for real. Falling back to `expires_in` there would put `_exp` at
+    `now + 300` on a corpse -- the pre-fix behaviour -- and leave the 401 retry to
+    pay a round trip a proactive mint would have avoided.
+
+    Drives `_mint` directly: reaching this through `bearer_value` would need the
+    first fallback's 300s lease to run down first, which is the thing under test,
+    not a precondition worth sleeping for.
+    """
+    dead = _jwt_with_exp(-5, jti="replayed-and-dead")
+    pool = _FakePool([_mint_response(access_token=dead, expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    grant = {"grant_type": "api_token", "api_token": "hd_secret_token"}
+
+    mgr._mint(dict(grant))          # first sight: elapsed but unseen -> skew branch
+    assert mgr._replayed is False
+    assert mgr._exp - time.time() > 200, "first sight should fall back to expires_in"
+
+    mgr._mint(dict(grant))          # same token back -> a known replay
+    assert mgr._replayed is True
+    assert mgr._exp - time.time() < 0, "gave a dead replayed token a fresh lease"

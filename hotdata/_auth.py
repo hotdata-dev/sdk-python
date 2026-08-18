@@ -39,6 +39,7 @@ Key behaviors:
   endpoint fails fast instead of hanging every call.
 """
 
+import base64
 import json
 import os
 import random
@@ -79,6 +80,32 @@ class TokenExchangeError(Exception):
     Surfacing ``invalid_grant`` (expired/revoked API token) here keeps the
     failure clear instead of a confusing downstream 401.
     """
+
+
+def _exp_from_jwt(token):
+    """The `exp` claim of a compact JWT, as a UNIX timestamp, or None.
+
+    The claim is AUTHORITATIVE where `expires_in` is only a promise. A mint
+    endpoint that replays a cached token is required by RFC 6749 s4.2.2 to
+    report the REMAINING lifetime ("the value 3600 denotes that the access token
+    will expire in one hour from the time the response was generated"); one that
+    reports the original TTL instead hands back a token with seconds of life
+    stamped as good for minutes. Reading the claim costs a base64 decode and
+    removes the need to trust that.
+
+    Deliberately does NOT verify the signature: this is the SDK reading a token
+    it was just handed, to decide when to refresh it. Whether the token is
+    genuine is the server's call on the next request, and a forged `exp` can
+    only make this client refresh sooner. Any malformed token returns None and
+    the caller falls back to `expires_in`.
+    """
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        exp = json.loads(base64.urlsafe_b64decode(payload)).get("exp")
+        return float(exp) if exp is not None else None
+    except Exception:  # noqa: BLE001 -- any malformed token falls back
+        return None
 
 
 def _is_socks_proxy_url(url):
@@ -184,6 +211,13 @@ class _TokenManager:
         self._jwt = None
         self._exp = 0.0
         self._refresh = None
+        # The token this manager last served before it was invalidated. Lets a
+        # request that carried it be told apart from one carrying a credential
+        # this manager never issued -- see `ApiClient._remint_bearer`.
+        self._prev_jwt = None
+        # True when the last mint handed back the token we already held, i.e. the
+        # server has nothing newer to give. See `_refresh_margin`.
+        self._replayed = False
 
     @property
     def _needs_exchange(self):
@@ -217,12 +251,12 @@ class _TokenManager:
         # under the lock, and the _LEEWAY margin keeps a token read here valid on
         # the wire even if it is about to be rotated.
         jwt = self._jwt
-        if jwt and time.time() < self._exp - _LEEWAY:
+        if jwt and time.time() < self._exp - self._refresh_margin():
             return jwt
         with self._lock:
             # Re-check under the lock: another thread may have minted a fresh JWT
             # while we waited (double-checked locking).
-            if self._jwt and time.time() < self._exp - _LEEWAY:
+            if self._jwt and time.time() < self._exp - self._refresh_margin():
                 return self._jwt
             # Prefer the refresh token; on failure, drop it and re-mint below.
             if self._refresh and not self._mint(
@@ -230,9 +264,62 @@ class _TokenManager:
             ):
                 self._refresh = None           # refresh failed -> fall through to re-mint
             # Re-mint from the held API token if we still lack a fresh JWT.
-            if not self._jwt or time.time() >= self._exp - _LEEWAY:
+            if not self._jwt or time.time() >= self._exp - self._refresh_margin():
                 self._mint({"grant_type": "api_token", "api_token": self._credential})
             return self._jwt
+
+    def _refresh_margin(self):
+        """How early to refresh: `_LEEWAY`, or nothing once the server replays.
+
+        The leeway exists to rotate a token before it dies. That only helps if a
+        mint can produce something newer -- and a server that replays a cached
+        token has just demonstrated it cannot. Refreshing anyway costs two token
+        endpoint round trips per request (the refresh grant returns the same
+        token, so `_refresh` survives and the api_token grant runs too), taken
+        under the lock, for the whole leeway window of every cycle.
+
+        Reading the honest `exp` is what exposes this: the inflated
+        `now + expires_in` never entered the window at all, because it had
+        already sailed past the real expiry -- a dead token instead of a slow
+        one. Dropping the margin for a replayed token keeps the honest expiry
+        without paying for advice the server has said it does not have, and the
+        401 retry remains the backstop for when the token really does die.
+
+        Clock skew is NOT handled here -- this margin only ever suppresses the
+        window `(_exp - _LEEWAY, _exp)`, and a skewed client's `_exp` is already
+        behind `now`, so nothing is left to suppress. `_mint` handles that case by
+        declining a claim that has already elapsed.
+        """
+        return 0 if self._replayed else _LEEWAY
+
+    def invalidate(self, only_if=None):
+        """Drop the cached JWT so the next `bearer_value()` mints a fresh one.
+
+        For the ONE case the proactive `_exp` check cannot cover: the server
+        rejected a token this client still believed in. Clears the refresh token
+        too -- a refresh is exactly what would hand back the same replayed JWT
+        that was just refused, so the next mint must go to the API token.
+
+        `only_if` makes it a COMPARE-AND-CLEAR, which is what keeps concurrent
+        401s from fighting. Several in-flight requests can carry the same doomed
+        token and 401 together; without the guard the second one clears the fresh
+        JWT the first just minted, and they take turns invalidating each other's
+        work. Passing the token that actually failed means a thread only clears
+        the state it observed.
+
+        Returns True when it cleared, False when another thread had already
+        replaced the token -- in which case the caller should use that one rather
+        than mint again.
+        """
+        with self._lock:
+            if only_if is not None and self._jwt != only_if:
+                return False
+            self._prev_jwt = self._jwt
+            self._replayed = False
+            self._jwt = None
+            self._exp = 0.0
+            self._refresh = None
+            return True
 
     def _mint(self, params):
         # Returns True on success. The refresh path is best-effort: ANY failure
@@ -259,8 +346,55 @@ class _TokenManager:
             if isinstance(exc, TokenExchangeError):
                 raise
             raise TokenExchangeError(f"token exchange failed: {exc!r}") from exc
+        # A mint that returns the token we already hold is the server saying it
+        # has nothing newer; `_refresh_margin` stops asking again until this one
+        # has actually expired.
+        self._replayed = token == self._jwt
         self._jwt = token
-        self._exp = time.time() + expires_in
+        # The JWT's own `exp` WINS when it is sooner than what `expires_in`
+        # promises. A mint that replays a cached token while still reporting the
+        # full TTL would otherwise push `_exp` past the token's real expiry, and
+        # each refresh pushes it further -- so the proactive `_exp - _LEEWAY`
+        # check never fires and an expired token goes on the wire. Observed in
+        # production: four consecutive mints returned the same `jti` with
+        # `expires_in=300` each time, while the token's true remaining life fell
+        # 300s -> 289s. Any load running longer than one token lifetime then
+        # fails at whatever it happens to be doing when the token dies.
+        #
+        # `min`, not "prefer the claim": a claim FURTHER out than `expires_in`
+        # would extend the client's trust past what the server offered, which is
+        # the opposite of the guarantee wanted here.
+        now = time.time()
+        by_expires_in = now + expires_in
+        claim = _exp_from_jwt(token)
+        if claim is not None and (claim > now or self._replayed):
+            self._exp = min(by_expires_in, claim)
+        else:
+            # No readable claim, or one already elapsed on a token we had NOT seen
+            # before. Two causes produce an elapsed claim and they want opposite
+            # answers, so `_replayed` -- set just above -- separates them:
+            #
+            #   replayed  the server keeps handing back one cached token, and its
+            #             `exp` has finally passed. The token really is dead.
+            #             Honour the claim: this manager accepted the same claim as
+            #             FUTURE on an earlier mint, so the clock is not the
+            #             explanation, and pretending otherwise would put `_exp` at
+            #             `now + 300` on a corpse -- the pre-fix behaviour, leaving
+            #             the 401 retry to pay a round trip that a proactive mint
+            #             would have avoided.
+            #
+            #   first seen  the clocks disagree. The server validates `exp` against
+            #             its own clock, so the token is fine and only this client
+            #             disbelieves it. Honouring the claim would pin `_exp` in
+            #             the past and run both grants on every request forever.
+            #             `expires_in` is always in the future, which is what makes
+            #             it the safe fallback.
+            #
+            # A skewed clock AND a replaying server together fall to the first
+            # branch, i.e. back to both grants per request. That union is the case
+            # being traded away, knowingly: it is rarer than either alone and the
+            # 401 retry still covers it.
+            self._exp = by_expires_in
         self._refresh = data.get("refresh_token") or self._refresh
         return True
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- fix(auth): take a token's expiry from its own `exp` claim, and retry once on a 401
+
 ### Changed
 
 - chore: add request/response examples and update documentation
