@@ -282,6 +282,11 @@ class ApiClient:
                 _request_timeout=_request_timeout
             )
             if response_data.status == 401:
+                # `header_params` is Optional on this method. `param_serialize`
+                # always passes a dict so nothing in-tree omits it, but a direct
+                # caller that does would otherwise crash HERE, on the failure
+                # path, rather than anywhere it could be noticed.
+                header_params = header_params if header_params is not None else {}
                 fresh = self._remint_bearer(header_params)
                 if fresh is not None:
                     # Drain the response being discarded. urllib3 only returns a

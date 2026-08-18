@@ -1100,3 +1100,15 @@ def test_a_concurrent_refresh_is_not_clobbered() -> None:
     assert mgr.invalidate(only_if="eyJ.someone.elses") is True
     assert mgr._jwt is None
 
+
+def test_a_401_with_no_header_params_does_not_crash() -> None:
+    """`header_params` is Optional on `call_api`. A direct caller that omits it
+    would otherwise crash on the retry path -- on failure, where it is least
+    likely to be noticed."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(300, jti="a"))])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x")
+    assert resp.status == 401
+    assert rest.bearers == [None], rest.bearers
+
