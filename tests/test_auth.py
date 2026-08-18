@@ -994,19 +994,38 @@ def test_invalidate_forces_an_api_token_mint_not_a_refresh() -> None:
 # --------------------------------------------------------------------------
 
 
+class _DrainableResponse(_FakeResponse):
+    """A response that records whether its body was consumed.
+
+    `_FakeResponse` models only `.status`/`.data`, so a missing `read()` would
+    make the drain raise into a suppressed `except` and the test would pass
+    either way -- exactly the drift this asserts against."""
+
+    def __init__(self, status: int, payload: Any):
+        super().__init__(status, payload)
+        self.drained = False
+
+    def read(self):
+        self.drained = True
+        return self.data
+
+
 class _FakeRest:
     """Rest client that 401s a scripted number of times, recording bearers."""
 
     def __init__(self, fail_times: int):
         self._left = fail_times
         self.bearers: List[Optional[str]] = []
+        self.responses: List[_DrainableResponse] = []
 
     def request(self, method, url, headers=None, body=None, post_params=None,
                 _request_timeout=None):
         self.bearers.append((headers or {}).get("Authorization"))
         status = 401 if self._left > 0 else 200
         self._left -= 1
-        return _FakeResponse(status, {})
+        resp = _DrainableResponse(status, {})
+        self.responses.append(resp)
+        return resp
 
 
 def _client_with(rest, pool):
@@ -1111,4 +1130,66 @@ def test_a_401_with_no_header_params_does_not_crash() -> None:
     resp = api.call_api("GET", "https://api.hotdata.test/v1/x")
     assert resp.status == 401
     assert rest.bearers == [None], rest.bearers
+
+
+def test_the_discarded_401_is_drained_before_the_retry() -> None:
+    """urllib3 returns a connection to the pool only once the body is read or
+    released. A client 401ing on every request is precisely the case this PR
+    targets, and also the one that would exhaust the pool fastest."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="a")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="b")),
+    ])
+    rest = _FakeRest(fail_times=1)
+    api = _client_with(rest, pool)
+    api.call_api("GET", "https://api.hotdata.test/v1/x",
+                 header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert rest.responses[0].drained, "the 401 was abandoned un-read"
+
+
+def test_a_sibling_that_lost_the_rotation_race_retries_with_the_winners_token() -> None:
+    """N threads carry one doomed token and 401 together. The winner mints; the
+    losers' headers no longer match the current token. Without telling "already
+    rotated" apart from "never ours", one recovers and N-1 fail -- the stampede
+    the compare-and-clear was added for, arriving by the other door."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="old")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="new")),
+    ])
+    rest = _FakeRest(fail_times=1)
+    api = _client_with(rest, pool)
+    old_token = api.configuration.api_key          # what the "sibling" carried
+    api.configuration._token_manager.invalidate(only_if=old_token)
+    new_token = api.configuration.api_key          # the winner's mint
+    assert new_token != old_token
+
+    mints_before = len(pool.calls)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + old_token})
+    assert resp.status == 200, "the sibling was not retried"
+    assert rest.bearers[-1] == "Bearer " + new_token, rest.bearers
+    assert len(pool.calls) == mints_before, "minted again instead of reusing"
+
+
+def test_a_replayed_mint_stops_the_client_asking_again() -> None:
+    """A server that hands back the token we already hold has said it has nothing
+    newer. Refreshing anyway costs two round trips per request, under the lock,
+    for the whole leeway window of every cycle -- and clock skew makes that
+    permanent rather than periodic."""
+    same = _jwt_with_exp(10, jti="replayed")       # inside _LEEWAY already
+    pool = _FakePool([_mint_response(access_token=same, expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    assert mgr._replayed is False, "the first mint is not a replay"
+    calls_after_first = len(pool.calls)
+    mgr.bearer_value()                              # replay detected here
+    assert mgr._replayed is True
+    calls_after_replay = len(pool.calls)
+    mgr.bearer_value()
+    mgr.bearer_value()
+    assert len(pool.calls) == calls_after_replay, (
+        f"kept re-minting a token the server will not improve "
+        f"({len(pool.calls) - calls_after_replay} extra round trips)"
+    )
+    assert calls_after_replay > calls_after_first
 

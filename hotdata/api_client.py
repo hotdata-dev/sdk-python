@@ -345,13 +345,23 @@ class ApiClient:
         # notice.
         stale = manager._jwt
         before = header_params.get("Authorization")
-        if stale is None or before != "Bearer " + stale:
+        if stale is not None and before == "Bearer " + stale:
+            # We carried the token the manager still holds: clear it so the read
+            # below mints. Compare-and-clear, so a thread that is beaten to it
+            # takes the winner's token rather than clearing it again.
+            manager.invalidate(only_if=stale)
+        elif before == "Bearer " + (manager._prev_jwt or "\0"):
+            # We carried the token the manager has ALREADY rotated away from --
+            # another request 401'd on it first and minted the replacement. Do
+            # not invalidate: retry with what it minted. Without this the winner
+            # recovers and every sibling fails, since their header no longer
+            # matches the current token, which is the stampede case the
+            # compare-and-clear was added for in the first place.
+            pass
+        else:
+            # A credential this manager never issued -- `_request_auth`, or an
+            # endpoint with no auth at all. Not ours to replace.
             return None
-
-        # Compare-and-clear: if another thread already replaced this token, use
-        # what it minted instead of minting again. Several concurrent requests
-        # can carry the same doomed token and 401 together.
-        manager.invalidate(only_if=stale)
         try:
             token = config.api_key
         except TokenExchangeError:
