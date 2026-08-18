@@ -32,13 +32,11 @@ from hotdata.api.results_api import ResultsApi
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CONFIGURATION_TEMPLATE = REPO_ROOT / ".openapi-generator-templates" / "configuration.mustache"
 
-# A JWT-shaped credential is returned as-is by _TokenManager, so no exchange
-# request is ever made from these tests.
-FAKE_JWT = "eyJfake.payload.signature"
+FAKE_API_TOKEN = "hd_fake_api_token"
 
 
 def _config(**kwargs) -> Configuration:
-    return Configuration(host="https://api.example.test", api_key=FAKE_JWT, **kwargs)
+    return Configuration(host="https://api.example.test", api_key=FAKE_API_TOKEN, **kwargs)
 
 
 def _typed_api_key_kwargs() -> list[str]:

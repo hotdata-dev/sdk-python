@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking:** the API-token → JWT key exchange is deprecated and removed. The
+  client no longer POSTs your token to `/v1/auth/jwt`, caches the minted JWT, or
+  refreshes it with a `refresh_token` grant — the API token configured as
+  `api_key` is sent verbatim as `Authorization: Bearer <token>`. The internal
+  `hotdata._auth` module (and its `TokenExchangeError`) is gone, `api_key` is a
+  plain attribute rather than a minting property, and the
+  `HOTDATA_DISABLE_JWT_EXCHANGE` escape hatch no longer does anything (it is
+  safe to unset). Callers passing an API token need no change; callers that were
+  passing a pre-minted JWT can keep doing so, since it is now forwarded as the
+  bearer credential like any other token.
+
 ## [0.9.1] - 2026-08-18
 
 ### Fixed
