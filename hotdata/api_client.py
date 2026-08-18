@@ -281,11 +281,55 @@ class ApiClient:
                 body=body, post_params=post_params,
                 _request_timeout=_request_timeout
             )
+            if response_data.status == 401:
+                fresh = self._remint_bearer(header_params)
+                if fresh is not None:
+                    header_params["Authorization"] = fresh
+                    response_data = self.rest_client.request(
+                        method, url,
+                        headers=header_params,
+                        body=body, post_params=post_params,
+                        _request_timeout=_request_timeout
+                    )
 
         except ApiException as e:
             raise e
 
         return response_data
+
+    def _remint_bearer(self, header_params):
+        """A replacement `Authorization` value after a 401, or None to give up.
+
+        ONCE per request, and only for a bearer this client minted. A 401 on an
+        exchanged JWT is recoverable in a way it is not for a caller-supplied
+        credential: the SDK swapped an API token for a short-lived JWT behind the
+        caller's back, so a JWT the server refuses is the SDK's problem to fix,
+        not an error the caller can act on.
+
+        The proactive `_exp` check covers the expected case. This covers the one
+        it cannot: a token the client still believed in but the server rejected —
+        clock skew, a revoked JWT, or a mint that reported a lifetime the token
+        did not have. Returns None when there is nothing to re-mint (no manager,
+        a caller-supplied JWT, exchange opted out) so the 401 surfaces unchanged.
+
+        Never loops. A second 401 is a real rejection and is returned to the
+        caller; retrying a genuine auth failure would only turn one clear error
+        into a slower one.
+        """
+        config = self.configuration
+        manager = getattr(config, "_token_manager", None)
+        if manager is None or not getattr(manager, "_needs_exchange", False):
+            return None
+        before = header_params.get("Authorization")
+        manager.invalidate()
+        token = config.api_key
+        if token is None:
+            return None
+        after = "Bearer " + token
+        # A re-mint that hands back the same credential means the server would
+        # refuse it again; sending it a second time buys a round trip and the
+        # same 401. This is the replayed-cache case, so it is not hypothetical.
+        return None if after == before else after
 
     def response_deserialize(
         self,

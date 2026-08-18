@@ -913,3 +913,141 @@ def test_malformed_json_200_body_is_not_retried() -> None:
         mgr.bearer_value()
     assert len(pool.calls) == 1  # parse error is fatal, not retried
     assert sleeps == []
+
+
+# --------------------------------------------------------------------------
+# Honest expiry: the JWT's own `exp` beats a promised `expires_in`
+# --------------------------------------------------------------------------
+
+
+def _jwt_with_exp(seconds_from_now: float, *, jti: str = "t1") -> str:
+    """A compact JWT whose payload carries a real `exp`. Unsigned -- the SDK
+    reads the claim to schedule refresh and never verifies it."""
+    import base64 as _b64
+
+    def seg(obj: Dict[str, Any]) -> str:
+        raw = json.dumps(obj).encode()
+        return _b64.urlsafe_b64encode(raw).decode().rstrip("=")
+
+    return ".".join((
+        seg({"alg": "RS256", "typ": "JWT"}),
+        seg({"exp": int(time.time() + seconds_from_now), "jti": jti}),
+        "sig",
+    ))
+
+
+def test_a_replayed_token_expires_when_the_claim_says_not_when_the_server_says() -> None:
+    """The bug this guards (hotdata-dev/sdk-python#146).
+
+    A mint endpoint that replays a cached JWT while still reporting the full TTL
+    hands back a token with seconds of life stamped as good for minutes. Trusting
+    `expires_in` pushes `_exp` past the token's real expiry -- and every refresh
+    pushes it further -- so the proactive check never fires and an expired token
+    goes on the wire. Observed in production against a workspace whose loads run
+    longer than one token lifetime.
+    """
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(45), expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    remaining = mgr._exp - time.time()
+    assert remaining < 60, (
+        f"trusted expires_in over the claim: believes {remaining:.0f}s of a 45s token"
+    )
+
+
+def test_a_claim_further_out_than_expires_in_does_not_extend_trust() -> None:
+    """`min`, not "prefer the claim". A token asserting more life than the server
+    offered must not widen the window the server granted."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(9000), expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    assert mgr._exp - time.time() <= 300 + 1
+
+
+def test_a_token_with_no_readable_claim_falls_back_to_expires_in() -> None:
+    """Opaque or malformed tokens keep the old behaviour rather than failing --
+    the claim is an improvement on `expires_in`, not a requirement."""
+    pool = _FakePool([_mint_response(access_token="not.a.jwt", expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    mgr.bearer_value()
+    assert 290 <= mgr._exp - time.time() <= 301
+
+
+def test_invalidate_forces_an_api_token_mint_not_a_refresh() -> None:
+    """A refresh is exactly what would hand back the replayed token that was just
+    refused, so `invalidate` drops the refresh token with the JWT."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="a")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="b")),
+    ])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    first = mgr.bearer_value()
+    mgr.invalidate()
+    assert mgr._jwt is None and mgr._refresh is None
+    second = mgr.bearer_value()
+    assert second != first
+    assert _form(pool.calls[-1]["body"])["grant_type"] == ["api_token"]
+
+
+# --------------------------------------------------------------------------
+# Retry once on a 401 the SDK's own exchange caused
+# --------------------------------------------------------------------------
+
+
+class _FakeRest:
+    """Rest client that 401s a scripted number of times, recording bearers."""
+
+    def __init__(self, fail_times: int):
+        self._left = fail_times
+        self.bearers: List[Optional[str]] = []
+
+    def request(self, method, url, headers=None, body=None, post_params=None,
+                _request_timeout=None):
+        self.bearers.append((headers or {}).get("Authorization"))
+        status = 401 if self._left > 0 else 200
+        self._left -= 1
+        return _FakeResponse(status, {})
+
+
+def _client_with(rest, pool):
+    from hotdata.api_client import ApiClient
+
+    cfg = _config()
+    cfg.api_key = "hd_secret_token"
+    cfg._token_manager._pool = pool
+    api = ApiClient(cfg)
+    api.rest_client = rest
+    return api
+
+
+def test_a_401_on_an_exchanged_jwt_is_retried_once_with_a_fresh_token() -> None:
+    """The half of #146 the proactive check cannot cover: a token the client
+    still believed in but the server rejected. One re-mint, one retry."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="stale")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="fresh")),
+    ])
+    rest = _FakeRest(fail_times=1)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert resp.status == 200, "the 401 was not retried"
+    assert len(rest.bearers) == 2, rest.bearers
+    assert rest.bearers[0] != rest.bearers[1], "retried with the same token"
+
+
+def test_a_second_401_is_a_real_rejection_and_is_not_retried_again() -> None:
+    """Never loops. Retrying a genuine auth failure turns one clear error into a
+    slower one."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="a")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="b")),
+        _mint_response(access_token=_jwt_with_exp(300, jti="c")),
+    ])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert resp.status == 401
+    assert len(rest.bearers) == 2, f"retried more than once: {len(rest.bearers)}"
+

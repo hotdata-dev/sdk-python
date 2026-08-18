@@ -39,6 +39,7 @@ Key behaviors:
   endpoint fails fast instead of hanging every call.
 """
 
+import base64
 import json
 import os
 import random
@@ -79,6 +80,32 @@ class TokenExchangeError(Exception):
     Surfacing ``invalid_grant`` (expired/revoked API token) here keeps the
     failure clear instead of a confusing downstream 401.
     """
+
+
+def _exp_from_jwt(token):
+    """The `exp` claim of a compact JWT, as a UNIX timestamp, or None.
+
+    The claim is AUTHORITATIVE where `expires_in` is only a promise. A mint
+    endpoint that replays a cached token is required by RFC 6749 s4.2.2 to
+    report the REMAINING lifetime ("the value 3600 denotes that the access token
+    will expire in one hour from the time the response was generated"); one that
+    reports the original TTL instead hands back a token with seconds of life
+    stamped as good for minutes. Reading the claim costs a base64 decode and
+    removes the need to trust that.
+
+    Deliberately does NOT verify the signature: this is the SDK reading a token
+    it was just handed, to decide when to refresh it. Whether the token is
+    genuine is the server's call on the next request, and a forged `exp` can
+    only make this client refresh sooner. Any malformed token returns None and
+    the caller falls back to `expires_in`.
+    """
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        exp = json.loads(base64.urlsafe_b64decode(payload)).get("exp")
+        return float(exp) if exp is not None else None
+    except Exception:  # noqa: BLE001 -- any malformed token falls back
+        return None
 
 
 def _is_socks_proxy_url(url):
@@ -234,6 +261,23 @@ class _TokenManager:
                 self._mint({"grant_type": "api_token", "api_token": self._credential})
             return self._jwt
 
+    def invalidate(self):
+        """Drop the cached JWT so the next `bearer_value()` mints a fresh one.
+
+        For the ONE case the proactive `_exp` check cannot cover: the server
+        rejected a token this client still believed in. Clears the refresh token
+        too -- a refresh is exactly what would hand back the same replayed JWT
+        that was just refused, so the next mint must go to the API token.
+
+        Safe to call from any thread: the assignments are individually atomic
+        under the GIL and a concurrent `bearer_value()` either sees the cleared
+        state and mints, or sees a token it is about to re-check anyway.
+        """
+        with self._lock:
+            self._jwt = None
+            self._exp = 0.0
+            self._refresh = None
+
     def _mint(self, params):
         # Returns True on success. The refresh path is best-effort: ANY failure
         # -- a non-200, a transport error, or a malformed/missing-token body --
@@ -260,7 +304,22 @@ class _TokenManager:
                 raise
             raise TokenExchangeError(f"token exchange failed: {exc!r}") from exc
         self._jwt = token
-        self._exp = time.time() + expires_in
+        # The JWT's own `exp` WINS when it is sooner than what `expires_in`
+        # promises. A mint that replays a cached token while still reporting the
+        # full TTL would otherwise push `_exp` past the token's real expiry, and
+        # each refresh pushes it further -- so the proactive `_exp - _LEEWAY`
+        # check never fires and an expired token goes on the wire. Observed in
+        # production: four consecutive mints returned the same `jti` with
+        # `expires_in=300` each time, while the token's true remaining life fell
+        # 300s -> 289s. Any load running longer than one token lifetime then
+        # fails at whatever it happens to be doing when the token dies.
+        #
+        # `min`, not "prefer the claim": a claim FURTHER out than `expires_in`
+        # would extend the client's trust past what the server offered, which is
+        # the opposite of the guarantee wanted here.
+        claim = _exp_from_jwt(token)
+        by_expires_in = time.time() + expires_in
+        self._exp = min(by_expires_in, claim) if claim is not None else by_expires_in
         self._refresh = data.get("refresh_token") or self._refresh
         return True
 
