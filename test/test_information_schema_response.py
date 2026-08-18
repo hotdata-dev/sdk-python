@@ -52,15 +52,15 @@ class TestInformationSchemaResponse(unittest.TestCase):
                         last_sync = '', 
                         partition_by = [
                             hotdata.models.table_partition_key.TablePartitionKey(
-                                column = '', 
-                                transform = '', )
+                                column = 'created_at', 
+                                transform = 'day', )
                             ], 
                         schema = '', 
                         sorted_by = [
                             hotdata.models.table_sort_key.TableSortKey(
-                                column = '', 
-                                direction = '', 
-                                nulls = '', )
+                                column = 'created_at', 
+                                direction = 'asc', 
+                                nulls = 'last', )
                             ], 
                         synced = True, 
                         table = '', )
@@ -83,15 +83,15 @@ class TestInformationSchemaResponse(unittest.TestCase):
                         last_sync = '', 
                         partition_by = [
                             hotdata.models.table_partition_key.TablePartitionKey(
-                                column = '', 
-                                transform = '', )
+                                column = 'created_at', 
+                                transform = 'day', )
                             ], 
                         schema = '', 
                         sorted_by = [
                             hotdata.models.table_sort_key.TableSortKey(
-                                column = '', 
-                                direction = '', 
-                                nulls = '', )
+                                column = 'created_at', 
+                                direction = 'asc', 
+                                nulls = 'last', )
                             ], 
                         synced = True, 
                         table = '', )

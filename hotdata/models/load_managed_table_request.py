@@ -27,9 +27,9 @@ from typing_extensions import Self
 
 class LoadManagedTableRequest(BaseModel):
     """
-    Request body for the managed-table load endpoints — the connection-scoped `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads` and the database-scoped equivalent.  Publishes data to the named table from one of three sources: a previously uploaded file (`upload_id`), a persisted query result (`result_id`), or data sent inline in this request (`data`). Provide exactly one. CSV and JSON uploads are converted to columnar storage on load; Parquet uploads and query results are published directly. `mode` selects whether the data replaces the table's contents or is appended on top of them.
+    Request body for the managed-table load endpoints — the connection-scoped `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads` and the database-scoped equivalent.  Publishes data to the named table from one of three sources: a previously uploaded file (`upload_id`), a persisted query result (`result_id`), or data sent inline in this request (`data`). Provide exactly one. `mode` selects whether the data replaces the table's contents or is appended on top of them.
     """ # noqa: E501
-    var_async: Optional[StrictBool] = Field(default=None, description="When true, run the load as a background job and return a job ID to poll instead of blocking until it finishes. Recommended for large uploads, which can take longer than an HTTP request should stay open.", alias="async")
+    var_async: Optional[StrictBool] = Field(default=False, description="When true, run the load as a background job and return a job ID to poll instead of blocking until it finishes. Recommended for large uploads, which can take longer than an HTTP request should stay open.", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the load to finish: if it completes in time the full result is returned (200), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
     columns: Optional[Dict[str, ColumnDefinition]] = Field(default=None, description="Column types for inline `data`, keyed by column name. Optional — types are detected from the data when omitted.  Each value is either a type name (`\"VARCHAR\"`, `\"BIGINT\"`, `\"DECIMAL(10,2)\"`) or an object carrying explicit parameters (`{\"type\": \"DECIMAL\", \"precision\": 10, \"scale\": 2}`). Supported types: `VARCHAR`, `TEXT`, `STRING`, `CHAR`, `BOOLEAN`, `TINYINT`, `SMALLINT`, `INTEGER`, `BIGINT`, `UTINYINT`, `USMALLINT`, `UINTEGER`, `UBIGINT`, `REAL`, `FLOAT`, `DOUBLE`, `DECIMAL`, `NUMERIC`, `DATE`, `TIME`, `TIMESTAMP`, `TIMESTAMPTZ`, `BINARY`, `BLOB`, `UUID`, and `JSON`.  When given, it must name every column in the CSV header and no others. Only valid together with `data`.")
     data: Optional[StrictStr] = Field(default=None, description="The data to load, sent inline in this request instead of being uploaded first — the quickest way to get a small table in. CSV text with a header row, up to 2 MiB.  Larger payloads are rejected with `413` and the error code `INLINE_DATA_TOO_LARGE`; upload the file (see `POST /v1/uploads`) and load it by `upload_id` instead. Column types are detected from the data unless `columns` declares them. Provide exactly one of this, `upload_id`, or `result_id`.")
@@ -134,7 +134,7 @@ class LoadManagedTableRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "async": obj.get("async"),
+            "async": obj.get("async") if obj.get("async") is not None else False,
             "async_after_ms": obj.get("async_after_ms"),
             "columns": dict(
                 (_k, ColumnDefinition.from_dict(_v))

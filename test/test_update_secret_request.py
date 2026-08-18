@@ -36,11 +36,11 @@ class TestUpdateSecretRequest(unittest.TestCase):
         model = UpdateSecretRequest()
         if include_optional:
             return UpdateSecretRequest(
-                value = ''
+                value = 's3cr3t-p4ssw0rd'
             )
         else:
             return UpdateSecretRequest(
-                value = '',
+                value = 's3cr3t-p4ssw0rd',
         )
         """
 

@@ -58,7 +58,7 @@ class UsageApi:
     ) -> WorkspaceUsageResponse:
         """Get workspace usage snapshot
 
-        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the subscription's `current_period_start` so the meter value aligns with the Stripe invoice window rather than the calendar month.
+        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the start of your billing period so the totals line up with your invoice rather than the calendar month.
 
         :param since: Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.
         :type since: str
@@ -125,7 +125,7 @@ class UsageApi:
     ) -> ApiResponse[WorkspaceUsageResponse]:
         """Get workspace usage snapshot
 
-        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the subscription's `current_period_start` so the meter value aligns with the Stripe invoice window rather than the calendar month.
+        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the start of your billing period so the totals line up with your invoice rather than the calendar month.
 
         :param since: Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.
         :type since: str
@@ -192,7 +192,7 @@ class UsageApi:
     ) -> RESTResponseType:
         """Get workspace usage snapshot
 
-        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the subscription's `current_period_start` so the meter value aligns with the Stripe invoice window rather than the calendar month.
+        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the start of your billing period so the totals line up with your invoice rather than the calendar month.
 
         :param since: Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.
         :type since: str

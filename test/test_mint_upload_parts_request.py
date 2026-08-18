@@ -36,15 +36,11 @@ class TestMintUploadPartsRequest(unittest.TestCase):
         model = MintUploadPartsRequest()
         if include_optional:
             return MintUploadPartsRequest(
-                part_numbers = [
-                    56
-                    ]
+                part_numbers = [1, 2, 3]
             )
         else:
             return MintUploadPartsRequest(
-                part_numbers = [
-                    56
-                    ],
+                part_numbers = [1, 2, 3],
         )
         """
 

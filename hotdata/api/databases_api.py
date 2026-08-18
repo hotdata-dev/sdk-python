@@ -74,7 +74,7 @@ class DatabasesApi:
     ) -> ManagedSchemaResponse:
         """Add schema to database default catalog
 
-        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller addressing the internal default connection directly. Identifiers are normalized to lowercase.
+        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -148,7 +148,7 @@ class DatabasesApi:
     ) -> ApiResponse[ManagedSchemaResponse]:
         """Add schema to database default catalog
 
-        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller addressing the internal default connection directly. Identifiers are normalized to lowercase.
+        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -222,7 +222,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Add schema to database default catalog
 
-        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller addressing the internal default connection directly. Identifiers are normalized to lowercase.
+        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
 
         :param database_id: Database ID (required)
         :type database_id: str

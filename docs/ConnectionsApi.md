@@ -853,7 +853,7 @@ with hotdata.ApiClient(configuration) as api_client:
     connection_id = 'connection_id_example' # str | Connection ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
-    load_managed_table_request = hotdata.LoadManagedTableRequest() # LoadManagedTableRequest | 
+    load_managed_table_request = {"data":"order_id,customer_id,amount\n1001,42,1999\n1002,7,4550\n","mode":"replace"} # LoadManagedTableRequest | 
 
     try:
         # Load managed table from inline data, upload, or query result

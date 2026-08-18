@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class BulkCreateDatabasesResult(BaseModel):
     """
-    What a bulk-create job reports when it finishes. Distinct from every other `JobResult` variant by its `batch_id` field, which matters because the enum is untagged and deserializes by trying arms in order.
+    What a bulk-create job reports when it finishes.
     """ # noqa: E501
     batch_id: StrictStr = Field(description="Batch these databases belong to.")
     cancelled: StrictBool = Field(description="True when the batch was stopped before finishing.")

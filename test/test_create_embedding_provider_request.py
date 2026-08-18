@@ -37,15 +37,15 @@ class TestCreateEmbeddingProviderRequest(unittest.TestCase):
         if include_optional:
             return CreateEmbeddingProviderRequest(
                 api_key = '',
-                config = None,
-                name = '',
-                provider_type = '',
-                secret_name = ''
+                config = {base_url=https://api.openai.com/v1, dimensions=1536, model=text-embedding-3-small},
+                name = 'openai-text-embedding-3-small',
+                provider_type = 'service',
+                secret_name = 'openai-api-key'
             )
         else:
             return CreateEmbeddingProviderRequest(
-                name = '',
-                provider_type = '',
+                name = 'openai-text-embedding-3-small',
+                provider_type = 'service',
         )
         """
 

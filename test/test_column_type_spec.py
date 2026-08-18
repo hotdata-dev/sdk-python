@@ -36,13 +36,13 @@ class TestColumnTypeSpec(unittest.TestCase):
         model = ColumnTypeSpec()
         if include_optional:
             return ColumnTypeSpec(
-                precision = 0,
-                scale = 56,
-                type = ''
+                precision = 10,
+                scale = 2,
+                type = 'DECIMAL'
             )
         else:
             return ColumnTypeSpec(
-                type = '',
+                type = 'DECIMAL',
         )
         """
 

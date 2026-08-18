@@ -36,13 +36,13 @@ class TestColumnDefinition(unittest.TestCase):
         model = ColumnDefinition()
         if include_optional:
             return ColumnDefinition(
-                precision = 0,
-                scale = 56,
-                type = ''
+                precision = 10,
+                scale = 2,
+                type = 'DECIMAL'
             )
         else:
             return ColumnDefinition(
-                type = '',
+                type = 'DECIMAL',
         )
         """
 

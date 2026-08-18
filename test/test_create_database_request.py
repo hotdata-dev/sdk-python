@@ -42,23 +42,21 @@ class TestCreateDatabaseRequest(unittest.TestCase):
                 name = '',
                 schemas = [
                     hotdata.models.database_default_schema_decl.DatabaseDefaultSchemaDecl(
-                        name = '', 
+                        name = 'sales', 
                         tables = [
                             hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
-                                key = [
-                                    ''
-                                    ], 
-                                name = '', 
+                                key = [order_id], 
+                                name = 'orders', 
                                 partition_by = [
                                     hotdata.models.table_partition_key.TablePartitionKey(
-                                        column = '', 
-                                        transform = '', )
+                                        column = 'created_at', 
+                                        transform = 'day', )
                                     ], 
                                 sorted_by = [
                                     hotdata.models.table_sort_key.TableSortKey(
-                                        column = '', 
-                                        direction = '', 
-                                        nulls = '', )
+                                        column = 'created_at', 
+                                        direction = 'asc', 
+                                        nulls = 'last', )
                                     ], )
                             ], )
                     ]

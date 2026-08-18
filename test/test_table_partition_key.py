@@ -36,13 +36,13 @@ class TestTablePartitionKey(unittest.TestCase):
         model = TablePartitionKey()
         if include_optional:
             return TablePartitionKey(
-                column = '',
-                transform = ''
+                column = 'created_at',
+                transform = 'day'
             )
         else:
             return TablePartitionKey(
-                column = '',
-                transform = '',
+                column = 'created_at',
+                transform = 'day',
         )
         """
 

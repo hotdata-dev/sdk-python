@@ -38,23 +38,19 @@ class TestCreateIndexRequest(unittest.TestCase):
             return CreateIndexRequest(
                 var_async = True,
                 async_after_ms = 1000,
-                columns = [
-                    ''
-                    ],
+                columns = [customer_id],
                 description = '',
                 dimensions = 0,
                 embedding_provider_id = '',
-                index_name = '',
-                index_type = '',
+                index_name = 'orders_customer_id',
+                index_type = 'sorted',
                 metric = '',
                 output_column = ''
             )
         else:
             return CreateIndexRequest(
-                columns = [
-                    ''
-                    ],
-                index_name = '',
+                columns = [customer_id],
+                index_name = 'orders_customer_id',
         )
         """
 

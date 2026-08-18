@@ -36,25 +36,23 @@ class TestAddManagedTableRequest(unittest.TestCase):
         model = AddManagedTableRequest()
         if include_optional:
             return AddManagedTableRequest(
-                key = [
-                    ''
-                    ],
-                name = '',
+                key = [order_id],
+                name = 'orders',
                 partition_by = [
                     hotdata.models.table_partition_key.TablePartitionKey(
-                        column = '', 
-                        transform = '', )
+                        column = 'created_at', 
+                        transform = 'day', )
                     ],
                 sorted_by = [
                     hotdata.models.table_sort_key.TableSortKey(
-                        column = '', 
-                        direction = '', 
-                        nulls = '', )
+                        column = 'created_at', 
+                        direction = 'asc', 
+                        nulls = 'last', )
                     ]
             )
         else:
             return AddManagedTableRequest(
-                name = '',
+                name = 'orders',
         )
         """
 

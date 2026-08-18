@@ -36,13 +36,13 @@ class TestFinalizeUploadPart(unittest.TestCase):
         model = FinalizeUploadPart()
         if include_optional:
             return FinalizeUploadPart(
-                e_tag = '',
-                part_number = 56
+                e_tag = '"9f8c1e5b7a2d4f60b3c8e1a9d7f4b206"',
+                part_number = 1
             )
         else:
             return FinalizeUploadPart(
-                e_tag = '',
-                part_number = 56,
+                e_tag = '"9f8c1e5b7a2d4f60b3c8e1a9d7f4b206"',
+                part_number = 1,
         )
         """
 

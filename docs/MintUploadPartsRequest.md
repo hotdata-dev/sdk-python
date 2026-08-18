@@ -1,6 +1,6 @@
 # MintUploadPartsRequest
 
-Request body for `POST /v1/uploads/{upload_id}/parts`: mint presigned upload URLs for specific parts of a streaming (unknown-size) multi-part upload.  Provide the 1-based part numbers you want URLs for. Mint parts as you upload, and re-request a part number if its URL expires before you finish — the parts you have already uploaded are unaffected.
+Request body for `POST /v1/uploads/{upload_id}/parts`: get short-lived upload URLs for specific parts of a streaming (unknown-size) multi-part upload.  Provide the 1-based part numbers you want URLs for. Mint parts as you upload, and re-request a part number if its URL expires before you finish — the parts you have already uploaded are unaffected.
 
 ## Properties
 
