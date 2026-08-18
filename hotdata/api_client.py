@@ -284,6 +284,15 @@ class ApiClient:
             if response_data.status == 401:
                 fresh = self._remint_bearer(header_params)
                 if fresh is not None:
+                    # Drain the response being discarded. urllib3 only returns a
+                    # connection to the pool once its body is consumed or
+                    # released; abandoning it un-read leaks the connection for
+                    # the life of the pool, and a client that 401s on every
+                    # request would exhaust it.
+                    try:
+                        response_data.read()
+                    except Exception:  # noqa: BLE001 -- draining must not mask the retry
+                        pass
                     header_params["Authorization"] = fresh
                     response_data = self.rest_client.request(
                         method, url,
@@ -316,13 +325,38 @@ class ApiClient:
         caller; retrying a genuine auth failure would only turn one clear error
         into a slower one.
         """
+        from hotdata._auth import TokenExchangeError
+
         config = self.configuration
         manager = getattr(config, "_token_manager", None)
         if manager is None or not getattr(manager, "_needs_exchange", False):
             return None
+
+        # Only a header THIS manager produced. `_request_auth` lets a caller
+        # override auth for a single request, and a per-request credential that
+        # the server rejects is the caller's to deal with -- replacing it with a
+        # managed token would silently answer a different question than the one
+        # asked, and would do it only on the failure path where it is hardest to
+        # notice.
+        stale = manager._jwt
         before = header_params.get("Authorization")
-        manager.invalidate()
-        token = config.api_key
+        if stale is None or before != "Bearer " + stale:
+            return None
+
+        # Compare-and-clear: if another thread already replaced this token, use
+        # what it minted instead of minting again. Several concurrent requests
+        # can carry the same doomed token and 401 together.
+        manager.invalidate(only_if=stale)
+        try:
+            token = config.api_key
+        except TokenExchangeError:
+            # The commonest cause of a 401 is a revoked or expired API token, and
+            # re-minting from it fails for the same reason. `invalidate` cleared
+            # the refresh token, so this raise has no best-effort path behind it.
+            # Surfacing it here would replace the server's own 401 -- body and
+            # all -- with an exchange error from a retry the caller never asked
+            # for, turning a clear answer into a confusing one.
+            return None
         if token is None:
             return None
         after = "Bearer " + token

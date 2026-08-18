@@ -261,7 +261,7 @@ class _TokenManager:
                 self._mint({"grant_type": "api_token", "api_token": self._credential})
             return self._jwt
 
-    def invalidate(self):
+    def invalidate(self, only_if=None):
         """Drop the cached JWT so the next `bearer_value()` mints a fresh one.
 
         For the ONE case the proactive `_exp` check cannot cover: the server
@@ -269,14 +269,24 @@ class _TokenManager:
         too -- a refresh is exactly what would hand back the same replayed JWT
         that was just refused, so the next mint must go to the API token.
 
-        Safe to call from any thread: the assignments are individually atomic
-        under the GIL and a concurrent `bearer_value()` either sees the cleared
-        state and mints, or sees a token it is about to re-check anyway.
+        `only_if` makes it a COMPARE-AND-CLEAR, which is what keeps concurrent
+        401s from fighting. Several in-flight requests can carry the same doomed
+        token and 401 together; without the guard the second one clears the fresh
+        JWT the first just minted, and they take turns invalidating each other's
+        work. Passing the token that actually failed means a thread only clears
+        the state it observed.
+
+        Returns True when it cleared, False when another thread had already
+        replaced the token -- in which case the caller should use that one rather
+        than mint again.
         """
         with self._lock:
+            if only_if is not None and self._jwt != only_if:
+                return False
             self._jwt = None
             self._exp = 0.0
             self._refresh = None
+            return True
 
     def _mint(self, params):
         # Returns True on success. The refresh path is best-effort: ANY failure

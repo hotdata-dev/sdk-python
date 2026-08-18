@@ -1051,3 +1051,52 @@ def test_a_second_401_is_a_real_rejection_and_is_not_retried_again() -> None:
     assert resp.status == 401
     assert len(rest.bearers) == 2, f"retried more than once: {len(rest.bearers)}"
 
+
+def test_a_failed_remint_leaves_the_original_401_for_the_caller() -> None:
+    """A revoked API token is the commonest cause of a 401, and re-minting from
+    it fails for the same reason. `invalidate` cleared the refresh token, so that
+    mint has no best-effort path -- it raises. Surfacing that would replace the
+    server's own 401, body and all, with an exchange error from a retry the
+    caller never asked for."""
+    pool = _FakePool([
+        _mint_response(access_token=_jwt_with_exp(300, jti="ok")),
+        _FakeResponse(401, {"error": "invalid_grant"}),   # the re-mint is refused
+    ])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer " + api.configuration.api_key})
+    assert resp.status == 401, "the caller lost the server's 401"
+    assert len(rest.bearers) == 1, "retried despite having no usable token"
+
+
+def test_a_caller_supplied_authorization_is_not_replaced_on_a_401() -> None:
+    """`_request_auth` overrides auth for a single request. A per-request
+    credential the server rejects is the caller's to deal with; swapping in a
+    managed token would answer a different question than the one asked, on the
+    failure path where it is hardest to notice."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(300, jti="managed"))])
+    rest = _FakeRest(fail_times=99)
+    api = _client_with(rest, pool)
+    api.configuration.api_key  # prime the manager
+    resp = api.call_api("GET", "https://api.hotdata.test/v1/x",
+                        header_params={"Authorization": "Bearer caller-supplied"})
+    assert resp.status == 401
+    assert rest.bearers == ["Bearer caller-supplied"], rest.bearers
+
+
+def test_a_concurrent_refresh_is_not_clobbered() -> None:
+    """Several in-flight requests can carry the same doomed token and 401
+    together. Without compare-and-clear the second clears the fresh JWT the first
+    just minted, and they take turns invalidating each other's work."""
+    pool = _FakePool([_mint_response(access_token=_jwt_with_exp(300, jti="a"))])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    first = mgr.bearer_value()
+    # another thread has already replaced it
+    with mgr._lock:
+        mgr._jwt, mgr._exp = "eyJ.someone.elses", time.time() + 300
+    assert mgr.invalidate(only_if=first) is False, "clobbered a fresher token"
+    assert mgr._jwt == "eyJ.someone.elses"
+    assert mgr.invalidate(only_if="eyJ.someone.elses") is True
+    assert mgr._jwt is None
+
