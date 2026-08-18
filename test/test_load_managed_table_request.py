@@ -43,6 +43,7 @@ class TestLoadManagedTableRequest(unittest.TestCase):
                     },
                 data = '',
                 format = '',
+                idempotency_key = '',
                 key = [
                     ''
                     ],
