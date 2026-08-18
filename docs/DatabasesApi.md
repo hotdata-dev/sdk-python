@@ -7,13 +7,17 @@ Method | HTTP request | Description
 [**add_database_schema**](DatabasesApi.md#add_database_schema) | **POST** /v1/databases/{database_id}/schemas | Add schema to database default catalog
 [**add_database_table**](DatabasesApi.md#add_database_table) | **POST** /v1/databases/{database_id}/schemas/{schema}/tables | Add table to database default catalog
 [**attach_database_catalog**](DatabasesApi.md#attach_database_catalog) | **POST** /v1/databases/{database_id}/catalogs | Attach catalog to database
+[**bulk_create_databases**](DatabasesApi.md#bulk_create_databases) | **POST** /v1/databases/bulk | Create many databases at once
+[**count_databases**](DatabasesApi.md#count_databases) | **GET** /v1/databases/count | Count databases
 [**create_database**](DatabasesApi.md#create_database) | **POST** /v1/databases | Create database
 [**delete_database**](DatabasesApi.md#delete_database) | **DELETE** /v1/databases/{database_id} | Delete database
+[**delete_database_batch**](DatabasesApi.md#delete_database_batch) | **DELETE** /v1/databases/bulk/{batch_id} | Delete a database batch
 [**detach_database_catalog**](DatabasesApi.md#detach_database_catalog) | **DELETE** /v1/databases/{database_id}/catalogs/{connection_id} | Detach catalog from database
 [**fork_database**](DatabasesApi.md#fork_database) | **POST** /v1/databases/{database_id}/fork | Fork database
 [**get_database**](DatabasesApi.md#get_database) | **GET** /v1/databases/{database_id} | Get database
+[**get_database_batch**](DatabasesApi.md#get_database_batch) | **GET** /v1/databases/bulk/{batch_id} | Get a database batch
 [**list_databases**](DatabasesApi.md#list_databases) | **GET** /v1/databases | List databases
-[**load_database_table**](DatabasesApi.md#load_database_table) | **POST** /v1/databases/{database_id}/schemas/{schema}/tables/{table}/loads | Load database table from upload or query result
+[**load_database_table**](DatabasesApi.md#load_database_table) | **POST** /v1/databases/{database_id}/schemas/{schema}/tables/{table}/loads | Load database table from inline data, upload, or query result
 
 
 # **add_database_schema**
@@ -21,7 +25,7 @@ Method | HTTP request | Description
 
 Add schema to database default catalog
 
-Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller addressing the internal default connection directly. Identifiers are normalized to lowercase.
+Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
 
 ### Example
 
@@ -288,6 +292,185 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **bulk_create_databases**
+> DatabaseBatchResponse bulk_create_databases(bulk_create_databases_request)
+
+Create many databases at once
+
+Create many databases from one template in a single request. The databases are created in the background: the response returns immediately with a batch and a job to poll.
+
+The databases are not returned inline. List the ones a batch created with `GET /databases?batch=<batch_id>`; they also appear in the normal database listing alongside every other database.
+
+Each database gets a default catalog and schema. Declare tables on all of them by passing `schemas`, in the same shape a single create accepts — a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load, with no follow-up call per database. Omit `schemas` and the databases are created empty. Either way, load data into them exactly as you would a database created individually.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.bulk_create_databases_request import BulkCreateDatabasesRequest
+from hotdata.models.database_batch_response import DatabaseBatchResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.DatabasesApi(api_client)
+    bulk_create_databases_request = hotdata.BulkCreateDatabasesRequest() # BulkCreateDatabasesRequest | 
+
+    try:
+        # Create many databases at once
+        api_response = api_instance.bulk_create_databases(bulk_create_databases_request)
+        print("The response of DatabasesApi->bulk_create_databases:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DatabasesApi->bulk_create_databases: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **bulk_create_databases_request** | [**BulkCreateDatabasesRequest**](BulkCreateDatabasesRequest.md)|  | 
+
+### Return type
+
+[**DatabaseBatchResponse**](DatabaseBatchResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**202** | Batch accepted and filling in the background |  -  |
+**400** | Invalid count, template, or expiry |  -  |
+**409** | A batch with this idempotency key is already running |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **count_databases**
+> DatabaseCountResponse count_databases(search=search, batch=batch)
+
+Count databases
+
+Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.database_count_response import DatabaseCountResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.DatabasesApi(api_client)
+    search = 'search_example' # str | Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted. (optional)
+    batch = 'batch_example' # str | Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned. (optional)
+
+    try:
+        # Count databases
+        api_response = api_instance.count_databases(search=search, batch=batch)
+        print("The response of DatabasesApi->count_databases:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DatabasesApi->count_databases: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **search** | **str**| Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted. | [optional] 
+ **batch** | **str**| Count only the databases belonging to one bulk-creation batch, identified by the &#x60;batch_id&#x60; that call returned. | [optional] 
+
+### Return type
+
+[**DatabaseCountResponse**](DatabaseCountResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Total databases in the workspace |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **create_database**
 > CreateDatabaseResponse create_database(create_database_request)
 
@@ -372,7 +555,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **201** | Database created |  -  |
 **400** | Invalid request |  -  |
-**500** | Internal server error (e.g., managed-connection create succeeded but database row insert + rollback both failed) |  -  |
+**500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -456,6 +639,95 @@ void (empty response body)
 |-------------|-------------|------------------|
 **204** | Database deleted |  -  |
 **404** | Database not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **delete_database_batch**
+> DeleteDatabaseBatchResponse delete_database_batch(batch_id)
+
+Delete a database batch
+
+Stop a batch that is still filling and delete the databases it created, then the batch itself.
+
+Only batches whose databases hold no data can be removed this way. Tables that were declared but never loaded do not prevent it, so a batch created with `schemas` stays deletable. If any database in the batch has had data loaded into it, the request is rejected and those databases must be deleted one at a time — removing a database that holds data is per-database work that cannot be batched.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.DatabasesApi(api_client)
+    batch_id = 'batch_id_example' # str | Batch ID
+
+    try:
+        # Delete a database batch
+        api_response = api_instance.delete_database_batch(batch_id)
+        print("The response of DatabasesApi->delete_database_batch:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DatabasesApi->delete_database_batch: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **batch_id** | **str**| Batch ID | 
+
+### Return type
+
+[**DeleteDatabaseBatchResponse**](DeleteDatabaseBatchResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Batch deleted |  -  |
+**404** | Batch not found |  -  |
+**409** | Some of the batch&#39;s databases hold loaded data |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -628,7 +900,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Database forked |  -  |
-**400** | The source database can&#39;t be forked as-is (for example, it uses a storage backend that does not support forking, or one of its tables has rows that were individually deleted or updated) |  -  |
+**400** | The source database can&#39;t be forked as-is (for example, one of its tables has rows that were individually deleted or updated) |  -  |
 **404** | Source database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -719,12 +991,98 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **get_database_batch**
+> DatabaseBatchResponse get_database_batch(batch_id)
+
+Get a database batch
+
+Fetch a batch by id: how many databases were requested and how many exist so far. Poll this to follow progress.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.database_batch_response import DatabaseBatchResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.DatabasesApi(api_client)
+    batch_id = 'batch_id_example' # str | Batch ID
+
+    try:
+        # Get a database batch
+        api_response = api_instance.get_database_batch(batch_id)
+        print("The response of DatabasesApi->get_database_batch:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DatabasesApi->get_database_batch: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **batch_id** | **str**| Batch ID | 
+
+### Return type
+
+[**DatabaseBatchResponse**](DatabaseBatchResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | The batch |  -  |
+**404** | Batch not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **list_databases**
-> ListDatabasesResponse list_databases(limit=limit, cursor=cursor, search=search)
+> ListDatabasesResponse list_databases(limit=limit, cursor=cursor, search=search, batch=batch)
 
 List databases
 
-List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive).
+List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
 ### Example
 
@@ -766,10 +1124,11 @@ with hotdata.ApiClient(configuration) as api_client:
     limit = 56 # int | Maximum number of databases to return in this page (1–100). Values outside the range are clamped. (optional)
     cursor = 'cursor_example' # str | Opaque pagination cursor from a previous response's `next_cursor`. (optional)
     search = 'search_example' # str | Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged. (optional)
+    batch = 'batch_example' # str | List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once. (optional)
 
     try:
         # List databases
-        api_response = api_instance.list_databases(limit=limit, cursor=cursor, search=search)
+        api_response = api_instance.list_databases(limit=limit, cursor=cursor, search=search, batch=batch)
         print("The response of DatabasesApi->list_databases:\n")
         pprint(api_response)
     except Exception as e:
@@ -786,6 +1145,7 @@ Name | Type | Description  | Notes
  **limit** | **int**| Maximum number of databases to return in this page (1–100). Values outside the range are clamped. | [optional] 
  **cursor** | **str**| Opaque pagination cursor from a previous response&#39;s &#x60;next_cursor&#x60;. | [optional] 
  **search** | **str**| Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged. | [optional] 
+ **batch** | **str**| List only the databases belonging to one bulk-creation batch, identified by the &#x60;batch_id&#x60; that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once. | [optional] 
 
 ### Return type
 
@@ -811,9 +1171,9 @@ Name | Type | Description  | Notes
 # **load_database_table**
 > LoadManagedTableResponse load_database_table(database_id, var_schema, table, load_managed_table_request)
 
-Load database table from upload or query result
+Load database table from inline data, upload, or query result
 
-Publish data as the new contents of a table on the database's default catalog, from one of two sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+Publish data as the new contents of a table on the database's default catalog, from one of three sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
 ### Example
 
@@ -856,10 +1216,13 @@ with hotdata.ApiClient(configuration) as api_client:
     database_id = 'database_id_example' # str | Database ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
-    load_managed_table_request = hotdata.LoadManagedTableRequest() # LoadManagedTableRequest | 
+    load_managed_table_request = {data=order_id,customer_id,amount
+1001,42,1999
+1002,7,4550
+, mode=replace} # LoadManagedTableRequest | 
 
     try:
-        # Load database table from upload or query result
+        # Load database table from inline data, upload, or query result
         api_response = api_instance.load_database_table(database_id, var_schema, table, load_managed_table_request)
         print("The response of DatabasesApi->load_database_table:\n")
         pprint(api_response)
@@ -897,10 +1260,11 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Table loaded |  -  |
-**202** | Upload load accepted and running in the background; poll the returned job for status and result |  -  |
-**400** | Invalid request (bad mode, both or neither of &#x60;upload_id&#x60;/&#x60;result_id&#x60;, &#x60;format&#x60; combined with &#x60;result_id&#x60;, invalid identifier, bad parquet, or the result failed to compute) |  -  |
+**202** | Load accepted and running in the background; poll the returned job for status and result |  -  |
+**400** | Invalid request (bad mode, none or several of &#x60;upload_id&#x60;/&#x60;result_id&#x60;/&#x60;data&#x60;, &#x60;format&#x60; combined with &#x60;result_id&#x60;, &#x60;columns&#x60; without &#x60;data&#x60;, a non-CSV inline &#x60;format&#x60;, unparseable inline data, invalid identifier, bad parquet, or the result failed to compute) |  -  |
 **404** | Database, upload, or result not found, or the table was deleted |  -  |
 **409** | Upload already consumed or in flight, the result is still being computed, or the incoming data changes a column&#39;s type incompatibly (only widening to a larger compatible type can be applied automatically); the existing data is unchanged and remains queryable |  -  |
+**413** | Inline &#x60;data&#x60; is over the 2 MiB limit (error code &#x60;INLINE_DATA_TOO_LARGE&#x60;); upload the data and load it by &#x60;upload_id&#x60; instead |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

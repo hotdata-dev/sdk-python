@@ -44,14 +44,36 @@ class TestTableInfo(unittest.TestCase):
                     ],
                 connection = '',
                 last_sync = '',
+                partition_by = [
+                    hotdata.models.table_partition_key.TablePartitionKey(
+                        column = 'created_at', 
+                        transform = 'day', )
+                    ],
                 var_schema = '',
+                sorted_by = [
+                    hotdata.models.table_sort_key.TableSortKey(
+                        column = 'created_at', 
+                        direction = 'asc', 
+                        nulls = 'last', )
+                    ],
                 synced = True,
                 table = ''
             )
         else:
             return TableInfo(
                 connection = '',
+                partition_by = [
+                    hotdata.models.table_partition_key.TablePartitionKey(
+                        column = 'created_at', 
+                        transform = 'day', )
+                    ],
                 var_schema = '',
+                sorted_by = [
+                    hotdata.models.table_sort_key.TableSortKey(
+                        column = 'created_at', 
+                        direction = 'asc', 
+                        nulls = 'last', )
+                    ],
                 synced = True,
                 table = '',
         )

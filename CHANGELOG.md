@@ -7,8 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking:** the API-token → JWT key exchange is deprecated and removed. The
+  client no longer POSTs your token to `/v1/auth/jwt`, caches the minted JWT, or
+  refreshes it with a `refresh_token` grant — the API token configured as
+  `api_key` is sent verbatim as `Authorization: Bearer <token>`. The internal
+  `hotdata._auth` module (and its `TokenExchangeError`) is gone, `api_key` is a
+  plain attribute rather than a minting property, and the
+  `HOTDATA_DISABLE_JWT_EXCHANGE` escape hatch no longer does anything (it is
+  safe to unset). Callers passing an API token need no change; callers that were
+  passing a pre-minted JWT can keep doing so, since it is now forwarded as the
+  bearer credential like any other token.
+
+## [0.9.1] - 2026-08-18
+
+### Fixed
+
+- fix(auth): take a token's expiry from its own `exp` claim, and retry once on a 401
+
 ### Changed
 
+- chore: add request/response examples and update documentation
+- feat(loads): add idempotency_key to load requests
+- feat(loads): support inline csv data in table load requests
+- feat(databases): add bulk operations and count endpoint
+
+## [0.9.0] - 2026-08-11
+
+### Changed
+
+- feat(information-schema): `TableInfo` now reports the table's declared storage
+  layout via `partition_by` and `sorted_by`, so a caller can read back the layout
+  a table was created with — it is fixed at creation and cannot be altered, so
+  reading it is the only way to confirm what was actually applied. Both fields
+  are **required**: code that constructs `TableInfo` directly (test mocks,
+  fixtures) must now supply them, while code that only reads responses is
+  unaffected. Note the existing `feat(tables): add partition_by and sorted_by
+  configuration` entry below covers the *write* side — declaring a layout — which
+  is a different half of the same feature.
 - feat(tables): add partition_by and sorted_by configuration
 - chore(query-runs): clarify user_public_id documentation
 - feat(databases): add search parameter to list endpoint
@@ -22,16 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- **Breaking:** the API-token → JWT key exchange is deprecated and removed. The
-  client no longer POSTs your token to `/v1/auth/jwt`, caches the minted JWT, or
-  refreshes it with a `refresh_token` grant — the API token configured as
-  `api_key` is sent verbatim as `Authorization: Bearer <token>`. The internal
-  `hotdata._auth` module (and its `TokenExchangeError`) is gone, `api_key` is a
-  plain attribute rather than a minting property, and the
-  `HOTDATA_DISABLE_JWT_EXCHANGE` escape hatch no longer does anything (it is
-  safe to unset). Callers passing an API token need no change; callers that were
-  passing a pre-minted JWT can keep doing so, since it is now forwarded as the
-  bearer credential like any other token.
 - **Breaking:** sandbox session scoping is gone. The `SessionId` security scheme
   no longer exists in the Hotdata OpenAPI spec, so `X-Session-Id` is no longer
   sent on `/v1/query` or the results endpoints. `Configuration`'s `session_id`

@@ -24,8 +24,11 @@ from hotdata.models.attach_database_catalog_request import AttachDatabaseCatalog
 from hotdata.models.batch_create_upload_request import BatchCreateUploadRequest
 from hotdata.models.batch_create_upload_response import BatchCreateUploadResponse
 from hotdata.models.boolean_profile_detail import BooleanProfileDetail
+from hotdata.models.bulk_create_databases_request import BulkCreateDatabasesRequest
+from hotdata.models.bulk_create_databases_result import BulkCreateDatabasesResult
 from hotdata.models.categorical_profile_detail import CategoricalProfileDetail
 from hotdata.models.category_value_info import CategoryValueInfo
+from hotdata.models.column_definition import ColumnDefinition
 from hotdata.models.column_info import ColumnInfo
 from hotdata.models.column_profile_detail import ColumnProfileDetail
 from hotdata.models.column_profile_detail_one_of import ColumnProfileDetailOneOf
@@ -34,6 +37,7 @@ from hotdata.models.column_profile_detail_one_of2 import ColumnProfileDetailOneO
 from hotdata.models.column_profile_detail_one_of3 import ColumnProfileDetailOneOf3
 from hotdata.models.column_profile_detail_one_of4 import ColumnProfileDetailOneOf4
 from hotdata.models.column_profile_info import ColumnProfileInfo
+from hotdata.models.column_type_spec import ColumnTypeSpec
 from hotdata.models.connection_health_response import ConnectionHealthResponse
 from hotdata.models.connection_info import ConnectionInfo
 from hotdata.models.connection_refresh_result import ConnectionRefreshResult
@@ -54,11 +58,14 @@ from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
 from hotdata.models.database_attachment_info import DatabaseAttachmentInfo
+from hotdata.models.database_batch_response import DatabaseBatchResponse
 from hotdata.models.database_context_entry import DatabaseContextEntry
+from hotdata.models.database_count_response import DatabaseCountResponse
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse
 from hotdata.models.database_summary import DatabaseSummary
+from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse
 from hotdata.models.discovery_status import DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse
 from hotdata.models.error import Error

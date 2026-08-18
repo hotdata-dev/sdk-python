@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class MintUploadPartsRequest(BaseModel):
     """
-    Request body for `POST /v1/uploads/{upload_id}/parts`: mint presigned upload URLs for specific parts of a streaming (unknown-size) multi-part upload.  Provide the 1-based part numbers you want URLs for. Mint parts as you upload, and re-request a part number if its URL expires before you finish — the parts you have already uploaded are unaffected.
+    Request body for `POST /v1/uploads/{upload_id}/parts`: get short-lived upload URLs for specific parts of a streaming (unknown-size) multi-part upload.  Provide the 1-based part numbers you want URLs for. Mint parts as you upload, and re-request a part number if its URL expires before you finish — the parts you have already uploaded are unaffected.
     """ # noqa: E501
     part_numbers: List[StrictInt] = Field(description="The 1-based part numbers to mint URLs for. Must be non-empty; each number must be between 1 and the maximum number of parts allowed.")
     __properties: ClassVar[List[str]] = ["part_numbers"]

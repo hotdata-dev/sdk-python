@@ -21,21 +21,25 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
+from hotdata.models.column_definition import ColumnDefinition
 from typing import Optional, Set
 from typing_extensions import Self
 
 class LoadManagedTableRequest(BaseModel):
     """
-    Request body for the managed-table load endpoints — the connection-scoped `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads` and the database-scoped equivalent.  Publishes data to the named table from one of two sources: a previously uploaded file (`upload_id`) or a persisted query result (`result_id`). Provide exactly one. CSV and JSON uploads are converted to columnar storage on load; Parquet uploads and query results are published directly. `mode` selects whether the data replaces the table's contents or is appended on top of them.
+    Request body for the managed-table load endpoints — the connection-scoped `POST /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads` and the database-scoped equivalent.  Publishes data to the named table from one of three sources: a previously uploaded file (`upload_id`), a persisted query result (`result_id`), or data sent inline in this request (`data`). Provide exactly one. `mode` selects whether the data replaces the table's contents or is appended on top of them.
     """ # noqa: E501
-    var_async: Optional[StrictBool] = Field(default=None, description="When true, run the load as a background job and return a job ID to poll instead of blocking until it finishes. Recommended for large uploads, which can take longer than an HTTP request should stay open.", alias="async")
+    var_async: Optional[StrictBool] = Field(default=False, description="When true, run the load as a background job and return a job ID to poll instead of blocking until it finishes. Recommended for large uploads, which can take longer than an HTTP request should stay open.", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the load to finish: if it completes in time the full result is returned (200), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
-    format: Optional[StrictStr] = Field(default=None, description="File format of the upload: `\"csv\"`, `\"json\"`, or `\"parquet\"`. Optional — when omitted, the format is auto-detected from the upload's `Content-Type` and, failing that, from the file contents. Provide it explicitly to override detection or when the contents are ambiguous. `\"json\"` expects newline-delimited JSON (one object per line), not a JSON array. Only applies to `upload_id`; query results are always parquet.")
+    columns: Optional[Dict[str, ColumnDefinition]] = Field(default=None, description="Column types for inline `data`, keyed by column name. Optional — types are detected from the data when omitted.  Each value is either a type name (`\"VARCHAR\"`, `\"BIGINT\"`, `\"DECIMAL(10,2)\"`) or an object carrying explicit parameters (`{\"type\": \"DECIMAL\", \"precision\": 10, \"scale\": 2}`). Supported types: `VARCHAR`, `TEXT`, `STRING`, `CHAR`, `BOOLEAN`, `TINYINT`, `SMALLINT`, `INTEGER`, `BIGINT`, `UTINYINT`, `USMALLINT`, `UINTEGER`, `UBIGINT`, `REAL`, `FLOAT`, `DOUBLE`, `DECIMAL`, `NUMERIC`, `DATE`, `TIME`, `TIMESTAMP`, `TIMESTAMPTZ`, `BINARY`, `BLOB`, `UUID`, and `JSON`.  When given, it must name every column in the CSV header and no others. Only valid together with `data`.")
+    data: Optional[StrictStr] = Field(default=None, description="The data to load, sent inline in this request instead of being uploaded first — the quickest way to get a small table in. CSV text with a header row, up to 2 MiB.  Larger payloads are rejected with `413` and the error code `INLINE_DATA_TOO_LARGE`; upload the file (see `POST /v1/uploads`) and load it by `upload_id` instead. Column types are detected from the data unless `columns` declares them. Provide exactly one of this, `upload_id`, or `result_id`.")
+    format: Optional[StrictStr] = Field(default=None, description="File format of the upload: `\"csv\"`, `\"json\"`, or `\"parquet\"`. Optional — when omitted, the format is auto-detected from the upload's `Content-Type` and, failing that, from the file contents. Provide it explicitly to override detection or when the contents are ambiguous. `\"json\"` expects newline-delimited JSON (one object per line), not a JSON array.  With inline `data` the only accepted value is `\"csv\"` (the default); upload the file and load it by `upload_id` for any other format. Not valid with `result_id` — query results are always parquet.")
+    idempotency_key: Optional[StrictStr] = Field(default=None, description="A key of your own that makes this load safe to retry. Send the same key again — after a timeout, a dropped connection, or any answer you did not receive — and the load runs at most once: the retry returns the original result instead of loading the rows a second time.  Generate the key before the first attempt (a UUID is a good choice) and reuse it for every retry of that same data. Use a new key for the next batch: sending different data under a key already used returns `409`, and loads nothing.  A retry sent while the first attempt is still running also returns `409`, because the table is busy with it; wait and send the same key again. A `409` never means the data was loaded twice — under one key it is loaded once or not at all.  Only valid with inline `data`. A load from `upload_id` is already safe to retry — re-send the same `upload_id`. Keys are at most 255 characters.")
     key: Optional[List[StrictStr]] = Field(default=None, description="Key columns identifying rows for `\"delete\"`, `\"update\"`, and `\"upsert\"` loads — the columns whose values decide which existing row an incoming row removes, updates, or replaces. Omit to use the key the table was created with. Keep the key consistent across loads of the same table: changing it re-targets which rows are matched. Ignored for `\"replace\"` and `\"append\"`.")
     mode: StrictStr = Field(description="How the data is applied: `\"replace\"` overwrites the table's contents, `\"append\"` inserts the new rows on top of the existing data.")
-    result_id: Optional[StrictStr] = Field(default=None, description="ID of a persisted query result (see `GET /v1/results/{result_id}`) to publish as the table's contents. The result is copied into the table, so the table keeps its data even after the result expires. A result can be loaded into any number of tables. Provide either this or `upload_id`, not both.")
-    upload_id: Optional[StrictStr] = Field(default=None, description="ID of a previously-staged upload (see `POST /v1/uploads`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409. Provide either this or `result_id`, not both.")
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "format", "key", "mode", "result_id", "upload_id"]
+    result_id: Optional[StrictStr] = Field(default=None, description="ID of a persisted query result (see `GET /v1/results/{result_id}`) to publish as the table's contents. The result is copied into the table, so the table keeps its data even after the result expires. A result can be loaded into any number of tables. Provide exactly one of this, `upload_id`, or `data`.")
+    upload_id: Optional[StrictStr] = Field(default=None, description="ID of a previously-staged upload (see `POST /v1/uploads`). The upload is claimed atomically; concurrent loads against the same `upload_id` return 409. Provide exactly one of this, `result_id`, or `data`.")
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "columns", "data", "format", "idempotency_key", "key", "mode", "result_id", "upload_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -76,15 +80,32 @@ class LoadManagedTableRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each value in columns (dict)
+        _field_dict = {}
+        if self.columns:
+            for _key_columns in self.columns:
+                if self.columns[_key_columns]:
+                    _field_dict[_key_columns] = self.columns[_key_columns].to_dict()
+            _dict['columns'] = _field_dict
         # set to None if async_after_ms (nullable) is None
         # and model_fields_set contains the field
         if self.async_after_ms is None and "async_after_ms" in self.model_fields_set:
             _dict['async_after_ms'] = None
 
+        # set to None if data (nullable) is None
+        # and model_fields_set contains the field
+        if self.data is None and "data" in self.model_fields_set:
+            _dict['data'] = None
+
         # set to None if format (nullable) is None
         # and model_fields_set contains the field
         if self.format is None and "format" in self.model_fields_set:
             _dict['format'] = None
+
+        # set to None if idempotency_key (nullable) is None
+        # and model_fields_set contains the field
+        if self.idempotency_key is None and "idempotency_key" in self.model_fields_set:
+            _dict['idempotency_key'] = None
 
         # set to None if key (nullable) is None
         # and model_fields_set contains the field
@@ -113,9 +134,17 @@ class LoadManagedTableRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "async": obj.get("async"),
+            "async": obj.get("async") if obj.get("async") is not None else False,
             "async_after_ms": obj.get("async_after_ms"),
+            "columns": dict(
+                (_k, ColumnDefinition.from_dict(_v))
+                for _k, _v in obj["columns"].items()
+            )
+            if obj.get("columns") is not None
+            else None,
+            "data": obj.get("data"),
             "format": obj.get("format"),
+            "idempotency_key": obj.get("idempotency_key"),
             "key": obj.get("key"),
             "mode": obj.get("mode"),
             "result_id": obj.get("result_id"),

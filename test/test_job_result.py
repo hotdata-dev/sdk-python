@@ -67,7 +67,11 @@ class TestJobResult(unittest.TestCase):
                 status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 arrow_schema_json = '',
-                row_count = 0
+                row_count = 0,
+                batch_id = '',
+                cancelled = True,
+                created = 0,
+                requested = 0
             )
         else:
             return JobResult(
@@ -89,6 +93,10 @@ class TestJobResult(unittest.TestCase):
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 arrow_schema_json = '',
                 row_count = 0,
+                batch_id = '',
+                cancelled = True,
+                created = 0,
+                requested = 0,
         )
         """
 

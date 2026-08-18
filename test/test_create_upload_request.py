@@ -36,13 +36,13 @@ class TestCreateUploadRequest(unittest.TestCase):
         model = CreateUploadRequest()
         if include_optional:
             return CreateUploadRequest(
-                checksum_algo = '',
-                checksum_value = '',
+                checksum_algo = 'sha256',
+                checksum_value = '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
                 content_encoding = '',
-                content_type = '',
-                declared_size_bytes = 0,
-                filename = '',
-                part_size = 0
+                content_type = 'application/vnd.apache.parquet',
+                declared_size_bytes = 10485760,
+                filename = 'orders.parquet',
+                part_size = 8388608
             )
         else:
             return CreateUploadRequest(

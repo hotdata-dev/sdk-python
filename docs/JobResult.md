@@ -26,6 +26,10 @@ Name | Type | Description | Notes
 **updated_at** | **datetime** |  | 
 **arrow_schema_json** | **str** | Schema of the loaded table, as JSON. | 
 **row_count** | **int** | Total number of rows in the table after the load. | 
+**batch_id** | **str** | Batch these databases belong to. | 
+**cancelled** | **bool** | True when the batch was stopped before finishing. | 
+**created** | **int** | How many were created. | 
+**requested** | **int** | How many databases were asked for. | 
 
 ## Example
 

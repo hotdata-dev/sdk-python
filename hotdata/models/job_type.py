@@ -28,6 +28,7 @@ class JobType(str, Enum):
     allowed enum values
     """
     NOOP = 'noop'
+    BULK_CREATE_DATABASES = 'bulk_create_databases'
     DATA_REFRESH_TABLE = 'data_refresh_table'
     DATA_REFRESH_CONNECTION = 'data_refresh_connection'
     CREATE_INDEX = 'create_index'
@@ -37,6 +38,8 @@ class JobType(str, Enum):
     RESULT_DELETION = 'result_deletion'
     STALE_RESULT_CLEANUP = 'stale_result_cleanup'
     RESULT_RETENTION = 'result_retention'
+    DUCKLAKE_COMPACTION = 'ducklake_compaction'
+    DUCKLAKE_TABLE_COMPACTION = 'ducklake_table_compaction'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

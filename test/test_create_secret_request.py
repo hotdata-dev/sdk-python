@@ -36,13 +36,13 @@ class TestCreateSecretRequest(unittest.TestCase):
         model = CreateSecretRequest()
         if include_optional:
             return CreateSecretRequest(
-                name = '',
-                value = ''
+                name = 'prod-postgres-password',
+                value = 's3cr3t-p4ssw0rd'
             )
         else:
             return CreateSecretRequest(
-                name = '',
-                value = '',
+                name = 'prod-postgres-password',
+                value = 's3cr3t-p4ssw0rd',
         )
         """
 

@@ -50,7 +50,18 @@ class TestInformationSchemaResponse(unittest.TestCase):
                             ], 
                         connection = '', 
                         last_sync = '', 
+                        partition_by = [
+                            hotdata.models.table_partition_key.TablePartitionKey(
+                                column = 'created_at', 
+                                transform = 'day', )
+                            ], 
                         schema = '', 
+                        sorted_by = [
+                            hotdata.models.table_sort_key.TableSortKey(
+                                column = 'created_at', 
+                                direction = 'asc', 
+                                nulls = 'last', )
+                            ], 
                         synced = True, 
                         table = '', )
                     ]
@@ -70,7 +81,18 @@ class TestInformationSchemaResponse(unittest.TestCase):
                             ], 
                         connection = '', 
                         last_sync = '', 
+                        partition_by = [
+                            hotdata.models.table_partition_key.TablePartitionKey(
+                                column = 'created_at', 
+                                transform = 'day', )
+                            ], 
                         schema = '', 
+                        sorted_by = [
+                            hotdata.models.table_sort_key.TableSortKey(
+                                column = 'created_at', 
+                                direction = 'asc', 
+                                nulls = 'last', )
+                            ], 
                         synced = True, 
                         table = '', )
                     ],

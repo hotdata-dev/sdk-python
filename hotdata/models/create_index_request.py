@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
 from typing import Optional, Set
@@ -28,17 +28,27 @@ class CreateIndexRequest(BaseModel):
     """
     Request body for POST .../indexes
     """ # noqa: E501
-    var_async: Optional[StrictBool] = Field(default=None, description="When true, create the index as a background job and return a job ID for polling.", alias="async")
+    var_async: Optional[StrictBool] = Field(default=False, description="When true, create the index as a background job and return a job ID for polling.", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the index build to finish: if it completes in time the index is returned (201), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
     columns: List[StrictStr] = Field(description="Columns to index. Required for all index types.")
     description: Optional[StrictStr] = Field(default=None, description="User-facing description of the embedding (e.g., \"product descriptions\").")
     dimensions: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Output vector dimensions. Some models support multiple dimension sizes (e.g., OpenAI text-embedding-3-small supports 512 or 1536). If omitted, the model's default dimensions are used")
     embedding_provider_id: Optional[StrictStr] = Field(default=None, description="Embedding provider ID. When set for a vector index, the source column is treated as text and embeddings are generated automatically. The vector index is then built on the generated embedding column (`{column}_embedding` by default).")
     index_name: StrictStr
-    index_type: Optional[StrictStr] = Field(default=None, description="Index type: \"sorted\" (default), \"bm25\", or \"vector\"")
+    index_type: Optional[StrictStr] = Field(default='sorted', description="Index type. `sorted` supports range queries, `bm25` full-text search, and `vector` similarity search.")
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric for vector indexes: \"l2\", \"cosine\", or \"dot\". When omitted, defaults to \"l2\" for float array columns or the provider's preferred metric for text columns with auto-embedding.")
     output_column: Optional[StrictStr] = Field(default=None, description="Custom name for the generated embedding column. Defaults to `{column}_embedding`.")
     __properties: ClassVar[List[str]] = ["async", "async_after_ms", "columns", "description", "dimensions", "embedding_provider_id", "index_name", "index_type", "metric", "output_column"]
+
+    @field_validator('index_type')
+    def index_type_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['sorted', 'bm25', 'vector']):
+            raise ValueError("must be one of enum values ('sorted', 'bm25', 'vector')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -121,14 +131,14 @@ class CreateIndexRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "async": obj.get("async"),
+            "async": obj.get("async") if obj.get("async") is not None else False,
             "async_after_ms": obj.get("async_after_ms"),
             "columns": obj.get("columns"),
             "description": obj.get("description"),
             "dimensions": obj.get("dimensions"),
             "embedding_provider_id": obj.get("embedding_provider_id"),
             "index_name": obj.get("index_name"),
-            "index_type": obj.get("index_type"),
+            "index_type": obj.get("index_type") if obj.get("index_type") is not None else 'sorted',
             "metric": obj.get("metric"),
             "output_column": obj.get("output_column")
         })

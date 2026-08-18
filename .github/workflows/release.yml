@@ -75,4 +75,10 @@ jobs:
           name: ${{ steps.meta.outputs.name }} ${{ steps.meta.outputs.version }}
           body: ${{ steps.notes.outputs.body }}
           generate_release_notes: false
-          make_latest: true
+          # Let GitHub decide by tag date/semver rather than by run order. This
+          # workflow already accepts a dispatch for an existing tag, so a repair
+          # run may target an older tag than the newest release — `true` would
+          # move the badge onto it. `false` is not "leave alone" either: it marks
+          # a release explicitly NOT latest, which would demote the newest tag
+          # when the dispatch is repairing that one.
+          make_latest: legacy

@@ -1,6 +1,6 @@
 # IndexEntryResponse
 
-One index in a cross-table listing: the per-table [`IndexInfoResponse`] plus the identity needed to know which table it belongs to.
+One index in a cross-table listing: the index itself plus the connection, schema, and table it belongs to.
 
 ## Properties
 

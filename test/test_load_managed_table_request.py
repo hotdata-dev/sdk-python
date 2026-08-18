@@ -38,17 +38,23 @@ class TestLoadManagedTableRequest(unittest.TestCase):
             return LoadManagedTableRequest(
                 var_async = True,
                 async_after_ms = 1000,
-                format = '',
+                columns = {amount={precision=10, scale=2, type=DECIMAL}, customer_id=BIGINT, order_id=BIGINT},
+                data = 'order_id,customer_id,amount
+1001,42,1999
+1002,7,4550
+',
+                format = 'csv',
+                idempotency_key = '3f6b1c1e-9a2b-4a5f-9a1e-2f0d6a7c8b91',
                 key = [
                     ''
                     ],
-                mode = '',
+                mode = 'replace',
                 result_id = '',
                 upload_id = ''
             )
         else:
             return LoadManagedTableRequest(
-                mode = '',
+                mode = 'replace',
         )
         """
 

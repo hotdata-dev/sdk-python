@@ -34,6 +34,29 @@ Pushing a `vX.Y.Z` tag triggers two workflows:
 | `publish.yml` | Build wheel/sdist and publish to PyPI |
 | `release.yml` | Create the GitHub Release with notes from `CHANGELOG.md` |
 
+## Retry a failed PyPI publish
+
+If the publish workflow failed *before* PyPI accepted the upload — a stale action
+pin, a PyPI outage — re-run it against the same tag rather than deleting the tag
+or burning a version number:
+
+```bash
+gh workflow run "Publish to PyPI" --ref main -f tag=vX.Y.Z
+```
+
+`--ref main` selects the workflow *definition*, so a fix landed since the tag is
+picked up; the `tag` input selects what gets built and published.
+
+Only safe while the version is unpublished. PyPI refuses to replace an existing
+file, so a retry after a successful upload fails at the upload step rather than
+overwriting. Check first:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}' https://pypi.org/pypi/hotdata/X.Y.Z/json
+```
+
+404 means the version is still free.
+
 ## Recover a missing GitHub Release
 
 If PyPI publish succeeded but the GitHub Release workflow failed, rerun it from `main`

@@ -36,13 +36,13 @@ class TestUpsertDatabaseContextRequest(unittest.TestCase):
         model = UpsertDatabaseContextRequest()
         if include_optional:
             return UpsertDatabaseContextRequest(
-                content = '',
-                name = ''
+                content = 'The orders table holds one row per completed purchase. `amount` is in USD cents.',
+                name = 'orders_overview'
             )
         else:
             return UpsertDatabaseContextRequest(
-                content = '',
-                name = '',
+                content = 'The orders table holds one row per completed purchase. `amount` is in USD cents.',
+                name = 'orders_overview',
         )
         """
 

@@ -28,7 +28,7 @@ class QueryRequest(BaseModel):
     """
     Request body for POST /query
     """ # noqa: E501
-    var_async: Optional[StrictBool] = Field(default=None, description="When true, execute the query asynchronously and return a query run ID for polling via GET /query-runs/{id}. The query results can be retrieved via GET /results/{id} once the query run status is \"succeeded\".", alias="async")
+    var_async: Optional[StrictBool] = Field(default=False, description="When true, execute the query asynchronously and return a query run ID for polling via GET /query-runs/{id}. The query results can be retrieved via GET /results/{id} once the query run status is \"succeeded\".", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), first attempt the query synchronously and wait up to this many milliseconds: if it finishes in time the full result is returned, otherwise an async response (a run id to poll) is returned. Must be at least 1000 and at most the server's configured maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
     database_id: Optional[StrictStr] = Field(default=None, description="Database to scope the query to (its id). Alternative to the `X-Database-Id` header — exactly one source must be provided. If both this field and the header are set and they disagree, the request is rejected with a 400.")
     default_catalog: Optional[StrictStr] = Field(default=None, description="Catalog that unqualified table references resolve against within the query's database scope. Must name a catalog visible in the database (`default`, an attached catalog alias, or a system catalog). Defaults to `default` when omitted.")
@@ -107,7 +107,7 @@ class QueryRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "async": obj.get("async"),
+            "async": obj.get("async") if obj.get("async") is not None else False,
             "async_after_ms": obj.get("async_after_ms"),
             "database_id": obj.get("database_id"),
             "default_catalog": obj.get("default_catalog"),
