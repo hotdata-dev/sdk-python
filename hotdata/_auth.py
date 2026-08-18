@@ -367,16 +367,33 @@ class _TokenManager:
         now = time.time()
         by_expires_in = now + expires_in
         claim = _exp_from_jwt(token)
-        if claim is not None and claim > now:
+        if claim is not None and (claim > now or self._replayed):
             self._exp = min(by_expires_in, claim)
         else:
-            # No readable claim, or one ALREADY ELAPSED when the mint returned.
-            # An elapsed claim means the clocks disagree, not that the server
-            # handed back a corpse -- it validates `exp` against its own clock, so
-            # the token is fine and only this client disbelieves it. Honouring the
-            # claim here would set `_exp` permanently in the past, and every
-            # request would then run both grants forever. `expires_in` is always
-            # in the future, which is what makes it the safe fallback for skew.
+            # No readable claim, or one already elapsed on a token we had NOT seen
+            # before. Two causes produce an elapsed claim and they want opposite
+            # answers, so `_replayed` -- set just above -- separates them:
+            #
+            #   replayed  the server keeps handing back one cached token, and its
+            #             `exp` has finally passed. The token really is dead.
+            #             Honour the claim: this manager accepted the same claim as
+            #             FUTURE on an earlier mint, so the clock is not the
+            #             explanation, and pretending otherwise would put `_exp` at
+            #             `now + 300` on a corpse -- the pre-fix behaviour, leaving
+            #             the 401 retry to pay a round trip that a proactive mint
+            #             would have avoided.
+            #
+            #   first seen  the clocks disagree. The server validates `exp` against
+            #             its own clock, so the token is fine and only this client
+            #             disbelieves it. Honouring the claim would pin `_exp` in
+            #             the past and run both grants on every request forever.
+            #             `expires_in` is always in the future, which is what makes
+            #             it the safe fallback.
+            #
+            # A skewed clock AND a replaying server together fall to the first
+            # branch, i.e. back to both grants per request. That union is the case
+            # being traded away, knowingly: it is rarer than either alone and the
+            # 401 retry still covers it.
             self._exp = by_expires_in
         self._refresh = data.get("refresh_token") or self._refresh
         return True

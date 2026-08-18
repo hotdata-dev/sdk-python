@@ -1213,3 +1213,27 @@ def test_a_claim_already_elapsed_is_declined_so_a_skewed_clock_still_works() -> 
     mgr.bearer_value()
     assert len(pool.calls) == calls, "kept minting under skew"
 
+
+def test_a_replayed_token_that_finally_elapsed_is_not_given_a_fresh_lease() -> None:
+    """The other cause of an elapsed claim, which wants the opposite answer to
+    skew. When the server keeps replaying one cached token, its `exp` eventually
+    passes for real. Falling back to `expires_in` there would put `_exp` at
+    `now + 300` on a corpse -- the pre-fix behaviour -- and leave the 401 retry to
+    pay a round trip a proactive mint would have avoided.
+
+    Drives `_mint` directly: reaching this through `bearer_value` would need the
+    first fallback's 300s lease to run down first, which is the thing under test,
+    not a precondition worth sleeping for.
+    """
+    dead = _jwt_with_exp(-5, jti="replayed-and-dead")
+    pool = _FakePool([_mint_response(access_token=dead, expires_in=300)])
+    mgr = _TokenManager("hd_secret_token", _config(), pool=pool)
+    grant = {"grant_type": "api_token", "api_token": "hd_secret_token"}
+
+    mgr._mint(dict(grant))          # first sight: elapsed but unseen -> skew branch
+    assert mgr._replayed is False
+    assert mgr._exp - time.time() > 200, "first sight should fall back to expires_in"
+
+    mgr._mint(dict(grant))          # same token back -> a known replay
+    assert mgr._replayed is True
+    assert mgr._exp - time.time() < 0, "gave a dead replayed token a fresh lease"
