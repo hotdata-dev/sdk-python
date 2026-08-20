@@ -33,8 +33,9 @@ class QueryRequest(BaseModel):
     database_id: Optional[StrictStr] = Field(default=None, description="Database to scope the query to (its id). Alternative to the `X-Database-Id` header — exactly one source must be provided. If both this field and the header are set and they disagree, the request is rejected with a 400.")
     default_catalog: Optional[StrictStr] = Field(default=None, description="Catalog that unqualified table references resolve against within the query's database scope. Must name a catalog visible in the database (`default`, an attached catalog alias, or a system catalog). Defaults to `default` when omitted.")
     default_schema: Optional[StrictStr] = Field(default=None, description="Schema that unqualified table references resolve against within the query's database scope. Defaults to `main` when omitted. Existence is not validated up front — an unknown schema surfaces as a \"table not found\" error at planning time.")
+    dialect: Optional[StrictStr] = Field(default=None, description="SQL dialect the `sql` field is written in. One of `hotsql` (the default), `duckdb`, `postgres`, or `snowflake`. When set to anything other than `hotsql`, the query is translated to HotSQL before it runs, so you can use idioms from that dialect (for example Snowflake `IFF(...)` or Postgres `MOD(a, b)`). Only read-only queries are accepted. An unrecognized value is rejected with a 400.")
     sql: StrictStr
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "database_id", "default_catalog", "default_schema", "sql"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "database_id", "default_catalog", "default_schema", "dialect", "sql"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,6 +96,11 @@ class QueryRequest(BaseModel):
         if self.default_schema is None and "default_schema" in self.model_fields_set:
             _dict['default_schema'] = None
 
+        # set to None if dialect (nullable) is None
+        # and model_fields_set contains the field
+        if self.dialect is None and "dialect" in self.model_fields_set:
+            _dict['dialect'] = None
+
         return _dict
 
     @classmethod
@@ -112,6 +118,7 @@ class QueryRequest(BaseModel):
             "database_id": obj.get("database_id"),
             "default_catalog": obj.get("default_catalog"),
             "default_schema": obj.get("default_schema"),
+            "dialect": obj.get("dialect"),
             "sql": obj.get("sql")
         })
         return _obj
