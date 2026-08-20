@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **database_id** | **str** | Database to scope the query to (its id). Alternative to the &#x60;X-Database-Id&#x60; header — exactly one source must be provided. If both this field and the header are set and they disagree, the request is rejected with a 400. | [optional] 
 **default_catalog** | **str** | Catalog that unqualified table references resolve against within the query&#39;s database scope. Must name a catalog visible in the database (&#x60;default&#x60;, an attached catalog alias, or a system catalog). Defaults to &#x60;default&#x60; when omitted. | [optional] 
 **default_schema** | **str** | Schema that unqualified table references resolve against within the query&#39;s database scope. Defaults to &#x60;main&#x60; when omitted. Existence is not validated up front — an unknown schema surfaces as a \&quot;table not found\&quot; error at planning time. | [optional] 
+**dialect** | **str** | SQL dialect the &#x60;sql&#x60; field is written in. One of &#x60;hotsql&#x60; (the default), &#x60;duckdb&#x60;, &#x60;postgres&#x60;, or &#x60;snowflake&#x60;. When set to anything other than &#x60;hotsql&#x60;, the query is translated to HotSQL before it runs, so you can use idioms from that dialect (for example Snowflake &#x60;IFF(...)&#x60; or Postgres &#x60;MOD(a, b)&#x60;). Only read-only queries are accepted. An unrecognized value is rejected with a 400. | [optional] 
 **sql** | **str** |  | 
 
 ## Example
