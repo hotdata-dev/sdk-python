@@ -38,12 +38,7 @@ from hotdata.models.column_profile_detail_one_of3 import ColumnProfileDetailOneO
 from hotdata.models.column_profile_detail_one_of4 import ColumnProfileDetailOneOf4
 from hotdata.models.column_profile_info import ColumnProfileInfo
 from hotdata.models.column_type_spec import ColumnTypeSpec
-from hotdata.models.connection_health_response import ConnectionHealthResponse
 from hotdata.models.connection_info import ConnectionInfo
-from hotdata.models.connection_refresh_result import ConnectionRefreshResult
-from hotdata.models.connection_schema_error import ConnectionSchemaError
-from hotdata.models.connection_type_detail import ConnectionTypeDetail
-from hotdata.models.connection_type_summary import ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse
 from hotdata.models.create_database_request import CreateDatabaseRequest
@@ -52,8 +47,6 @@ from hotdata.models.create_embedding_provider_request import CreateEmbeddingProv
 from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse
 from hotdata.models.create_index_request import CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest
-from hotdata.models.create_secret_request import CreateSecretRequest
-from hotdata.models.create_secret_response import CreateSecretResponse
 from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
@@ -77,7 +70,6 @@ from hotdata.models.fork_database_request import ForkDatabaseRequest
 from hotdata.models.get_connection_response import GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse
-from hotdata.models.get_secret_response import GetSecretResponse
 from hotdata.models.index_entry_response import IndexEntryResponse
 from hotdata.models.index_info_response import IndexInfoResponse
 from hotdata.models.index_status import IndexStatus
@@ -86,7 +78,6 @@ from hotdata.models.job_result import JobResult
 from hotdata.models.job_status import JobStatus
 from hotdata.models.job_status_response import JobStatusResponse
 from hotdata.models.job_type import JobType
-from hotdata.models.list_connection_types_response import ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse
 from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse
@@ -98,7 +89,6 @@ from hotdata.models.list_query_runs_response import ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse
-from hotdata.models.list_secrets_response import ListSecretsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
@@ -111,21 +101,16 @@ from hotdata.models.numeric_profile_detail import NumericProfileDetail
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo
-from hotdata.models.refresh_request import RefreshRequest
-from hotdata.models.refresh_response import RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning
 from hotdata.models.result_info import ResultInfo
 from hotdata.models.results_format_query import ResultsFormatQuery
 from hotdata.models.saved_query_detail import SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo
-from hotdata.models.schema_refresh_result import SchemaRefreshResult
-from hotdata.models.secret_metadata_response import SecretMetadataResponse
 from hotdata.models.submit_job_response import SubmitJobResponse
 from hotdata.models.table_info import TableInfo
 from hotdata.models.table_partition_key import TablePartitionKey
 from hotdata.models.table_profile_response import TableProfileResponse
-from hotdata.models.table_refresh_error import TableRefreshError
 from hotdata.models.table_refresh_result import TableRefreshResult
 from hotdata.models.table_sort_key import TableSortKey
 from hotdata.models.temporal_profile_detail import TemporalProfileDetail
@@ -133,8 +118,6 @@ from hotdata.models.text_profile_detail import TextProfileDetail
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest
 from hotdata.models.update_embedding_provider_response import UpdateEmbeddingProviderResponse
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest
-from hotdata.models.update_secret_request import UpdateSecretRequest
-from hotdata.models.update_secret_response import UpdateSecretResponse
 from hotdata.models.upload_session_response import UploadSessionResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest
 from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse

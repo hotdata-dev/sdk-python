@@ -12,10 +12,6 @@ Name | Type | Description | Notes
 **schema_name** | **str** |  | 
 **table_name** | **str** |  | 
 **warnings** | [**List[RefreshWarning]**](RefreshWarning.md) |  | [optional] 
-**errors** | [**List[TableRefreshError]**](TableRefreshError.md) |  | [optional] 
-**tables_failed** | **int** |  | 
-**tables_refreshed** | **int** |  | 
-**total_rows** | **int** |  | 
 **columns** | **List[str]** |  | 
 **created_at** | **datetime** |  | 
 **index_name** | **str** |  | 

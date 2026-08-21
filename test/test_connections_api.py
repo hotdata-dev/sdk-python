@@ -41,13 +41,6 @@ class TestConnectionsApi(unittest.TestCase):
         """
         pass
 
-    def test_check_connection_health(self) -> None:
-        """Test case for check_connection_health
-
-        Check connection health
-        """
-        pass
-
     def test_create_connection(self) -> None:
         """Test case for create_connection
 
