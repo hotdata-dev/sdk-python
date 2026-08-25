@@ -6,16 +6,6 @@ Job-specific result payload. The shape depends on the job type. Null while the j
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**connection_id** | **str** |  | 
-**duration_ms** | **int** |  | 
-**rows_synced** | **int** |  | 
-**schema_name** | **str** |  | 
-**table_name** | **str** |  | 
-**warnings** | [**List[RefreshWarning]**](RefreshWarning.md) |  | [optional] 
-**errors** | [**List[TableRefreshError]**](TableRefreshError.md) |  | [optional] 
-**tables_failed** | **int** |  | 
-**tables_refreshed** | **int** |  | 
-**total_rows** | **int** |  | 
 **columns** | **List[str]** |  | 
 **created_at** | **datetime** |  | 
 **index_name** | **str** |  | 
@@ -25,7 +15,10 @@ Name | Type | Description | Notes
 **status** | [**IndexStatus**](IndexStatus.md) |  | 
 **updated_at** | **datetime** |  | 
 **arrow_schema_json** | **str** | Schema of the loaded table, as JSON. | 
+**connection_id** | **str** |  | 
 **row_count** | **int** | Total number of rows in the table after the load. | 
+**schema_name** | **str** |  | 
+**table_name** | **str** |  | 
 **batch_id** | **str** | Batch these databases belong to. | 
 **cancelled** | **bool** | True when the batch was stopped before finishing. | 
 **created** | **int** | How many were created. | 

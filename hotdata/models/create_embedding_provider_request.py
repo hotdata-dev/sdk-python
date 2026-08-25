@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for managed databases, queries, and analytics.
+    Powerful data platform API for instant databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
@@ -31,7 +31,7 @@ class CreateEmbeddingProviderRequest(BaseModel):
     config: Optional[Dict[str, Any]] = Field(default=None, description="Provider-specific configuration (model name, base URL, dimensions, etc.)")
     name: StrictStr
     provider_type: StrictStr = Field(description="Provider type: \"local\" or \"service\"")
-    secret_name: Optional[StrictStr] = Field(default=None, description="Reference an existing secret by name (for service providers).")
+    secret_name: Optional[StrictStr] = Field(default=None, description="Reference an existing stored secret by name (for service providers).  A stored secret is only sent to an approved provider origin — by default OpenAI's public API. To use a different endpoint, supply the key inline with `api_key` instead, or ask your operator to approve the origin.")
     __properties: ClassVar[List[str]] = ["api_key", "config", "name", "provider_type", "secret_name"]
 
     model_config = ConfigDict(
