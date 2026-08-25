@@ -19,7 +19,6 @@ import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
 from typing import Any, List, Optional
 from hotdata.models.bulk_create_databases_result import BulkCreateDatabasesResult
-from hotdata.models.connection_refresh_result import ConnectionRefreshResult
 from hotdata.models.index_info_response import IndexInfoResponse
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
 from hotdata.models.table_refresh_result import TableRefreshResult
@@ -27,7 +26,7 @@ from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self
 
-JOBRESULT_ONE_OF_SCHEMAS = ["BulkCreateDatabasesResult", "ConnectionRefreshResult", "IndexInfoResponse", "LoadManagedTableResponse", "TableRefreshResult"]
+JOBRESULT_ONE_OF_SCHEMAS = ["BulkCreateDatabasesResult", "IndexInfoResponse", "LoadManagedTableResponse", "TableRefreshResult"]
 
 class JobResult(BaseModel):
     """
@@ -35,16 +34,14 @@ class JobResult(BaseModel):
     """
     # data type: TableRefreshResult
     oneof_schema_1_validator: Optional[TableRefreshResult] = Field(default=None, description="Result of a single table data refresh.")
-    # data type: ConnectionRefreshResult
-    oneof_schema_2_validator: Optional[ConnectionRefreshResult] = Field(default=None, description="Result of a connection-wide data refresh.")
     # data type: IndexInfoResponse
-    oneof_schema_3_validator: Optional[IndexInfoResponse] = Field(default=None, description="Result of an index creation.")
+    oneof_schema_2_validator: Optional[IndexInfoResponse] = Field(default=None, description="Result of an index creation.")
     # data type: LoadManagedTableResponse
-    oneof_schema_4_validator: Optional[LoadManagedTableResponse] = Field(default=None, description="Result of a managed-table load (row count + published schema).")
+    oneof_schema_3_validator: Optional[LoadManagedTableResponse] = Field(default=None, description="Result of a managed-table load (row count + published schema).")
     # data type: BulkCreateDatabasesResult
-    oneof_schema_5_validator: Optional[BulkCreateDatabasesResult] = Field(default=None, description="Counters from a bulk database creation.")
-    actual_instance: Optional[Union[BulkCreateDatabasesResult, ConnectionRefreshResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult]] = None
-    one_of_schemas: Set[str] = { "BulkCreateDatabasesResult", "ConnectionRefreshResult", "IndexInfoResponse", "LoadManagedTableResponse", "TableRefreshResult" }
+    oneof_schema_4_validator: Optional[BulkCreateDatabasesResult] = Field(default=None, description="Counters from a bulk database creation.")
+    actual_instance: Optional[Union[BulkCreateDatabasesResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult]] = None
+    one_of_schemas: Set[str] = { "BulkCreateDatabasesResult", "IndexInfoResponse", "LoadManagedTableResponse", "TableRefreshResult" }
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -72,11 +69,6 @@ class JobResult(BaseModel):
             error_messages.append(f"Error! Input type `{type(v)}` is not `TableRefreshResult`")
         else:
             match += 1
-        # validate data type: ConnectionRefreshResult
-        if not isinstance(v, ConnectionRefreshResult):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `ConnectionRefreshResult`")
-        else:
-            match += 1
         # validate data type: IndexInfoResponse
         if not isinstance(v, IndexInfoResponse):
             error_messages.append(f"Error! Input type `{type(v)}` is not `IndexInfoResponse`")
@@ -94,10 +86,10 @@ class JobResult(BaseModel):
             match += 1
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in JobResult with oneOf schemas: BulkCreateDatabasesResult, ConnectionRefreshResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when setting `actual_instance` in JobResult with oneOf schemas: BulkCreateDatabasesResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in JobResult with oneOf schemas: BulkCreateDatabasesResult, ConnectionRefreshResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when setting `actual_instance` in JobResult with oneOf schemas: BulkCreateDatabasesResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         else:
             return v
 
@@ -115,12 +107,6 @@ class JobResult(BaseModel):
         # deserialize data into TableRefreshResult
         try:
             instance.actual_instance = TableRefreshResult.from_json(json_str)
-            match += 1
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
-        # deserialize data into ConnectionRefreshResult
-        try:
-            instance.actual_instance = ConnectionRefreshResult.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
@@ -145,10 +131,10 @@ class JobResult(BaseModel):
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into JobResult with oneOf schemas: BulkCreateDatabasesResult, ConnectionRefreshResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when deserializing the JSON string into JobResult with oneOf schemas: BulkCreateDatabasesResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into JobResult with oneOf schemas: BulkCreateDatabasesResult, ConnectionRefreshResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when deserializing the JSON string into JobResult with oneOf schemas: BulkCreateDatabasesResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult. Details: " + ", ".join(error_messages))
         else:
             return instance
 
@@ -162,7 +148,7 @@ class JobResult(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Optional[Union[Dict[str, Any], BulkCreateDatabasesResult, ConnectionRefreshResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult]]:
+    def to_dict(self) -> Optional[Union[Dict[str, Any], BulkCreateDatabasesResult, IndexInfoResponse, LoadManagedTableResponse, TableRefreshResult]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return None

@@ -47,15 +47,6 @@ class TestJobResult(unittest.TestCase):
                         schema_name = '', 
                         table_name = '', )
                     ],
-                errors = [
-                    hotdata.models.table_refresh_error.TableRefreshError(
-                        error = '', 
-                        schema_name = '', 
-                        table_name = '', )
-                    ],
-                tables_failed = 0,
-                tables_refreshed = 0,
-                total_rows = 0,
                 columns = [
                     ''
                     ],
@@ -80,9 +71,6 @@ class TestJobResult(unittest.TestCase):
                 rows_synced = 0,
                 schema_name = '',
                 table_name = '',
-                tables_failed = 0,
-                tables_refreshed = 0,
-                total_rows = 0,
                 columns = [
                     ''
                     ],

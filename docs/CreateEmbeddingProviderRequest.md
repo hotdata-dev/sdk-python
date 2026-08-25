@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **config** | **Dict[str, object]** | Provider-specific configuration (model name, base URL, dimensions, etc.) | [optional] 
 **name** | **str** |  | 
 **provider_type** | **str** | Provider type: \&quot;local\&quot; or \&quot;service\&quot; | 
-**secret_name** | **str** | Reference an existing secret by name (for service providers). | [optional] 
+**secret_name** | **str** | Reference an existing stored secret by name (for service providers).  A stored secret is only sent to an approved provider origin — by default OpenAI&#39;s public API. To use a different endpoint, supply the key inline with &#x60;api_key&#x60; instead, or ask your operator to approve the origin. | [optional] 
 
 ## Example
 

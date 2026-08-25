@@ -24,7 +24,6 @@ except PackageNotFoundError:  # running from a source checkout without install
 
 # Define package exports
 __all__ = [
-    "ConnectionTypesApi",
     "ConnectionsApi",
     "DatabaseContextApi",
     "DatabasesApi",
@@ -34,10 +33,8 @@ __all__ = [
     "JobsApi",
     "QueryApi",
     "QueryRunsApi",
-    "RefreshApi",
     "ResultsApi",
     "SavedQueriesApi",
-    "SecretsApi",
     "UploadsApi",
     "UsageApi",
     "WorkspacesApi",
@@ -74,12 +71,7 @@ __all__ = [
     "ColumnProfileDetailOneOf4",
     "ColumnProfileInfo",
     "ColumnTypeSpec",
-    "ConnectionHealthResponse",
     "ConnectionInfo",
-    "ConnectionRefreshResult",
-    "ConnectionSchemaError",
-    "ConnectionTypeDetail",
-    "ConnectionTypeSummary",
     "CreateConnectionRequest",
     "CreateConnectionResponse",
     "CreateDatabaseRequest",
@@ -88,8 +80,6 @@ __all__ = [
     "CreateEmbeddingProviderResponse",
     "CreateIndexRequest",
     "CreateSavedQueryRequest",
-    "CreateSecretRequest",
-    "CreateSecretResponse",
     "CreateUploadRequest",
     "CreateWorkspaceRequest",
     "CreateWorkspaceResponse",
@@ -113,7 +103,6 @@ __all__ = [
     "GetConnectionResponse",
     "GetDatabaseContextResponse",
     "GetResultResponse",
-    "GetSecretResponse",
     "IndexEntryResponse",
     "IndexInfoResponse",
     "IndexStatus",
@@ -122,7 +111,6 @@ __all__ = [
     "JobStatus",
     "JobStatusResponse",
     "JobType",
-    "ListConnectionTypesResponse",
     "ListConnectionsResponse",
     "ListDatabaseContextsResponse",
     "ListDatabasesResponse",
@@ -134,7 +122,6 @@ __all__ = [
     "ListResultsResponse",
     "ListSavedQueriesResponse",
     "ListSavedQueryVersionsResponse",
-    "ListSecretsResponse",
     "ListWorkspacesResponse",
     "LoadManagedTableRequest",
     "LoadManagedTableResponse",
@@ -147,21 +134,16 @@ __all__ = [
     "QueryRequest",
     "QueryResponse",
     "QueryRunInfo",
-    "RefreshRequest",
-    "RefreshResponse",
     "RefreshWarning",
     "ResultInfo",
     "ResultsFormatQuery",
     "SavedQueryDetail",
     "SavedQuerySummary",
     "SavedQueryVersionInfo",
-    "SchemaRefreshResult",
-    "SecretMetadataResponse",
     "SubmitJobResponse",
     "TableInfo",
     "TablePartitionKey",
     "TableProfileResponse",
-    "TableRefreshError",
     "TableRefreshResult",
     "TableSortKey",
     "TemporalProfileDetail",
@@ -169,8 +151,6 @@ __all__ = [
     "UpdateEmbeddingProviderRequest",
     "UpdateEmbeddingProviderResponse",
     "UpdateSavedQueryRequest",
-    "UpdateSecretRequest",
-    "UpdateSecretResponse",
     "UploadSessionResponse",
     "UpsertDatabaseContextRequest",
     "UpsertDatabaseContextResponse",
@@ -180,7 +160,6 @@ __all__ = [
 ]
 
 # import apis into sdk package
-from hotdata.api.connection_types_api import ConnectionTypesApi as ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi as ConnectionsApi
 from hotdata.api.database_context_api import DatabaseContextApi as DatabaseContextApi
 from hotdata.api.databases_api import DatabasesApi as DatabasesApi
@@ -190,10 +169,8 @@ from hotdata.api.information_schema_api import InformationSchemaApi as Informati
 from hotdata.api.jobs_api import JobsApi as JobsApi
 from hotdata.api.query_api import QueryApi as QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi as QueryRunsApi
-from hotdata.api.refresh_api import RefreshApi as RefreshApi
 from hotdata.api.results_api import ResultsApi as ResultsApi
 from hotdata.api.saved_queries_api import SavedQueriesApi as SavedQueriesApi
-from hotdata.api.secrets_api import SecretsApi as SecretsApi
 from hotdata.api.uploads_api import UploadsApi as UploadsApi
 from hotdata.api.usage_api import UsageApi as UsageApi
 from hotdata.api.workspaces_api import WorkspacesApi as WorkspacesApi
@@ -234,12 +211,7 @@ from hotdata.models.column_profile_detail_one_of3 import ColumnProfileDetailOneO
 from hotdata.models.column_profile_detail_one_of4 import ColumnProfileDetailOneOf4 as ColumnProfileDetailOneOf4
 from hotdata.models.column_profile_info import ColumnProfileInfo as ColumnProfileInfo
 from hotdata.models.column_type_spec import ColumnTypeSpec as ColumnTypeSpec
-from hotdata.models.connection_health_response import ConnectionHealthResponse as ConnectionHealthResponse
 from hotdata.models.connection_info import ConnectionInfo as ConnectionInfo
-from hotdata.models.connection_refresh_result import ConnectionRefreshResult as ConnectionRefreshResult
-from hotdata.models.connection_schema_error import ConnectionSchemaError as ConnectionSchemaError
-from hotdata.models.connection_type_detail import ConnectionTypeDetail as ConnectionTypeDetail
-from hotdata.models.connection_type_summary import ConnectionTypeSummary as ConnectionTypeSummary
 from hotdata.models.create_connection_request import CreateConnectionRequest as CreateConnectionRequest
 from hotdata.models.create_connection_response import CreateConnectionResponse as CreateConnectionResponse
 from hotdata.models.create_database_request import CreateDatabaseRequest as CreateDatabaseRequest
@@ -248,8 +220,6 @@ from hotdata.models.create_embedding_provider_request import CreateEmbeddingProv
 from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse as CreateEmbeddingProviderResponse
 from hotdata.models.create_index_request import CreateIndexRequest as CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
-from hotdata.models.create_secret_request import CreateSecretRequest as CreateSecretRequest
-from hotdata.models.create_secret_response import CreateSecretResponse as CreateSecretResponse
 from hotdata.models.create_upload_request import CreateUploadRequest as CreateUploadRequest
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
@@ -273,7 +243,6 @@ from hotdata.models.fork_database_request import ForkDatabaseRequest as ForkData
 from hotdata.models.get_connection_response import GetConnectionResponse as GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse as GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
-from hotdata.models.get_secret_response import GetSecretResponse as GetSecretResponse
 from hotdata.models.index_entry_response import IndexEntryResponse as IndexEntryResponse
 from hotdata.models.index_info_response import IndexInfoResponse as IndexInfoResponse
 from hotdata.models.index_status import IndexStatus as IndexStatus
@@ -282,7 +251,6 @@ from hotdata.models.job_result import JobResult as JobResult
 from hotdata.models.job_status import JobStatus as JobStatus
 from hotdata.models.job_status_response import JobStatusResponse as JobStatusResponse
 from hotdata.models.job_type import JobType as JobType
-from hotdata.models.list_connection_types_response import ListConnectionTypesResponse as ListConnectionTypesResponse
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
 from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse as ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse as ListDatabasesResponse
@@ -294,7 +262,6 @@ from hotdata.models.list_query_runs_response import ListQueryRunsResponse as Lis
 from hotdata.models.list_results_response import ListResultsResponse as ListResultsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse as ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse as ListSavedQueryVersionsResponse
-from hotdata.models.list_secrets_response import ListSecretsResponse as ListSecretsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest as LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse as LoadManagedTableResponse
@@ -307,21 +274,16 @@ from hotdata.models.numeric_profile_detail import NumericProfileDetail as Numeri
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo as QueryRunInfo
-from hotdata.models.refresh_request import RefreshRequest as RefreshRequest
-from hotdata.models.refresh_response import RefreshResponse as RefreshResponse
 from hotdata.models.refresh_warning import RefreshWarning as RefreshWarning
 from hotdata.models.result_info import ResultInfo as ResultInfo
 from hotdata.models.results_format_query import ResultsFormatQuery as ResultsFormatQuery
 from hotdata.models.saved_query_detail import SavedQueryDetail as SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary as SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo as SavedQueryVersionInfo
-from hotdata.models.schema_refresh_result import SchemaRefreshResult as SchemaRefreshResult
-from hotdata.models.secret_metadata_response import SecretMetadataResponse as SecretMetadataResponse
 from hotdata.models.submit_job_response import SubmitJobResponse as SubmitJobResponse
 from hotdata.models.table_info import TableInfo as TableInfo
 from hotdata.models.table_partition_key import TablePartitionKey as TablePartitionKey
 from hotdata.models.table_profile_response import TableProfileResponse as TableProfileResponse
-from hotdata.models.table_refresh_error import TableRefreshError as TableRefreshError
 from hotdata.models.table_refresh_result import TableRefreshResult as TableRefreshResult
 from hotdata.models.table_sort_key import TableSortKey as TableSortKey
 from hotdata.models.temporal_profile_detail import TemporalProfileDetail as TemporalProfileDetail
@@ -329,8 +291,6 @@ from hotdata.models.text_profile_detail import TextProfileDetail as TextProfileD
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest as UpdateEmbeddingProviderRequest
 from hotdata.models.update_embedding_provider_response import UpdateEmbeddingProviderResponse as UpdateEmbeddingProviderResponse
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest as UpdateSavedQueryRequest
-from hotdata.models.update_secret_request import UpdateSecretRequest as UpdateSecretRequest
-from hotdata.models.update_secret_response import UpdateSecretResponse as UpdateSecretResponse
 from hotdata.models.upload_session_response import UploadSessionResponse as UploadSessionResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest as UpsertDatabaseContextRequest
 from hotdata.models.upsert_database_context_response import UpsertDatabaseContextResponse as UpsertDatabaseContextResponse
