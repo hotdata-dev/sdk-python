@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- docs: adopt "instant database" / "instant catalog" terminology in hand-written
+  prose. Documentation only — all public API symbols (`ManagedTableResponse`,
+  `load_managed_table`, the `managed` source type, etc.) are unchanged for
+  compatibility. Generated docstrings pick up the new wording on the next client
+  regeneration from the updated OpenAPI spec.
 - feat(query): add dialect parameter to query request
 
 ## [0.10.0] - 2026-08-18
