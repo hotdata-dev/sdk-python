@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for managed databases, queries, and analytics.
+    Powerful data platform API for instant databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
@@ -31,7 +31,7 @@ class CreateDatabaseRequest(BaseModel):
     default_catalog: Optional[StrictStr] = Field(default=None, description="Optional name the database's auto-created default catalog answers to inside its query scope. Must be a valid SQL identifier (`[a-z0-9_]`, not starting with a digit) and may not collide with the reserved catalog names `hotdata` or `information_schema`. Defaults to `default` when omitted, so `default.main.<table>` keeps working.")
     default_schema: Optional[StrictStr] = Field(default=None, description="Optional schema that unqualified table names resolve to inside this database's query scope. Must be a valid SQL identifier (`[a-z0-9_]`, not starting with a digit). When omitted, a database that declares exactly one schema adopts that schema as its default; otherwise unqualified names resolve to `main`. Fully-qualified names (`<catalog>.<schema>.<table>`) are unaffected, and a per-query `default_schema` still takes precedence.")
     expires_at: Optional[StrictStr] = Field(default=None, description="When this database expires. Accepts either an RFC 3339 timestamp (e.g. `\"2026-06-01T00:00:00Z\"`) or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days) — for example `\"24h\"`, `\"48h\"`, or `\"7d\"`. Omitted (or empty) means the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.")
-    name: Optional[StrictStr] = Field(default=None, description="Optional free-form display label (for UIs/CLIs). Not unique. Not an identifier — databases are always addressed by `id`.  Accepts the legacy `description` key as an alias so clients that predate the rename keep populating this field.")
+    name: Optional[StrictStr] = Field(default=None, description="Optional free-form display label (for UIs/CLIs). When omitted, a label derived from the database's ID is assigned. Not unique. Not an identifier — databases are always addressed by `id`.  Accepts the legacy `description` key as an alias so clients that predate the rename keep populating this field.")
     schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Optional schemas/tables to declare on the database's auto-created default catalog. Tables declared here can be loaded via the standard managed-table load endpoint targeting `default_connection_id`. Omitted or empty means the default catalog starts empty.")
     __properties: ClassVar[List[str]] = ["default_catalog", "default_schema", "expires_at", "name", "schemas"]
 
