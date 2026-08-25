@@ -1,18 +1,18 @@
 """Scenario: managed_tables_lifecycle.
 
 The heaviest scenario — it ties databases, uploads, and managed tables together
-against a fresh scratch database (whose default catalog is a managed catalog):
+against a fresh scratch database (whose default catalog is an instant catalog):
 
   1. declare a schema and a table on the database's default catalog connection,
   2. upload a small parquet file,
   3. load it into the table (load_managed_table) and verify the load response,
   4. delete the managed table.
 
-Notes on managed-catalog semantics (all confirmed against prod). A managed
+Notes on instant-catalog semantics (all confirmed against prod). An instant
 catalog rejects the maintenance ops that apply to external catalogs, so this
 scenario deliberately omits them:
 
-  * No `refresh` step — rejected with 400 on a managed catalog ("use the loads
+  * No `refresh` step — rejected with 400 on an instant catalog ("use the loads
     endpoint to update its data"); `load_managed_table` is itself the load.
   * No `purge_table_cache` step — rejected with 400 ("purge not supported for
     managed catalogs").
@@ -55,7 +55,7 @@ def test_managed_tables_lifecycle(
     uploads_api: UploadsApi,
     scratch_database: str,
 ) -> None:
-    # The database's auto-provisioned default catalog is a managed catalog,
+    # The database's auto-provisioned default catalog is an instant catalog,
     # addressed through its default_connection_id.
     connection_id = databases_api.get_database(scratch_database).default_connection_id
     schema_name = "sdkci_mt"
