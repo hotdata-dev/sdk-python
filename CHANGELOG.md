@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Docs restructure (Core Concepts / Push Data / Pull Data) + homepage design refinements
 - feat(query): add dialect parameter to query request
 
 ## [0.10.0] - 2026-08-18

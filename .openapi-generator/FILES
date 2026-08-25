@@ -25,13 +25,7 @@ docs/ColumnProfileDetailOneOf3.md
 docs/ColumnProfileDetailOneOf4.md
 docs/ColumnProfileInfo.md
 docs/ColumnTypeSpec.md
-docs/ConnectionHealthResponse.md
 docs/ConnectionInfo.md
-docs/ConnectionRefreshResult.md
-docs/ConnectionSchemaError.md
-docs/ConnectionTypeDetail.md
-docs/ConnectionTypeSummary.md
-docs/ConnectionTypesApi.md
 docs/ConnectionsApi.md
 docs/CreateConnectionRequest.md
 docs/CreateConnectionResponse.md
@@ -41,8 +35,6 @@ docs/CreateEmbeddingProviderRequest.md
 docs/CreateEmbeddingProviderResponse.md
 docs/CreateIndexRequest.md
 docs/CreateSavedQueryRequest.md
-docs/CreateSecretRequest.md
-docs/CreateSecretResponse.md
 docs/CreateUploadRequest.md
 docs/CreateWorkspaceRequest.md
 docs/CreateWorkspaceResponse.md
@@ -69,7 +61,6 @@ docs/ForkDatabaseRequest.md
 docs/GetConnectionResponse.md
 docs/GetDatabaseContextResponse.md
 docs/GetResultResponse.md
-docs/GetSecretResponse.md
 docs/IndexEntryResponse.md
 docs/IndexInfoResponse.md
 docs/IndexStatus.md
@@ -81,7 +72,6 @@ docs/JobStatus.md
 docs/JobStatusResponse.md
 docs/JobType.md
 docs/JobsApi.md
-docs/ListConnectionTypesResponse.md
 docs/ListConnectionsResponse.md
 docs/ListDatabaseContextsResponse.md
 docs/ListDatabasesResponse.md
@@ -93,7 +83,6 @@ docs/ListQueryRunsResponse.md
 docs/ListResultsResponse.md
 docs/ListSavedQueriesResponse.md
 docs/ListSavedQueryVersionsResponse.md
-docs/ListSecretsResponse.md
 docs/ListWorkspacesResponse.md
 docs/LoadManagedTableRequest.md
 docs/LoadManagedTableResponse.md
@@ -108,9 +97,6 @@ docs/QueryRequest.md
 docs/QueryResponse.md
 docs/QueryRunInfo.md
 docs/QueryRunsApi.md
-docs/RefreshApi.md
-docs/RefreshRequest.md
-docs/RefreshResponse.md
 docs/RefreshWarning.md
 docs/ResultInfo.md
 docs/ResultsApi.md
@@ -119,14 +105,10 @@ docs/SavedQueriesApi.md
 docs/SavedQueryDetail.md
 docs/SavedQuerySummary.md
 docs/SavedQueryVersionInfo.md
-docs/SchemaRefreshResult.md
-docs/SecretMetadataResponse.md
-docs/SecretsApi.md
 docs/SubmitJobResponse.md
 docs/TableInfo.md
 docs/TablePartitionKey.md
 docs/TableProfileResponse.md
-docs/TableRefreshError.md
 docs/TableRefreshResult.md
 docs/TableSortKey.md
 docs/TemporalProfileDetail.md
@@ -134,8 +116,6 @@ docs/TextProfileDetail.md
 docs/UpdateEmbeddingProviderRequest.md
 docs/UpdateEmbeddingProviderResponse.md
 docs/UpdateSavedQueryRequest.md
-docs/UpdateSecretRequest.md
-docs/UpdateSecretResponse.md
 docs/UploadSessionResponse.md
 docs/UploadsApi.md
 docs/UpsertDatabaseContextRequest.md
@@ -147,7 +127,6 @@ docs/WorkspaceUsageResponse.md
 docs/WorkspacesApi.md
 hotdata/__init__.py
 hotdata/api/__init__.py
-hotdata/api/connection_types_api.py
 hotdata/api/connections_api.py
 hotdata/api/database_context_api.py
 hotdata/api/databases_api.py
@@ -157,10 +136,8 @@ hotdata/api/information_schema_api.py
 hotdata/api/jobs_api.py
 hotdata/api/query_api.py
 hotdata/api/query_runs_api.py
-hotdata/api/refresh_api.py
 hotdata/api/results_api.py
 hotdata/api/saved_queries_api.py
-hotdata/api/secrets_api.py
 hotdata/api/uploads_api.py
 hotdata/api/usage_api.py
 hotdata/api/workspaces_api.py
@@ -193,12 +170,7 @@ hotdata/models/column_profile_detail_one_of3.py
 hotdata/models/column_profile_detail_one_of4.py
 hotdata/models/column_profile_info.py
 hotdata/models/column_type_spec.py
-hotdata/models/connection_health_response.py
 hotdata/models/connection_info.py
-hotdata/models/connection_refresh_result.py
-hotdata/models/connection_schema_error.py
-hotdata/models/connection_type_detail.py
-hotdata/models/connection_type_summary.py
 hotdata/models/create_connection_request.py
 hotdata/models/create_connection_response.py
 hotdata/models/create_database_request.py
@@ -207,8 +179,6 @@ hotdata/models/create_embedding_provider_request.py
 hotdata/models/create_embedding_provider_response.py
 hotdata/models/create_index_request.py
 hotdata/models/create_saved_query_request.py
-hotdata/models/create_secret_request.py
-hotdata/models/create_secret_response.py
 hotdata/models/create_upload_request.py
 hotdata/models/create_workspace_request.py
 hotdata/models/create_workspace_response.py
@@ -232,7 +202,6 @@ hotdata/models/fork_database_request.py
 hotdata/models/get_connection_response.py
 hotdata/models/get_database_context_response.py
 hotdata/models/get_result_response.py
-hotdata/models/get_secret_response.py
 hotdata/models/index_entry_response.py
 hotdata/models/index_info_response.py
 hotdata/models/index_status.py
@@ -241,7 +210,6 @@ hotdata/models/job_result.py
 hotdata/models/job_status.py
 hotdata/models/job_status_response.py
 hotdata/models/job_type.py
-hotdata/models/list_connection_types_response.py
 hotdata/models/list_connections_response.py
 hotdata/models/list_database_contexts_response.py
 hotdata/models/list_databases_response.py
@@ -253,7 +221,6 @@ hotdata/models/list_query_runs_response.py
 hotdata/models/list_results_response.py
 hotdata/models/list_saved_queries_response.py
 hotdata/models/list_saved_query_versions_response.py
-hotdata/models/list_secrets_response.py
 hotdata/models/list_workspaces_response.py
 hotdata/models/load_managed_table_request.py
 hotdata/models/load_managed_table_response.py
@@ -266,21 +233,16 @@ hotdata/models/numeric_profile_detail.py
 hotdata/models/query_request.py
 hotdata/models/query_response.py
 hotdata/models/query_run_info.py
-hotdata/models/refresh_request.py
-hotdata/models/refresh_response.py
 hotdata/models/refresh_warning.py
 hotdata/models/result_info.py
 hotdata/models/results_format_query.py
 hotdata/models/saved_query_detail.py
 hotdata/models/saved_query_summary.py
 hotdata/models/saved_query_version_info.py
-hotdata/models/schema_refresh_result.py
-hotdata/models/secret_metadata_response.py
 hotdata/models/submit_job_response.py
 hotdata/models/table_info.py
 hotdata/models/table_partition_key.py
 hotdata/models/table_profile_response.py
-hotdata/models/table_refresh_error.py
 hotdata/models/table_refresh_result.py
 hotdata/models/table_sort_key.py
 hotdata/models/temporal_profile_detail.py
@@ -288,8 +250,6 @@ hotdata/models/text_profile_detail.py
 hotdata/models/update_embedding_provider_request.py
 hotdata/models/update_embedding_provider_response.py
 hotdata/models/update_saved_query_request.py
-hotdata/models/update_secret_request.py
-hotdata/models/update_secret_response.py
 hotdata/models/upload_session_response.py
 hotdata/models/upsert_database_context_request.py
 hotdata/models/upsert_database_context_response.py
@@ -324,13 +284,7 @@ test/test_column_profile_detail_one_of3.py
 test/test_column_profile_detail_one_of4.py
 test/test_column_profile_info.py
 test/test_column_type_spec.py
-test/test_connection_health_response.py
 test/test_connection_info.py
-test/test_connection_refresh_result.py
-test/test_connection_schema_error.py
-test/test_connection_type_detail.py
-test/test_connection_type_summary.py
-test/test_connection_types_api.py
 test/test_connections_api.py
 test/test_create_connection_request.py
 test/test_create_connection_response.py
@@ -340,8 +294,6 @@ test/test_create_embedding_provider_request.py
 test/test_create_embedding_provider_response.py
 test/test_create_index_request.py
 test/test_create_saved_query_request.py
-test/test_create_secret_request.py
-test/test_create_secret_response.py
 test/test_create_upload_request.py
 test/test_create_workspace_request.py
 test/test_create_workspace_response.py
@@ -368,7 +320,6 @@ test/test_fork_database_request.py
 test/test_get_connection_response.py
 test/test_get_database_context_response.py
 test/test_get_result_response.py
-test/test_get_secret_response.py
 test/test_index_entry_response.py
 test/test_index_info_response.py
 test/test_index_status.py
@@ -380,7 +331,6 @@ test/test_job_status.py
 test/test_job_status_response.py
 test/test_job_type.py
 test/test_jobs_api.py
-test/test_list_connection_types_response.py
 test/test_list_connections_response.py
 test/test_list_database_contexts_response.py
 test/test_list_databases_response.py
@@ -392,7 +342,6 @@ test/test_list_query_runs_response.py
 test/test_list_results_response.py
 test/test_list_saved_queries_response.py
 test/test_list_saved_query_versions_response.py
-test/test_list_secrets_response.py
 test/test_list_workspaces_response.py
 test/test_load_managed_table_request.py
 test/test_load_managed_table_response.py
@@ -407,9 +356,6 @@ test/test_query_request.py
 test/test_query_response.py
 test/test_query_run_info.py
 test/test_query_runs_api.py
-test/test_refresh_api.py
-test/test_refresh_request.py
-test/test_refresh_response.py
 test/test_refresh_warning.py
 test/test_result_info.py
 test/test_results_api.py
@@ -418,14 +364,10 @@ test/test_saved_queries_api.py
 test/test_saved_query_detail.py
 test/test_saved_query_summary.py
 test/test_saved_query_version_info.py
-test/test_schema_refresh_result.py
-test/test_secret_metadata_response.py
-test/test_secrets_api.py
 test/test_submit_job_response.py
 test/test_table_info.py
 test/test_table_partition_key.py
 test/test_table_profile_response.py
-test/test_table_refresh_error.py
 test/test_table_refresh_result.py
 test/test_table_sort_key.py
 test/test_temporal_profile_detail.py
@@ -433,8 +375,6 @@ test/test_text_profile_detail.py
 test/test_update_embedding_provider_request.py
 test/test_update_embedding_provider_response.py
 test/test_update_saved_query_request.py
-test/test_update_secret_request.py
-test/test_update_secret_response.py
 test/test_upload_session_response.py
 test/test_uploads_api.py
 test/test_upsert_database_context_request.py

@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for managed databases, queries, and analytics.
+    Powerful data platform API for instant databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
@@ -47,15 +47,6 @@ class TestJobResult(unittest.TestCase):
                         schema_name = '', 
                         table_name = '', )
                     ],
-                errors = [
-                    hotdata.models.table_refresh_error.TableRefreshError(
-                        error = '', 
-                        schema_name = '', 
-                        table_name = '', )
-                    ],
-                tables_failed = 0,
-                tables_refreshed = 0,
-                total_rows = 0,
                 columns = [
                     ''
                     ],
@@ -80,9 +71,6 @@ class TestJobResult(unittest.TestCase):
                 rows_synced = 0,
                 schema_name = '',
                 table_name = '',
-                tables_failed = 0,
-                tables_refreshed = 0,
-                total_rows = 0,
                 columns = [
                     ''
                     ],
