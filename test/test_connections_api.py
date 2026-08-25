@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for managed databases, queries, and analytics.
+    Powerful data platform API for instant databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
@@ -38,13 +38,6 @@ class TestConnectionsApi(unittest.TestCase):
         """Test case for add_managed_table
 
         Add managed table
-        """
-        pass
-
-    def test_check_connection_health(self) -> None:
-        """Test case for check_connection_health
-
-        Check connection health
         """
         pass
 

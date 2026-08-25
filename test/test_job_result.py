@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for managed databases, queries, and analytics.
+    Powerful data platform API for instant databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
@@ -36,26 +36,6 @@ class TestJobResult(unittest.TestCase):
         model = JobResult()
         if include_optional:
             return JobResult(
-                connection_id = '',
-                duration_ms = 0,
-                rows_synced = 0,
-                schema_name = '',
-                table_name = '',
-                warnings = [
-                    hotdata.models.refresh_warning.RefreshWarning(
-                        message = '', 
-                        schema_name = '', 
-                        table_name = '', )
-                    ],
-                errors = [
-                    hotdata.models.table_refresh_error.TableRefreshError(
-                        error = '', 
-                        schema_name = '', 
-                        table_name = '', )
-                    ],
-                tables_failed = 0,
-                tables_refreshed = 0,
-                total_rows = 0,
                 columns = [
                     ''
                     ],
@@ -67,7 +47,10 @@ class TestJobResult(unittest.TestCase):
                 status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 arrow_schema_json = '',
+                connection_id = '',
                 row_count = 0,
+                schema_name = '',
+                table_name = '',
                 batch_id = '',
                 cancelled = True,
                 created = 0,
@@ -75,14 +58,6 @@ class TestJobResult(unittest.TestCase):
             )
         else:
             return JobResult(
-                connection_id = '',
-                duration_ms = 0,
-                rows_synced = 0,
-                schema_name = '',
-                table_name = '',
-                tables_failed = 0,
-                tables_refreshed = 0,
-                total_rows = 0,
                 columns = [
                     ''
                     ],
@@ -92,7 +67,10 @@ class TestJobResult(unittest.TestCase):
                 status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 arrow_schema_json = '',
+                connection_id = '',
                 row_count = 0,
+                schema_name = '',
+                table_name = '',
                 batch_id = '',
                 cancelled = True,
                 created = 0,

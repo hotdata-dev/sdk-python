@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore(jobs): remove data_refresh_table and data_refresh_connection job types
 - docs: adopt "instant database" / "instant catalog" terminology in hand-written
   prose. Documentation only — all public API symbols (`ManagedTableResponse`,
   `load_managed_table`, the `managed` source type, etc.) are unchanged for

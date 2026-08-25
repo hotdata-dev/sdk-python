@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for managed databases, queries, and analytics.
+    Powerful data platform API for instant databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
@@ -29,8 +29,6 @@ class JobType(str, Enum):
     """
     NOOP = 'noop'
     BULK_CREATE_DATABASES = 'bulk_create_databases'
-    DATA_REFRESH_TABLE = 'data_refresh_table'
-    DATA_REFRESH_CONNECTION = 'data_refresh_connection'
     CREATE_INDEX = 'create_index'
     MANAGED_LOAD = 'managed_load'
     DUCKLAKE_VACUUM = 'ducklake_vacuum'
