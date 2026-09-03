@@ -39,12 +39,14 @@ class TestCreateDatabaseRequest(unittest.TestCase):
                 default_catalog = '',
                 default_schema = '',
                 expires_at = '',
+                if_not_exists = True,
                 name = '',
                 schemas = [
                     hotdata.models.database_default_schema_decl.DatabaseDefaultSchemaDecl(
                         name = 'sales', 
                         tables = [
                             hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
+                                constant_per_key = [event_date], 
                                 key = [order_id], 
                                 name = 'orders', 
                                 partition_by = [
