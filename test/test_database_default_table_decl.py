@@ -37,6 +37,7 @@ class TestDatabaseDefaultTableDecl(unittest.TestCase):
         if include_optional:
             return DatabaseDefaultTableDecl(
                 key = [order_id],
+                key_determines = [event_date],
                 name = 'orders',
                 partition_by = [
                     hotdata.models.table_partition_key.TablePartitionKey(

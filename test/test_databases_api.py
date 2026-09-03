@@ -111,6 +111,13 @@ class TestDatabasesApi(unittest.TestCase):
         """
         pass
 
+    def test_get_database_lineage(self) -> None:
+        """Test case for get_database_lineage
+
+        Get database lineage
+        """
+        pass
+
     def test_list_databases(self) -> None:
         """Test case for list_databases
 
@@ -122,6 +129,13 @@ class TestDatabasesApi(unittest.TestCase):
         """Test case for load_database_table
 
         Load database table from inline data, upload, or query result
+        """
+        pass
+
+    def test_lookup_database_by_name(self) -> None:
+        """Test case for lookup_database_by_name
+
+        Look up a database by name
         """
         pass
 

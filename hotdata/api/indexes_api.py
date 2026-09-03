@@ -64,7 +64,7 @@ class IndexesApi:
     ) -> IndexInfoResponse:
         """Create an index on a table
 
-        Create a sorted or BM25 full-text index on a cached table.
+        Create a sorted, BM25 full-text, or vector index on a cached table. A table can hold several indexes, with one exception: a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. The request body describes the rule in full.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -147,7 +147,7 @@ class IndexesApi:
     ) -> ApiResponse[IndexInfoResponse]:
         """Create an index on a table
 
-        Create a sorted or BM25 full-text index on a cached table.
+        Create a sorted, BM25 full-text, or vector index on a cached table. A table can hold several indexes, with one exception: a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. The request body describes the rule in full.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -230,7 +230,7 @@ class IndexesApi:
     ) -> RESTResponseType:
         """Create an index on a table
 
-        Create a sorted or BM25 full-text index on a cached table.
+        Create a sorted, BM25 full-text, or vector index on a cached table. A table can hold several indexes, with one exception: a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. The request body describes the rule in full.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
