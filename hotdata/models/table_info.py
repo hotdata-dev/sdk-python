@@ -3,7 +3,7 @@
 """
     Hotdata API
 
-    Powerful data platform API for managed databases, queries, and analytics.
+    Powerful data platform API for instant databases, queries, and analytics.
 
     The version of the OpenAPI document: 1.0.0
     Contact: developers@hotdata.dev
@@ -33,9 +33,9 @@ class TableInfo(BaseModel):
     columns: Optional[List[ColumnInfo]] = None
     connection: StrictStr
     last_sync: Optional[StrictStr] = None
-    partition_by: List[TablePartitionKey] = Field(description="The table's partition keys, in the order they were declared when the table was created. Empty when the table is not partitioned.  A table's storage layout is fixed when the table is created and cannot be changed afterwards, so this is how to confirm a table really was created with the layout that was asked for. The field is always present: an empty array means \"no partitioning declared\", which is not the same as a response that omits the field entirely.  Reported for tables in a hotdata-managed database, which are the only ones whose layout is declared here. A table discovered from an external connection always reports an empty array — its layout belongs to the upstream system, so an empty array there means \"not known from here\", not \"confirmed unpartitioned\".")
+    partition_by: List[TablePartitionKey] = Field(description="The table's partition keys, in the order they were declared when the table was created. Empty when the table is not partitioned.  A table's storage layout is fixed when the table is created and cannot be changed afterwards, so this is how to confirm a table really was created with the layout that was asked for. The field is always present: an empty array means \"no partitioning declared\", which is not the same as a response that omits the field entirely.  Reported for tables in a Hotdata instant database, which are the only ones whose layout is declared here. A table discovered from an external connection always reports an empty array — its layout belongs to the upstream system, so an empty array there means \"not known from here\", not \"confirmed unpartitioned\".")
     var_schema: StrictStr = Field(alias="schema")
-    sorted_by: List[TableSortKey] = Field(description="The table's sort keys, in the order they were declared when the table was created. Empty when no sort order was declared. Always present, and limited to tables in a hotdata-managed database, for the same reasons as `partition_by`.")
+    sorted_by: List[TableSortKey] = Field(description="The table's sort keys, in the order they were declared when the table was created. Empty when no sort order was declared. Always present, and limited to tables in a Hotdata instant database, for the same reasons as `partition_by`.")
     synced: StrictBool
     table: StrictStr
     __properties: ClassVar[List[str]] = ["columns", "connection", "last_sync", "partition_by", "schema", "sorted_by", "synced", "table"]

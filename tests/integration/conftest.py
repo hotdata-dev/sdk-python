@@ -14,7 +14,6 @@ from typing import Iterator
 import pytest
 
 from hotdata import ApiClient, Configuration
-from hotdata.api.connection_types_api import ConnectionTypesApi
 from hotdata.api.connections_api import ConnectionsApi
 from hotdata.api.database_context_api import DatabaseContextApi
 from hotdata.api.databases_api import DatabasesApi
@@ -22,9 +21,7 @@ from hotdata.api.embedding_providers_api import EmbeddingProvidersApi
 from hotdata.api.indexes_api import IndexesApi
 from hotdata.api.information_schema_api import InformationSchemaApi
 from hotdata.api.jobs_api import JobsApi
-from hotdata.api.refresh_api import RefreshApi
 from hotdata.api.saved_queries_api import SavedQueriesApi
-from hotdata.api.secrets_api import SecretsApi
 from hotdata.api.workspaces_api import WorkspacesApi
 from hotdata.exceptions import ApiException
 from hotdata.models.create_database_request import CreateDatabaseRequest
@@ -152,11 +149,6 @@ def saved_queries_api(api_client: ApiClient) -> SavedQueriesApi:
 
 
 @pytest.fixture
-def secrets_api(api_client: ApiClient) -> SecretsApi:
-    return SecretsApi(api_client)
-
-
-@pytest.fixture
 def database_context_api(api_client: ApiClient) -> DatabaseContextApi:
     return DatabaseContextApi(api_client)
 
@@ -164,11 +156,6 @@ def database_context_api(api_client: ApiClient) -> DatabaseContextApi:
 @pytest.fixture
 def embedding_providers_api(api_client: ApiClient) -> EmbeddingProvidersApi:
     return EmbeddingProvidersApi(api_client)
-
-
-@pytest.fixture
-def connection_types_api(api_client: ApiClient) -> ConnectionTypesApi:
-    return ConnectionTypesApi(api_client)
 
 
 @pytest.fixture
@@ -184,11 +171,6 @@ def information_schema_api(api_client: ApiClient) -> InformationSchemaApi:
 @pytest.fixture
 def uploads_api(api_client: ApiClient) -> UploadsApi:
     return UploadsApi(api_client)
-
-
-@pytest.fixture
-def refresh_api(api_client: ApiClient) -> RefreshApi:
-    return RefreshApi(api_client)
 
 
 @pytest.fixture

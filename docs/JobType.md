@@ -8,10 +8,6 @@ Background job types returned by the API.
 
 * `BULK_CREATE_DATABASES` (value: `'bulk_create_databases'`)
 
-* `DATA_REFRESH_TABLE` (value: `'data_refresh_table'`)
-
-* `DATA_REFRESH_CONNECTION` (value: `'data_refresh_connection'`)
-
 * `CREATE_INDEX` (value: `'create_index'`)
 
 * `MANAGED_LOAD` (value: `'managed_load'`)

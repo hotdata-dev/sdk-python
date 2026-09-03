@@ -1,6 +1,6 @@
 # hotdata
 
-Official Python client for the [Hotdata](https://www.hotdata.dev) HTTP API: workspaces, connections, datasets, SQL queries, results, secrets, uploads, indexes, jobs, embedding providers, and workspace context.
+Official Python client for the [Hotdata](https://www.hotdata.dev) HTTP API: workspaces, connections, datasets, SQL queries, results, uploads, indexes, jobs, embedding providers, and workspace context.
 
 ## Requirements
 
