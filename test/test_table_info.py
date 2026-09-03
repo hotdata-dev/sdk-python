@@ -43,6 +43,9 @@ class TestTableInfo(unittest.TestCase):
                         nullable = True, )
                     ],
                 connection = '',
+                constant_per_key = [
+                    ''
+                    ],
                 last_sync = '',
                 partition_by = [
                     hotdata.models.table_partition_key.TablePartitionKey(
@@ -62,6 +65,9 @@ class TestTableInfo(unittest.TestCase):
         else:
             return TableInfo(
                 connection = '',
+                constant_per_key = [
+                    ''
+                    ],
                 partition_by = [
                     hotdata.models.table_partition_key.TablePartitionKey(
                         column = 'created_at', 

@@ -40,6 +40,11 @@ class TestDatabaseSummary(unittest.TestCase):
                 default_catalog = '',
                 default_schema = '',
                 expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                forked_from = hotdata.models.forked_from_info.ForkedFromInfo(
+                    database_id = 'dbidk9p34y6n3wd25rq4f5zr37e3p3', 
+                    forked_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                    name = '', 
+                    snapshot_id = 56, ),
                 id = '',
                 name = ''
             )
