@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking:** the Secrets, Refresh, and Connection Types endpoints were retired
+  from the HotData API and are gone from the SDK: `SecretsApi`, `RefreshApi`,
+  `ConnectionTypesApi`, and their request/response models
+  (`CreateSecretRequest`, `UpdateSecretRequest`, `RefreshRequest`, etc.).
+- **Breaking:** `ConnectionsApi.check_connection_health` and
+  `ConnectionHealthResponse` are removed.
+- **Breaking:** the `data_refresh_table` / `data_refresh_connection` `JobType`
+  values and the corresponding `JobResult` variants
+  (`TableRefreshResult` / `ConnectionRefreshResult`) are removed.
+
 ### Changed
 
 - chore(databases): clarify fork naming behavior

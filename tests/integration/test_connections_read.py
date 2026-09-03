@@ -28,9 +28,5 @@ def test_connections_read(connections_api: ConnectionsApi, connection_id: str) -
         f"seeded connection {connection_id} not in list_connections"
     )
 
-    health = connections_api.check_connection_health(connection_id)
-    assert health.connection_id == connection_id
-    assert health.healthy, f"seeded connection unhealthy: {health.error}"
-
     # purge_connection_cache returns None on success.
     connections_api.purge_connection_cache(connection_id)
