@@ -49,6 +49,9 @@ class TestInformationSchemaResponse(unittest.TestCase):
                                 nullable = True, )
                             ], 
                         connection = '', 
+                        constant_per_key = [
+                            ''
+                            ], 
                         last_sync = '', 
                         partition_by = [
                             hotdata.models.table_partition_key.TablePartitionKey(
@@ -80,6 +83,9 @@ class TestInformationSchemaResponse(unittest.TestCase):
                                 nullable = True, )
                             ], 
                         connection = '', 
+                        constant_per_key = [
+                            ''
+                            ], 
                         last_sync = '', 
                         partition_by = [
                             hotdata.models.table_partition_key.TablePartitionKey(

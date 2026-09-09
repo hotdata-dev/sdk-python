@@ -26,6 +26,8 @@ Background job types returned by the API.
 
 * `DUCKLAKE_TABLE_COMPACTION` (value: `'ducklake_table_compaction'`)
 
+* `TABLE_CONSTANTS_UPDATE` (value: `'table_constants_update'`)
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 
