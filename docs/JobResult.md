@@ -1,6 +1,6 @@
 # JobResult
 
-Job-specific result payload. The shape depends on the job type. Null while the job is pending or running.
+What a finished background job produced. Absent while the job is `pending` or `running`, and absent for job types that report no payload.  Which shape you get is decided by the job's `job_type`, so read `job_type` first and then the matching object — the payload carries no discriminator of its own:  - `create_index` — the created index, in the same shape the index listing   returns. - `managed_load` — the load receipt: rows published and the table's schema   as published, in the same shape a synchronous load returns. - `bulk_create_databases` — the batch's counters: how many databases were   requested, how many were created, and whether the batch was stopped early.  The remaining job types — `noop` and the vacuum, compaction, and cleanup sweeps — report their outcome through `status` and `error_message` alone and leave this absent even once they finish.
 
 ## Properties
 

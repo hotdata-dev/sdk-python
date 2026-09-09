@@ -28,7 +28,7 @@ class QueryRunInfo(BaseModel):
     """
     Single query run for listing
     """ # noqa: E501
-    bytes_scanned: Optional[StrictInt] = Field(default=None, description="Total bytes of table data read from storage to run this query. `null` when the query touches no table at all (for example a constant expression like `SELECT 1`). May be `0` when the query reads a table but not its row data — for example a row count served from table statistics.")
+    bytes_scanned: Optional[StrictInt] = Field(default=None, description="Bytes this query actually fetched from storage. Not a measure of how much data the query covered — it counts the reads that reached storage, so the same SQL over the same rows reports a different number depending on what was already cached.  `null` means the query touched no table at all (for example a constant expression like `SELECT 1`).  `0` means the query read a table but fetched nothing from storage. It is a normal, common answer, not an error or a missing measurement, and it does not mean the query did no work — `rows_scanned` shows the rows it went through. The usual cause is a warm cache: re-running a query whose data or file metadata is already held in memory reports far fewer bytes than the first run, frequently `0`, with `rows_scanned` unchanged. A query answered from table statistics alone (a row count, say) also reports `0`.  Because of this, `bytes_scanned` is not a proxy for query cost or query volume. `GET /v1/usage` sums this field over a period, so that total is the storage read a workspace caused, not the work its queries did: repeating one query cheaply adds little or nothing to it.")
     completed_at: Optional[datetime] = None
     created_at: datetime
     error_message: Optional[StrictStr] = None

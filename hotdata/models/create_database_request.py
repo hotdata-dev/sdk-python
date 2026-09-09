@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl
 from typing import Optional, Set
@@ -31,9 +31,10 @@ class CreateDatabaseRequest(BaseModel):
     default_catalog: Optional[StrictStr] = Field(default=None, description="Optional name the database's auto-created default catalog answers to inside its query scope. Must be a valid SQL identifier (`[a-z0-9_]`, not starting with a digit) and may not collide with the reserved catalog names `hotdata` or `information_schema`. Defaults to `default` when omitted, so `default.main.<table>` keeps working.")
     default_schema: Optional[StrictStr] = Field(default=None, description="Optional schema that unqualified table names resolve to inside this database's query scope. Must be a valid SQL identifier (`[a-z0-9_]`, not starting with a digit). When omitted, a database that declares exactly one schema adopts that schema as its default; otherwise unqualified names resolve to `main`. Fully-qualified names (`<catalog>.<schema>.<table>`) are unaffected, and a per-query `default_schema` still takes precedence.")
     expires_at: Optional[StrictStr] = Field(default=None, description="When this database expires. Accepts either an RFC 3339 timestamp (e.g. `\"2026-06-01T00:00:00Z\"`) or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days) — for example `\"24h\"`, `\"48h\"`, or `\"7d\"`. Omitted (or empty) means the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.")
+    if_not_exists: Optional[StrictBool] = Field(default=None, description="Return the database that already carries this `name` instead of creating a second one with it. Requires `name`; the comparison is case-insensitive for unaccented Latin letters and digits, and ignores surrounding whitespace, matching `GET /v1/databases/by-name`.  A match responds `200` with the existing database rather than `201`, and is returned exactly as it stands: the rest of this request — `schemas`, `expires_at`, `default_catalog`, `default_schema` — is neither compared against it nor applied to it. Nothing is created, so this is safe to call on every start-up.")
     name: Optional[StrictStr] = Field(default=None, description="Optional free-form display label (for UIs/CLIs). When omitted, a label derived from the database's ID is assigned. Not unique. Not an identifier — databases are always addressed by `id`.  Accepts the legacy `description` key as an alias so clients that predate the rename keep populating this field.")
     schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Optional schemas/tables to declare on the database's auto-created default catalog. Tables declared here can be loaded via the standard managed-table load endpoint targeting `default_connection_id`. Omitted or empty means the default catalog starts empty.")
-    __properties: ClassVar[List[str]] = ["default_catalog", "default_schema", "expires_at", "name", "schemas"]
+    __properties: ClassVar[List[str]] = ["default_catalog", "default_schema", "expires_at", "if_not_exists", "name", "schemas"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -116,6 +117,7 @@ class CreateDatabaseRequest(BaseModel):
             "default_catalog": obj.get("default_catalog"),
             "default_schema": obj.get("default_schema"),
             "expires_at": obj.get("expires_at"),
+            "if_not_exists": obj.get("if_not_exists"),
             "name": obj.get("name"),
             "schemas": [DatabaseDefaultSchemaDecl.from_dict(_item) for _item in obj["schemas"]] if obj.get("schemas") is not None else None
         })

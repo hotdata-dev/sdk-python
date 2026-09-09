@@ -36,6 +36,7 @@ class TestAddManagedTableDecl(unittest.TestCase):
         model = AddManagedTableDecl()
         if include_optional:
             return AddManagedTableDecl(
+                constant_per_key = [event_date],
                 key = [order_id],
                 name = 'orders',
                 partition_by = [
