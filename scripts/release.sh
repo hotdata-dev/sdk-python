@@ -5,6 +5,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 die() { echo "error: $*" >&2; exit 1; }
+
+# The one definition of an explicit version, shared by the argument check and
+# the branch that takes the argument verbatim, so the two cannot drift apart.
+readonly VERSION_RE='^[0-9]+\.[0-9]+\.[0-9]+$'
+readonly BUMP_KIND_RE='^(patch|minor|major)$'
 need() { command -v "$1" >/dev/null 2>&1 || die "$1 is required"; }
 
 # An interpreter that can `import tomllib`, which is stdlib only from 3.11.
@@ -135,9 +140,11 @@ update_changelog() {
 cmd_prepare() {
   local bump="${1:-}"
   [[ -n "$bump" ]] || { usage; die "missing bump kind or explicit version"; }
-  # Validate before any branch switch below, so a typo exits without moving the
-  # caller off the branch they invoked from.
-  [[ "$bump" =~ ^(patch|minor|major|[0-9]+\.[0-9]+\.[0-9]+)$ ]] \
+  # Check the argument before any branch switch below, so a typo exits without
+  # moving the caller off the branch they invoked from. Failures that depend on
+  # the base branch's version — an unchanged version, a pre-release suffix —
+  # can only be found after the checkout.
+  [[ "$bump" =~ $BUMP_KIND_RE || "$bump" =~ $VERSION_RE ]] \
     || { usage; die "unknown bump kind: $bump"; }
   need gh
   PY_BIN="$(resolve_python)"
@@ -154,7 +161,7 @@ cmd_prepare() {
   # was invoked on. The bump is computed from it, so reading it first numbers
   # the release off unrelated history.
   current="$(get_version)"
-  if [[ "$bump" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  if [[ "$bump" =~ $VERSION_RE ]]; then
     new="$bump"
   else
     new="$(bump_version "$bump" "$current")"
