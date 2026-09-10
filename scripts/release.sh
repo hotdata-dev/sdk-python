@@ -135,6 +135,10 @@ update_changelog() {
 cmd_prepare() {
   local bump="${1:-}"
   [[ -n "$bump" ]] || { usage; die "missing bump kind or explicit version"; }
+  # Validate before any branch switch below, so a typo exits without moving the
+  # caller off the branch they invoked from.
+  [[ "$bump" =~ ^(patch|minor|major|[0-9]+\.[0-9]+\.[0-9]+)$ ]] \
+    || { usage; die "unknown bump kind: $bump"; }
   need gh
   PY_BIN="$(resolve_python)"
   ensure_clean
