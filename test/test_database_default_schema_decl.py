@@ -39,6 +39,7 @@ class TestDatabaseDefaultSchemaDecl(unittest.TestCase):
                 name = 'sales',
                 tables = [
                     hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
+                        constant_per_key = [event_date], 
                         key = [order_id], 
                         name = 'orders', 
                         partition_by = [

@@ -40,7 +40,7 @@ class TestQueryRequest(unittest.TestCase):
                 async_after_ms = 1000,
                 database_id = 'dbid6lguax1dxn9y1xj5gxnameyywl',
                 default_catalog = 'default',
-                default_schema = 'main',
+                default_schema = 'public',
                 dialect = 'hotsql',
                 sql = 'SELECT customer_id, sum(amount) AS total FROM orders GROUP BY customer_id ORDER BY total DESC LIMIT 10'
             )
