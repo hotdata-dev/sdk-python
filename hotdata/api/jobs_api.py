@@ -309,8 +309,8 @@ class JobsApi:
     @validate_call
     def list_jobs(
         self,
-        job_type: Annotated[Optional[JobType], Field(description="Filter by job type")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=pending,running)")] = None,
+        job_type: Annotated[Optional[JobType], Field(description="Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.")] = None,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max results (default 50)")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Offset for pagination")] = None,
         _request_timeout: Union[
@@ -328,11 +328,11 @@ class JobsApi:
     ) -> ListJobsResponse:
         """List jobs
 
-        List background jobs with optional filters by type and status.
+        List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
 
-        :param job_type: Filter by job type
+        :param job_type: Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.
         :type job_type: JobType
-        :param status: Filter by status (comma-separated, e.g. status=pending,running)
+        :param status: Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.
         :type status: str
         :param limit: Max results (default 50)
         :type limit: int
@@ -388,8 +388,8 @@ class JobsApi:
     @validate_call
     def list_jobs_with_http_info(
         self,
-        job_type: Annotated[Optional[JobType], Field(description="Filter by job type")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=pending,running)")] = None,
+        job_type: Annotated[Optional[JobType], Field(description="Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.")] = None,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max results (default 50)")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Offset for pagination")] = None,
         _request_timeout: Union[
@@ -407,11 +407,11 @@ class JobsApi:
     ) -> ApiResponse[ListJobsResponse]:
         """List jobs
 
-        List background jobs with optional filters by type and status.
+        List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
 
-        :param job_type: Filter by job type
+        :param job_type: Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.
         :type job_type: JobType
-        :param status: Filter by status (comma-separated, e.g. status=pending,running)
+        :param status: Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.
         :type status: str
         :param limit: Max results (default 50)
         :type limit: int
@@ -467,8 +467,8 @@ class JobsApi:
     @validate_call
     def list_jobs_without_preload_content(
         self,
-        job_type: Annotated[Optional[JobType], Field(description="Filter by job type")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=pending,running)")] = None,
+        job_type: Annotated[Optional[JobType], Field(description="Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.")] = None,
         limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max results (default 50)")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Offset for pagination")] = None,
         _request_timeout: Union[
@@ -486,11 +486,11 @@ class JobsApi:
     ) -> RESTResponseType:
         """List jobs
 
-        List background jobs with optional filters by type and status.
+        List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
 
-        :param job_type: Filter by job type
+        :param job_type: Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.
         :type job_type: JobType
-        :param status: Filter by status (comma-separated, e.g. status=pending,running)
+        :param status: Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.
         :type status: str
         :param limit: Max results (default 50)
         :type limit: int
