@@ -22,6 +22,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from hotdata.models.database_attachment_info import DatabaseAttachmentInfo
+from hotdata.models.forked_from_info import ForkedFromInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -35,9 +36,10 @@ class DatabaseDetailResponse(BaseModel):
     default_connection_id: StrictStr
     default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
     expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
+    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Set on a database created by forking another one: where it came from and which state of the source it copied. `GET /databases/{database_id}/lineage` returns the whole family tree.")
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["attachments", "created_at", "default_catalog", "default_connection_id", "default_schema", "expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["attachments", "created_at", "default_catalog", "default_connection_id", "default_schema", "expires_at", "forked_from", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,6 +87,9 @@ class DatabaseDetailResponse(BaseModel):
                 if _item_attachments:
                     _items.append(_item_attachments.to_dict())
             _dict['attachments'] = _items
+        # override the default output from pydantic by calling `to_dict()` of forked_from
+        if self.forked_from:
+            _dict['forked_from'] = self.forked_from.to_dict()
         # set to None if created_at (nullable) is None
         # and model_fields_set contains the field
         if self.created_at is None and "created_at" in self.model_fields_set:
@@ -94,6 +99,11 @@ class DatabaseDetailResponse(BaseModel):
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
             _dict['expires_at'] = None
+
+        # set to None if forked_from (nullable) is None
+        # and model_fields_set contains the field
+        if self.forked_from is None and "forked_from" in self.model_fields_set:
+            _dict['forked_from'] = None
 
         # set to None if name (nullable) is None
         # and model_fields_set contains the field
@@ -118,6 +128,7 @@ class DatabaseDetailResponse(BaseModel):
             "default_connection_id": obj.get("default_connection_id"),
             "default_schema": obj.get("default_schema"),
             "expires_at": obj.get("expires_at"),
+            "forked_from": ForkedFromInfo.from_dict(obj["forked_from"]) if obj.get("forked_from") is not None else None,
             "id": obj.get("id"),
             "name": obj.get("name")
         })

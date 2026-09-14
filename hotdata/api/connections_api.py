@@ -27,8 +27,10 @@ from hotdata.models.list_connections_response import ListConnectionsResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
 from hotdata.models.managed_schema_response import ManagedSchemaResponse
+from hotdata.models.managed_table_constant_per_key_response import ManagedTableConstantPerKeyResponse
 from hotdata.models.managed_table_response import ManagedTableResponse
 from hotdata.models.table_profile_response import TableProfileResponse
+from hotdata.models.update_managed_table_request import UpdateManagedTableRequest
 
 from hotdata.api_client import ApiClient, RequestSerialized
 from hotdata.api_response import ApiResponse
@@ -2337,7 +2339,7 @@ class ConnectionsApi:
     ) -> LoadManagedTableResponse:
         """Load managed table from inline data, upload, or query result
 
-        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2421,7 +2423,7 @@ class ConnectionsApi:
     ) -> ApiResponse[LoadManagedTableResponse]:
         """Load managed table from inline data, upload, or query result
 
-        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2505,7 +2507,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Load managed table from inline data, upload, or query result
 
-        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2651,9 +2653,12 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_connection_cache(
+    def set_managed_table_constant_per_key(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        var_schema: Annotated[StrictStr, Field(description="Schema name")],
+        table: Annotated[StrictStr, Field(description="Table name")],
+        update_managed_table_request: UpdateManagedTableRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2666,13 +2671,19 @@ class ConnectionsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Purge connection cache
+    ) -> ManagedTableConstantPerKeyResponse:
+        """Declare which columns are constant per key
 
-        Purge all cached data for a connection. The next query against these tables will trigger a fresh sync from the remote source.
+        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics do not discriminate.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created. It changes only which files a mutation opens, never how rows are written, so nothing stored becomes wrong when it changes and a populated table can adopt it with no rewrite. It takes effect on the next load.  Send an empty array to revoke it, restoring the unrestricted search — this is the way to undo a declaration that turns out to be false.  **This is correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it, and the pruning conceals its own evidence because the file holding the missed row is never opened. Declare it only where the invariant is established.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
+        :param var_schema: Schema name (required)
+        :type var_schema: str
+        :param table: Table name (required)
+        :type table: str
+        :param update_managed_table_request: (required)
+        :type update_managed_table_request: UpdateManagedTableRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2695,8 +2706,11 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_connection_cache_serialize(
+        _param = self._set_managed_table_constant_per_key_serialize(
             connection_id=connection_id,
+            var_schema=var_schema,
+            table=table,
+            update_managed_table_request=update_managed_table_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2704,7 +2718,7 @@ class ConnectionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '204': None,
+            '200': "ManagedTableConstantPerKeyResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
@@ -2721,9 +2735,12 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_connection_cache_with_http_info(
+    def set_managed_table_constant_per_key_with_http_info(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        var_schema: Annotated[StrictStr, Field(description="Schema name")],
+        table: Annotated[StrictStr, Field(description="Table name")],
+        update_managed_table_request: UpdateManagedTableRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2736,13 +2753,19 @@ class ConnectionsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Purge connection cache
+    ) -> ApiResponse[ManagedTableConstantPerKeyResponse]:
+        """Declare which columns are constant per key
 
-        Purge all cached data for a connection. The next query against these tables will trigger a fresh sync from the remote source.
+        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics do not discriminate.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created. It changes only which files a mutation opens, never how rows are written, so nothing stored becomes wrong when it changes and a populated table can adopt it with no rewrite. It takes effect on the next load.  Send an empty array to revoke it, restoring the unrestricted search — this is the way to undo a declaration that turns out to be false.  **This is correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it, and the pruning conceals its own evidence because the file holding the missed row is never opened. Declare it only where the invariant is established.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
+        :param var_schema: Schema name (required)
+        :type var_schema: str
+        :param table: Table name (required)
+        :type table: str
+        :param update_managed_table_request: (required)
+        :type update_managed_table_request: UpdateManagedTableRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2765,8 +2788,11 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_connection_cache_serialize(
+        _param = self._set_managed_table_constant_per_key_serialize(
             connection_id=connection_id,
+            var_schema=var_schema,
+            table=table,
+            update_managed_table_request=update_managed_table_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2774,7 +2800,7 @@ class ConnectionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '204': None,
+            '200': "ManagedTableConstantPerKeyResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
@@ -2791,9 +2817,12 @@ class ConnectionsApi:
 
 
     @validate_call
-    def purge_connection_cache_without_preload_content(
+    def set_managed_table_constant_per_key_without_preload_content(
         self,
         connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        var_schema: Annotated[StrictStr, Field(description="Schema name")],
+        table: Annotated[StrictStr, Field(description="Table name")],
+        update_managed_table_request: UpdateManagedTableRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2807,12 +2836,18 @@ class ConnectionsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Purge connection cache
+        """Declare which columns are constant per key
 
-        Purge all cached data for a connection. The next query against these tables will trigger a fresh sync from the remote source.
+        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics do not discriminate.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created. It changes only which files a mutation opens, never how rows are written, so nothing stored becomes wrong when it changes and a populated table can adopt it with no rewrite. It takes effect on the next load.  Send an empty array to revoke it, restoring the unrestricted search — this is the way to undo a declaration that turns out to be false.  **This is correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it, and the pruning conceals its own evidence because the file holding the missed row is never opened. Declare it only where the invariant is established.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
+        :param var_schema: Schema name (required)
+        :type var_schema: str
+        :param table: Table name (required)
+        :type table: str
+        :param update_managed_table_request: (required)
+        :type update_managed_table_request: UpdateManagedTableRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2835,8 +2870,11 @@ class ConnectionsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._purge_connection_cache_serialize(
+        _param = self._set_managed_table_constant_per_key_serialize(
             connection_id=connection_id,
+            var_schema=var_schema,
+            table=table,
+            update_managed_table_request=update_managed_table_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2844,7 +2882,7 @@ class ConnectionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '204': None,
+            '200': "ManagedTableConstantPerKeyResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
@@ -2856,300 +2894,12 @@ class ConnectionsApi:
         return response_data.response
 
 
-    def _purge_connection_cache_serialize(
-        self,
-        connection_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if connection_id is not None:
-            _path_params['connection_id'] = connection_id
-        # process the query parameters
-        # process the header parameters
-        # process the form parameters
-        # process the body parameter
-
-
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'WorkspaceId', 
-            'BearerAuth'
-        ]
-
-        return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/v1/connections/{connection_id}/cache',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    def purge_table_cache(
-        self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
-        var_schema: Annotated[StrictStr, Field(description="Schema name")],
-        table: Annotated[StrictStr, Field(description="Table name")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Purge table cache
-
-        Purge the cached data for a single table. The next query will trigger a fresh sync.
-
-        :param connection_id: Connection ID (required)
-        :type connection_id: str
-        :param var_schema: Schema name (required)
-        :type var_schema: str
-        :param table: Table name (required)
-        :type table: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._purge_table_cache_serialize(
-            connection_id=connection_id,
-            var_schema=var_schema,
-            table=table,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '204': None,
-            '404': "ApiErrorResponse",
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    def purge_table_cache_with_http_info(
-        self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
-        var_schema: Annotated[StrictStr, Field(description="Schema name")],
-        table: Annotated[StrictStr, Field(description="Table name")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Purge table cache
-
-        Purge the cached data for a single table. The next query will trigger a fresh sync.
-
-        :param connection_id: Connection ID (required)
-        :type connection_id: str
-        :param var_schema: Schema name (required)
-        :type var_schema: str
-        :param table: Table name (required)
-        :type table: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._purge_table_cache_serialize(
-            connection_id=connection_id,
-            var_schema=var_schema,
-            table=table,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '204': None,
-            '404': "ApiErrorResponse",
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    def purge_table_cache_without_preload_content(
-        self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
-        var_schema: Annotated[StrictStr, Field(description="Schema name")],
-        table: Annotated[StrictStr, Field(description="Table name")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Purge table cache
-
-        Purge the cached data for a single table. The next query will trigger a fresh sync.
-
-        :param connection_id: Connection ID (required)
-        :type connection_id: str
-        :param var_schema: Schema name (required)
-        :type var_schema: str
-        :param table: Table name (required)
-        :type table: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._purge_table_cache_serialize(
-            connection_id=connection_id,
-            var_schema=var_schema,
-            table=table,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '204': None,
-            '404': "ApiErrorResponse",
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _purge_table_cache_serialize(
+    def _set_managed_table_constant_per_key_serialize(
         self,
         connection_id,
         var_schema,
         table,
+        update_managed_table_request,
         _request_auth,
         _content_type,
         _headers,
@@ -3181,6 +2931,8 @@ class ConnectionsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
+        if update_managed_table_request is not None:
+            _body_params = update_managed_table_request
 
 
         # set the HTTP header `Accept`
@@ -3191,6 +2943,19 @@ class ConnectionsApi:
                 ]
             )
 
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [
@@ -3199,8 +2964,8 @@ class ConnectionsApi:
         ]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/v1/connections/{connection_id}/tables/{schema}/{table}/cache',
+            method='PUT',
+            resource_path='/v1/connections/{connection_id}/schemas/{schema}/tables/{table}/constant-per-key',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -29,11 +29,11 @@ class InformationSchemaResponse(BaseModel):
     """
     Response body for GET /information_schema
     """ # noqa: E501
-    count: Annotated[int, Field(strict=True, ge=0)]
-    has_more: StrictBool
-    limit: Annotated[int, Field(strict=True, ge=0)]
-    next_cursor: Optional[StrictStr] = None
-    tables: List[TableInfo]
+    count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of tables in this response, the same meaning `count` carries on the results and databases listings.  This is a page size, not a total for the whole filter. Page with `has_more` and `next_cursor`: an empty `tables` array on its own does not mean the listing is finished.")
+    has_more: StrictBool = Field(description="True when more tables follow this page. Pass `next_cursor` to fetch them.")
+    limit: Annotated[int, Field(strict=True, ge=0)] = Field(description="The page size in effect for this response — the `limit` you asked for, clamped to the server's maximum, or the server default when you sent none.")
+    next_cursor: Optional[StrictStr] = Field(default=None, description="Cursor for the next page, present only when `has_more` is `true`. Send it back as the `cursor` query parameter.")
+    tables: List[TableInfo] = Field(description="The tables on this page.")
     __properties: ClassVar[List[str]] = ["count", "has_more", "limit", "next_cursor", "tables"]
 
     model_config = ConfigDict(
