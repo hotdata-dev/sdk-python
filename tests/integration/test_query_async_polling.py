@@ -70,10 +70,20 @@ def test_query_async_polling(
     )
     assert run.row_count == 1
 
-    runs_listing = query_runs_api.list_query_runs(x_database_id=database_id, limit=50)
-    assert any(r.id == query_run_id for r in runs_listing.query_runs), (
-        f"query run {query_run_id} not surfaced by list_query_runs"
-    )
+    # The shared sdkci database serves concurrent CI runs, and a run that just
+    # reached terminal status can lag out of list_query_runs briefly — retry
+    # for a few seconds before declaring it missing.
+    listing_deadline = time.monotonic() + 10.0
+    while True:
+        runs_listing = query_runs_api.list_query_runs(
+            x_database_id=database_id, limit=50
+        )
+        if any(r.id == query_run_id for r in runs_listing.query_runs):
+            break
+        assert time.monotonic() < listing_deadline, (
+            f"query run {query_run_id} not surfaced by list_query_runs"
+        )
+        time.sleep(POLL_INTERVAL_S)
 
     if run.result_id:
         result = results_api.get_result(run.result_id, x_database_id=database_id)
