@@ -13,8 +13,6 @@ Method | HTTP request | Description
 [**get_table_profile**](ConnectionsApi.md#get_table_profile) | **GET** /v1/connections/{connection_id}/tables/{schema}/{table}/profile | Get table profile
 [**list_connections**](ConnectionsApi.md#list_connections) | **GET** /v1/connections | List connections
 [**load_managed_table**](ConnectionsApi.md#load_managed_table) | **POST** /v1/connections/{connection_id}/schemas/{schema}/tables/{table}/loads | Load managed table from inline data, upload, or query result
-[**purge_connection_cache**](ConnectionsApi.md#purge_connection_cache) | **DELETE** /v1/connections/{connection_id}/cache | Purge connection cache
-[**purge_table_cache**](ConnectionsApi.md#purge_table_cache) | **DELETE** /v1/connections/{connection_id}/tables/{schema}/{table}/cache | Purge table cache
 
 
 # **add_managed_schema**
@@ -723,7 +721,7 @@ This endpoint does not need any parameter.
 
 Load managed table from inline data, upload, or query result
 
-Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
+Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously.
 
 ### Example
 
@@ -766,7 +764,7 @@ with hotdata.ApiClient(configuration) as api_client:
     connection_id = 'connection_id_example' # str | Connection ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
-    load_managed_table_request = {"data":"order_id,customer_id,amount\n1001,42,1999\n1002,7,4550\n","mode":"replace"} # LoadManagedTableRequest | 
+    load_managed_table_request = {"mode":"replace","data":"order_id,customer_id,amount\n1001,42,1999\n1002,7,4550\n"} # LoadManagedTableRequest | 
 
     try:
         # Load managed table from inline data, upload, or query result
@@ -812,178 +810,6 @@ Name | Type | Description  | Notes
 **404** | Connection, upload, or result not found, or the table was deleted |  -  |
 **409** | Upload already consumed or in flight, the result is still being computed, or the incoming data changes a column&#39;s type incompatibly (only widening to a larger compatible type can be applied automatically); the existing data is unchanged and remains queryable |  -  |
 **413** | Inline &#x60;data&#x60; is over the 2 MiB limit (error code &#x60;INLINE_DATA_TOO_LARGE&#x60;); upload the data and load it by &#x60;upload_id&#x60; instead |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **purge_connection_cache**
-> purge_connection_cache(connection_id)
-
-Purge connection cache
-
-Purge all cached data for a connection. The next query against these tables will trigger a fresh sync from the remote source.
-
-### Example
-
-* Api Key Authentication (WorkspaceId):
-* Bearer Authentication (BearerAuth):
-
-```python
-import hotdata
-from hotdata.rest import ApiException
-from pprint import pprint
-
-# Defining the host is optional and defaults to https://api.hotdata.dev
-# See configuration.py for a list of all supported configuration parameters.
-configuration = hotdata.Configuration(
-    host = "https://api.hotdata.dev"
-)
-
-# The client must configure the authentication and authorization parameters
-# in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
-
-# Configure API key authorization: WorkspaceId
-configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
-
-# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
-
-# Configure Bearer authorization: BearerAuth
-configuration = hotdata.Configuration(
-    access_token = os.environ["BEARER_TOKEN"]
-)
-
-# Enter a context with an instance of the API client
-with hotdata.ApiClient(configuration) as api_client:
-    # Create an instance of the API class
-    api_instance = hotdata.ConnectionsApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection ID
-
-    try:
-        # Purge connection cache
-        api_instance.purge_connection_cache(connection_id)
-    except Exception as e:
-        print("Exception when calling ConnectionsApi->purge_connection_cache: %s\n" % e)
-```
-
-
-
-### Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection ID | 
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-**204** | Cache purged |  -  |
-**400** | Managed catalogs own their data and cannot be cache-purged |  -  |
-**404** | Connection not found |  -  |
-**409** | Connection backs a database&#39;s default catalog and cannot be purged directly |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **purge_table_cache**
-> purge_table_cache(connection_id, var_schema, table)
-
-Purge table cache
-
-Purge the cached data for a single table. The next query will trigger a fresh sync.
-
-### Example
-
-* Api Key Authentication (WorkspaceId):
-* Bearer Authentication (BearerAuth):
-
-```python
-import hotdata
-from hotdata.rest import ApiException
-from pprint import pprint
-
-# Defining the host is optional and defaults to https://api.hotdata.dev
-# See configuration.py for a list of all supported configuration parameters.
-configuration = hotdata.Configuration(
-    host = "https://api.hotdata.dev"
-)
-
-# The client must configure the authentication and authorization parameters
-# in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
-
-# Configure API key authorization: WorkspaceId
-configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
-
-# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
-
-# Configure Bearer authorization: BearerAuth
-configuration = hotdata.Configuration(
-    access_token = os.environ["BEARER_TOKEN"]
-)
-
-# Enter a context with an instance of the API client
-with hotdata.ApiClient(configuration) as api_client:
-    # Create an instance of the API class
-    api_instance = hotdata.ConnectionsApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection ID
-    var_schema = 'var_schema_example' # str | Schema name
-    table = 'table_example' # str | Table name
-
-    try:
-        # Purge table cache
-        api_instance.purge_table_cache(connection_id, var_schema, table)
-    except Exception as e:
-        print("Exception when calling ConnectionsApi->purge_table_cache: %s\n" % e)
-```
-
-
-
-### Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection ID | 
- **var_schema** | **str**| Schema name | 
- **table** | **str**| Table name | 
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-**204** | Table cache purged |  -  |
-**404** | Not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -90,6 +90,7 @@ __all__ = [
     "DatabaseDefaultSchemaDecl",
     "DatabaseDefaultTableDecl",
     "DatabaseDetailResponse",
+    "DatabaseLineageResponse",
     "DatabaseSummary",
     "DeleteDatabaseBatchResponse",
     "DiscoveryStatus",
@@ -100,6 +101,7 @@ __all__ = [
     "FinalizeUploadRequest",
     "FinalizeUploadResponse",
     "ForkDatabaseRequest",
+    "ForkedFromInfo",
     "GetConnectionResponse",
     "GetDatabaseContextResponse",
     "GetResultResponse",
@@ -111,6 +113,8 @@ __all__ = [
     "JobStatus",
     "JobStatusResponse",
     "JobType",
+    "LineageAncestorInfo",
+    "LineageForkInfo",
     "ListConnectionsResponse",
     "ListDatabaseContextsResponse",
     "ListDatabasesResponse",
@@ -228,6 +232,7 @@ from hotdata.models.database_count_response import DatabaseCountResponse as Data
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl as DatabaseDefaultSchemaDecl
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl as DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse as DatabaseDetailResponse
+from hotdata.models.database_lineage_response import DatabaseLineageResponse as DatabaseLineageResponse
 from hotdata.models.database_summary import DatabaseSummary as DatabaseSummary
 from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse as DeleteDatabaseBatchResponse
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
@@ -238,6 +243,7 @@ from hotdata.models.finalize_upload_part import FinalizeUploadPart as FinalizeUp
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest as FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse as FinalizeUploadResponse
 from hotdata.models.fork_database_request import ForkDatabaseRequest as ForkDatabaseRequest
+from hotdata.models.forked_from_info import ForkedFromInfo as ForkedFromInfo
 from hotdata.models.get_connection_response import GetConnectionResponse as GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse as GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
@@ -249,6 +255,8 @@ from hotdata.models.job_result import JobResult as JobResult
 from hotdata.models.job_status import JobStatus as JobStatus
 from hotdata.models.job_status_response import JobStatusResponse as JobStatusResponse
 from hotdata.models.job_type import JobType as JobType
+from hotdata.models.lineage_ancestor_info import LineageAncestorInfo as LineageAncestorInfo
+from hotdata.models.lineage_fork_info import LineageForkInfo as LineageForkInfo
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
 from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse as ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse as ListDatabasesResponse

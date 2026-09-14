@@ -90,20 +90,6 @@ class TestConnectionsApi(unittest.TestCase):
         """
         pass
 
-    def test_purge_connection_cache(self) -> None:
-        """Test case for purge_connection_cache
-
-        Purge connection cache
-        """
-        pass
-
-    def test_purge_table_cache(self) -> None:
-        """Test case for purge_table_cache
-
-        Purge table cache
-        """
-        pass
-
 
 if __name__ == '__main__':
     unittest.main()

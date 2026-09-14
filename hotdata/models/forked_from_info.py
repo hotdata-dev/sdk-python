@@ -21,25 +21,18 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from hotdata.models.job_result import JobResult
-from hotdata.models.job_status import JobStatus
-from hotdata.models.job_type import JobType
 from typing import Optional, Set
 from typing_extensions import Self
 
-class JobStatusResponse(BaseModel):
+class ForkedFromInfo(BaseModel):
     """
-    Response body for GET /v1/jobs/{id}
+    Where a forked database came from, and which state of the source it copied.  Present only on a database that was created by forking another one. It is a record of how this database came to exist, not a live link: the fork and its source are independent from the moment the fork is created, and either can change or be deleted without affecting the other.  Forks created before lineage was recorded carry no `forked_from`.
     """ # noqa: E501
-    attempts: StrictInt = Field(description="Number of execution attempts (including the current one).")
-    completed_at: Optional[datetime] = None
-    created_at: datetime
-    error_message: Optional[StrictStr] = Field(default=None, description="Error or warning message. Set when status is `failed` or `partially_succeeded`.")
-    id: StrictStr
-    job_type: JobType
-    result: Optional[JobResult] = Field(default=None, description="What the job produced. Omitted entirely while the job is `pending` or `running`, and for job types that report no payload. Read `job_type` to know which shape to expect.")
-    status: JobStatus
-    __properties: ClassVar[List[str]] = ["attempts", "completed_at", "created_at", "error_message", "id", "job_type", "result", "status"]
+    database_id: StrictStr = Field(description="ID of the database that was forked. The database may since have been deleted — the record outlives it — so this is not guaranteed to resolve.")
+    forked_at: Optional[datetime] = Field(default=None, description="When the fork was taken.")
+    name: Optional[StrictStr] = Field(default=None, description="Display label the source carried when the fork was taken, kept so a deleted source still reads as more than an ID.")
+    snapshot_id: Optional[StrictInt] = Field(default=None, description="Marks the version of the source that this fork copied — its table set and their contents as of that moment. It is a point in time rather than a per-database revision count, so two forks of a source that did not change still report different values, and the numbers are not a way to tell whether a source has changed. Absent only on forks taken before the version was recorded.")
+    __properties: ClassVar[List[str]] = ["database_id", "forked_at", "name", "snapshot_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,7 +52,7 @@ class JobStatusResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of JobStatusResponse from a JSON string"""
+        """Create an instance of ForkedFromInfo from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -80,29 +73,26 @@ class JobStatusResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of result
-        if self.result:
-            _dict['result'] = self.result.to_dict()
-        # set to None if completed_at (nullable) is None
+        # set to None if forked_at (nullable) is None
         # and model_fields_set contains the field
-        if self.completed_at is None and "completed_at" in self.model_fields_set:
-            _dict['completed_at'] = None
+        if self.forked_at is None and "forked_at" in self.model_fields_set:
+            _dict['forked_at'] = None
 
-        # set to None if error_message (nullable) is None
+        # set to None if name (nullable) is None
         # and model_fields_set contains the field
-        if self.error_message is None and "error_message" in self.model_fields_set:
-            _dict['error_message'] = None
+        if self.name is None and "name" in self.model_fields_set:
+            _dict['name'] = None
 
-        # set to None if result (nullable) is None
+        # set to None if snapshot_id (nullable) is None
         # and model_fields_set contains the field
-        if self.result is None and "result" in self.model_fields_set:
-            _dict['result'] = None
+        if self.snapshot_id is None and "snapshot_id" in self.model_fields_set:
+            _dict['snapshot_id'] = None
 
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of JobStatusResponse from a dict"""
+        """Create an instance of ForkedFromInfo from a dict"""
         if obj is None:
             return None
 
@@ -110,14 +100,10 @@ class JobStatusResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "attempts": obj.get("attempts"),
-            "completed_at": obj.get("completed_at"),
-            "created_at": obj.get("created_at"),
-            "error_message": obj.get("error_message"),
-            "id": obj.get("id"),
-            "job_type": obj.get("job_type"),
-            "result": JobResult.from_dict(obj["result"]) if obj.get("result") is not None else None,
-            "status": obj.get("status")
+            "database_id": obj.get("database_id"),
+            "forked_at": obj.get("forked_at"),
+            "name": obj.get("name"),
+            "snapshot_id": obj.get("snapshot_id")
         })
         return _obj
 
