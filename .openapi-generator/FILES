@@ -46,6 +46,7 @@ docs/DatabaseCountResponse.md
 docs/DatabaseDefaultSchemaDecl.md
 docs/DatabaseDefaultTableDecl.md
 docs/DatabaseDetailResponse.md
+docs/DatabaseLineageResponse.md
 docs/DatabaseSummary.md
 docs/DatabasesApi.md
 docs/DeleteDatabaseBatchResponse.md
@@ -58,6 +59,7 @@ docs/FinalizeUploadPart.md
 docs/FinalizeUploadRequest.md
 docs/FinalizeUploadResponse.md
 docs/ForkDatabaseRequest.md
+docs/ForkedFromInfo.md
 docs/GetConnectionResponse.md
 docs/GetDatabaseContextResponse.md
 docs/GetResultResponse.md
@@ -72,6 +74,8 @@ docs/JobStatus.md
 docs/JobStatusResponse.md
 docs/JobType.md
 docs/JobsApi.md
+docs/LineageAncestorInfo.md
+docs/LineageForkInfo.md
 docs/ListConnectionsResponse.md
 docs/ListDatabaseContextsResponse.md
 docs/ListDatabasesResponse.md
@@ -87,6 +91,7 @@ docs/ListWorkspacesResponse.md
 docs/LoadManagedTableRequest.md
 docs/LoadManagedTableResponse.md
 docs/ManagedSchemaResponse.md
+docs/ManagedTableConstantPerKeyResponse.md
 docs/ManagedTableResponse.md
 docs/MintUploadPartsRequest.md
 docs/MintUploadPartsResponse.md
@@ -113,6 +118,7 @@ docs/TemporalProfileDetail.md
 docs/TextProfileDetail.md
 docs/UpdateEmbeddingProviderRequest.md
 docs/UpdateEmbeddingProviderResponse.md
+docs/UpdateManagedTableRequest.md
 docs/UpdateSavedQueryRequest.md
 docs/UploadSessionResponse.md
 docs/UploadsApi.md
@@ -187,6 +193,7 @@ hotdata/models/database_count_response.py
 hotdata/models/database_default_schema_decl.py
 hotdata/models/database_default_table_decl.py
 hotdata/models/database_detail_response.py
+hotdata/models/database_lineage_response.py
 hotdata/models/database_summary.py
 hotdata/models/delete_database_batch_response.py
 hotdata/models/discovery_status.py
@@ -197,6 +204,7 @@ hotdata/models/finalize_upload_part.py
 hotdata/models/finalize_upload_request.py
 hotdata/models/finalize_upload_response.py
 hotdata/models/fork_database_request.py
+hotdata/models/forked_from_info.py
 hotdata/models/get_connection_response.py
 hotdata/models/get_database_context_response.py
 hotdata/models/get_result_response.py
@@ -208,6 +216,8 @@ hotdata/models/job_result.py
 hotdata/models/job_status.py
 hotdata/models/job_status_response.py
 hotdata/models/job_type.py
+hotdata/models/lineage_ancestor_info.py
+hotdata/models/lineage_fork_info.py
 hotdata/models/list_connections_response.py
 hotdata/models/list_database_contexts_response.py
 hotdata/models/list_databases_response.py
@@ -223,6 +233,7 @@ hotdata/models/list_workspaces_response.py
 hotdata/models/load_managed_table_request.py
 hotdata/models/load_managed_table_response.py
 hotdata/models/managed_schema_response.py
+hotdata/models/managed_table_constant_per_key_response.py
 hotdata/models/managed_table_response.py
 hotdata/models/mint_upload_parts_request.py
 hotdata/models/mint_upload_parts_response.py
@@ -245,6 +256,7 @@ hotdata/models/temporal_profile_detail.py
 hotdata/models/text_profile_detail.py
 hotdata/models/update_embedding_provider_request.py
 hotdata/models/update_embedding_provider_response.py
+hotdata/models/update_managed_table_request.py
 hotdata/models/update_saved_query_request.py
 hotdata/models/upload_session_response.py
 hotdata/models/upsert_database_context_request.py
@@ -301,6 +313,7 @@ test/test_database_count_response.py
 test/test_database_default_schema_decl.py
 test/test_database_default_table_decl.py
 test/test_database_detail_response.py
+test/test_database_lineage_response.py
 test/test_database_summary.py
 test/test_databases_api.py
 test/test_delete_database_batch_response.py
@@ -313,6 +326,7 @@ test/test_finalize_upload_part.py
 test/test_finalize_upload_request.py
 test/test_finalize_upload_response.py
 test/test_fork_database_request.py
+test/test_forked_from_info.py
 test/test_get_connection_response.py
 test/test_get_database_context_response.py
 test/test_get_result_response.py
@@ -327,6 +341,8 @@ test/test_job_status.py
 test/test_job_status_response.py
 test/test_job_type.py
 test/test_jobs_api.py
+test/test_lineage_ancestor_info.py
+test/test_lineage_fork_info.py
 test/test_list_connections_response.py
 test/test_list_database_contexts_response.py
 test/test_list_databases_response.py
@@ -342,6 +358,7 @@ test/test_list_workspaces_response.py
 test/test_load_managed_table_request.py
 test/test_load_managed_table_response.py
 test/test_managed_schema_response.py
+test/test_managed_table_constant_per_key_response.py
 test/test_managed_table_response.py
 test/test_mint_upload_parts_request.py
 test/test_mint_upload_parts_response.py
@@ -368,6 +385,7 @@ test/test_temporal_profile_detail.py
 test/test_text_profile_detail.py
 test/test_update_embedding_provider_request.py
 test/test_update_embedding_provider_response.py
+test/test_update_managed_table_request.py
 test/test_update_saved_query_request.py
 test/test_upload_session_response.py
 test/test_uploads_api.py

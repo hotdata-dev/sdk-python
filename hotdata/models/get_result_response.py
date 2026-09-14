@@ -34,7 +34,8 @@ class GetResultResponse(BaseModel):
     row_count: Optional[StrictInt] = None
     rows: Optional[List[List[Any]]] = Field(default=None, description="Array of rows, where each row is an array of column values.")
     status: StrictStr
-    __properties: ClassVar[List[str]] = ["columns", "error_message", "nullable", "result_id", "row_count", "rows", "status"]
+    total_row_count: Optional[StrictInt] = Field(default=None, description="Grand total rows in the full result, ignoring `offset` and `limit`. Present whenever the result is `ready`, and carrying the same value as the `X-Total-Row-Count` response header.  Compare it against `row_count` to tell whether this body is the whole result: `row_count < total_row_count` means the rest is still there, one page further on. Without it a windowed fetch cannot tell a full result from a truncated one from the body alone.")
+    __properties: ClassVar[List[str]] = ["columns", "error_message", "nullable", "result_id", "row_count", "rows", "status", "total_row_count"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -100,6 +101,11 @@ class GetResultResponse(BaseModel):
         if self.rows is None and "rows" in self.model_fields_set:
             _dict['rows'] = None
 
+        # set to None if total_row_count (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_row_count is None and "total_row_count" in self.model_fields_set:
+            _dict['total_row_count'] = None
+
         return _dict
 
     @classmethod
@@ -118,7 +124,8 @@ class GetResultResponse(BaseModel):
             "result_id": obj.get("result_id"),
             "row_count": obj.get("row_count"),
             "rows": obj.get("rows"),
-            "status": obj.get("status")
+            "status": obj.get("status"),
+            "total_row_count": obj.get("total_row_count")
         })
         return _obj
 
