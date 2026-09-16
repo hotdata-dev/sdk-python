@@ -99,7 +99,7 @@ Name | Type | Description  | Notes
 
 List jobs
 
-List background jobs with optional filters by type and status.
+List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
 
 ### Example
 
@@ -139,8 +139,8 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.JobsApi(api_client)
-    job_type = hotdata.JobType() # JobType | Filter by job type (optional)
-    status = 'status_example' # str | Filter by status (comma-separated, e.g. status=pending,running) (optional)
+    job_type = hotdata.JobType() # JobType | Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected. (optional)
+    status = 'status_example' # str | Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected. (optional)
     limit = 56 # int | Max results (default 50) (optional)
     offset = 56 # int | Offset for pagination (optional)
 
@@ -160,8 +160,8 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **job_type** | [**JobType**](.md)| Filter by job type | [optional] 
- **status** | **str**| Filter by status (comma-separated, e.g. status&#x3D;pending,running) | [optional] 
+ **job_type** | [**JobType**](.md)| Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected. | [optional] 
+ **status** | **str**| Filter by status: one or more of &#x60;pending&#x60;, &#x60;running&#x60;, &#x60;succeeded&#x60;, &#x60;partially_succeeded&#x60;, and &#x60;failed&#x60;, comma-separated (for example &#x60;status&#x3D;pending,running&#x60;). Omit to list every status. An unknown value is rejected. | [optional] 
  **limit** | **int**| Max results (default 50) | [optional] 
  **offset** | **int**| Offset for pagination | [optional] 
 

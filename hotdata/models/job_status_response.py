@@ -37,7 +37,7 @@ class JobStatusResponse(BaseModel):
     error_message: Optional[StrictStr] = Field(default=None, description="Error or warning message. Set when status is `failed` or `partially_succeeded`.")
     id: StrictStr
     job_type: JobType
-    result: Optional[JobResult] = Field(default=None, description="Job-specific result payload. Null while the job is pending or running.")
+    result: Optional[JobResult] = Field(default=None, description="What the job produced. Omitted entirely while the job is `pending` or `running`, and for job types that report no payload. Read `job_type` to know which shape to expect.")
     status: JobStatus
     __properties: ClassVar[List[str]] = ["attempts", "completed_at", "created_at", "error_message", "id", "job_type", "result", "status"]
 

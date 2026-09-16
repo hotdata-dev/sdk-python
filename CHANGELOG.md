@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat(indexes): add vector_precision field to index operations
 - chore(databases): clarify fork naming behavior
 - docs: adopt "instant database" / "instant catalog" terminology in hand-written
   prose. Documentation only — all public API symbols (`ManagedTableResponse`,

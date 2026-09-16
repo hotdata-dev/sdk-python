@@ -45,7 +45,8 @@ class TestCreateIndexRequest(unittest.TestCase):
                 index_name = 'orders_customer_id',
                 index_type = 'sorted',
                 metric = '',
-                output_column = ''
+                output_column = '',
+                vector_precision = 'float64'
             )
         else:
             return CreateIndexRequest(
