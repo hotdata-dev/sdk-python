@@ -174,9 +174,15 @@ class RESTClientObject:
         # that reaches us as undecodable bytes. urllib3 decodes the body
         # transparently, so callers are unaffected.
         #
-        # setdefault, not assignment: an operation whose payload is already
-        # compressed end-to-end can pass `identity` and stay in control.
-        headers.setdefault('Accept-Encoding', ACCEPT_ENCODING)
+        # A default, not an override: an operation whose payload is already
+        # compressed end-to-end passes `identity` and stays in control. The
+        # check is case-insensitive because header names are -- a caller
+        # passing `accept-encoding` would otherwise leave both keys in the
+        # dict and urllib3 would emit two header lines, so the server would
+        # see the opt-out *and* the compressed set. urllib3 lowercases names
+        # the same way before adding its own Accept-Encoding.
+        if not any(key.lower() == 'accept-encoding' for key in headers):
+            headers['Accept-Encoding'] = ACCEPT_ENCODING
 
         timeout = None
         if _request_timeout:

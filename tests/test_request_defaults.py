@@ -51,6 +51,11 @@ class _RecordingHandler(BaseHTTPRequestHandler):
         self.server.seen_headers = {  # type: ignore[attr-defined]
             key.lower(): value for key, value in self.headers.items()
         }
+        # get_all, not get: a case-sensitive default check produces two
+        # Accept-Encoding header *lines*, which a dict of headers would hide.
+        self.server.seen_encodings = (  # type: ignore[attr-defined]
+            self.headers.get_all("Accept-Encoding") or []
+        )
         body = gzip.compress(json.dumps(self.payload).encode())
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -81,6 +86,7 @@ def server():
     """A local HTTP server that records what the client sent."""
     httpd = _QuietServer(("127.0.0.1", 0), _RecordingHandler)
     httpd.seen_headers = {}  # type: ignore[attr-defined]
+    httpd.seen_encodings = []  # type: ignore[attr-defined]
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
     try:
@@ -167,3 +173,19 @@ def test_user_agent_remains_caller_settable(client, server):
     _get(client, server)
 
     assert server.seen_headers["user-agent"] == "my-app/2.0"
+
+
+def test_lowercase_override_is_not_duplicated(client, server):
+    """A differently-cased opt-out must suppress the default, not duplicate it.
+
+    HTTP header names are case-insensitive and nothing stops a caller from
+    passing ``accept-encoding``. A case-*sensitive* default check leaves both
+    keys in the dict, urllib3 emits one header line per key, and the server
+    receives ``identity`` *and* the compressed set — so the documented
+    per-request opt-out is silently lost. urllib3 itself lowercases header
+    names before deciding whether to add its own ``Accept-Encoding``; this
+    matches that.
+    """
+    _get(client, server, headers={"accept-encoding": "identity"})
+
+    assert server.seen_encodings == ["identity"]

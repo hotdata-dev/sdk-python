@@ -46,9 +46,15 @@ def patch_accept_encoding() -> None:
         "        # that reaches us as undecodable bytes. urllib3 decodes the body\n"
         "        # transparently, so callers are unaffected.\n"
         "        #\n"
-        "        # setdefault, not assignment: an operation whose payload is already\n"
-        "        # compressed end-to-end can pass `identity` and stay in control.\n"
-        "        headers.setdefault('Accept-Encoding', ACCEPT_ENCODING)\n"
+        "        # A default, not an override: an operation whose payload is already\n"
+        "        # compressed end-to-end passes `identity` and stays in control. The\n"
+        "        # check is case-insensitive because header names are -- a caller\n"
+        "        # passing `accept-encoding` would otherwise leave both keys in the\n"
+        "        # dict and urllib3 would emit two header lines, so the server would\n"
+        "        # see the opt-out *and* the compressed set. urllib3 lowercases names\n"
+        "        # the same way before adding its own Accept-Encoding.\n"
+        "        if not any(key.lower() == 'accept-encoding' for key in headers):\n"
+        "            headers['Accept-Encoding'] = ACCEPT_ENCODING\n"
     )
     if needle not in src:
         sys.exit(f"Failed to patch {path}: request() header anchor not found")

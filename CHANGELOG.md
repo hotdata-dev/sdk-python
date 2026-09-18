@@ -33,7 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compress, so every JSON response came back uncompressed. The client now
   advertises `urllib3.util.request.ACCEPT_ENCODING` — exactly the codecs the
   installed urllib3 can transparently decode. Response bodies are unchanged;
-  a caller or operation can still pass an explicit `Accept-Encoding`.
+  a caller or operation can still pass an explicit `Accept-Encoding` (matched
+  case-insensitively). Arrow IPC fetches opt out and stay uncompressed, since
+  their record batches are frequently compressed by the writer already.
 - feat(transport): send an SDK `User-Agent`. Requests identified themselves as
   `OpenAPI-Generator/1.0.0/python`; they now send
   `hotdata-python/<version> (Python/<py>; urllib3/<urllib3>)`. Setting
