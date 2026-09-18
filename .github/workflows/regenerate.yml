@@ -198,6 +198,9 @@ jobs:
       - name: Patch default client exports (enhanced query/results)
         run: python3 scripts/patch_query_exports.py
 
+      - name: Patch transport request defaults (Accept-Encoding, User-Agent)
+        run: python3 scripts/patch_request_defaults.py
+
       # The API-token -> JWT key exchange is deprecated: the configured API token
       # is the bearer credential and goes on the wire verbatim. This check is the
       # inverse of the old "did the exchange survive?" guard — it fails if the
