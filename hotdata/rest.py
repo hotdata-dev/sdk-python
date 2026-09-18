@@ -19,6 +19,7 @@ import re
 import ssl
 
 import urllib3
+from urllib3.util.request import ACCEPT_ENCODING
 
 from hotdata.exceptions import ApiException, ApiValueError
 
@@ -163,6 +164,19 @@ class RESTClientObject:
 
         post_params = post_params or {}
         headers = headers or {}
+
+        # Ask for compressed responses. urllib3 defaults every connection to
+        # `Accept-Encoding: identity`, which is not "no preference" but an
+        # explicit request *not* to compress, and a spec-compliant server
+        # honors it. ACCEPT_ENCODING is built from the codecs the installed
+        # urllib3 can actually decode (gzip/deflate, plus br/zstd when their
+        # backends are present), so the server can never negotiate an encoding
+        # that reaches us as undecodable bytes. urllib3 decodes the body
+        # transparently, so callers are unaffected.
+        #
+        # setdefault, not assignment: an operation whose payload is already
+        # compressed end-to-end can pass `identity` and stay in control.
+        headers.setdefault('Accept-Encoding', ACCEPT_ENCODING)
 
         timeout = None
         if _request_timeout:

@@ -28,6 +28,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility. Generated docstrings pick up the new wording on the next client
   regeneration from the updated OpenAPI spec.
 - feat(query): add dialect parameter to query request
+- perf(transport): request compressed responses. urllib3 defaults every
+  connection to `Accept-Encoding: identity`, which asks the server *not* to
+  compress, so every JSON response came back uncompressed. The client now
+  advertises `urllib3.util.request.ACCEPT_ENCODING` — exactly the codecs the
+  installed urllib3 can transparently decode. Response bodies are unchanged;
+  a caller or operation can still pass an explicit `Accept-Encoding`.
+- feat(transport): send an SDK `User-Agent`. Requests identified themselves as
+  `OpenAPI-Generator/1.0.0/python`; they now send
+  `hotdata-python/<version> (Python/<py>; urllib3/<urllib3>)`. Setting
+  `ApiClient.user_agent` still overrides it.
 
 ## [0.10.0] - 2026-08-18
 

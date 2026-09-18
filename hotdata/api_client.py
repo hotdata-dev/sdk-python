@@ -29,6 +29,7 @@ from pydantic import SecretStr
 
 from hotdata.configuration import Configuration
 from hotdata.api_response import ApiResponse, T as ApiResponseT
+from hotdata._useragent import USER_AGENT
 import hotdata.models
 from hotdata import rest
 from hotdata.exceptions import (
@@ -91,7 +92,7 @@ class ApiClient:
             self.default_headers[header_name] = header_value
         self.cookie = cookie
         # Set default User-Agent.
-        self.user_agent = 'OpenAPI-Generator/1.0.0/python'
+        self.user_agent = USER_AGENT
         self.client_side_validation = configuration.client_side_validation
 
     def __enter__(self):
