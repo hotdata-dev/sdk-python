@@ -174,7 +174,16 @@ class ResultsApi(_GeneratedResultsApi):
         # Override only what we need: the Accept header and the format query.
         # `GET /v1/results/{id}` is database-scoped, so the required
         # X-Database-Id header flows through the generated serializer too.
-        headers: Dict[str, Any] = {"Accept": ARROW_STREAM_MEDIA_TYPE}
+        # `Accept-Encoding: identity` opts this path out of the client-wide
+        # response compression default (hotdata/rest.py). Arrow IPC record
+        # batches are frequently LZ4/ZSTD-compressed by the writer already, so
+        # a gzip pass over the stream burns CPU on both ends for little size
+        # gain. Drop it if the endpoint is measured to serve uncompressed
+        # batches, where columnar data does compress well.
+        headers: Dict[str, Any] = {
+            "Accept": ARROW_STREAM_MEDIA_TYPE,
+            "Accept-Encoding": "identity",
+        }
         params = self._get_result_serialize(
             id=id,
             x_database_id=x_database_id,

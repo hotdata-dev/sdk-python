@@ -163,6 +163,10 @@ def test_get_result_arrow_returns_table(monkeypatch: pytest.MonkeyPatch) -> None
     assert call["headers"]["Accept"] == ARROW_STREAM_MEDIA_TYPE
     # Results are database-scoped: the required X-Database-Id header is sent.
     assert call["headers"]["X-Database-Id"] == "db_x"
+    # Arrow opts out of the client-wide response compression default: IPC
+    # record batches are frequently LZ4/ZSTD-compressed already, so a gzip
+    # pass over the stream costs CPU on both ends for little size gain.
+    assert call["headers"]["Accept-Encoding"] == "identity"
 
 
 def test_get_result_arrow_forwards_offset_and_limit(
