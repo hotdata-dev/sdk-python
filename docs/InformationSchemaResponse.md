@@ -6,11 +6,11 @@ Response body for GET /information_schema
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**count** | **int** |  | 
-**has_more** | **bool** |  | 
-**limit** | **int** |  | 
-**next_cursor** | **str** |  | [optional] 
-**tables** | [**List[TableInfo]**](TableInfo.md) |  | 
+**count** | **int** | Number of tables in this response, the same meaning &#x60;count&#x60; carries on the results and databases listings.  This is a page size, not a total for the whole filter. Page with &#x60;has_more&#x60; and &#x60;next_cursor&#x60;: an empty &#x60;tables&#x60; array on its own does not mean the listing is finished. | 
+**has_more** | **bool** | True when more tables follow this page. Pass &#x60;next_cursor&#x60; to fetch them. | 
+**limit** | **int** | The page size in effect for this response — the &#x60;limit&#x60; you asked for, clamped to the server&#39;s maximum, or the server default when you sent none. | 
+**next_cursor** | **str** | Cursor for the next page, present only when &#x60;has_more&#x60; is &#x60;true&#x60;. Send it back as the &#x60;cursor&#x60; query parameter. | [optional] 
+**tables** | [**List[TableInfo]**](TableInfo.md) | The tables on this page. | 
 
 ## Example
 
