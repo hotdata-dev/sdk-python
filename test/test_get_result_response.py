@@ -50,7 +50,8 @@ class TestGetResultResponse(unittest.TestCase):
                         null
                         ]
                     ],
-                status = ''
+                status = '',
+                total_row_count = 56
             )
         else:
             return GetResultResponse(

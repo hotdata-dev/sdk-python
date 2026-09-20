@@ -90,6 +90,7 @@ __all__ = [
     "DatabaseDefaultSchemaDecl",
     "DatabaseDefaultTableDecl",
     "DatabaseDetailResponse",
+    "DatabaseLineageResponse",
     "DatabaseSummary",
     "DeleteDatabaseBatchResponse",
     "DiscoveryStatus",
@@ -100,6 +101,7 @@ __all__ = [
     "FinalizeUploadRequest",
     "FinalizeUploadResponse",
     "ForkDatabaseRequest",
+    "ForkedFromInfo",
     "GetConnectionResponse",
     "GetDatabaseContextResponse",
     "GetResultResponse",
@@ -111,6 +113,8 @@ __all__ = [
     "JobStatus",
     "JobStatusResponse",
     "JobType",
+    "LineageAncestorInfo",
+    "LineageForkInfo",
     "ListConnectionsResponse",
     "ListDatabaseContextsResponse",
     "ListDatabasesResponse",
@@ -126,6 +130,7 @@ __all__ = [
     "LoadManagedTableRequest",
     "LoadManagedTableResponse",
     "ManagedSchemaResponse",
+    "ManagedTableConstantPerKeyResponse",
     "ManagedTableResponse",
     "MintUploadPartsRequest",
     "MintUploadPartsResponse",
@@ -148,6 +153,7 @@ __all__ = [
     "TextProfileDetail",
     "UpdateEmbeddingProviderRequest",
     "UpdateEmbeddingProviderResponse",
+    "UpdateManagedTableRequest",
     "UpdateSavedQueryRequest",
     "UploadSessionResponse",
     "UpsertDatabaseContextRequest",
@@ -228,6 +234,7 @@ from hotdata.models.database_count_response import DatabaseCountResponse as Data
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl as DatabaseDefaultSchemaDecl
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl as DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse as DatabaseDetailResponse
+from hotdata.models.database_lineage_response import DatabaseLineageResponse as DatabaseLineageResponse
 from hotdata.models.database_summary import DatabaseSummary as DatabaseSummary
 from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse as DeleteDatabaseBatchResponse
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
@@ -238,6 +245,7 @@ from hotdata.models.finalize_upload_part import FinalizeUploadPart as FinalizeUp
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest as FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse as FinalizeUploadResponse
 from hotdata.models.fork_database_request import ForkDatabaseRequest as ForkDatabaseRequest
+from hotdata.models.forked_from_info import ForkedFromInfo as ForkedFromInfo
 from hotdata.models.get_connection_response import GetConnectionResponse as GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse as GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse as GetResultResponse
@@ -249,6 +257,8 @@ from hotdata.models.job_result import JobResult as JobResult
 from hotdata.models.job_status import JobStatus as JobStatus
 from hotdata.models.job_status_response import JobStatusResponse as JobStatusResponse
 from hotdata.models.job_type import JobType as JobType
+from hotdata.models.lineage_ancestor_info import LineageAncestorInfo as LineageAncestorInfo
+from hotdata.models.lineage_fork_info import LineageForkInfo as LineageForkInfo
 from hotdata.models.list_connections_response import ListConnectionsResponse as ListConnectionsResponse
 from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse as ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse as ListDatabasesResponse
@@ -264,6 +274,7 @@ from hotdata.models.list_workspaces_response import ListWorkspacesResponse as Li
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest as LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse as LoadManagedTableResponse
 from hotdata.models.managed_schema_response import ManagedSchemaResponse as ManagedSchemaResponse
+from hotdata.models.managed_table_constant_per_key_response import ManagedTableConstantPerKeyResponse as ManagedTableConstantPerKeyResponse
 from hotdata.models.managed_table_response import ManagedTableResponse as ManagedTableResponse
 from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest as MintUploadPartsRequest
 from hotdata.models.mint_upload_parts_response import MintUploadPartsResponse as MintUploadPartsResponse
@@ -286,6 +297,7 @@ from hotdata.models.temporal_profile_detail import TemporalProfileDetail as Temp
 from hotdata.models.text_profile_detail import TextProfileDetail as TextProfileDetail
 from hotdata.models.update_embedding_provider_request import UpdateEmbeddingProviderRequest as UpdateEmbeddingProviderRequest
 from hotdata.models.update_embedding_provider_response import UpdateEmbeddingProviderResponse as UpdateEmbeddingProviderResponse
+from hotdata.models.update_managed_table_request import UpdateManagedTableRequest as UpdateManagedTableRequest
 from hotdata.models.update_saved_query_request import UpdateSavedQueryRequest as UpdateSavedQueryRequest
 from hotdata.models.upload_session_response import UploadSessionResponse as UploadSessionResponse
 from hotdata.models.upsert_database_context_request import UpsertDatabaseContextRequest as UpsertDatabaseContextRequest
