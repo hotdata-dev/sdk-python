@@ -19,21 +19,21 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class WorkspaceUsageResponse(BaseModel):
+class LineageAncestorInfo(BaseModel):
     """
-    Response for GET /v1/usage
+    One database up a fork chain.
     """ # noqa: E501
-    bytes_scanned: StrictInt = Field(description="Sum of `bytes_scanned` across all completed/failed query runs since `since`. Null bytes (queries that touched no row data) contribute 0.  This is the storage read the workspace's queries caused, not how much data they covered: a query whose data was already cached contributes little or nothing (see `bytes_scanned` on a query run). Two periods with identical query histories can therefore report different totals, and this figure will not reconcile against a per-query estimate of rows or bytes touched.")
-    query_count: StrictInt = Field(description="Number of query runs (succeeded + failed) since `since`.")
-    since: datetime = Field(description="The period start used for this response (echoed back for the caller to verify).")
-    storage_bytes: StrictInt = Field(description="The workspace's current stored-data footprint in bytes, measured at request time: instant-database data, plus un-consumed uploads, connection caches, and search-index artifacts.")
-    storage_captured_at: Optional[datetime] = Field(default=None, description="When `storage_bytes` was measured (the time this response was produced).")
-    __properties: ClassVar[List[str]] = ["bytes_scanned", "query_count", "since", "storage_bytes", "storage_captured_at"]
+    database_id: StrictStr
+    exists: StrictBool = Field(description="False once the ancestor has been deleted. Its place in the chain is kept either way, and the ancestry continues past it.")
+    forked_at: Optional[datetime] = Field(default=None, description="When the next database down the chain was forked from it.")
+    name: Optional[StrictStr] = Field(default=None, description="The ancestor's current label, or the one captured at fork time when it no longer exists.")
+    snapshot_id: Optional[StrictInt] = Field(default=None, description="Version of this ancestor's data that the next database down the chain copied. See `forked_from.snapshot_id`.")
+    __properties: ClassVar[List[str]] = ["database_id", "exists", "forked_at", "name", "snapshot_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,7 +53,7 @@ class WorkspaceUsageResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of WorkspaceUsageResponse from a JSON string"""
+        """Create an instance of LineageAncestorInfo from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,16 +74,26 @@ class WorkspaceUsageResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # set to None if storage_captured_at (nullable) is None
+        # set to None if forked_at (nullable) is None
         # and model_fields_set contains the field
-        if self.storage_captured_at is None and "storage_captured_at" in self.model_fields_set:
-            _dict['storage_captured_at'] = None
+        if self.forked_at is None and "forked_at" in self.model_fields_set:
+            _dict['forked_at'] = None
+
+        # set to None if name (nullable) is None
+        # and model_fields_set contains the field
+        if self.name is None and "name" in self.model_fields_set:
+            _dict['name'] = None
+
+        # set to None if snapshot_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.snapshot_id is None and "snapshot_id" in self.model_fields_set:
+            _dict['snapshot_id'] = None
 
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of WorkspaceUsageResponse from a dict"""
+        """Create an instance of LineageAncestorInfo from a dict"""
         if obj is None:
             return None
 
@@ -91,11 +101,11 @@ class WorkspaceUsageResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "bytes_scanned": obj.get("bytes_scanned"),
-            "query_count": obj.get("query_count"),
-            "since": obj.get("since"),
-            "storage_bytes": obj.get("storage_bytes"),
-            "storage_captured_at": obj.get("storage_captured_at")
+            "database_id": obj.get("database_id"),
+            "exists": obj.get("exists"),
+            "forked_at": obj.get("forked_at"),
+            "name": obj.get("name"),
+            "snapshot_id": obj.get("snapshot_id")
         })
         return _obj
 

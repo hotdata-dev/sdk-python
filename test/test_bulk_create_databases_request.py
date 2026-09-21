@@ -48,6 +48,7 @@ class TestBulkCreateDatabasesRequest(unittest.TestCase):
                         tables = [
                             hotdata.models.database_default_table_decl.DatabaseDefaultTableDecl(
                                 key = [order_id], 
+                                key_determines = [event_date], 
                                 name = 'orders', 
                                 partition_by = [
                                     hotdata.models.table_partition_key.TablePartitionKey(

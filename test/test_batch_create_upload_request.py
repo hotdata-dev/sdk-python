@@ -36,11 +36,11 @@ class TestBatchCreateUploadRequest(unittest.TestCase):
         model = BatchCreateUploadRequest()
         if include_optional:
             return BatchCreateUploadRequest(
-                uploads = [{content_type=text/csv, declared_size_bytes=4096, filename=orders.csv}, {content_type=text/csv, declared_size_bytes=2048, filename=customers.csv}]
+                uploads = [{filename=orders.csv, declared_size_bytes=4096, content_type=text/csv}, {filename=customers.csv, declared_size_bytes=2048, content_type=text/csv}]
             )
         else:
             return BatchCreateUploadRequest(
-                uploads = [{content_type=text/csv, declared_size_bytes=4096, filename=orders.csv}, {content_type=text/csv, declared_size_bytes=2048, filename=customers.csv}],
+                uploads = [{filename=orders.csv, declared_size_bytes=4096, content_type=text/csv}, {filename=customers.csv, declared_size_bytes=2048, content_type=text/csv}],
         )
         """
 

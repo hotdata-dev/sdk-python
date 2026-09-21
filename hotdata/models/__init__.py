@@ -57,6 +57,7 @@ from hotdata.models.database_count_response import DatabaseCountResponse
 from hotdata.models.database_default_schema_decl import DatabaseDefaultSchemaDecl
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse
+from hotdata.models.database_lineage_response import DatabaseLineageResponse
 from hotdata.models.database_summary import DatabaseSummary
 from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse
 from hotdata.models.discovery_status import DiscoveryStatus
@@ -67,6 +68,7 @@ from hotdata.models.finalize_upload_part import FinalizeUploadPart
 from hotdata.models.finalize_upload_request import FinalizeUploadRequest
 from hotdata.models.finalize_upload_response import FinalizeUploadResponse
 from hotdata.models.fork_database_request import ForkDatabaseRequest
+from hotdata.models.forked_from_info import ForkedFromInfo
 from hotdata.models.get_connection_response import GetConnectionResponse
 from hotdata.models.get_database_context_response import GetDatabaseContextResponse
 from hotdata.models.get_result_response import GetResultResponse
@@ -78,6 +80,8 @@ from hotdata.models.job_result import JobResult
 from hotdata.models.job_status import JobStatus
 from hotdata.models.job_status_response import JobStatusResponse
 from hotdata.models.job_type import JobType
+from hotdata.models.lineage_ancestor_info import LineageAncestorInfo
+from hotdata.models.lineage_fork_info import LineageForkInfo
 from hotdata.models.list_connections_response import ListConnectionsResponse
 from hotdata.models.list_database_contexts_response import ListDatabaseContextsResponse
 from hotdata.models.list_databases_response import ListDatabasesResponse
