@@ -46,6 +46,7 @@ class TestJobResult(unittest.TestCase):
                 source_column = '',
                 status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                vector_precision = '',
                 arrow_schema_json = '',
                 connection_id = '',
                 row_count = 0,

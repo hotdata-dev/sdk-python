@@ -36,6 +36,7 @@ class TestForkDatabaseRequest(unittest.TestCase):
         model = ForkDatabaseRequest()
         if include_optional:
             return ForkDatabaseRequest(
+                description = '',
                 expires_at = '',
                 name = ''
             )

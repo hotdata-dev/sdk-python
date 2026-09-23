@@ -9,9 +9,10 @@ Name | Type | Description | Notes
 **attachments** | [**List[DatabaseAttachmentInfo]**](DatabaseAttachmentInfo.md) |  | 
 **created_at** | **datetime** | When the database was created. | [optional] 
 **default_catalog** | **str** | Name the database&#39;s default catalog answers to inside its query scope (&#x60;default&#x60; unless overridden at create time). | 
-**default_connection_id** | **str** |  | 
+**default_connection_id** | **str** | Id of the connection backing this database&#39;s &#x60;default&#x60; catalog. Pass it as &#x60;connection_id&#x60; to &#x60;POST /v1/databases/{other}/catalogs&#x60; to attach this database&#39;s catalog into another database. In SQL, address the catalog as &#x60;default&#x60; inside an &#x60;X-Database-Id&#x60; scope, not by id. | 
 **default_schema** | **str** | Schema that unqualified table names resolve to inside this database&#39;s query scope. &#x60;main&#x60; unless the database declares a single schema or a &#x60;default_schema&#x60; was set at create time. | 
 **expires_at** | **datetime** | When this database expires. | [optional] 
+**forked_from** | [**ForkedFromInfo**](ForkedFromInfo.md) | Set on a database created by forking another one: where it came from and which state of the source it copied. &#x60;GET /databases/{database_id}/lineage&#x60; returns the whole family tree. | [optional] 
 **id** | **str** |  | 
 **name** | **str** |  | [optional] 
 
