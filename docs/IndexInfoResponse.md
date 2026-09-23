@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **source_column** | **str** | Source text column for an embedding-backed vector index. A query searches it via &#x60;vector_distance(&lt;source_column&gt;, …)&#x60;; the indexed &#x60;columns&#x60; hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes. | [optional] 
 **status** | [**IndexStatus**](IndexStatus.md) |  | 
 **updated_at** | **datetime** |  | 
+**vector_precision** | **str** | How precisely this vector index stores each number of a vector, when it was created with an explicit precision. Absent means it stores at the same precision as the column, which is the default. Also absent for BM25 and sorted indexes. | [optional] 
 
 ## Example
 

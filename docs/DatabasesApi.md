@@ -16,8 +16,11 @@ Method | HTTP request | Description
 [**fork_database**](DatabasesApi.md#fork_database) | **POST** /v1/databases/{database_id}/fork | Fork database
 [**get_database**](DatabasesApi.md#get_database) | **GET** /v1/databases/{database_id} | Get database
 [**get_database_batch**](DatabasesApi.md#get_database_batch) | **GET** /v1/databases/bulk/{batch_id} | Get a database batch
+[**get_database_lineage**](DatabasesApi.md#get_database_lineage) | **GET** /v1/databases/{database_id}/lineage | Get database lineage
 [**list_databases**](DatabasesApi.md#list_databases) | **GET** /v1/databases | List databases
 [**load_database_table**](DatabasesApi.md#load_database_table) | **POST** /v1/databases/{database_id}/schemas/{schema}/tables/{table}/loads | Load database table from inline data, upload, or query result
+[**lookup_database_by_name**](DatabasesApi.md#lookup_database_by_name) | **GET** /v1/databases/by-name | Look up a database by name
+[**set_database_table_constant_per_key**](DatabasesApi.md#set_database_table_constant_per_key) | **PUT** /v1/databases/{database_id}/schemas/{schema}/tables/{table}/constant-per-key | Declare which columns are constant per key
 
 
 # **add_database_schema**
@@ -209,7 +212,7 @@ Name | Type | Description  | Notes
 
 Attach catalog to database
 
-Attach an existing connection (catalog) to a database with an optional alias. Inside the database the catalog is reachable as the alias (when set) or its original name.
+Attach a catalog to a database so its tables are queryable alongside the database's own. Pass another database's `default_connection_id` as `connection_id` to read across the two in one query. Inside the database the catalog answers to `alias` when set, otherwise to the name it already answers to in its own scope. That name may not be `default`, a reserved name, or this database's own default catalog name — so attaching a database that kept the stock `default` catalog needs an `alias`. Attaching is read-only and copies nothing: loads still target the database's own default catalog, and detaching withdraws visibility rather than deleting data. A database's own default catalog is always attached and cannot be attached again. Attaching is not transitive — a database sees the catalog it attached, not that catalog's own attachments.
 
 ### Example
 
@@ -389,7 +392,7 @@ Name | Type | Description  | Notes
 
 Count databases
 
-Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text, ignoring the case of unaccented Latin letters and digits, or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
 
 ### Example
 
@@ -476,7 +479,7 @@ Name | Type | Description  | Notes
 
 Create database
 
-Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.
+Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp. Optional `if_not_exists` makes this a get-or-create: when a database already carries the requested `name`, it is returned with status `200` and nothing is created, which lets a client bind to its database on every start-up without first looking one up.
 
 ### Example
 
@@ -553,8 +556,10 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
+**200** | A database already carried the requested &#x60;name&#x60;, and is returned unchanged (&#x60;if_not_exists&#x60; only) |  -  |
 **201** | Database created |  -  |
 **400** | Invalid request |  -  |
+**409** | &#x60;if_not_exists&#x60; was requested for a name carried by more than one database, so there is no single one to return |  -  |
 **500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -564,7 +569,7 @@ Name | Type | Description  | Notes
 
 Delete database
 
-Delete a database and its auto-created default catalog. Attached catalogs are detached (their underlying connections are not deleted).
+Delete a database and its auto-created default catalog. Catalogs attached to it are detached (the catalogs themselves are not deleted). Refused while another database attaches this one's catalog — detach it there first — unless this database is past its `expires_at`, in which case it can be deleted regardless and the attaching database loses the catalog. A database that attaches one should watch that date.
 
 ### Example
 
@@ -639,6 +644,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 **204** | Database deleted |  -  |
 **404** | Database not found |  -  |
+**409** | Another database attaches this one&#39;s catalog |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -820,7 +826,7 @@ void (empty response body)
 
 Fork database
 
-Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over.
+Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over. A fork adds no stored bytes at first, because it starts out sharing the source's storage. Routine maintenance can later rewrite a shared table into the fork's own storage, and the fork is billed for that copy from then on. Whether and when that happens depends on the table, so a fork that is only read can keep sharing indefinitely.
 
 ### Example
 
@@ -900,8 +906,9 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Database forked |  -  |
-**400** | The source database can&#39;t be forked as-is (for example, one of its tables has rows that were individually deleted or updated) |  -  |
+**400** | The source database can&#39;t be forked as-is |  -  |
 **404** | Source database not found |  -  |
+**409** | The source database changed while it was being forked; retry the request |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -910,7 +917,7 @@ Name | Type | Description  | Notes
 
 Get database
 
-Fetch a database by id. The `name` field is a display label only; it is not accepted as an identifier here.
+Fetch a database by id. The `name` field is a display label only and is not accepted as an identifier here; to fetch a database by its name instead, use `GET /v1/databases/by-name`.
 
 ### Example
 
@@ -1077,12 +1084,106 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **get_database_lineage**
+> DatabaseLineageResponse get_database_lineage(database_id, forks_limit=forks_limit)
+
+Get database lineage
+
+Trace where a database came from and what came from it.
+
+`ancestors` walks the fork chain from this database's immediate source up to the original it descends from, nearest first, and each entry says which state of that source the next database down copied. `forks` lists the databases forked directly from this one, most recently forked first, with `fork_count` giving the true total when the list is only a sample of it.
+
+Lineage is a historical record, not a live link: a fork is an independent database from the moment it is created, and either side can change or be deleted without affecting the other. Deleting either one does not erase the record: a deleted ancestor keeps its place in the chain, a deleted fork still appears among `forks`, and both are marked with `exists` set to false.
+
+A database that was never forked, and was never forked from, answers with empty lists and itself as `root_id`. Forks taken before lineage was recorded carry none: their provenance was never written and cannot be reconstructed.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.database_lineage_response import DatabaseLineageResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.DatabasesApi(api_client)
+    database_id = 'database_id_example' # str | Database ID
+    forks_limit = 56 # int | How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to. (optional)
+
+    try:
+        # Get database lineage
+        api_response = api_instance.get_database_lineage(database_id, forks_limit=forks_limit)
+        print("The response of DatabasesApi->get_database_lineage:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DatabasesApi->get_database_lineage: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **database_id** | **str**| Database ID | 
+ **forks_limit** | **int**| How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. &#x60;fork_count&#x60; always reports the true total, whatever this is set to. | [optional] 
+
+### Return type
+
+[**DatabaseLineageResponse**](DatabaseLineageResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Database lineage |  -  |
+**404** | Database not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **list_databases**
 > ListDatabasesResponse list_databases(limit=limit, cursor=cursor, search=search, batch=batch)
 
 List databases
 
-List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
+List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name *contains* that text, ignoring the case of unaccented Latin letters and digits; to fetch the single database whose name matches exactly, use `GET /v1/databases/by-name` instead. Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
 ### Example
 
@@ -1216,10 +1317,10 @@ with hotdata.ApiClient(configuration) as api_client:
     database_id = 'database_id_example' # str | Database ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
-    load_managed_table_request = {data=order_id,customer_id,amount
+    load_managed_table_request = {mode=replace, data=order_id,customer_id,amount
 1001,42,1999
 1002,7,4550
-, mode=replace} # LoadManagedTableRequest | 
+} # LoadManagedTableRequest | 
 
     try:
         # Load database table from inline data, upload, or query result
@@ -1265,6 +1366,197 @@ Name | Type | Description  | Notes
 **404** | Database, upload, or result not found, or the table was deleted |  -  |
 **409** | Upload already consumed or in flight, the result is still being computed, or the incoming data changes a column&#39;s type incompatibly (only widening to a larger compatible type can be applied automatically); the existing data is unchanged and remains queryable |  -  |
 **413** | Inline &#x60;data&#x60; is over the 2 MiB limit (error code &#x60;INLINE_DATA_TOO_LARGE&#x60;); upload the data and load it by &#x60;upload_id&#x60; instead |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **lookup_database_by_name**
+> DatabaseDetailResponse lookup_database_by_name(name)
+
+Look up a database by name
+
+Fetch a single database by its exact name. This is the counterpart to the listing's `search` filter, which matches any database whose name merely contains the text.
+
+Matching ignores case for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so a name containing an accented letter or a non-Latin script must be looked up with the capitalisation it was created with.
+
+Returns 404 when no database has that name. A name shared by more than one database returns 409 rather than picking one of them; address those by id.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.database_detail_response import DatabaseDetailResponse
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.DatabasesApi(api_client)
+    name = 'name_example' # str | Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with.
+
+    try:
+        # Look up a database by name
+        api_response = api_instance.lookup_database_by_name(name)
+        print("The response of DatabasesApi->lookup_database_by_name:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DatabasesApi->lookup_database_by_name: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| Exact name to look up. Unlike the listing&#39;s &#x60;search&#x60;, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with. | 
+
+### Return type
+
+[**DatabaseDetailResponse**](DatabaseDetailResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Database details |  -  |
+**400** | The &#x60;name&#x60; parameter is empty or too long |  -  |
+**404** | No database has that name |  -  |
+**409** | More than one database has that name |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_database_table_constant_per_key**
+> ManagedTableConstantPerKeyResponse set_database_table_constant_per_key(database_id, var_schema, table, update_managed_table_request)
+
+Declare which columns are constant per key
+
+Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries.
+
+Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created — it changes only which files a mutation opens, never how rows are written — so a populated table can adopt it with no rewrite, taking effect on the next load. Send an empty array to revoke it.
+
+**Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.
+
+### Example
+
+* Api Key Authentication (WorkspaceId):
+* Bearer Authentication (BearerAuth):
+
+```python
+import hotdata
+from hotdata.models.managed_table_constant_per_key_response import ManagedTableConstantPerKeyResponse
+from hotdata.models.update_managed_table_request import UpdateManagedTableRequest
+from hotdata.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.hotdata.dev
+# See configuration.py for a list of all supported configuration parameters.
+configuration = hotdata.Configuration(
+    host = "https://api.hotdata.dev"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: WorkspaceId
+configuration.api_key['WorkspaceId'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['WorkspaceId'] = 'Bearer'
+
+# Configure Bearer authorization: BearerAuth
+configuration = hotdata.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with hotdata.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = hotdata.DatabasesApi(api_client)
+    database_id = 'database_id_example' # str | Database ID
+    var_schema = 'var_schema_example' # str | Schema name
+    table = 'table_example' # str | Table name
+    update_managed_table_request = hotdata.UpdateManagedTableRequest() # UpdateManagedTableRequest | 
+
+    try:
+        # Declare which columns are constant per key
+        api_response = api_instance.set_database_table_constant_per_key(database_id, var_schema, table, update_managed_table_request)
+        print("The response of DatabasesApi->set_database_table_constant_per_key:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DatabasesApi->set_database_table_constant_per_key: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **database_id** | **str**| Database ID | 
+ **var_schema** | **str**| Schema name | 
+ **table** | **str**| Table name | 
+ **update_managed_table_request** | [**UpdateManagedTableRequest**](UpdateManagedTableRequest.md)|  | 
+
+### Return type
+
+[**ManagedTableConstantPerKeyResponse**](ManagedTableConstantPerKeyResponse.md)
+
+### Authorization
+
+[WorkspaceId](../README.md#WorkspaceId), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | The table&#39;s declaration as it now stands |  -  |
+**400** | An invalid column name, or a table with no key |  -  |
+**404** | Database, schema or table not found |  -  |
+**409** | The declaration changed concurrently; retry |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

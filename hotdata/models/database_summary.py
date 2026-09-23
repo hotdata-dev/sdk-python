@@ -21,6 +21,7 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.forked_from_info import ForkedFromInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -32,9 +33,10 @@ class DatabaseSummary(BaseModel):
     default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope.")
     default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
     expires_at: Optional[datetime] = None
+    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Set on a fork: which database it came from. Distinguishes a fork from an original in a listing, where the two are otherwise indistinguishable.")
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["created_at", "default_catalog", "default_schema", "expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["created_at", "default_catalog", "default_schema", "expires_at", "forked_from", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -75,6 +77,9 @@ class DatabaseSummary(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of forked_from
+        if self.forked_from:
+            _dict['forked_from'] = self.forked_from.to_dict()
         # set to None if created_at (nullable) is None
         # and model_fields_set contains the field
         if self.created_at is None and "created_at" in self.model_fields_set:
@@ -84,6 +89,11 @@ class DatabaseSummary(BaseModel):
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
             _dict['expires_at'] = None
+
+        # set to None if forked_from (nullable) is None
+        # and model_fields_set contains the field
+        if self.forked_from is None and "forked_from" in self.model_fields_set:
+            _dict['forked_from'] = None
 
         # set to None if name (nullable) is None
         # and model_fields_set contains the field
@@ -106,6 +116,7 @@ class DatabaseSummary(BaseModel):
             "default_catalog": obj.get("default_catalog"),
             "default_schema": obj.get("default_schema"),
             "expires_at": obj.get("expires_at"),
+            "forked_from": ForkedFromInfo.from_dict(obj["forked_from"]) if obj.get("forked_from") is not None else None,
             "id": obj.get("id"),
             "name": obj.get("name")
         })

@@ -37,7 +37,8 @@ class IndexInfoResponse(BaseModel):
     source_column: Optional[StrictStr] = Field(default=None, description="Source text column for an embedding-backed vector index. A query searches it via `vector_distance(<source_column>, …)`; the indexed `columns` hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes.")
     status: IndexStatus
     updated_at: datetime
-    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "source_column", "status", "updated_at"]
+    vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely this vector index stores each number of a vector, when it was created with an explicit precision. Absent means it stores at the same precision as the column, which is the default. Also absent for BM25 and sorted indexes.")
+    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "source_column", "status", "updated_at", "vector_precision"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -88,6 +89,11 @@ class IndexInfoResponse(BaseModel):
         if self.source_column is None and "source_column" in self.model_fields_set:
             _dict['source_column'] = None
 
+        # set to None if vector_precision (nullable) is None
+        # and model_fields_set contains the field
+        if self.vector_precision is None and "vector_precision" in self.model_fields_set:
+            _dict['vector_precision'] = None
+
         return _dict
 
     @classmethod
@@ -107,7 +113,8 @@ class IndexInfoResponse(BaseModel):
             "metric": obj.get("metric"),
             "source_column": obj.get("source_column"),
             "status": obj.get("status"),
-            "updated_at": obj.get("updated_at")
+            "updated_at": obj.get("updated_at"),
+            "vector_precision": obj.get("vector_precision")
         })
         return _obj
 
