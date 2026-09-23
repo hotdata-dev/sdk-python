@@ -28,13 +28,16 @@ from hotdata.models.create_database_response import CreateDatabaseResponse
 from hotdata.models.database_batch_response import DatabaseBatchResponse
 from hotdata.models.database_count_response import DatabaseCountResponse
 from hotdata.models.database_detail_response import DatabaseDetailResponse
+from hotdata.models.database_lineage_response import DatabaseLineageResponse
 from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse
 from hotdata.models.fork_database_request import ForkDatabaseRequest
 from hotdata.models.list_databases_response import ListDatabasesResponse
 from hotdata.models.load_managed_table_request import LoadManagedTableRequest
 from hotdata.models.load_managed_table_response import LoadManagedTableResponse
 from hotdata.models.managed_schema_response import ManagedSchemaResponse
+from hotdata.models.managed_table_constant_per_key_response import ManagedTableConstantPerKeyResponse
 from hotdata.models.managed_table_response import ManagedTableResponse
+from hotdata.models.update_managed_table_request import UpdateManagedTableRequest
 
 from hotdata.api_client import ApiClient, RequestSerialized
 from hotdata.api_response import ApiResponse
@@ -687,7 +690,7 @@ class DatabasesApi:
     ) -> None:
         """Attach catalog to database
 
-        Attach an existing connection (catalog) to a database with an optional alias. Inside the database the catalog is reachable as the alias (when set) or its original name.
+        Attach a catalog to a database so its tables are queryable alongside the database's own. Pass another database's `default_connection_id` as `connection_id` to read across the two in one query. Inside the database the catalog answers to `alias` when set, otherwise to the name it already answers to in its own scope. That name may not be `default`, a reserved name, or this database's own default catalog name — so attaching a database that kept the stock `default` catalog needs an `alias`. Attaching is read-only and copies nothing: loads still target the database's own default catalog, and detaching withdraws visibility rather than deleting data. A database's own default catalog is always attached and cannot be attached again. Attaching is not transitive — a database sees the catalog it attached, not that catalog's own attachments.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -761,7 +764,7 @@ class DatabasesApi:
     ) -> ApiResponse[None]:
         """Attach catalog to database
 
-        Attach an existing connection (catalog) to a database with an optional alias. Inside the database the catalog is reachable as the alias (when set) or its original name.
+        Attach a catalog to a database so its tables are queryable alongside the database's own. Pass another database's `default_connection_id` as `connection_id` to read across the two in one query. Inside the database the catalog answers to `alias` when set, otherwise to the name it already answers to in its own scope. That name may not be `default`, a reserved name, or this database's own default catalog name — so attaching a database that kept the stock `default` catalog needs an `alias`. Attaching is read-only and copies nothing: loads still target the database's own default catalog, and detaching withdraws visibility rather than deleting data. A database's own default catalog is always attached and cannot be attached again. Attaching is not transitive — a database sees the catalog it attached, not that catalog's own attachments.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -835,7 +838,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Attach catalog to database
 
-        Attach an existing connection (catalog) to a database with an optional alias. Inside the database the catalog is reachable as the alias (when set) or its original name.
+        Attach a catalog to a database so its tables are queryable alongside the database's own. Pass another database's `default_connection_id` as `connection_id` to read across the two in one query. Inside the database the catalog answers to `alias` when set, otherwise to the name it already answers to in its own scope. That name may not be `default`, a reserved name, or this database's own default catalog name — so attaching a database that kept the stock `default` catalog needs an `alias`. Attaching is read-only and copies nothing: loads still target the database's own default catalog, and detaching withdraws visibility rather than deleting data. A database's own default catalog is always attached and cannot be attached again. Attaching is not transitive — a database sees the catalog it attached, not that catalog's own attachments.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -1267,7 +1270,7 @@ class DatabasesApi:
     ) -> DatabaseCountResponse:
         """Count databases
 
-        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text, ignoring the case of unaccented Latin letters and digits, or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
 
         :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
         :type search: str
@@ -1338,7 +1341,7 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseCountResponse]:
         """Count databases
 
-        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text, ignoring the case of unaccented Latin letters and digits, or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
 
         :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
         :type search: str
@@ -1409,7 +1412,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Count databases
 
-        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text (case-insensitive), or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text, ignoring the case of unaccented Latin letters and digits, or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
 
         :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
         :type search: str
@@ -1547,7 +1550,7 @@ class DatabasesApi:
     ) -> CreateDatabaseResponse:
         """Create database
 
-        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.
+        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp. Optional `if_not_exists` makes this a get-or-create: when a database already carries the requested `name`, it is returned with status `200` and nothing is created, which lets a client bind to its database on every start-up without first looking one up.
 
         :param create_database_request: (required)
         :type create_database_request: CreateDatabaseRequest
@@ -1582,8 +1585,10 @@ class DatabasesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CreateDatabaseResponse",
             '201': "CreateDatabaseResponse",
             '400': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -1616,7 +1621,7 @@ class DatabasesApi:
     ) -> ApiResponse[CreateDatabaseResponse]:
         """Create database
 
-        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.
+        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp. Optional `if_not_exists` makes this a get-or-create: when a database already carries the requested `name`, it is returned with status `200` and nothing is created, which lets a client bind to its database on every start-up without first looking one up.
 
         :param create_database_request: (required)
         :type create_database_request: CreateDatabaseRequest
@@ -1651,8 +1656,10 @@ class DatabasesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CreateDatabaseResponse",
             '201': "CreateDatabaseResponse",
             '400': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -1685,7 +1692,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Create database
 
-        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp.
+        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp. Optional `if_not_exists` makes this a get-or-create: when a database already carries the requested `name`, it is returned with status `200` and nothing is created, which lets a client bind to its database on every start-up without first looking one up.
 
         :param create_database_request: (required)
         :type create_database_request: CreateDatabaseRequest
@@ -1720,8 +1727,10 @@ class DatabasesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
+            '200': "CreateDatabaseResponse",
             '201': "CreateDatabaseResponse",
             '400': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -1828,7 +1837,7 @@ class DatabasesApi:
     ) -> None:
         """Delete database
 
-        Delete a database and its auto-created default catalog. Attached catalogs are detached (their underlying connections are not deleted).
+        Delete a database and its auto-created default catalog. Catalogs attached to it are detached (the catalogs themselves are not deleted). Refused while another database attaches this one's catalog — detach it there first — unless this database is past its `expires_at`, in which case it can be deleted regardless and the attaching database loses the catalog. A database that attaches one should watch that date.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -1865,6 +1874,7 @@ class DatabasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1896,7 +1906,7 @@ class DatabasesApi:
     ) -> ApiResponse[None]:
         """Delete database
 
-        Delete a database and its auto-created default catalog. Attached catalogs are detached (their underlying connections are not deleted).
+        Delete a database and its auto-created default catalog. Catalogs attached to it are detached (the catalogs themselves are not deleted). Refused while another database attaches this one's catalog — detach it there first — unless this database is past its `expires_at`, in which case it can be deleted regardless and the attaching database loses the catalog. A database that attaches one should watch that date.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -1933,6 +1943,7 @@ class DatabasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1964,7 +1975,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Delete database
 
-        Delete a database and its auto-created default catalog. Attached catalogs are detached (their underlying connections are not deleted).
+        Delete a database and its auto-created default catalog. Catalogs attached to it are detached (the catalogs themselves are not deleted). Refused while another database attaches this one's catalog — detach it there first — unless this database is past its `expires_at`, in which case it can be deleted regardless and the attaching database loses the catalog. A database that attaches one should watch that date.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2001,6 +2012,7 @@ class DatabasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2642,7 +2654,7 @@ class DatabasesApi:
     ) -> CreateDatabaseResponse:
         """Fork database
 
-        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over.
+        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `description` records why the fork is being taken; it is returned with the fork's `forked_from` and in the lineage of both databases. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over. A fork adds no stored bytes at first, because it starts out sharing the source's storage. Routine maintenance can later rewrite a shared table into the fork's own storage, and the fork is billed for that copy from then on. Whether and when that happens depends on the table, so a fork that is only read can keep sharing indefinitely.
 
         :param database_id: Source database ID (required)
         :type database_id: str
@@ -2683,6 +2695,7 @@ class DatabasesApi:
             '201': "CreateDatabaseResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2715,7 +2728,7 @@ class DatabasesApi:
     ) -> ApiResponse[CreateDatabaseResponse]:
         """Fork database
 
-        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over.
+        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `description` records why the fork is being taken; it is returned with the fork's `forked_from` and in the lineage of both databases. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over. A fork adds no stored bytes at first, because it starts out sharing the source's storage. Routine maintenance can later rewrite a shared table into the fork's own storage, and the fork is billed for that copy from then on. Whether and when that happens depends on the table, so a fork that is only read can keep sharing indefinitely.
 
         :param database_id: Source database ID (required)
         :type database_id: str
@@ -2756,6 +2769,7 @@ class DatabasesApi:
             '201': "CreateDatabaseResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2788,7 +2802,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Fork database
 
-        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over.
+        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `description` records why the fork is being taken; it is returned with the fork's `forked_from` and in the lineage of both databases. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Any indexes on the source's tables are not carried over. A fork adds no stored bytes at first, because it starts out sharing the source's storage. Routine maintenance can later rewrite a shared table into the fork's own storage, and the fork is billed for that copy from then on. Whether and when that happens depends on the table, so a fork that is only read can keep sharing indefinitely.
 
         :param database_id: Source database ID (required)
         :type database_id: str
@@ -2829,6 +2843,7 @@ class DatabasesApi:
             '201': "CreateDatabaseResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2937,7 +2952,7 @@ class DatabasesApi:
     ) -> DatabaseDetailResponse:
         """Get database
 
-        Fetch a database by id. The `name` field is a display label only; it is not accepted as an identifier here.
+        Fetch a database by id. The `name` field is a display label only and is not accepted as an identifier here; to fetch a database by its name instead, use `GET /v1/databases/by-name`.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3005,7 +3020,7 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseDetailResponse]:
         """Get database
 
-        Fetch a database by id. The `name` field is a display label only; it is not accepted as an identifier here.
+        Fetch a database by id. The `name` field is a display label only and is not accepted as an identifier here; to fetch a database by its name instead, use `GET /v1/databases/by-name`.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3073,7 +3088,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Get database
 
-        Fetch a database by id. The `name` field is a display label only; it is not accepted as an identifier here.
+        Fetch a database by id. The `name` field is a display label only and is not accepted as an identifier here; to fetch a database by its name instead, use `GET /v1/databases/by-name`.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3449,6 +3464,288 @@ class DatabasesApi:
 
 
     @validate_call
+    def get_database_lineage(
+        self,
+        database_id: Annotated[StrictStr, Field(description="Database ID")],
+        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> DatabaseLineageResponse:
+        """Get database lineage
+
+        Trace where a database came from and what came from it.  `ancestors` walks the fork chain from this database's immediate source up to the original it descends from, nearest first, and each entry says which state of that source the next database down copied. `forks` lists the databases forked directly from this one, most recently forked first, with `fork_count` giving the true total when the list is only a sample of it.  Lineage is a historical record, not a live link: a fork is an independent database from the moment it is created, and either side can change or be deleted without affecting the other. Deleting either one does not erase the record: a deleted ancestor keeps its place in the chain, a deleted fork still appears among `forks`, and both are marked with `exists` set to false.  A database that was never forked, and was never forked from, answers with empty lists and itself as `root_id`. Forks taken before lineage was recorded carry none: their provenance was never written and cannot be reconstructed.
+
+        :param database_id: Database ID (required)
+        :type database_id: str
+        :param forks_limit: How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.
+        :type forks_limit: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_database_lineage_serialize(
+            database_id=database_id,
+            forks_limit=forks_limit,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseLineageResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def get_database_lineage_with_http_info(
+        self,
+        database_id: Annotated[StrictStr, Field(description="Database ID")],
+        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[DatabaseLineageResponse]:
+        """Get database lineage
+
+        Trace where a database came from and what came from it.  `ancestors` walks the fork chain from this database's immediate source up to the original it descends from, nearest first, and each entry says which state of that source the next database down copied. `forks` lists the databases forked directly from this one, most recently forked first, with `fork_count` giving the true total when the list is only a sample of it.  Lineage is a historical record, not a live link: a fork is an independent database from the moment it is created, and either side can change or be deleted without affecting the other. Deleting either one does not erase the record: a deleted ancestor keeps its place in the chain, a deleted fork still appears among `forks`, and both are marked with `exists` set to false.  A database that was never forked, and was never forked from, answers with empty lists and itself as `root_id`. Forks taken before lineage was recorded carry none: their provenance was never written and cannot be reconstructed.
+
+        :param database_id: Database ID (required)
+        :type database_id: str
+        :param forks_limit: How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.
+        :type forks_limit: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_database_lineage_serialize(
+            database_id=database_id,
+            forks_limit=forks_limit,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseLineageResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def get_database_lineage_without_preload_content(
+        self,
+        database_id: Annotated[StrictStr, Field(description="Database ID")],
+        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Get database lineage
+
+        Trace where a database came from and what came from it.  `ancestors` walks the fork chain from this database's immediate source up to the original it descends from, nearest first, and each entry says which state of that source the next database down copied. `forks` lists the databases forked directly from this one, most recently forked first, with `fork_count` giving the true total when the list is only a sample of it.  Lineage is a historical record, not a live link: a fork is an independent database from the moment it is created, and either side can change or be deleted without affecting the other. Deleting either one does not erase the record: a deleted ancestor keeps its place in the chain, a deleted fork still appears among `forks`, and both are marked with `exists` set to false.  A database that was never forked, and was never forked from, answers with empty lists and itself as `root_id`. Forks taken before lineage was recorded carry none: their provenance was never written and cannot be reconstructed.
+
+        :param database_id: Database ID (required)
+        :type database_id: str
+        :param forks_limit: How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.
+        :type forks_limit: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_database_lineage_serialize(
+            database_id=database_id,
+            forks_limit=forks_limit,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseLineageResponse",
+            '404': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _get_database_lineage_serialize(
+        self,
+        database_id,
+        forks_limit,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if database_id is not None:
+            _path_params['database_id'] = database_id
+        # process the query parameters
+        if forks_limit is not None:
+            
+            _query_params.append(('forks_limit', forks_limit))
+            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/v1/databases/{database_id}/lineage',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
     def list_databases(
         self,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
@@ -3470,7 +3767,7 @@ class DatabasesApi:
     ) -> ListDatabasesResponse:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name *contains* that text, ignoring the case of unaccented Latin letters and digits; to fetch the single database whose name matches exactly, use `GET /v1/databases/by-name` instead. Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
@@ -3549,7 +3846,7 @@ class DatabasesApi:
     ) -> ApiResponse[ListDatabasesResponse]:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name *contains* that text, ignoring the case of unaccented Latin letters and digits; to fetch the single database whose name matches exactly, use `GET /v1/databases/by-name` instead. Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
@@ -3628,7 +3925,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name contains that text (case-insensitive). Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
+        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name *contains* that text, ignoring the case of unaccented Latin letters and digits; to fetch the single database whose name matches exactly, use `GET /v1/databases/by-name` instead. Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
 
         :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
         :type limit: int
@@ -4083,6 +4380,608 @@ class DatabasesApi:
         return self.api_client.param_serialize(
             method='POST',
             resource_path='/v1/databases/{database_id}/schemas/{schema}/tables/{table}/loads',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def lookup_database_by_name(
+        self,
+        name: Annotated[StrictStr, Field(description="Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with.")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> DatabaseDetailResponse:
+        """Look up a database by name
+
+        Fetch a single database by its exact name. This is the counterpart to the listing's `search` filter, which matches any database whose name merely contains the text.  Matching ignores case for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so a name containing an accented letter or a non-Latin script must be looked up with the capitalisation it was created with.  Returns 404 when no database has that name. A name shared by more than one database returns 409 rather than picking one of them; address those by id.
+
+        :param name: Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with. (required)
+        :type name: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._lookup_database_by_name_serialize(
+            name=name,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseDetailResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def lookup_database_by_name_with_http_info(
+        self,
+        name: Annotated[StrictStr, Field(description="Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with.")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[DatabaseDetailResponse]:
+        """Look up a database by name
+
+        Fetch a single database by its exact name. This is the counterpart to the listing's `search` filter, which matches any database whose name merely contains the text.  Matching ignores case for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so a name containing an accented letter or a non-Latin script must be looked up with the capitalisation it was created with.  Returns 404 when no database has that name. A name shared by more than one database returns 409 rather than picking one of them; address those by id.
+
+        :param name: Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with. (required)
+        :type name: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._lookup_database_by_name_serialize(
+            name=name,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseDetailResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def lookup_database_by_name_without_preload_content(
+        self,
+        name: Annotated[StrictStr, Field(description="Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with.")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Look up a database by name
+
+        Fetch a single database by its exact name. This is the counterpart to the listing's `search` filter, which matches any database whose name merely contains the text.  Matching ignores case for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so a name containing an accented letter or a non-Latin script must be looked up with the capitalisation it was created with.  Returns 404 when no database has that name. A name shared by more than one database returns 409 rather than picking one of them; address those by id.
+
+        :param name: Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with. (required)
+        :type name: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._lookup_database_by_name_serialize(
+            name=name,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DatabaseDetailResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _lookup_database_by_name_serialize(
+        self,
+        name,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if name is not None:
+            
+            _query_params.append(('name', name))
+            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/v1/databases/by-name',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def set_database_table_constant_per_key(
+        self,
+        database_id: Annotated[StrictStr, Field(description="Database ID")],
+        var_schema: Annotated[StrictStr, Field(description="Schema name")],
+        table: Annotated[StrictStr, Field(description="Table name")],
+        update_managed_table_request: UpdateManagedTableRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ManagedTableConstantPerKeyResponse:
+        """Declare which columns are constant per key
+
+        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created — it changes only which files a mutation opens, never how rows are written — so a populated table can adopt it with no rewrite, taking effect on the next load. Send an empty array to revoke it.  **Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.
+
+        :param database_id: Database ID (required)
+        :type database_id: str
+        :param var_schema: Schema name (required)
+        :type var_schema: str
+        :param table: Table name (required)
+        :type table: str
+        :param update_managed_table_request: (required)
+        :type update_managed_table_request: UpdateManagedTableRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_database_table_constant_per_key_serialize(
+            database_id=database_id,
+            var_schema=var_schema,
+            table=table,
+            update_managed_table_request=update_managed_table_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ManagedTableConstantPerKeyResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def set_database_table_constant_per_key_with_http_info(
+        self,
+        database_id: Annotated[StrictStr, Field(description="Database ID")],
+        var_schema: Annotated[StrictStr, Field(description="Schema name")],
+        table: Annotated[StrictStr, Field(description="Table name")],
+        update_managed_table_request: UpdateManagedTableRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[ManagedTableConstantPerKeyResponse]:
+        """Declare which columns are constant per key
+
+        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created — it changes only which files a mutation opens, never how rows are written — so a populated table can adopt it with no rewrite, taking effect on the next load. Send an empty array to revoke it.  **Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.
+
+        :param database_id: Database ID (required)
+        :type database_id: str
+        :param var_schema: Schema name (required)
+        :type var_schema: str
+        :param table: Table name (required)
+        :type table: str
+        :param update_managed_table_request: (required)
+        :type update_managed_table_request: UpdateManagedTableRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_database_table_constant_per_key_serialize(
+            database_id=database_id,
+            var_schema=var_schema,
+            table=table,
+            update_managed_table_request=update_managed_table_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ManagedTableConstantPerKeyResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def set_database_table_constant_per_key_without_preload_content(
+        self,
+        database_id: Annotated[StrictStr, Field(description="Database ID")],
+        var_schema: Annotated[StrictStr, Field(description="Schema name")],
+        table: Annotated[StrictStr, Field(description="Table name")],
+        update_managed_table_request: UpdateManagedTableRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Declare which columns are constant per key
+
+        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created — it changes only which files a mutation opens, never how rows are written — so a populated table can adopt it with no rewrite, taking effect on the next load. Send an empty array to revoke it.  **Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.
+
+        :param database_id: Database ID (required)
+        :type database_id: str
+        :param var_schema: Schema name (required)
+        :type var_schema: str
+        :param table: Table name (required)
+        :type table: str
+        :param update_managed_table_request: (required)
+        :type update_managed_table_request: UpdateManagedTableRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_database_table_constant_per_key_serialize(
+            database_id=database_id,
+            var_schema=var_schema,
+            table=table,
+            update_managed_table_request=update_managed_table_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ManagedTableConstantPerKeyResponse",
+            '400': "ApiErrorResponse",
+            '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _set_database_table_constant_per_key_serialize(
+        self,
+        database_id,
+        var_schema,
+        table,
+        update_managed_table_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if database_id is not None:
+            _path_params['database_id'] = database_id
+        if var_schema is not None:
+            _path_params['schema'] = var_schema
+        if table is not None:
+            _path_params['table'] = table
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if update_managed_table_request is not None:
+            _body_params = update_managed_table_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'WorkspaceId', 
+            'BearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='PUT',
+            resource_path='/v1/databases/{database_id}/schemas/{schema}/tables/{table}/constant-per-key',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -27,9 +27,10 @@ class ForkDatabaseRequest(BaseModel):
     """
     Request body for POST /databases/{database_id}/fork
     """ # noqa: E501
+    description: Optional[StrictStr] = Field(default=None, description="Optional note saying why the fork is being taken — for example \"backfill test before the March migration\". It is kept with the record of the fork and returned wherever that record appears: `forked_from` on the fork, and the fork's entry in both databases' lineage. Surrounding whitespace is trimmed, and an empty value is treated as absent. At most 4096 bytes; line breaks and tabs are allowed, other control characters are not.")
     expires_at: Optional[StrictStr] = Field(default=None, description="When the fork expires. Accepts either an RFC 3339 timestamp (e.g. `\"2026-06-01T00:00:00Z\"`) or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days) — for example `\"24h\"` or `\"7d\"`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires.")
     name: Optional[StrictStr] = Field(default=None, description="Optional display label for the fork. When omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. A source with no usable label of its own gives a fork named from that ID alone.")
-    __properties: ClassVar[List[str]] = ["expires_at", "name"]
+    __properties: ClassVar[List[str]] = ["description", "expires_at", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,6 +71,11 @@ class ForkDatabaseRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if description (nullable) is None
+        # and model_fields_set contains the field
+        if self.description is None and "description" in self.model_fields_set:
+            _dict['description'] = None
+
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
@@ -92,6 +98,7 @@ class ForkDatabaseRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "description": obj.get("description"),
             "expires_at": obj.get("expires_at"),
             "name": obj.get("name")
         })

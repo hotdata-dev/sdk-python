@@ -46,6 +46,7 @@ class TestIndexEntryResponse(unittest.TestCase):
                 source_column = '',
                 status = 'ready',
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                vector_precision = '',
                 connection_id = '',
                 schema_name = '',
                 table_name = ''
