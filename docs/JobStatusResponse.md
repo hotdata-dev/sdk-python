@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **error_message** | **str** | Error or warning message. Set when status is &#x60;failed&#x60; or &#x60;partially_succeeded&#x60;. | [optional] 
 **id** | **str** |  | 
 **job_type** | [**JobType**](JobType.md) |  | 
-**result** | [**JobResult**](JobResult.md) | Job-specific result payload. Null while the job is pending or running. | [optional] 
+**result** | [**JobResult**](JobResult.md) | What the job produced. Omitted entirely while the job is &#x60;pending&#x60; or &#x60;running&#x60;, and for job types that report no payload. Read &#x60;job_type&#x60; to know which shape to expect. | [optional] 
 **status** | [**JobStatus**](JobStatus.md) |  | 
 
 ## Example

@@ -19,8 +19,9 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.forked_from_info import ForkedFromInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,13 +29,15 @@ class CreateDatabaseResponse(BaseModel):
     """
     Response body for POST /databases
     """ # noqa: E501
+    created: Optional[StrictBool] = Field(default=None, description="Whether this call brought the database into existence.  Only `false` when `if_not_exists` found a database already carrying the requested name, in which case nothing was created and the existing one is returned. The response status says the same thing — `201` against `200` — but generated clients often surface only the body, so it is stated here as well.  Always sent. It is declared optional so that a client built against a newer version of this API still accepts a response from a deployment that predates the field. Absent therefore means \"this deployment cannot say\", which is not the same as `false` — test for the two values explicitly rather than for truthiness.")
     default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope (`default` unless overridden at create time).")
-    default_connection_id: StrictStr = Field(description="Internal id of the connection that backs this database's `default` catalog. Workspace-level connection endpoints (list, get, health, delete, cache purge) refuse to act on this id — it is exposed only for the managed-tables load endpoint (`POST /v1/connections/{id}/schemas/{s}/tables/{t}/loads`) so callers can load data into tables declared at database-create time. Addressing it directly in SQL is not the recommended path — use `default` inside an `X-Database-Id` scope instead.")
+    default_connection_id: StrictStr = Field(description="Id of the connection that backs this database's `default` catalog. Two uses: pass it as `connection_id` to `POST /v1/databases/{other}/catalogs` to attach this database's catalog into another database, and as the connection in the managed-tables load endpoint (`POST /v1/connections/{id}/schemas/{s}/tables/{t}/loads`) to load tables declared at create time. Other connection endpoints (list, get, health, delete, cache purge) refuse to act on it. In SQL, address the catalog as `default` inside an `X-Database-Id` scope, not by this id.")
     default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
     expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
+    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Set on a database created by forking another one: where it came from and which state of the source it copied.")
     id: StrictStr
     name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["default_catalog", "default_connection_id", "default_schema", "expires_at", "id", "name"]
+    __properties: ClassVar[List[str]] = ["created", "default_catalog", "default_connection_id", "default_schema", "expires_at", "forked_from", "id", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -75,10 +78,23 @@ class CreateDatabaseResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of forked_from
+        if self.forked_from:
+            _dict['forked_from'] = self.forked_from.to_dict()
+        # set to None if created (nullable) is None
+        # and model_fields_set contains the field
+        if self.created is None and "created" in self.model_fields_set:
+            _dict['created'] = None
+
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
             _dict['expires_at'] = None
+
+        # set to None if forked_from (nullable) is None
+        # and model_fields_set contains the field
+        if self.forked_from is None and "forked_from" in self.model_fields_set:
+            _dict['forked_from'] = None
 
         # set to None if name (nullable) is None
         # and model_fields_set contains the field
@@ -97,10 +113,12 @@ class CreateDatabaseResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "created": obj.get("created"),
             "default_catalog": obj.get("default_catalog"),
             "default_connection_id": obj.get("default_connection_id"),
             "default_schema": obj.get("default_schema"),
             "expires_at": obj.get("expires_at"),
+            "forked_from": ForkedFromInfo.from_dict(obj["forked_from"]) if obj.get("forked_from") is not None else None,
             "id": obj.get("id"),
             "name": obj.get("name")
         })
