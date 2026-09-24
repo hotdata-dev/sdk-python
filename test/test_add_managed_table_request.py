@@ -36,6 +36,7 @@ class TestAddManagedTableRequest(unittest.TestCase):
         model = AddManagedTableRequest()
         if include_optional:
             return AddManagedTableRequest(
+                constant_per_key = [event_date],
                 key = [order_id],
                 name = 'orders',
                 partition_by = [

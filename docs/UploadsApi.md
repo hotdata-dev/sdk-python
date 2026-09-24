@@ -19,6 +19,8 @@ Create an upload session for a file you will upload directly to the URL the resp
 
 You may hint a preferred part size with `part_size`; the service clamps it to the allowed range and ignores it for single-`PUT` uploads.
 
+One upload may be at most 16 GiB by default, whatever its format. Declare `declared_size_bytes` and an oversized file is refused here, before you transfer any of it; an upload created without a declared size is refused at finalize instead. To load more than that into one table, split the data across several uploads and load each one with `mode: append`.
+
 A `501` with error code `PRESIGN_UNSUPPORTED` means this deployment cannot issue upload URLs; send the data inline on the load endpoint instead.
 
 ### Example
@@ -109,6 +111,8 @@ Create upload sessions in bulk
 
 Create upload sessions for several files in one request. Each file is planned independently and the response returns one session per requested file, in the same order. Each session is finalized separately via the finalize endpoint, so you can upload and finalize files at your own pace.
 
+The maximum upload size (16 GiB by default, the same for every file format) applies to each file, not to the request as a whole. The batch is all-or-nothing: if any one file is refused, no sessions are created and the ones already planned are discarded, so retry the whole request rather than the rejected file alone.
+
 A `501` with error code `PRESIGN_UNSUPPORTED` means this deployment cannot issue upload URLs; send the data inline on the load endpoint instead.
 
 ### Example
@@ -197,7 +201,7 @@ Name | Type | Description  | Notes
 
 Finalize upload
 
-Confirm that a file has been uploaded and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. When you declared a size at create time, the uploaded file's size is validated against it and a mismatch is rejected. An upload created without a declared size is finalized from its uploaded parts; it must be non-empty and is rejected if it exceeds the server's maximum upload size. Finalize is exactly-once: a second finalize of the same upload is rejected.
+Confirm that a file has been uploaded and make it usable as managed-table contents. Supply the `finalize_token` returned when the session was created, in the `X-Upload-Finalize-Token` header. When you declared a size at create time, the uploaded file's size is validated against it and a mismatch is rejected. An upload created without a declared size is finalized from its uploaded parts; it must be non-empty and is rejected if it exceeds the maximum upload size (16 GiB by default, the same for every file format). Finalize is exactly-once: a second finalize of the same upload is rejected.
 
 ### Example
 
