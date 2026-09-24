@@ -36,6 +36,7 @@ class TestDatabaseDefaultTableDecl(unittest.TestCase):
         model = DatabaseDefaultTableDecl()
         if include_optional:
             return DatabaseDefaultTableDecl(
+                constant_per_key = [event_date],
                 key = [order_id],
                 name = 'orders',
                 partition_by = [

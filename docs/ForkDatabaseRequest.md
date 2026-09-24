@@ -6,6 +6,7 @@ Request body for POST /databases/{database_id}/fork
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**description** | **str** | Optional note saying why the fork is being taken — for example \&quot;backfill test before the March migration\&quot;. It is kept with the record of the fork and returned wherever that record appears: &#x60;forked_from&#x60; on the fork, and the fork&#39;s entry in both databases&#39; lineage. Surrounding whitespace is trimmed, and an empty value is treated as absent. At most 4096 bytes; line breaks and tabs are allowed, other control characters are not. | [optional] 
 **expires_at** | **str** | When the fork expires. Accepts either an RFC 3339 timestamp (e.g. &#x60;\&quot;2026-06-01T00:00:00Z\&quot;&#x60;) or a relative duration suffixed with &#x60;h&#x60; (hours), &#x60;m&#x60; (minutes), or &#x60;d&#x60; (days) — for example &#x60;\&quot;24h\&quot;&#x60; or &#x60;\&quot;7d\&quot;&#x60;. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. | [optional] 
 **name** | **str** | Optional display label for the fork. When omitted, the fork takes the source&#39;s label followed by a short suffix derived from the fork&#39;s own ID, so the two stay distinguishable. A source with no usable label of its own gives a fork named from that ID alone. | [optional] 
 
