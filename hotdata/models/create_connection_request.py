@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -31,9 +31,8 @@ class CreateConnectionRequest(BaseModel):
     name: StrictStr
     secret_id: Optional[StrictStr] = Field(default=None, description="Optional reference to a secret by ID (e.g., \"secr_abc123\"). If provided, this secret will be used for authentication. Mutually exclusive with `secret_name`.")
     secret_name: Optional[StrictStr] = Field(default=None, description="Optional reference to a secret by name. If provided, this secret will be used for authentication. Mutually exclusive with `secret_id`.")
-    skip_discovery: Optional[StrictBool] = Field(default=False, description="If true, skip automatic schema discovery after registering the connection. The connection will be created but no tables will be discovered. You can run discovery later via the refresh endpoint.")
     source_type: StrictStr
-    __properties: ClassVar[List[str]] = ["config", "name", "secret_id", "secret_name", "skip_discovery", "source_type"]
+    __properties: ClassVar[List[str]] = ["config", "name", "secret_id", "secret_name", "source_type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -100,7 +99,6 @@ class CreateConnectionRequest(BaseModel):
             "name": obj.get("name"),
             "secret_id": obj.get("secret_id"),
             "secret_name": obj.get("secret_name"),
-            "skip_discovery": obj.get("skip_discovery") if obj.get("skip_discovery") is not None else False,
             "source_type": obj.get("source_type")
         })
         return _obj
