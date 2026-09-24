@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **row_count** | **int** |  | [optional] 
 **rows** | **List[List[object]]** | Array of rows, where each row is an array of column values. | [optional] 
 **status** | **str** |  | 
+**total_row_count** | **int** | Grand total rows in the full result, ignoring &#x60;offset&#x60; and &#x60;limit&#x60;. Present whenever the result is &#x60;ready&#x60;, and carrying the same value as the &#x60;X-Total-Row-Count&#x60; response header.  Compare it against &#x60;row_count&#x60; to tell whether this body is the whole result: &#x60;row_count &lt; total_row_count&#x60; means the rest is still there, one page further on. Without it a windowed fetch cannot tell a full result from a truncated one from the body alone. | [optional] 
 
 ## Example
 
