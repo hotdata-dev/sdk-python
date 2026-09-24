@@ -1,6 +1,6 @@
 # CreateIndexRequest
 
-Request body for POST .../indexes
+Request body for POST .../indexes  One constraint spans the whole table rather than this request alone: a vector index that generates its own embeddings — that is, one created with `embedding_provider_id` — has to be the only index on its table. So a table that already carries any index (sorted, full-text, or vector) will not accept an embedding-backed vector index, and a table that already carries an embedding-backed vector index will not accept any further index of any type. To move between the two arrangements, drop what is there first. Plan for it when designing a table: combining full-text search with generated embeddings on one table is not possible, so use a separate table for the second index, or supply the embeddings yourself.  A vector index over a column that already holds vectors — no `embedding_provider_id` — is not affected and coexists with other indexes normally.  Embedding generation also rewrites the table to add its generated column, and that rewrite cannot preserve a declared partition or sort order. An embedding-backed vector index is therefore refused on a table declaring either.
 
 ## Properties
 

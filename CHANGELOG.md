@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore: disallow additional properties in table request schemas
 - chore(databases): clarify fork naming behavior
 - docs: adopt "instant database" / "instant catalog" terminology in hand-written
   prose. Documentation only — all public API symbols (`ManagedTableResponse`,

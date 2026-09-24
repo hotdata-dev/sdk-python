@@ -6,7 +6,7 @@ Response for GET /v1/usage
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**bytes_scanned** | **int** | Sum of &#x60;bytes_scanned&#x60; across all completed/failed query runs since &#x60;since&#x60;. Null bytes (queries that touched no row data) contribute 0. | 
+**bytes_scanned** | **int** | Sum of &#x60;bytes_scanned&#x60; across all completed/failed query runs since &#x60;since&#x60;. Null bytes (queries that touched no row data) contribute 0.  This is the storage read the workspace&#39;s queries caused, not how much data they covered: a query whose data was already cached contributes little or nothing (see &#x60;bytes_scanned&#x60; on a query run). Two periods with identical query histories can therefore report different totals, and this figure will not reconcile against a per-query estimate of rows or bytes touched. | 
 **query_count** | **int** | Number of query runs (succeeded + failed) since &#x60;since&#x60;. | 
 **since** | **datetime** | The period start used for this response (echoed back for the caller to verify). | 
 **storage_bytes** | **int** | The workspace&#39;s current stored-data footprint in bytes, measured at request time: instant-database data, plus un-consumed uploads, connection caches, and search-index artifacts. | 
