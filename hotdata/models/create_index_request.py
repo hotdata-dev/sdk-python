@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class CreateIndexRequest(BaseModel):
     """
-    Request body for POST .../indexes
+    Request body for POST .../indexes  One constraint spans the whole table rather than this request alone: a vector index that generates its own embeddings — that is, one created with `embedding_provider_id` — has to be the only index on its table. So a table that already carries any index (sorted, full-text, or vector) will not accept an embedding-backed vector index, and a table that already carries an embedding-backed vector index will not accept any further index of any type. To move between the two arrangements, drop what is there first. Plan for it when designing a table: combining full-text search with generated embeddings on one table is not possible, so use a separate table for the second index, or supply the embeddings yourself.  A vector index over a column that already holds vectors — no `embedding_provider_id` — is not affected and coexists with other indexes normally.  Embedding generation also rewrites the table to add its generated column, and that rewrite cannot preserve a declared partition or sort order. An embedding-backed vector index is therefore refused on a table declaring either.
     """ # noqa: E501
     var_async: Optional[StrictBool] = Field(default=False, description="When true, create the index as a background job and return a job ID for polling.", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the index build to finish: if it completes in time the index is returned (201), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
@@ -38,7 +38,8 @@ class CreateIndexRequest(BaseModel):
     index_type: Optional[StrictStr] = Field(default='sorted', description="Index type. `sorted` supports range queries, `bm25` full-text search, and `vector` similarity search.")
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric for vector indexes: \"l2\", \"cosine\", or \"dot\". When omitted, defaults to \"l2\" for float array columns or the provider's preferred metric for text columns with auto-embedding.")
     output_column: Optional[StrictStr] = Field(default=None, description="Custom name for the generated embedding column. Defaults to `{column}_embedding`.")
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "columns", "description", "dimensions", "embedding_provider_id", "index_name", "index_type", "metric", "output_column"]
+    vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely a vector index stores each number of a vector. Lower precision shrinks the index so a larger table can be indexed within the same memory, and lets searches run on a smaller instance. Omit this field to store vectors at the same precision as the column, which is the default.  The quality figures below come from one benchmark — 1536-dimension text embeddings, cosine distance, default search settings — and are a guide, not a guarantee. Other models, dimensions, distance metrics and data distributions behave differently, so measure on your own data before moving a production index to a lower precision.  `float32` — on a `float64` column this halves the index. Widely used embedding models emit 32-bit values, so for those nothing is lost; vectors that genuinely carry more than 32 bits of precision will lose some.  `float16` — half the memory of `float32`. In that benchmark its results matched `float32` to within 0.1 percentage points.  `float8` — a quarter of the memory of `float32`. In that benchmark it scored about 4 percentage points below `float32`, and raising the search effort did not close the gap, so treat the reduction as permanent for a given index.  `float64` — accepted only for a column that already holds double-precision values; it cannot add precision the stored data does not have.  Changing this means dropping the index and creating it again. It affects only the index: the table's own values are never altered, and text columns indexed with a generated embedding are not re-embedded.")
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "columns", "description", "dimensions", "embedding_provider_id", "index_name", "index_type", "metric", "output_column", "vector_precision"]
 
     @field_validator('index_type')
     def index_type_validate_enum(cls, value):
@@ -48,6 +49,16 @@ class CreateIndexRequest(BaseModel):
 
         if value not in set(['sorted', 'bm25', 'vector']):
             raise ValueError("must be one of enum values ('sorted', 'bm25', 'vector')")
+        return value
+
+    @field_validator('vector_precision')
+    def vector_precision_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['float64', 'float32', 'float16', 'float8']):
+            raise ValueError("must be one of enum values ('float64', 'float32', 'float16', 'float8')")
         return value
 
     model_config = ConfigDict(
@@ -140,7 +151,8 @@ class CreateIndexRequest(BaseModel):
             "index_name": obj.get("index_name"),
             "index_type": obj.get("index_type") if obj.get("index_type") is not None else 'sorted',
             "metric": obj.get("metric"),
-            "output_column": obj.get("output_column")
+            "output_column": obj.get("output_column"),
+            "vector_precision": obj.get("vector_precision")
         })
         return _obj
 
