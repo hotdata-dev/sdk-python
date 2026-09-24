@@ -38,7 +38,7 @@ class TestLoadManagedTableRequest(unittest.TestCase):
             return LoadManagedTableRequest(
                 var_async = True,
                 async_after_ms = 1000,
-                columns = {amount={precision=10, scale=2, type=DECIMAL}, customer_id=BIGINT, order_id=BIGINT},
+                columns = {order_id=BIGINT, customer_id=BIGINT, amount={type=DECIMAL, precision=10, scale=2}},
                 data = 'order_id,customer_id,amount
 1001,42,1999
 1002,7,4550

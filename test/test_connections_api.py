@@ -90,17 +90,10 @@ class TestConnectionsApi(unittest.TestCase):
         """
         pass
 
-    def test_purge_connection_cache(self) -> None:
-        """Test case for purge_connection_cache
+    def test_set_managed_table_constant_per_key(self) -> None:
+        """Test case for set_managed_table_constant_per_key
 
-        Purge connection cache
-        """
-        pass
-
-    def test_purge_table_cache(self) -> None:
-        """Test case for purge_table_cache
-
-        Purge table cache
+        Declare which columns are constant per key
         """
         pass
 

@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **default_connection_id** | **str** |  | 
 **default_schema** | **str** | Schema that unqualified table names resolve to inside this database&#39;s query scope. &#x60;main&#x60; unless the database declares a single schema or a &#x60;default_schema&#x60; was set at create time. | 
 **expires_at** | **datetime** | When this database expires. | [optional] 
+**forked_from** | [**ForkedFromInfo**](ForkedFromInfo.md) | Set on a database created by forking another one: where it came from and which state of the source it copied. &#x60;GET /databases/{database_id}/lineage&#x60; returns the whole family tree. | [optional] 
 **id** | **str** |  | 
 **name** | **str** |  | [optional] 
 
