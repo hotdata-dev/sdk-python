@@ -114,6 +114,7 @@ class InformationSchemaApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InformationSchemaResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -202,6 +203,7 @@ class InformationSchemaApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InformationSchemaResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -290,6 +292,7 @@ class InformationSchemaApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InformationSchemaResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(

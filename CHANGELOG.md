@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore: add 403 forbidden response to endpoints
 - feat(jobs): add database_fork job type
 
 ## [0.11.0] - 2026-09-18

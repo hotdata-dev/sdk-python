@@ -96,6 +96,7 @@ class JobsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "JobStatusResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -164,6 +165,7 @@ class JobsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "JobStatusResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -232,6 +234,7 @@ class JobsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "JobStatusResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(

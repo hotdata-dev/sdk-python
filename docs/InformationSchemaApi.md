@@ -99,6 +99,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Table metadata |  -  |
+**403** | The credential is limited to one database, and the request does not name that database&#39;s connection |  -  |
 **404** | Connection not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
