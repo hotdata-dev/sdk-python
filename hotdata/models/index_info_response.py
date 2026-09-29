@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from hotdata.models.index_status import IndexStatus
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,16 +29,18 @@ class IndexInfoResponse(BaseModel):
     """
     Result payload for a `create_index` job, and response for index endpoints.
     """ # noqa: E501
+    algorithm: Optional[StrictStr] = Field(default=None, description="How this vector index organises the vectors it searches: `hnsw` or `ivf`. Absent for BM25 and sorted indexes.")
     columns: List[StrictStr]
     created_at: datetime
     index_name: StrictStr
     index_type: StrictStr
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric this index was built with. Only present for vector indexes.")
+    probe_fraction: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="How much of an `ivf` index a search reads, as a fraction greater than 0 and at most 1, when it was created with an explicit one. Absent means the server's default. Also absent for every other kind of index.")
     source_column: Optional[StrictStr] = Field(default=None, description="Source text column for an embedding-backed vector index. A query searches it via `vector_distance(<source_column>, …)`; the indexed `columns` hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes.")
     status: IndexStatus
     updated_at: datetime
     vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely this vector index stores each number of a vector, when it was created with an explicit precision. Absent means it stores at the same precision as the column, which is the default. Also absent for BM25 and sorted indexes.")
-    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "source_column", "status", "updated_at", "vector_precision"]
+    __properties: ClassVar[List[str]] = ["algorithm", "columns", "created_at", "index_name", "index_type", "metric", "probe_fraction", "source_column", "status", "updated_at", "vector_precision"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -79,10 +81,20 @@ class IndexInfoResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if algorithm (nullable) is None
+        # and model_fields_set contains the field
+        if self.algorithm is None and "algorithm" in self.model_fields_set:
+            _dict['algorithm'] = None
+
         # set to None if metric (nullable) is None
         # and model_fields_set contains the field
         if self.metric is None and "metric" in self.model_fields_set:
             _dict['metric'] = None
+
+        # set to None if probe_fraction (nullable) is None
+        # and model_fields_set contains the field
+        if self.probe_fraction is None and "probe_fraction" in self.model_fields_set:
+            _dict['probe_fraction'] = None
 
         # set to None if source_column (nullable) is None
         # and model_fields_set contains the field
@@ -106,11 +118,13 @@ class IndexInfoResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "algorithm": obj.get("algorithm"),
             "columns": obj.get("columns"),
             "created_at": obj.get("created_at"),
             "index_name": obj.get("index_name"),
             "index_type": obj.get("index_type"),
             "metric": obj.get("metric"),
+            "probe_fraction": obj.get("probe_fraction"),
             "source_column": obj.get("source_column"),
             "status": obj.get("status"),
             "updated_at": obj.get("updated_at"),

@@ -38,6 +38,7 @@ class TestListIndexesResponse(unittest.TestCase):
             return ListIndexesResponse(
                 indexes = [
                     hotdata.models.index_info_response.IndexInfoResponse(
+                        algorithm = '', 
                         columns = [
                             ''
                             ], 
@@ -45,6 +46,7 @@ class TestListIndexesResponse(unittest.TestCase):
                         index_name = '', 
                         index_type = '', 
                         metric = '', 
+                        probe_fraction = 1.337, 
                         source_column = '', 
                         status = 'ready', 
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
@@ -55,6 +57,7 @@ class TestListIndexesResponse(unittest.TestCase):
             return ListIndexesResponse(
                 indexes = [
                     hotdata.models.index_info_response.IndexInfoResponse(
+                        algorithm = '', 
                         columns = [
                             ''
                             ], 
@@ -62,6 +65,7 @@ class TestListIndexesResponse(unittest.TestCase):
                         index_name = '', 
                         index_type = '', 
                         metric = '', 
+                        probe_fraction = 1.337, 
                         source_column = '', 
                         status = 'ready', 
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 

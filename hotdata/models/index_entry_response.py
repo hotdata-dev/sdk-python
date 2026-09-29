@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from hotdata.models.index_status import IndexStatus
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,11 +29,13 @@ class IndexEntryResponse(BaseModel):
     """
     One index in a cross-table listing: the index itself plus the connection, schema, and table it belongs to.
     """ # noqa: E501
+    algorithm: Optional[StrictStr] = Field(default=None, description="How this vector index organises the vectors it searches: `hnsw` or `ivf`. Absent for BM25 and sorted indexes.")
     columns: List[StrictStr]
     created_at: datetime
     index_name: StrictStr
     index_type: StrictStr
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric this index was built with. Only present for vector indexes.")
+    probe_fraction: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="How much of an `ivf` index a search reads, as a fraction greater than 0 and at most 1, when it was created with an explicit one. Absent means the server's default. Also absent for every other kind of index.")
     source_column: Optional[StrictStr] = Field(default=None, description="Source text column for an embedding-backed vector index. A query searches it via `vector_distance(<source_column>, …)`; the indexed `columns` hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes.")
     status: IndexStatus
     updated_at: datetime
@@ -41,7 +43,7 @@ class IndexEntryResponse(BaseModel):
     connection_id: Optional[StrictStr] = None
     schema_name: StrictStr
     table_name: StrictStr
-    __properties: ClassVar[List[str]] = ["columns", "created_at", "index_name", "index_type", "metric", "source_column", "status", "updated_at", "vector_precision", "connection_id", "schema_name", "table_name"]
+    __properties: ClassVar[List[str]] = ["algorithm", "columns", "created_at", "index_name", "index_type", "metric", "probe_fraction", "source_column", "status", "updated_at", "vector_precision", "connection_id", "schema_name", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -99,11 +101,13 @@ class IndexEntryResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "algorithm": obj.get("algorithm"),
             "columns": obj.get("columns"),
             "created_at": obj.get("created_at"),
             "index_name": obj.get("index_name"),
             "index_type": obj.get("index_type"),
             "metric": obj.get("metric"),
+            "probe_fraction": obj.get("probe_fraction"),
             "source_column": obj.get("source_column"),
             "status": obj.get("status"),
             "updated_at": obj.get("updated_at"),

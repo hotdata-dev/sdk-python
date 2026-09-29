@@ -36,6 +36,7 @@ class TestCreateIndexRequest(unittest.TestCase):
         model = CreateIndexRequest()
         if include_optional:
             return CreateIndexRequest(
+                algorithm = 'hnsw',
                 var_async = True,
                 async_after_ms = 1000,
                 columns = [customer_id],
@@ -45,7 +46,9 @@ class TestCreateIndexRequest(unittest.TestCase):
                 index_name = 'orders_customer_id',
                 index_type = 'sorted',
                 metric = '',
+                nlist = 1,
                 output_column = '',
+                probe_fraction = 0,
                 vector_precision = 'float64'
             )
         else:
