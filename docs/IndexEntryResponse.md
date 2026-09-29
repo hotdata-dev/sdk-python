@@ -6,11 +6,13 @@ One index in a cross-table listing: the index itself plus the connection, schema
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**algorithm** | **str** | How this vector index organises the vectors it searches: &#x60;hnsw&#x60; or &#x60;ivf&#x60;. Absent for BM25 and sorted indexes. | [optional] 
 **columns** | **List[str]** |  | 
 **created_at** | **datetime** |  | 
 **index_name** | **str** |  | 
 **index_type** | **str** |  | 
 **metric** | **str** | Distance metric this index was built with. Only present for vector indexes. | [optional] 
+**probe_fraction** | **float** | How much of an &#x60;ivf&#x60; index a search reads, as a fraction greater than 0 and at most 1, when it was created with an explicit one. Absent means the server&#39;s default. Also absent for every other kind of index. | [optional] 
 **source_column** | **str** | Source text column for an embedding-backed vector index. A query searches it via &#x60;vector_distance(&lt;source_column&gt;, …)&#x60;; the indexed &#x60;columns&#x60; hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes. | [optional] 
 **status** | [**IndexStatus**](IndexStatus.md) |  | 
 **updated_at** | **datetime** |  | 

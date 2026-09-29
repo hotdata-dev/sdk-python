@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,6 +28,7 @@ class CreateIndexRequest(BaseModel):
     """
     Request body for POST .../indexes  One constraint spans the whole table rather than this request alone: a vector index that generates its own embeddings — that is, one created with `embedding_provider_id` — has to be the only index on its table. So a table that already carries any index (sorted, full-text, or vector) will not accept an embedding-backed vector index, and a table that already carries an embedding-backed vector index will not accept any further index of any type. To move between the two arrangements, drop what is there first. Plan for it when designing a table: combining full-text search with generated embeddings on one table is not possible, so use a separate table for the second index, or supply the embeddings yourself.  A vector index over a column that already holds vectors — no `embedding_provider_id` — is not affected and coexists with other indexes normally.  Embedding generation also rewrites the table to add its generated column, and that rewrite cannot preserve a declared partition or sort order. An embedding-backed vector index is therefore refused on a table declaring either.
     """ # noqa: E501
+    algorithm: Optional[StrictStr] = Field(default=None, description="How a vector index organises the vectors it searches. Omit this field for `hnsw`, which is the default.  `hnsw` — builds a graph of the vectors and keeps it in memory. Searches are very fast, and the memory a search needs grows with the whole table, so a large enough table cannot be served at all.  `ivf` — groups the vectors into clusters and reads only the clusters nearest the search. Searches are considerably slower than `hnsw`, and the memory a search needs follows how much of the index it reads rather than the size of the table, so a table far too large for `hnsw` can still be searched. It keeps a copy of the table's rows beside the vectors so a search is answered without reading the table; that copy is extra storage, and how much depends on `vector_precision`, which decides how compactly the copied vectors are held. Available for columns that already hold vectors, with the `l2` and `cosine` metrics.")
     var_async: Optional[StrictBool] = Field(default=False, description="When true, create the index as a background job and return a job ID for polling.", alias="async")
     async_after_ms: Optional[Annotated[int, Field(strict=True, ge=1000)]] = Field(default=None, description="If set (requires `async` = true), wait up to this many milliseconds for the index build to finish: if it completes in time the index is returned (201), otherwise a 202 with a job ID to poll. Must be between 1000 and the server maximum; a value out of that range, or set without `async` = true, is rejected with 400.")
     columns: List[StrictStr] = Field(description="Columns to index. Required for all index types.")
@@ -37,9 +38,21 @@ class CreateIndexRequest(BaseModel):
     index_name: StrictStr
     index_type: Optional[StrictStr] = Field(default='sorted', description="Index type. `sorted` supports range queries, `bm25` full-text search, and `vector` similarity search.")
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric for vector indexes: \"l2\", \"cosine\", or \"dot\". When omitted, defaults to \"l2\" for float array columns or the provider's preferred metric for text columns with auto-embedding.")
+    nlist: Optional[Annotated[int, Field(le=65536, strict=True, ge=1)]] = Field(default=None, description="Number of clusters an `ivf` index divides the vectors into. More clusters means each one holds fewer vectors, so a search of the same effort reads less data. Omit this to let the number be chosen from the table's size.")
     output_column: Optional[StrictStr] = Field(default=None, description="Custom name for the generated embedding column. Defaults to `{column}_embedding`.")
-    vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely a vector index stores each number of a vector. Lower precision shrinks the index so a larger table can be indexed within the same memory, and lets searches run on a smaller instance. Omit this field to store vectors at the same precision as the column, which is the default.  The quality figures below come from one benchmark — 1536-dimension text embeddings, cosine distance, default search settings — and are a guide, not a guarantee. Other models, dimensions, distance metrics and data distributions behave differently, so measure on your own data before moving a production index to a lower precision.  `float32` — on a `float64` column this halves the index. Widely used embedding models emit 32-bit values, so for those nothing is lost; vectors that genuinely carry more than 32 bits of precision will lose some.  `float16` — half the memory of `float32`. In that benchmark its results matched `float32` to within 0.1 percentage points.  `float8` — a quarter of the memory of `float32`. In that benchmark it scored about 4 percentage points below `float32`, and raising the search effort did not close the gap, so treat the reduction as permanent for a given index.  `float64` — accepted only for a column that already holds double-precision values; it cannot add precision the stored data does not have.  Changing this means dropping the index and creating it again. It affects only the index: the table's own values are never altered, and text columns indexed with a generated embedding are not re-embedded.")
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "columns", "description", "dimensions", "embedding_provider_id", "index_name", "index_type", "metric", "output_column", "vector_precision"]
+    probe_fraction: Optional[Union[Annotated[float, Field(le=1, strict=True, ge=0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = Field(default=None, description="How much of an `ivf` index a search reads, as a fraction greater than 0 and at most 1. Higher finds more of the true nearest neighbours and takes longer. This is a fraction rather than a number of clusters on purpose: the same number of clusters is a different share of the index whenever `nlist` changes, and results would quietly get worse. Omit this for the server's default.")
+    vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely a vector index stores each number of a vector. Lower precision shrinks the index so a larger table can be indexed within the same memory, and lets searches run on a smaller instance. For an `ivf` index it also shrinks what every search reads, because a search reads part of that stored copy.  Omit this field to get each algorithm's own default: an `hnsw` index stores vectors at the same precision as the column, and an `ivf` index stores them as `int8`.  The quality figures below come from one benchmark — 1536-dimension text embeddings, cosine distance, default search settings — and are a guide, not a guarantee. Other models, dimensions, distance metrics and data distributions behave differently, so measure on your own data before moving a production index to a lower precision.  `float32` — on a `float64` column this halves the index. Widely used embedding models emit 32-bit values, so for those nothing is lost; vectors that genuinely carry more than 32 bits of precision will lose some.  `float16` — half the memory of `float32`. In that benchmark its results matched `float32` to within 0.1 percentage points.  `float8` — a quarter of the memory of `float32`. In that benchmark it scored about 4 percentage points below `float32`, and raising the search effort did not close the gap, so treat the reduction as permanent for a given index.  `float64` — accepted only for a column that already holds double-precision values; it cannot add precision the stored data does not have.  `int8` — for an `ivf` index only, and its default. A quarter of the size of `float32`, which is a quarter of the bytes every search reads. On the benchmark this index was designed against it found about 99.5% of the neighbours an exact search finds. With `cosine` that accuracy holds however widely your vectors vary in magnitude; with `l2` it falls as they spread — around 93% of the neighbours once the largest magnitude is about 16 times the smallest, and lower beyond that. Use `float32` instead to store the column as written, at four times the size and four times the bytes per search.  An `ivf` index accepts `int8` and `float32` only: it stores its copy as a table, and the remaining values have no column type to be stored in or are no smaller than `int8`. An `hnsw` index accepts everything except `int8`; `float8` is its 8-bit option.  Changing this means dropping the index and creating it again. It affects only the index: the table's own values are never altered, and text columns indexed with a generated embedding are not re-embedded.")
+    __properties: ClassVar[List[str]] = ["algorithm", "async", "async_after_ms", "columns", "description", "dimensions", "embedding_provider_id", "index_name", "index_type", "metric", "nlist", "output_column", "probe_fraction", "vector_precision"]
+
+    @field_validator('algorithm')
+    def algorithm_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['hnsw', 'ivf']):
+            raise ValueError("must be one of enum values ('hnsw', 'ivf')")
+        return value
 
     @field_validator('index_type')
     def index_type_validate_enum(cls, value):
@@ -57,8 +70,8 @@ class CreateIndexRequest(BaseModel):
         if value is None:
             return value
 
-        if value not in set(['float64', 'float32', 'float16', 'float8']):
-            raise ValueError("must be one of enum values ('float64', 'float32', 'float16', 'float8')")
+        if value not in set(['float64', 'float32', 'float16', 'float8', 'int8']):
+            raise ValueError("must be one of enum values ('float64', 'float32', 'float16', 'float8', 'int8')")
         return value
 
     model_config = ConfigDict(
@@ -125,10 +138,20 @@ class CreateIndexRequest(BaseModel):
         if self.metric is None and "metric" in self.model_fields_set:
             _dict['metric'] = None
 
+        # set to None if nlist (nullable) is None
+        # and model_fields_set contains the field
+        if self.nlist is None and "nlist" in self.model_fields_set:
+            _dict['nlist'] = None
+
         # set to None if output_column (nullable) is None
         # and model_fields_set contains the field
         if self.output_column is None and "output_column" in self.model_fields_set:
             _dict['output_column'] = None
+
+        # set to None if probe_fraction (nullable) is None
+        # and model_fields_set contains the field
+        if self.probe_fraction is None and "probe_fraction" in self.model_fields_set:
+            _dict['probe_fraction'] = None
 
         return _dict
 
@@ -142,6 +165,7 @@ class CreateIndexRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "algorithm": obj.get("algorithm"),
             "async": obj.get("async") if obj.get("async") is not None else False,
             "async_after_ms": obj.get("async_after_ms"),
             "columns": obj.get("columns"),
@@ -151,7 +175,9 @@ class CreateIndexRequest(BaseModel):
             "index_name": obj.get("index_name"),
             "index_type": obj.get("index_type") if obj.get("index_type") is not None else 'sorted',
             "metric": obj.get("metric"),
+            "nlist": obj.get("nlist"),
             "output_column": obj.get("output_column"),
+            "probe_fraction": obj.get("probe_fraction"),
             "vector_precision": obj.get("vector_precision")
         })
         return _obj
