@@ -283,8 +283,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Upload finalized |  -  |
-**400** | Invalid finalize token, uploaded size mismatch, missing file, or upload not finalizable |  -  |
-**404** | Upload session not found |  -  |
+**400** | Missing finalize token header, uploaded size mismatch, missing file, or upload not finalizable |  -  |
+**404** | Upload session not found, or the finalize token does not match it |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -375,8 +375,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Minted part URLs |  -  |
-**400** | Invalid finalize token, invalid part numbers, batch too large, or the upload is not a multi-part upload |  -  |
-**404** | Upload session not found |  -  |
+**400** | Missing finalize token header, invalid part numbers, batch too large, or the upload is not a multi-part upload |  -  |
+**404** | Upload session not found, or the finalize token does not match it |  -  |
 **501** | This deployment cannot issue upload URLs |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
