@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore(uploads): clarify finalize token validation errors
 - feat(jobs): add ivf_index_hold job type support
 - feat(indexes): add algorithm and probe_fraction support
 - chore: add 403 forbidden response to endpoints
