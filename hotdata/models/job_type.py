@@ -40,6 +40,7 @@ class JobType(str, Enum):
     DUCKLAKE_TABLE_COMPACTION = 'ducklake_table_compaction'
     TABLE_CONSTANTS_UPDATE = 'table_constants_update'
     DATABASE_FORK = 'database_fork'
+    IVF_INDEX_HOLD = 'ivf_index_hold'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
