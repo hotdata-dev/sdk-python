@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - chore: add 403 forbidden response to endpoints
 - feat(jobs): add database_fork job type
 
+### Security
+
+- fix(deps): require urllib3 >=2.8.0 (GHSA-8988-9cw3-xx77, GHSA-gh4c-6fx4-qh6g,
+  GHSA-vxq7-64xx-v4gw). Projects that pin urllib3 below 2.8.0 must raise that
+  pin to upgrade.
+
 ## [0.11.0] - 2026-09-18
 
 ### Removed
