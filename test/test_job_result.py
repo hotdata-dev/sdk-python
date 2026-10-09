@@ -44,6 +44,7 @@ class TestJobResult(unittest.TestCase):
                 index_name = '',
                 index_type = '',
                 metric = '',
+                nlist = 0,
                 probe_fraction = 1.337,
                 source_column = '',
                 status = 'ready',

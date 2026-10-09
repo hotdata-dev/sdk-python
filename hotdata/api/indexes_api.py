@@ -45,7 +45,7 @@ class IndexesApi:
     @validate_call
     def create_index(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -64,9 +64,9 @@ class IndexesApi:
     ) -> IndexInfoResponse:
         """Create an index on a table
 
-        Create a sorted, BM25 full-text, or vector index on a cached table. A table can hold several indexes, with one exception: a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. The request body describes the rule in full.
+        Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request that breaks either limit is refused with 400, including when `async` is set. The request body describes the rules in full.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -128,7 +128,7 @@ class IndexesApi:
     @validate_call
     def create_index_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -147,9 +147,9 @@ class IndexesApi:
     ) -> ApiResponse[IndexInfoResponse]:
         """Create an index on a table
 
-        Create a sorted, BM25 full-text, or vector index on a cached table. A table can hold several indexes, with one exception: a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. The request body describes the rule in full.
+        Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request that breaks either limit is refused with 400, including when `async` is set. The request body describes the rules in full.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -211,7 +211,7 @@ class IndexesApi:
     @validate_call
     def create_index_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -230,9 +230,9 @@ class IndexesApi:
     ) -> RESTResponseType:
         """Create an index on a table
 
-        Create a sorted, BM25 full-text, or vector index on a cached table. A table can hold several indexes, with one exception: a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. The request body describes the rule in full.
+        Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request that breaks either limit is refused with 400, including when `async` is set. The request body describes the rules in full.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -377,7 +377,7 @@ class IndexesApi:
     @validate_call
     def delete_index(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -396,9 +396,9 @@ class IndexesApi:
     ) -> None:
         """Delete an index
 
-        Delete a specific index from a cached table.
+        Delete a specific index from a table.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -458,7 +458,7 @@ class IndexesApi:
     @validate_call
     def delete_index_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -477,9 +477,9 @@ class IndexesApi:
     ) -> ApiResponse[None]:
         """Delete an index
 
-        Delete a specific index from a cached table.
+        Delete a specific index from a table.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -539,7 +539,7 @@ class IndexesApi:
     @validate_call
     def delete_index_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -558,9 +558,9 @@ class IndexesApi:
     ) -> RESTResponseType:
         """Delete an index
 
-        Delete a specific index from a cached table.
+        Delete a specific index from a table.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -690,7 +690,7 @@ class IndexesApi:
     @validate_call
     def list_indexes(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -708,9 +708,9 @@ class IndexesApi:
     ) -> ListIndexesResponse:
         """List indexes on a table
 
-        List all indexes created on a cached table.
+        List all indexes created on a table.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -767,7 +767,7 @@ class IndexesApi:
     @validate_call
     def list_indexes_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -785,9 +785,9 @@ class IndexesApi:
     ) -> ApiResponse[ListIndexesResponse]:
         """List indexes on a table
 
-        List all indexes created on a cached table.
+        List all indexes created on a table.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -844,7 +844,7 @@ class IndexesApi:
     @validate_call
     def list_indexes_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="Connection ID")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -862,9 +862,9 @@ class IndexesApi:
     ) -> RESTResponseType:
         """List indexes on a table
 
-        List all indexes created on a cached table.
+        List all indexes created on a table.
 
-        :param connection_id: Connection ID (required)
+        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str

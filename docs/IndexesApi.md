@@ -15,7 +15,7 @@ Method | HTTP request | Description
 
 Create an index on a table
 
-Create a sorted, BM25 full-text, or vector index on a cached table. A table can hold several indexes, with one exception: a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. The request body describes the rule in full.
+Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request that breaks either limit is refused with 400, including when `async` is set. The request body describes the rules in full.
 
 ### Example
 
@@ -55,7 +55,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection ID
+    connection_id = 'connection_id_example' # str | The database's `default_connection_id`, as returned when the database is created or fetched
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
     create_index_request = hotdata.CreateIndexRequest() # CreateIndexRequest | 
@@ -76,7 +76,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection ID | 
+ **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60;, as returned when the database is created or fetched | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
  **create_index_request** | [**CreateIndexRequest**](CreateIndexRequest.md)|  | 
@@ -111,7 +111,7 @@ Name | Type | Description  | Notes
 
 Delete an index
 
-Delete a specific index from a cached table.
+Delete a specific index from a table.
 
 ### Example
 
@@ -149,7 +149,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection ID
+    connection_id = 'connection_id_example' # str | The database's `default_connection_id`, as returned when the database is created or fetched
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
     index_name = 'index_name_example' # str | Index name
@@ -168,7 +168,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection ID | 
+ **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60;, as returned when the database is created or fetched | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
  **index_name** | **str**| Index name | 
@@ -201,7 +201,7 @@ void (empty response body)
 
 List indexes on a table
 
-List all indexes created on a cached table.
+List all indexes created on a table.
 
 ### Example
 
@@ -240,7 +240,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | Connection ID
+    connection_id = 'connection_id_example' # str | The database's `default_connection_id`, as returned when the database is created or fetched
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
 
@@ -260,7 +260,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| Connection ID | 
+ **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60;, as returned when the database is created or fetched | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
 

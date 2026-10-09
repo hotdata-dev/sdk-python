@@ -30,8 +30,6 @@ Background job types returned by the API.
 
 * `DATABASE_FORK` (value: `'database_fork'`)
 
-* `IVF_INDEX_HOLD` (value: `'ivf_index_hold'`)
-
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 
