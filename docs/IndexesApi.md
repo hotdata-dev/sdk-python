@@ -15,7 +15,7 @@ Method | HTTP request | Description
 
 Create an index on a table
 
-Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request that breaks either limit is refused with 400, including when `async` is set. The request body describes the rules in full.
+Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded, and must not declare a sort order (`sorted_by`): a table with a sort order cannot be indexed. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request refused for any of these reasons gets 400, including when `async` is set. The request body describes the rules in full.
 
 ### Example
 
