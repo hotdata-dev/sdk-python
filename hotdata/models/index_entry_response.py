@@ -21,6 +21,7 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from hotdata.models.index_status import IndexStatus
 from typing import Optional, Set
 from typing_extensions import Self
@@ -35,15 +36,16 @@ class IndexEntryResponse(BaseModel):
     index_name: StrictStr
     index_type: StrictStr
     metric: Optional[StrictStr] = Field(default=None, description="Distance metric this index was built with. Only present for vector indexes.")
-    probe_fraction: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="How much of an `ivf` index a search reads, as a fraction greater than 0 and at most 1, when it was created with an explicit one. Absent means the server's default. Also absent for every other kind of index.")
+    nlist: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Number of clusters an `ivf` index was built with. This can be smaller than the `nlist` requested when the index was created, because the number is capped by how many vectors the clusters were fitted to. Absent for every other kind of index.")
+    probe_fraction: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="How much of an `ivf` index a search reads, as a fraction greater than 0 and at most 1, when the index was created with one. When absent, the server chooses how much each search reads: a width measured on this index's own data when it was built, scaled to the number of results a search asks for, or a server default when no measurement could be made. Absent for every other kind of index.")
     source_column: Optional[StrictStr] = Field(default=None, description="Source text column for an embedding-backed vector index. A query searches it via `vector_distance(<source_column>, …)`; the indexed `columns` hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes.")
     status: IndexStatus
     updated_at: datetime
-    vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely this vector index stores each number of a vector, when it was created with an explicit precision. Absent means it stores at the same precision as the column, which is the default. Also absent for BM25 and sorted indexes.")
+    vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely this vector index stores each number of a vector. Always present for an `ivf` index, which stores `int8` unless it was created with another precision. For an `hnsw` index it is present only when the index was created with an explicit precision; absent means it stores at the same precision as the column. Absent for BM25 and sorted indexes.")
     connection_id: Optional[StrictStr] = None
     schema_name: StrictStr
     table_name: StrictStr
-    __properties: ClassVar[List[str]] = ["algorithm", "columns", "created_at", "index_name", "index_type", "metric", "probe_fraction", "source_column", "status", "updated_at", "vector_precision", "connection_id", "schema_name", "table_name"]
+    __properties: ClassVar[List[str]] = ["algorithm", "columns", "created_at", "index_name", "index_type", "metric", "nlist", "probe_fraction", "source_column", "status", "updated_at", "vector_precision", "connection_id", "schema_name", "table_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -107,6 +109,7 @@ class IndexEntryResponse(BaseModel):
             "index_name": obj.get("index_name"),
             "index_type": obj.get("index_type"),
             "metric": obj.get("metric"),
+            "nlist": obj.get("nlist"),
             "probe_fraction": obj.get("probe_fraction"),
             "source_column": obj.get("source_column"),
             "status": obj.get("status"),
