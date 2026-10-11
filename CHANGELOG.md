@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore(indexes): clarify vector precision documentation
 - chore: clarify sorted table and index creation constraints
 - feat(indexes): add nlist field to index responses
 - chore(uploads): clarify finalized upload retention period
