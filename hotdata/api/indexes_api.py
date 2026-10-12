@@ -396,7 +396,7 @@ class IndexesApi:
     ) -> None:
         """Delete an index
 
-        Delete a specific index from a table.
+        Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
 
         :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
@@ -442,6 +442,7 @@ class IndexesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -477,7 +478,7 @@ class IndexesApi:
     ) -> ApiResponse[None]:
         """Delete an index
 
-        Delete a specific index from a table.
+        Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
 
         :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
@@ -523,6 +524,7 @@ class IndexesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
@@ -558,7 +560,7 @@ class IndexesApi:
     ) -> RESTResponseType:
         """Delete an index
 
-        Delete a specific index from a table.
+        Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
 
         :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
         :type connection_id: str
@@ -604,6 +606,7 @@ class IndexesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
             '500': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
