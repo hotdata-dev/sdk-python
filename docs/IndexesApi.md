@@ -111,7 +111,7 @@ Name | Type | Description  | Notes
 
 Delete an index
 
-Delete a specific index from a table.
+Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
 
 ### Example
 
@@ -192,6 +192,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 **204** | Index deleted |  -  |
 **404** | Index not found |  -  |
+**409** | A load into the table is running; retry once it finishes |  -  |
 **500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
