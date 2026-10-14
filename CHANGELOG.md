@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore(query): clarify write statement handling in dialect parameter
 - chore(indexes): clarify vector index constraints and algorithms
 - chore(indexes): clarify vector precision documentation
 - chore: clarify sorted table and index creation constraints
