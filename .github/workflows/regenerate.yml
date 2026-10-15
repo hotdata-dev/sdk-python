@@ -201,6 +201,12 @@ jobs:
       - name: Patch transport request defaults (Accept-Encoding, User-Agent)
         run: python3 scripts/patch_request_defaults.py
 
+      - name: Patch missing-workspace guard into ApiClient
+        run: python3 scripts/patch_workspace_guard.py
+
+      - name: Patch request models to reject unknown fields (extra=forbid)
+        run: python3 scripts/patch_model_extra_forbid.py
+
       # The API-token -> JWT key exchange is deprecated: the configured API token
       # is the bearer credential and goes on the wire verbatim. This check is the
       # inverse of the old "did the exchange survive?" guard — it fails if the

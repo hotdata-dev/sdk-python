@@ -7,8 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `hotdata.Configuration` reads `HOTDATA_API_KEY`, `HOTDATA_WORKSPACE` and
+  `HOTDATA_API_URL` from the environment when `api_key`, `workspace_id` or
+  `host` is not passed, matching the CLI. Explicit arguments always win and an
+  empty variable counts as unset.
+- A workspace-scoped call made with no workspace id configured now raises
+  `hotdata.MissingWorkspaceError` (an `ApiValueError`) before anything is sent,
+  naming `workspace_id=` and `HOTDATA_WORKSPACE`. Previously the request went
+  out without `X-Workspace-Id` and the server answered a bare 404. Calls that
+  pass the header via `_headers`, use `_request_auth`, or target endpoints that
+  are not workspace-scoped (the Workspaces endpoints) are unaffected.
+- `QueryApi.fetch_ready_result(result_id, x_database_id, offset=, limit=,
+  format=)` waits for a result to be `ready` and then fetches its rows in one
+  call. `QueryApi.wait_for_result` is unchanged: it polls with `limit=0` and
+  returns a status-only response with no rows, which its docstring now states
+  up front.
+- `DatabasesApi.load_database_table` and `ConnectionsApi.load_managed_table`
+  (the classes exported from `hotdata`) retry automatically while another load
+  holds the table: HTTP 409 with error code `RESOURCE_LOCKED` is retried,
+  honouring `Retry-After` (else exponential backoff) with jitter, under a
+  60s budget by default. Tune or disable with `LoadRetryPolicy`
+  (`DatabasesApi(client, load_retry=LoadRetryPolicy(...))`); when the budget
+  runs out, `hotdata.TableLockedError` (a 409 `ApiException`) is raised. Other
+  409s (`CONFLICT`, `IDEMPOTENCY_KEY_CONFLICT`) are never retried. The raw
+  generated classes stay available under `hotdata.api.*`.
+
 ### Changed
 
+- **Breaking:** request models reject unknown fields. Every model used as a
+  request body (`QueryRequest`, `LoadManagedTableRequest`,
+  `CreateDatabaseRequest`, ... and the models nested in them) now carries
+  `extra="forbid"`, so a misspelled keyword, or a field a newer API has that
+  this SDK release does not know yet, raises `pydantic.ValidationError` at
+  construction instead of being silently dropped from the request. Upgrade the
+  SDK to use a new field. Response models are unchanged: unknown fields in
+  server responses are still ignored, so a newer server never breaks an older
+  SDK.
 - feat(query): add arrow ipc stream response format
 - chore(query): clarify write statement handling in dialect parameter
 - chore(indexes): clarify vector index constraints and algorithms

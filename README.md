@@ -37,7 +37,17 @@ configuration = hotdata.Configuration(
 )
 ```
 
-`host` defaults to `https://api.hotdata.dev`. Override it if you target another environment.
+Each of these can come from the environment instead, the same variables the
+CLI uses: `HOTDATA_API_KEY`, `HOTDATA_WORKSPACE` and `HOTDATA_API_URL` fill in
+`api_key`, `workspace_id` and `host` when the argument is not passed. An
+explicit argument always wins.
+
+`host` defaults to `https://api.hotdata.dev`. Override it (or set
+`HOTDATA_API_URL`) if you target another environment.
+
+Almost every call is workspace-scoped. If no workspace id is configured, the
+SDK raises `hotdata.MissingWorkspaceError` before sending the request rather
+than letting the server answer with an unexplained 404.
 
 ## Usage
 
@@ -59,6 +69,25 @@ with hotdata.ApiClient(configuration) as api_client:
 ```
 
 Each `Api` class groups endpoints by resource. Construct the client, then call the typed methods you need.
+
+## Loading tables
+
+Loads are serialised per table on the server. `hotdata.DatabasesApi` and
+`hotdata.ConnectionsApi` retry a load that hits a table another load still
+holds (HTTP 409, error code `RESOURCE_LOCKED`), honouring the server's
+`Retry-After`, for up to 60s by default:
+
+```python
+from hotdata import DatabasesApi, LoadRetryPolicy, TableLockedError
+
+databases = DatabasesApi(api_client, load_retry=LoadRetryPolicy(deadline_s=120))
+try:
+    databases.load_database_table(db_id, "public", "events", request)
+except TableLockedError as e:
+    print(f"gave up after {e.attempts} attempts: {e.reason}")
+```
+
+Other 409s (`CONFLICT`, `IDEMPOTENCY_KEY_CONFLICT`) are raised immediately.
 
 ## Arrow results
 

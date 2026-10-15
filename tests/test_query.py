@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from contextlib import ExitStack
 from types import SimpleNamespace
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import pytest
@@ -447,6 +447,63 @@ def test_autofollow_uses_body_database_id_when_no_header() -> None:
 
     assert out.rows == full
     assert seen_result_dbs and all(db == "db_body" for db in seen_result_dbs)
+
+
+# --- wait_for_result / fetch_ready_result --------------------------------------
+
+
+def test_wait_for_result_returns_status_only() -> None:
+    # Documented contract: the readiness poll uses limit=0, so the response it
+    # returns never carries rows even once the result is ready.
+    seen: List[Any] = []
+
+    def get_result(result_id, **kw):
+        seen.append(kw.get("limit"))
+        return _result(status="ready", rows=[])
+
+    with patch.object(_ResultsApi, "get_result", side_effect=get_result):
+        out = _api().wait_for_result("rslt1", "db1")
+    assert out.status == "ready"
+    assert not out.rows
+    assert seen == [0]
+
+
+def test_fetch_ready_result_waits_then_fetches_rows() -> None:
+    calls: List[Dict[str, Any]] = []
+
+    def get_result(result_id, **kw):
+        calls.append(kw)
+        if kw.get("limit") == 0:  # readiness poll
+            return _result(status="pending" if len(calls) == 1 else "ready", rows=[])
+        return _result(status="ready", rows=[[1], [2]])
+
+    with patch.object(_ResultsApi, "get_result", side_effect=get_result), \
+            patch("hotdata.query.time.sleep"):
+        out = _api().fetch_ready_result("rslt1", "db1", offset=10, limit=2)
+    assert out.rows == [[1], [2]]
+    # two polls (pending, ready) then exactly one row fetch with the page args
+    assert [c.get("limit") for c in calls] == [0, 0, 2]
+    assert calls[-1] == {"x_database_id": "db1", "offset": 10, "limit": 2}
+
+
+def test_fetch_ready_result_defaults_leave_paging_to_the_server() -> None:
+    calls: List[Dict[str, Any]] = []
+
+    def get_result(result_id, **kw):
+        calls.append(kw)
+        return _result(status="ready", rows=[[1]])
+
+    with patch.object(_ResultsApi, "get_result", side_effect=get_result):
+        out = _api().fetch_ready_result("rslt1", "db1")
+    assert out.rows == [[1]]
+    assert calls[-1] == {"x_database_id": "db1"}
+
+
+def test_fetch_ready_result_propagates_failure() -> None:
+    with patch.object(_ResultsApi, "get_result", side_effect=_failed_409("bad sql")):
+        with pytest.raises(ResultFailedError) as ei:
+            _api().fetch_ready_result("rslt1", "db1")
+    assert ei.value.error_message == "bad sql"
 
 
 # --- forward-compatible deserialization --------------------------------------

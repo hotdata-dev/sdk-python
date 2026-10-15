@@ -16,6 +16,7 @@ import http.client as httplib
 import logging
 from logging import FileHandler
 import multiprocessing
+import os
 import sys
 from importlib.metadata import PackageNotFoundError, version as _pkg_version
 from typing import Any, ClassVar, Dict, List, Literal, Optional, TypedDict, Union
@@ -135,13 +136,16 @@ class HostSetting(TypedDict):
 class Configuration:
     """This class contains various settings of the API client.
 
-    :param host: Base url.
+    :param host: Base url. Defaults to the `HOTDATA_API_URL` environment
+      variable when set, else `https://api.hotdata.dev`.
     :param ignore_operation_servers
       Boolean to ignore operation servers for the API client.
       Config will use `host` as the base url regardless of the operation servers.
     :param api_key: Hotdata API key, sent as `Authorization: Bearer <key>`.
+      Defaults to the `HOTDATA_API_KEY` environment variable when not given.
     :param workspace_id: Public id of the target workspace, sent as
-      `X-Workspace-Id`.
+      `X-Workspace-Id`. Defaults to the `HOTDATA_WORKSPACE` environment
+      variable when not given.
     :param api_keys: Escape hatch for raw apiKey-scheme values, keyed by
       security scheme name. Prefer `workspace_id`.
     :param api_key_prefix: Dict to store API prefix (e.g. Bearer).
@@ -203,6 +207,14 @@ conf = hotdata.Configuration(
     ) -> None:
         """Constructor
         """
+        # Environment defaults, matching the Hotdata CLI: an explicit argument
+        # always wins; an unset or empty variable leaves the default in place.
+        if api_key is None:
+            api_key = os.environ.get("HOTDATA_API_KEY") or None
+        if workspace_id is None:
+            workspace_id = os.environ.get("HOTDATA_WORKSPACE") or None
+        if host is None:
+            host = os.environ.get("HOTDATA_API_URL") or None
         self._base_path = "https://api.hotdata.dev" if host is None else host
         """Default Base url
         """
