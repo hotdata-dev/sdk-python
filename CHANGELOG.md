@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   out without `X-Workspace-Id` and the server answered a bare 404. Calls that
   pass the header via `_headers`, use `_request_auth`, or target endpoints that
   are not workspace-scoped (the Workspaces endpoints) are unaffected.
+- `QueryApi.fetch_ready_result(result_id, x_database_id, offset=, limit=,
+  format=)` waits for a result to be `ready` and then fetches its rows in one
+  call. `QueryApi.wait_for_result` is unchanged: it polls with `limit=0` and
+  returns a status-only response with no rows, which its docstring now states
+  up front.
 - `DatabasesApi.load_database_table` and `ConnectionsApi.load_managed_table`
   (the classes exported from `hotdata`) retry automatically while another load
   holds the table: HTTP 409 with error code `RESOURCE_LOCKED` is retried,

@@ -356,13 +356,19 @@ class QueryApi(_GeneratedQueryApi):
     ) -> Any:
         """Poll ``GET /v1/results/{id}`` until the result is ``ready``.
 
-        Returns the ready :class:`~hotdata.models.get_result_response.GetResultResponse`.
-        Shared by auto-follow and available for direct use.
+        **The returned response carries no rows.** This polls with ``limit=0``
+        so each readiness check fetches status only — a ``ready`` result would
+        otherwise return its full (unbounded) row set on every poll,
+        materializing the whole result into memory before the size guards can
+        act. The returned
+        :class:`~hotdata.models.get_result_response.GetResultResponse` has
+        ``status == "ready"`` and ``rows`` empty (``[]``/``None``). To get the
+        data, call :meth:`fetch_ready_result` instead, which waits and then
+        fetches a page of rows, or follow this with
+        :meth:`hotdata.api.results_api.ResultsApi.get_result` /
+        :meth:`hotdata.arrow.ResultsApi.stream_result_arrow` yourself.
 
-        Polls with ``limit=0`` so the readiness check fetches status only — a
-        ``ready`` result would otherwise return its full (unbounded) row set on
-        every poll, materializing the whole result into memory before the size
-        guards can act.
+        Shared by auto-follow and available for direct use.
 
         :param result_id: Result ID to poll.
         :param x_database_id: Database the result belongs to. Results are scoped
@@ -408,6 +414,51 @@ class QueryApi(_GeneratedQueryApi):
                 )
             time.sleep(delay)
             delay = min(delay * 2, policy.max_backoff_s)
+
+    def fetch_ready_result(
+        self,
+        result_id: str,
+        x_database_id: str,
+        *,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        format: Optional[ResultsFormatQuery] = None,
+        results_api: Optional[_ResultsApi] = None,
+    ) -> Any:
+        """Wait for a result to be ``ready``, then fetch its rows.
+
+        The companion to :meth:`wait_for_result`, which deliberately returns a
+        status-only response (it polls with ``limit=0``). This method does the
+        same wait and then issues one ``GET /v1/results/{id}`` with the given
+        ``offset`` / ``limit`` / ``format``, returning that
+        :class:`~hotdata.models.get_result_response.GetResultResponse` with
+        ``rows`` populated.
+
+        No ``limit`` means the server's default — the full result — so for a
+        large result pass a ``limit`` and page with ``offset`` (or stream it
+        with :meth:`hotdata.arrow.ResultsApi.stream_result_arrow`). The
+        auto-materialize guards of :meth:`query` do not apply here.
+
+        :param result_id: Result ID to wait for and fetch.
+        :param x_database_id: Database the result belongs to (the required
+            ``X-Database-Id`` header).
+        :param offset: Rows to skip (server default 0).
+        :param limit: Maximum rows to return (server default: all).
+        :param format: Result format override; the default is the JSON rows the
+            response model carries.
+        :raises ResultFailedError: the result failed.
+        :raises ResultTimeoutError: ``ready`` not reached within the poll deadline.
+        """
+        api = results_api or _ResultsApi(self.api_client)
+        self.wait_for_result(result_id, x_database_id, results_api=api)
+        kwargs: Dict[str, Any] = {"x_database_id": x_database_id}
+        if offset is not None:
+            kwargs["offset"] = offset
+        if limit is not None:
+            kwargs["limit"] = limit
+        if format is not None:
+            kwargs["format"] = format
+        return api.get_result(result_id, **kwargs)
 
     # -- internals ---------------------------------------------------------
 
