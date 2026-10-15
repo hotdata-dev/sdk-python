@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- chore: add 503 service unavailable response to load endpoints
+
 ## [0.12.0] - 2026-10-15
 
 ### Added

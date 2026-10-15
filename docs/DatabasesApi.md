@@ -1366,6 +1366,7 @@ Name | Type | Description  | Notes
 **404** | Database, upload, or result not found, or the table was deleted |  -  |
 **409** | Upload already consumed or in flight, the result is still being computed, or the incoming data changes a column&#39;s type incompatibly (only widening to a larger compatible type can be applied automatically); the existing data is unchanged and remains queryable |  -  |
 **413** | Inline &#x60;data&#x60; is over the 2 MiB limit (error code &#x60;INLINE_DATA_TOO_LARGE&#x60;); upload the data and load it by &#x60;upload_id&#x60; instead |  -  |
+**503** | The catalog is busy: no pooled catalog connection came free within the acquire window (error code &#x60;CATALOG_BUSY&#x60;). The load may already have committed data if the timeout hit after the write, so check the table, or load with an idempotency key, before retrying after the &#x60;Retry-After&#x60; delay |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
