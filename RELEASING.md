@@ -9,25 +9,28 @@ Every release uses `./scripts/release.sh`. Do not bump versions, tag, or create 
 
 ## Release steps
 
-1. Add user-facing notes under `## [Unreleased]` in `CHANGELOG.md`.
-2. Prepare the release PR:
+Releases are cut in CI by the `Cut Release` workflow (`cut-release.yml`). It runs
+the same `./scripts/release.sh` a person would, as the Hotdata automation app.
+
+1. Make sure `## [Unreleased]` in `CHANGELOG.md` has user-facing notes.
+2. Trigger the workflow with the bump kind or an explicit version:
 
    ```bash
-   ./scripts/release.sh prepare patch   # or minor | major | 1.2.3
+   gh workflow run cut-release.yml -f bump=minor   # or patch | major | 1.2.3
    ```
 
-3. Merge the PR after CI passes (including the changelog check).
-4. Publish from a clean default branch checkout:
+   The `prepare` job runs `release.sh prepare`, which opens the
+   `release/vX.Y.Z` PR with auto-merge enabled.
+3. The PR merges on its own once CI and the review gate pass. Merging it runs
+   the `publish` job, which runs `release.sh publish` and pushes the `vX.Y.Z`
+   tag.
 
-   ```bash
-   git checkout main   # or master for hotdata-marimo
-   git pull
-   ./scripts/release.sh publish
-   ```
+That is the whole process. Running the script locally still works and does the
+same thing, but is not the normal path.
 
 ## What happens automatically
 
-Pushing a `vX.Y.Z` tag triggers two workflows:
+Pushing the `vX.Y.Z` tag triggers two workflows:
 
 | Workflow | Purpose |
 |----------|---------|
