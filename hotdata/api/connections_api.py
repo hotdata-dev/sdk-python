@@ -2389,6 +2389,7 @@ class ConnectionsApi:
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
             '413': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2473,6 +2474,7 @@ class ConnectionsApi:
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
             '413': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2557,6 +2559,7 @@ class ConnectionsApi:
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
             '413': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,

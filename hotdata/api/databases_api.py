@@ -4132,6 +4132,7 @@ class DatabasesApi:
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
             '413': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -4216,6 +4217,7 @@ class DatabasesApi:
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
             '413': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -4300,6 +4302,7 @@ class DatabasesApi:
             '404': "ApiErrorResponse",
             '409': "ApiErrorResponse",
             '413': "ApiErrorResponse",
+            '503': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
