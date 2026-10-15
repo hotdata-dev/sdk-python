@@ -1,0 +1,131 @@
+name: Cut Release
+
+# The whole release runs here; nothing is cut from a laptop.
+#
+#   1. Trigger this workflow (Actions tab, or
+#      `gh workflow run cut-release.yml -f bump=minor`). The `prepare` job runs
+#      the existing `scripts/release.sh prepare`, which bumps the version, dates
+#      the [Unreleased] changelog section, pushes `release/vX.Y.Z` and opens the
+#      release PR. Auto-merge is enabled, so the PR merges once branch
+#      protection is satisfied (checks green, review approved).
+#   2. When that PR merges, the `publish` job runs `scripts/release.sh publish`,
+#      which tags main `vX.Y.Z` and pushes the tag.
+#   3. The tag push triggers publish.yml (PyPI) and release.yml (GitHub Release),
+#      exactly as before.
+#
+# Both jobs act as the Hotdata automation GitHub App rather than GITHUB_TOKEN:
+# a PR opened or a tag pushed with GITHUB_TOKEN triggers no other workflows, so
+# the release PR would run no checks and the tag would publish nothing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'patch | minor | major | explicit X.Y.Z'
+        required: true
+        default: patch
+        type: string
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: cut-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Open release PR
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: Iv23liKBX2RYMoZIYuKa
+          private-key: ${{ secrets.HOTDATA_AUTOMATION_PRIVATE_KEY }}
+          owner: hotdata-dev
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+
+      # `release.sh prepare` refreshes uv.lock when uv is on PATH, so the lock
+      # the PR carries matches the bumped version.
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+
+      - name: Configure git identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          slug="${{ steps.app-token.outputs.app-slug }}[bot]"
+          id="$(gh api "/users/${slug}" --jq .id)"
+          git config user.name "$slug"
+          git config user.email "${id}+${slug}@users.noreply.github.com"
+
+      - name: Prepare release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: ./scripts/release.sh prepare "${{ inputs.bump }}"
+
+      # Branch protection on main gates the merge on the checks and the
+      # approving review, so this only merges once everything is green.
+      - name: Enable auto-merge on the release PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          branch="$(git rev-parse --abbrev-ref HEAD)"
+          number="$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')"
+          [[ -n "$number" ]] || { echo "::error::no open PR for $branch"; exit 1; }
+          gh pr merge "$number" --squash --auto
+          echo "Release PR #$number opened from $branch with auto-merge enabled."
+
+  publish:
+    name: Tag release
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true
+      && startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: Iv23liKBX2RYMoZIYuKa
+          private-key: ${{ secrets.HOTDATA_AUTOMATION_PRIVATE_KEY }}
+          owner: hotdata-dev
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Configure git identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          slug="${{ steps.app-token.outputs.app-slug }}[bot]"
+          id="$(gh api "/users/${slug}" --jq .id)"
+          git config user.name "$slug"
+          git config user.email "${id}+${slug}@users.noreply.github.com"
+
+      - name: Tag and push
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: ./scripts/release.sh publish

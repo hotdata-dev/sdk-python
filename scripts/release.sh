@@ -16,14 +16,15 @@ need() { command -v "$1" >/dev/null 2>&1 || die "$1 is required"; }
 #
 # `python3` carries no version guarantee, and this package's own requires-python
 # is >=3.10 — so hardcoding it meant the release script could not run on the
-# oldest Python the package claims to support. No workflow runs this script; only
-# a human cutting a release does, which is why it went unnoticed for so long. The
+# oldest Python the package claims to support. Until cut-release.yml, no workflow
+# ran this script; only a human cutting a release did, which is why it went
+# unnoticed for so long. The
 # symptom was a bare ModuleNotFoundError, which reads as a broken checkout rather
 # than a too-old interpreter.
 #
 # `uv` is the fallback because `prepare` below already shells out to `uv lock`
 # when a uv.lock is present, so a machine able to cut a release here already has
-# it. (CI installs with pip, so this is about the local release path only.)
+# it. (cut-release.yml installs uv for the same reason.)
 resolve_python() {
   if command -v python3 >/dev/null 2>&1 && python3 -c "import tomllib" >/dev/null 2>&1; then
     echo python3
@@ -192,9 +193,9 @@ Release **${pkg} v${new}**.
 - [x] \`CHANGELOG.md\` updated
 - [ ] CI green
 
-After merge, run \`./scripts/release.sh publish\` from a clean \`${base}\` checkout."
+Merging this PR tags the release in CI (cut-release.yml), which publishes to PyPI."
 
-  echo "Prepared ${pkg} v${new}. Merge the PR, then run: ./scripts/release.sh publish"
+  echo "Prepared ${pkg} v${new}. Once the PR merges, CI tags and publishes it."
 }
 
 cmd_publish() {
