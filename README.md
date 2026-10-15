@@ -60,6 +60,25 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Each `Api` class groups endpoints by resource. Construct the client, then call the typed methods you need.
 
+## Loading tables
+
+Loads are serialised per table on the server. `hotdata.DatabasesApi` and
+`hotdata.ConnectionsApi` retry a load that hits a table another load still
+holds (HTTP 409, error code `RESOURCE_LOCKED`), honouring the server's
+`Retry-After`, for up to 60s by default:
+
+```python
+from hotdata import DatabasesApi, LoadRetryPolicy, TableLockedError
+
+databases = DatabasesApi(api_client, load_retry=LoadRetryPolicy(deadline_s=120))
+try:
+    databases.load_database_table(db_id, "public", "events", request)
+except TableLockedError as e:
+    print(f"gave up after {e.attempts} attempts: {e.reason}")
+```
+
+Other 409s (`CONFLICT`, `IDEMPOTENCY_KEY_CONFLICT`) are raised immediately.
+
 ## Arrow results
 
 Query results can be fetched as an [Apache Arrow](https://arrow.apache.org/) IPC stream instead of JSON, which is faster and far more memory-efficient for large result sets. Install the optional extra:

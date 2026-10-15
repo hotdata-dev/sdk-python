@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `DatabasesApi.load_database_table` and `ConnectionsApi.load_managed_table`
+  (the classes exported from `hotdata`) retry automatically while another load
+  holds the table: HTTP 409 with error code `RESOURCE_LOCKED` is retried,
+  honouring `Retry-After` (else exponential backoff) with jitter, under a
+  60s budget by default. Tune or disable with `LoadRetryPolicy`
+  (`DatabasesApi(client, load_retry=LoadRetryPolicy(...))`); when the budget
+  runs out, `hotdata.TableLockedError` (a 409 `ApiException`) is raised. Other
+  409s (`CONFLICT`, `IDEMPOTENCY_KEY_CONFLICT`) are never retried. The raw
+  generated classes stay available under `hotdata.api.*`.
+
 ### Changed
 
 - feat(query): add arrow ipc stream response format

@@ -11,11 +11,13 @@ setup.py
 # connection-reset retry on all methods, #118), uploads.py (transparent
 # presigned direct-to-storage upload flow), _useragent.py (runtime-resolved
 # User-Agent; the generator's httpUserAgent property can only bake a literal at
-# generation time, which goes stale between releases).
+# generation time, which goes stale between releases), loads.py (409
+# RESOURCE_LOCKED retry of table loads while another load holds the table).
 hotdata/arrow.py
 hotdata/query.py
 hotdata/_retry.py
 hotdata/uploads.py
+hotdata/loads.py
 hotdata/_useragent.py
 
 # Hand-written test for the patched ApiClient.close()/context-manager behavior

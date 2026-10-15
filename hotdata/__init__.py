@@ -312,10 +312,18 @@ from hotdata.models.workspace_usage_response import WorkspaceUsageResponse as Wo
 # hotdata.query.QueryApi adds 429 retry + truncation auto-follow;
 # hotdata.arrow.ResultsApi adds Arrow IPC result fetch;
 # hotdata.uploads.UploadsApi adds transparent presigned direct-to-storage
-# uploads. The raw generated classes remain importable from hotdata.api.*.
+# uploads; hotdata.loads.DatabasesApi / ConnectionsApi retry table loads
+# while another load holds the table (409 RESOURCE_LOCKED). The raw
+# generated classes remain importable from hotdata.api.*.
 from hotdata.query import QueryApi as QueryApi  # noqa: E402,F811
 from hotdata.arrow import ResultsApi as ResultsApi  # noqa: E402,F811
 from hotdata.uploads import UploadsApi as UploadsApi  # noqa: E402,F811
+from hotdata.loads import DatabasesApi as DatabasesApi  # noqa: E402,F811
+from hotdata.loads import ConnectionsApi as ConnectionsApi  # noqa: E402,F811
+from hotdata.loads import (  # noqa: E402,F401
+    LoadRetryPolicy as LoadRetryPolicy,
+    TableLockedError as TableLockedError,
+)
 # The upload error hierarchy + option/helper types, so `from hotdata import
 # UploadError` / `StorageError` / ... works (they otherwise live only under
 # hotdata.uploads and are invisible to autocomplete on `hotdata.`).
@@ -350,4 +358,6 @@ __all__ += [  # noqa: F405
     "UploadProgress",
     "UploadSource",
     "tqdm_progress",
+    "LoadRetryPolicy",
+    "TableLockedError",
 ]
