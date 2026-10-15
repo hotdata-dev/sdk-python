@@ -45,6 +45,9 @@ OVERRIDE = (
     "    LoadRetryPolicy as LoadRetryPolicy,\n"
     "    TableLockedError as TableLockedError,\n"
     ")\n"
+    "# Raised client-side (scripts/patch_workspace_guard.py) when a workspace-\n"
+    "# scoped call has no workspace id configured.\n"
+    "from hotdata._workspace import MissingWorkspaceError as MissingWorkspaceError  # noqa: E402,F401\n"
     "# The upload error hierarchy + option/helper types, so `from hotdata import\n"
     "# UploadError` / `StorageError` / ... works (they otherwise live only under\n"
     "# hotdata.uploads and are invisible to autocomplete on `hotdata.`).\n"
@@ -81,6 +84,7 @@ OVERRIDE = (
     '    "tqdm_progress",\n'
     '    "LoadRetryPolicy",\n'
     '    "TableLockedError",\n'
+    '    "MissingWorkspaceError",\n'
     "]\n"
 )
 

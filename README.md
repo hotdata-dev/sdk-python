@@ -45,6 +45,10 @@ explicit argument always wins.
 `host` defaults to `https://api.hotdata.dev`. Override it (or set
 `HOTDATA_API_URL`) if you target another environment.
 
+Almost every call is workspace-scoped. If no workspace id is configured, the
+SDK raises `hotdata.MissingWorkspaceError` before sending the request rather
+than letting the server answer with an unexplained 404.
+
 ## Usage
 
 ```python

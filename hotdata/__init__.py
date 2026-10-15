@@ -324,6 +324,9 @@ from hotdata.loads import (  # noqa: E402,F401
     LoadRetryPolicy as LoadRetryPolicy,
     TableLockedError as TableLockedError,
 )
+# Raised client-side (scripts/patch_workspace_guard.py) when a workspace-
+# scoped call has no workspace id configured.
+from hotdata._workspace import MissingWorkspaceError as MissingWorkspaceError  # noqa: E402,F401
 # The upload error hierarchy + option/helper types, so `from hotdata import
 # UploadError` / `StorageError` / ... works (they otherwise live only under
 # hotdata.uploads and are invisible to autocomplete on `hotdata.`).
@@ -360,4 +363,5 @@ __all__ += [  # noqa: F405
     "tqdm_progress",
     "LoadRetryPolicy",
     "TableLockedError",
+    "MissingWorkspaceError",
 ]

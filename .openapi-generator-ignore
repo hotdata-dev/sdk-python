@@ -12,12 +12,15 @@ setup.py
 # presigned direct-to-storage upload flow), _useragent.py (runtime-resolved
 # User-Agent; the generator's httpUserAgent property can only bake a literal at
 # generation time, which goes stale between releases), loads.py (409
-# RESOURCE_LOCKED retry of table loads while another load holds the table).
+# RESOURCE_LOCKED retry of table loads while another load holds the table),
+# _workspace.py (client-side missing-workspace guard, wired into api_client by
+# scripts/patch_workspace_guard.py).
 hotdata/arrow.py
 hotdata/query.py
 hotdata/_retry.py
 hotdata/uploads.py
 hotdata/loads.py
+hotdata/_workspace.py
 hotdata/_useragent.py
 
 # Hand-written test for the patched ApiClient.close()/context-manager behavior

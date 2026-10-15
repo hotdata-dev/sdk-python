@@ -29,6 +29,7 @@ from pydantic import SecretStr
 
 from hotdata.configuration import Configuration
 from hotdata.api_response import ApiResponse, T as ApiResponseT
+from hotdata._workspace import ensure_workspace
 from hotdata._useragent import USER_AGENT
 import hotdata.models
 from hotdata import rest
@@ -636,6 +637,19 @@ class ApiClient:
         """
         if not auth_settings:
             return
+
+        # Hand-applied (scripts/patch_workspace_guard.py): a workspace-scoped
+        # operation with no workspace id configured would otherwise go out
+        # without X-Workspace-Id and come back as a bare 404. Fail here with
+        # an error that says what is missing and how to supply it.
+        ensure_workspace(
+            self.configuration,
+            auth_settings,
+            headers,
+            resource_path,
+            method,
+            request_auth=request_auth,
+        )
 
         if request_auth:
             self._apply_auth_params(
