@@ -72,6 +72,12 @@ jobs:
           git config user.name "$slug"
           git config user.email "${id}+${slug}@users.noreply.github.com"
 
+      # release.sh resolves the default branch from origin/HEAD, which
+      # actions/checkout never sets; without this the script sees an empty
+      # branch name and git aborts on an empty pathspec.
+      - name: Point origin/HEAD at the default branch
+        run: git remote set-head origin --auto
+
       - name: Prepare release
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -124,6 +130,12 @@ jobs:
           id="$(gh api "/users/${slug}" --jq .id)"
           git config user.name "$slug"
           git config user.email "${id}+${slug}@users.noreply.github.com"
+
+      # release.sh resolves the default branch from origin/HEAD, which
+      # actions/checkout never sets; without this the script sees an empty
+      # branch name and git aborts on an empty pathspec.
+      - name: Point origin/HEAD at the default branch
+        run: git remote set-head origin --auto
 
       - name: Tag and push
         env:
