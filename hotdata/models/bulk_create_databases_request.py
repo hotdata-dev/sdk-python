@@ -42,6 +42,10 @@ class BulkCreateDatabasesRequest(BaseModel):
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
+        # Hand-applied (scripts/patch_model_extra_forbid.py): this is a
+        # request model, so an unknown keyword is a caller mistake (or a field
+        # this SDK release does not know) and must not be dropped silently.
+        extra="forbid",
     )
 
 

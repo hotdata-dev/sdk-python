@@ -36,6 +36,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** request models reject unknown fields. Every model used as a
+  request body (`QueryRequest`, `LoadManagedTableRequest`,
+  `CreateDatabaseRequest`, ... and the models nested in them) now carries
+  `extra="forbid"`, so a misspelled keyword, or a field a newer API has that
+  this SDK release does not know yet, raises `pydantic.ValidationError` at
+  construction instead of being silently dropped from the request. Upgrade the
+  SDK to use a new field. Response models are unchanged: unknown fields in
+  server responses are still ignored, so a newer server never breaks an older
+  SDK.
 - feat(query): add arrow ipc stream response format
 - chore(query): clarify write statement handling in dialect parameter
 - chore(indexes): clarify vector index constraints and algorithms
