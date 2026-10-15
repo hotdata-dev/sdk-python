@@ -16,6 +16,8 @@ Execute a SQL query scoped to a database. A database is the only window into cat
 
 Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.
 
+To receive the rows as an Arrow IPC stream instead of JSON, send `Accept: application/vnd.apache.arrow.stream` (without also listing `application/json`). A query that completes within the request then returns 200 with an Arrow IPC stream body (schema, record batches, end-of-stream), and the values the JSON body would carry are sent as response headers: `X-Query-Run-Id`, `X-Result-Id` (when the result was saved), `X-Total-Row-Count`, `X-Execution-Time-Ms`, and `X-Query-Warning` (when there is a warning). Arrow keeps `±Inf` and `NaN` float values as they are. An Arrow response always holds the whole result: if the result is larger than an inline response can hold, the request returns 202 with the query run ticket and an `X-Result-Id` header instead, and the full result is read from `GET /v1/results/{id}?format=arrow` once it is ready. A query that goes async, and every error, return the same JSON bodies as without the header.
+
 ### Example
 
 * Api Key Authentication (WorkspaceId):
@@ -87,14 +89,14 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: application/json, application/vnd.apache.arrow.stream
 
 ### HTTP response details
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Query executed successfully |  -  |
-**202** | Query submitted asynchronously |  -  |
+**200** | Query executed successfully. JSON by default; an Arrow IPC stream when the request sends &#x60;Accept: application/vnd.apache.arrow.stream&#x60; (see the description for the headers that come with it). |  * X-Execution-Time-Ms - Arrow responses only: query execution time in milliseconds. <br>  * X-Query-Run-Id - Arrow responses only: the query run id. <br>  * X-Query-Warning - Arrow responses only: present when the JSON body would carry a &#x60;warning&#x60;. <br>  * X-Result-Id - Arrow responses only: the id to read this result again from the Results API. Absent when the result could not be saved. <br>  * X-Total-Row-Count - Arrow responses only: the number of rows in the stream, which is the whole result. <br>  |
+**202** | Query submitted asynchronously. With an Arrow &#x60;Accept&#x60;, also returned when the result is too large to send inline; the response then carries an &#x60;X-Result-Id&#x60; header naming the result to read from the Results API. |  * X-Result-Id - Arrow responses only: the id to read this result again from the Results API. Absent when the result could not be saved. <br>  |
 **400** | Invalid request (no database specified, or header/body database_id conflict) |  -  |
 **404** | Database not found |  -  |
 **429** | The engine was too busy to run this query right now — too many concurrent queries, or not enough memory available (often because of other queries running at the same time). Retry after the Retry-After delay; if it persists, narrowing the query (add a filter or LIMIT) may help. |  -  |
