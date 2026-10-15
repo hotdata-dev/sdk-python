@@ -37,7 +37,13 @@ configuration = hotdata.Configuration(
 )
 ```
 
-`host` defaults to `https://api.hotdata.dev`. Override it if you target another environment.
+Each of these can come from the environment instead, the same variables the
+CLI uses: `HOTDATA_API_KEY`, `HOTDATA_WORKSPACE` and `HOTDATA_API_URL` fill in
+`api_key`, `workspace_id` and `host` when the argument is not passed. An
+explicit argument always wins.
+
+`host` defaults to `https://api.hotdata.dev`. Override it (or set
+`HOTDATA_API_URL`) if you target another environment.
 
 ## Usage
 

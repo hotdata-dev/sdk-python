@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `hotdata.Configuration` reads `HOTDATA_API_KEY`, `HOTDATA_WORKSPACE` and
+  `HOTDATA_API_URL` from the environment when `api_key`, `workspace_id` or
+  `host` is not passed, matching the CLI. Explicit arguments always win and an
+  empty variable counts as unset.
 - `DatabasesApi.load_database_table` and `ConnectionsApi.load_managed_table`
   (the classes exported from `hotdata`) retry automatically while another load
   holds the table: HTTP 409 with error code `RESOURCE_LOCKED` is retried,
