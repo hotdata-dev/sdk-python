@@ -26,6 +26,8 @@ Background job types returned by the API.
 
 * `DUCKLAKE_TABLE_COMPACTION` (value: `'ducklake_table_compaction'`)
 
+* `IVF_REBALANCE_SWEEP` (value: `'ivf_rebalance_sweep'`)
+
 * `TABLE_CONSTANTS_UPDATE` (value: `'table_constants_update'`)
 
 * `DATABASE_FORK` (value: `'database_fork'`)
