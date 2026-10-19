@@ -38,6 +38,7 @@ class JobType(str, Enum):
     RESULT_RETENTION = 'result_retention'
     DUCKLAKE_COMPACTION = 'ducklake_compaction'
     DUCKLAKE_TABLE_COMPACTION = 'ducklake_table_compaction'
+    IVF_REBALANCE_SWEEP = 'ivf_rebalance_sweep'
     TABLE_CONSTANTS_UPDATE = 'table_constants_update'
     DATABASE_FORK = 'database_fork'
 

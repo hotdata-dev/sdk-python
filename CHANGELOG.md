@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat(jobs): add ivf_rebalance_sweep job type
 - chore(query): clarify write statement and dialect documentation
 - chore: add 503 service unavailable response to load endpoints
 
