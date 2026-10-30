@@ -47,6 +47,7 @@ class TestTableInfo(unittest.TestCase):
                     ''
                     ],
                 last_sync = '',
+                layout = 'analytical',
                 partition_by = [
                     hotdata.models.table_partition_key.TablePartitionKey(
                         column = 'created_at', 
@@ -68,6 +69,7 @@ class TestTableInfo(unittest.TestCase):
                 constant_per_key = [
                     ''
                     ],
+                layout = 'analytical',
                 partition_by = [
                     hotdata.models.table_partition_key.TablePartitionKey(
                         column = 'created_at', 

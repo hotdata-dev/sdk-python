@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.table_layout import TableLayout
 from hotdata.models.table_partition_key import TablePartitionKey
 from hotdata.models.table_sort_key import TableSortKey
 from typing import Optional, Set
@@ -31,10 +32,11 @@ class AddManagedTableDecl(BaseModel):
     """ # noqa: E501
     constant_per_key: Optional[List[StrictStr]] = Field(default=None, description="Columns whose value is determined by this table's `key`: for every uploaded row, every stored row sharing its key holds the same value of these columns.  Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) restrict its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics are weak. Omit (the default) for the unrestricted search.  **Correctness-affecting, not a hint.** If the assertion is false, a mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.")
     key: Optional[List[StrictStr]] = Field(default=None, description="Columns that uniquely identify a row, enabling the key-based load modes (`delete`, `update`, `upsert`) on this table: those loads match rows by these columns' values. Omit (the default) to declare no key; the table can still be loaded with `replace` and `append`, but key-based modes are then rejected.")
+    layout: Optional[TableLayout] = Field(default=None, description="Storage layout of the table: `analytical` (the default), or `point_lookup`, which writes small data pages so the table's rows can be fetched by id cheaply, which is what a vector index's answers do; analytical scans of it read more pages. Declared when the table is created and fixed thereafter.")
     name: StrictStr
     partition_by: Optional[List[TablePartitionKey]] = Field(default=None, description="Partition keys for this table, applied in order. Omit for no partitioning. Declared when the table is created and fixed thereafter.")
     sorted_by: Optional[List[TableSortKey]] = Field(default=None, description="Sort keys for this table, applied in order. Omit for no sort order. Declared when the table is created and fixed thereafter. A table with a sort order cannot be indexed: creating any index on it is refused, so leave this empty on a table you plan to search.")
-    __properties: ClassVar[List[str]] = ["constant_per_key", "key", "name", "partition_by", "sorted_by"]
+    __properties: ClassVar[List[str]] = ["constant_per_key", "key", "layout", "name", "partition_by", "sorted_by"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -107,6 +109,7 @@ class AddManagedTableDecl(BaseModel):
         _obj = cls.model_validate({
             "constant_per_key": obj.get("constant_per_key"),
             "key": obj.get("key"),
+            "layout": obj.get("layout"),
             "name": obj.get("name"),
             "partition_by": [TablePartitionKey.from_dict(_item) for _item in obj["partition_by"]] if obj.get("partition_by") is not None else None,
             "sorted_by": [TableSortKey.from_dict(_item) for _item in obj["sorted_by"]] if obj.get("sorted_by") is not None else None
