@@ -53,6 +53,7 @@ class TestInformationSchemaResponse(unittest.TestCase):
                             ''
                             ], 
                         last_sync = '', 
+                        layout = null, 
                         partition_by = [
                             hotdata.models.table_partition_key.TablePartitionKey(
                                 column = 'created_at', 
@@ -87,6 +88,7 @@ class TestInformationSchemaResponse(unittest.TestCase):
                             ''
                             ], 
                         last_sync = '', 
+                        layout = null, 
                         partition_by = [
                             hotdata.models.table_partition_key.TablePartitionKey(
                                 column = 'created_at', 

@@ -146,6 +146,7 @@ __all__ = [
     "SavedQueryVersionInfo",
     "SubmitJobResponse",
     "TableInfo",
+    "TableLayout",
     "TablePartitionKey",
     "TableProfileResponse",
     "TableSortKey",
@@ -290,6 +291,7 @@ from hotdata.models.saved_query_summary import SavedQuerySummary as SavedQuerySu
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo as SavedQueryVersionInfo
 from hotdata.models.submit_job_response import SubmitJobResponse as SubmitJobResponse
 from hotdata.models.table_info import TableInfo as TableInfo
+from hotdata.models.table_layout import TableLayout as TableLayout
 from hotdata.models.table_partition_key import TablePartitionKey as TablePartitionKey
 from hotdata.models.table_profile_response import TableProfileResponse as TableProfileResponse
 from hotdata.models.table_sort_key import TableSortKey as TableSortKey

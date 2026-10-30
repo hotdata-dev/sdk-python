@@ -38,6 +38,7 @@ class TestAddManagedTableRequest(unittest.TestCase):
             return AddManagedTableRequest(
                 constant_per_key = [event_date],
                 key = [order_id],
+                layout = 'analytical',
                 name = 'orders',
                 partition_by = [
                     hotdata.models.table_partition_key.TablePartitionKey(

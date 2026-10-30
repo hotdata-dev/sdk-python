@@ -41,6 +41,7 @@ class TestAddManagedSchemaRequest(unittest.TestCase):
                     hotdata.models.add_managed_table_decl.AddManagedTableDecl(
                         constant_per_key = [event_date], 
                         key = [order_id], 
+                        layout = null, 
                         name = 'orders', 
                         partition_by = [
                             hotdata.models.table_partition_key.TablePartitionKey(
