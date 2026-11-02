@@ -113,6 +113,7 @@ from hotdata.models.saved_query_summary import SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo
 from hotdata.models.submit_job_response import SubmitJobResponse
 from hotdata.models.table_info import TableInfo
+from hotdata.models.table_layout import TableLayout
 from hotdata.models.table_partition_key import TablePartitionKey
 from hotdata.models.table_profile_response import TableProfileResponse
 from hotdata.models.table_sort_key import TableSortKey

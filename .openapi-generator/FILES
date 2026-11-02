@@ -111,6 +111,7 @@ docs/SavedQuerySummary.md
 docs/SavedQueryVersionInfo.md
 docs/SubmitJobResponse.md
 docs/TableInfo.md
+docs/TableLayout.md
 docs/TablePartitionKey.md
 docs/TableProfileResponse.md
 docs/TableSortKey.md
@@ -249,6 +250,7 @@ hotdata/models/saved_query_summary.py
 hotdata/models/saved_query_version_info.py
 hotdata/models/submit_job_response.py
 hotdata/models/table_info.py
+hotdata/models/table_layout.py
 hotdata/models/table_partition_key.py
 hotdata/models/table_profile_response.py
 hotdata/models/table_sort_key.py
@@ -378,6 +380,7 @@ test/test_saved_query_summary.py
 test/test_saved_query_version_info.py
 test/test_submit_job_response.py
 test/test_table_info.py
+test/test_table_layout.py
 test/test_table_partition_key.py
 test/test_table_profile_response.py
 test/test_table_sort_key.py
