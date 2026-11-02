@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from hotdata.models.column_info import ColumnInfo
+from hotdata.models.table_layout import TableLayout
 from hotdata.models.table_partition_key import TablePartitionKey
 from hotdata.models.table_sort_key import TableSortKey
 from typing import Optional, Set
@@ -34,12 +35,13 @@ class TableInfo(BaseModel):
     connection: StrictStr
     constant_per_key: List[StrictStr] = Field(description="Columns the table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns.  Declaring this lets a keyed mutation narrow its search for prior versions to the values the upload carries. Empty when none is declared, which is the unrestricted search.  Unlike `partition_by` and `sorted_by` this is NOT fixed at creation — it changes only which files a mutation opens, never how rows are written — so read it here rather than assuming a declaration took effect.")
     last_sync: Optional[StrictStr] = None
+    layout: TableLayout = Field(description="The table's storage layout: `analytical`, or `point_lookup`, whose small data pages make fetching its rows by id cheap. Fixed at creation.")
     partition_by: List[TablePartitionKey] = Field(description="The table's partition keys, in the order they were declared when the table was created. Empty when the table is not partitioned.  A table's storage layout is fixed when the table is created and cannot be changed afterwards, so this is how to confirm a table really was created with the layout that was asked for. The field is always present: an empty array means \"no partitioning declared\", which is not the same as a response that omits the field entirely.  Reported for tables in a Hotdata instant database, which are the only ones whose layout is declared here. A table discovered from an external connection always reports an empty array — its layout belongs to the upstream system, so an empty array there means \"not known from here\", not \"confirmed unpartitioned\".")
     var_schema: StrictStr = Field(alias="schema")
     sorted_by: List[TableSortKey] = Field(description="The table's sort keys, in the order they were declared when the table was created. Empty when no sort order was declared. Always present, and limited to tables in a Hotdata instant database, for the same reasons as `partition_by`.")
     synced: StrictBool
     table: StrictStr
-    __properties: ClassVar[List[str]] = ["columns", "connection", "constant_per_key", "last_sync", "partition_by", "schema", "sorted_by", "synced", "table"]
+    __properties: ClassVar[List[str]] = ["columns", "connection", "constant_per_key", "last_sync", "layout", "partition_by", "schema", "sorted_by", "synced", "table"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -127,6 +129,7 @@ class TableInfo(BaseModel):
             "connection": obj.get("connection"),
             "constant_per_key": obj.get("constant_per_key"),
             "last_sync": obj.get("last_sync"),
+            "layout": obj.get("layout"),
             "partition_by": [TablePartitionKey.from_dict(_item) for _item in obj["partition_by"]] if obj.get("partition_by") is not None else None,
             "schema": obj.get("schema"),
             "sorted_by": [TableSortKey.from_dict(_item) for _item in obj["sorted_by"]] if obj.get("sorted_by") is not None else None,
