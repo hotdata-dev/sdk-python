@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat(query): support update statements
 - feat(query): support delete statements with where clause
 - chore(loads): document table write locking and retry behavior
+- feat(tables): add layout property to table schemas
 - feat(jobs): add ivf_rebalance_sweep job type
 - chore(query): clarify write statement and dialect documentation
 - chore: add 503 service unavailable response to load endpoints

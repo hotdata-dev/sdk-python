@@ -91,9 +91,12 @@ def test_every_request_body_model_forbids_extras() -> None:
         src = index[cls].read_text()
         if 'extra="forbid"' in src:
             continue
-        # The oneOf/anyOf wrappers carry a different ConfigDict and have no
-        # plain fields to forbid on; anything else must have been patched.
+        # The oneOf/anyOf wrappers carry a different ConfigDict and enums have
+        # no fields at all, so neither has anything to forbid on; anything
+        # else must have been patched.
         if re.search(r"^\s+(oneof|anyof)_schema_\d+_validator", src, re.M):
+            continue
+        if re.search(r"^class \w+\(str, Enum\):", src, re.M):
             continue
         missing.append(cls)
     assert missing == []
