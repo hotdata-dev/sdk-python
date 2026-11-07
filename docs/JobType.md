@@ -32,6 +32,10 @@ Background job types returned by the API.
 
 * `DATABASE_FORK` (value: `'database_fork'`)
 
+* `ROLLUP_BUILD` (value: `'rollup_build'`)
+
+* `ROLLUP_REFRESH_SWEEP` (value: `'rollup_refresh_sweep'`)
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 
