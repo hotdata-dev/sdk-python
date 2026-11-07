@@ -41,6 +41,8 @@ class JobType(str, Enum):
     IVF_REBALANCE_SWEEP = 'ivf_rebalance_sweep'
     TABLE_CONSTANTS_UPDATE = 'table_constants_update'
     DATABASE_FORK = 'database_fork'
+    ROLLUP_BUILD = 'rollup_build'
+    ROLLUP_REFRESH_SWEEP = 'rollup_refresh_sweep'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
