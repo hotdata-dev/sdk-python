@@ -71,5 +71,5 @@ jobs:
           path: dist/
 
       - name: Publish via Trusted Publishing
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
 EOF
