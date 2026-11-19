@@ -301,6 +301,8 @@ def test_follow_row_guard_holds_when_run_lookup_fails(calls: Any) -> None:
     with pytest.raises(ResultTooLargeError) as ei:
         _api().query_arrow(REQ, x_database_id="db1", max_auto_rows=2)
     assert ei.value.observed == 3
+    # The read asks for one row past the guard, not the whole result.
+    assert "limit=3" in calls[3]["url"]
 
 
 def test_follow_survives_failed_run_lookup(calls: Any) -> None:
