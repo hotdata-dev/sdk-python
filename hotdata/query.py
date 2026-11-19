@@ -21,6 +21,12 @@ the bounded-memory query contract introduces, transparently:
   into client memory — past the guard it raises :class:`ResultTooLargeError`,
   pointing callers at the streaming Arrow API (:mod:`hotdata.arrow`).
 
+* **Arrow in one call.** :meth:`QueryApi.query_arrow` asks ``POST /v1/query``
+  for an Arrow IPC stream, so the rows arrive as a :class:`pyarrow.Table` with
+  their column types and no second request. The values the JSON body would
+  carry (run id, result id, row count, timing, warning, rollup outcome) come
+  back as response headers and are returned on :class:`ArrowQueryResult`.
+
 Use this ``QueryApi`` in place of :class:`hotdata.api.query_api.QueryApi`; every
 other method on the base class works unchanged. Auto-follow and retry are both
 configurable per-instance (constructor) and per-call (keyword arguments), and
@@ -33,15 +39,22 @@ import logging
 import random
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from hotdata.api.query_api import QueryApi as _GeneratedQueryApi
 from hotdata.api.query_runs_api import QueryRunsApi as _QueryRunsApi
 from hotdata.api.results_api import ResultsApi as _ResultsApi
+from hotdata.arrow import ARROW_STREAM_MEDIA_TYPE, _import_pyarrow, _release_conn
+from hotdata.arrow import ResultsApi as _ArrowResultsApi
 from hotdata.exceptions import ApiException
+from hotdata.models.async_query_response import AsyncQueryResponse
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse
 from hotdata.models.results_format_query import ResultsFormatQuery
+from hotdata.models.rollup_usage import RollupUsage
+
+if TYPE_CHECKING:  # pragma: no cover - import-time only for type checkers
+    import pyarrow as pa  # type: ignore[import-untyped]
 
 # HTTP 429: too many concurrent queries (admission shedding). The server tags
 # the body with error code OVERLOADED; we key retry off the status code since
@@ -228,6 +241,23 @@ class ResultUnavailableError(ResultError):
         )
 
 
+class ResultNotInlineError(ResultError):
+    """Raised by :meth:`QueryApi.query_arrow` when the result is too large to
+    send inline and ``auto_follow`` is off. The query still ran: read the saved
+    result with :meth:`hotdata.arrow.ResultsApi.stream_result_arrow` once it is
+    ready (:meth:`QueryApi.wait_for_result`).
+    """
+
+    def __init__(self, *, result_id: str, query_run_id: str) -> None:
+        self.result_id = result_id
+        self.query_run_id = query_run_id
+        super().__init__(
+            f"Result {result_id} is too large to send inline. Wait for it with "
+            "wait_for_result, then stream it with "
+            "hotdata.arrow.ResultsApi.stream_result_arrow, or set auto_follow=True."
+        )
+
+
 def _parse_retry_after(headers: Any) -> Optional[float]:
     """Return the ``Retry-After`` delay in seconds, or ``None``.
 
@@ -250,6 +280,59 @@ def _parse_retry_after(headers: Any) -> Optional[float]:
     except (TypeError, ValueError):
         return None
     return seconds if seconds >= 0 else None
+
+
+@dataclass(frozen=True)
+class ArrowQueryResult:
+    """A query result as Arrow, with the values the JSON body would carry.
+
+    :param table: The full result.
+    :param query_run_id: ID of the query run.
+    :param result_id: ID of the saved result, when one was saved.
+    :param total_row_count: Rows in the full result.
+    :param execution_time_ms: Query execution time, when the server reported it.
+    :param warning: A problem that did not fail the query, if any.
+    :param rollup: Whether a rollup answered the query. ``None`` when no table
+        the query read has a rollup, or rollups were turned off for the query.
+    :param followed: ``True`` when the result was too large to send inline and
+        was read from the Results API instead (extra round trips).
+    """
+
+    table: "pa.Table"
+    query_run_id: Optional[str] = None
+    result_id: Optional[str] = None
+    total_row_count: Optional[int] = None
+    execution_time_ms: Optional[int] = None
+    warning: Optional[str] = None
+    rollup: Optional[RollupUsage] = None
+    followed: bool = False
+
+
+def _header(headers: Any, name: str) -> Optional[str]:
+    """One response header, or ``None``. urllib3's HTTPHeaderDict is
+    case-insensitive; a plain dict may not be, so try lowercase too."""
+    getter = getattr(headers, "get", None)
+    if not callable(getter):
+        return None
+    return headers.get(name) or headers.get(name.lower())
+
+
+def _int_header(headers: Any, name: str) -> Optional[int]:
+    value = _header(headers, name)
+    try:
+        return int(value) if value is not None else None
+    except ValueError:
+        return None
+
+
+def _rollup_header(headers: Any) -> Optional[RollupUsage]:
+    value = _header(headers, "X-Rollup")
+    try:
+        return RollupUsage(value) if value else None
+    except ValueError:
+        # A value this client does not know yet: the answer is the same either
+        # way, so report nothing rather than fail the query.
+        return None
 
 
 class QueryApi(_GeneratedQueryApi):
@@ -345,6 +428,74 @@ class QueryApi(_GeneratedQueryApi):
         effective_db = x_database_id or query_request.database_id or ""
         return self._materialize_full(
             response, effective_db, row_guard, byte_guard
+        )
+
+    def query_arrow(
+        self,
+        query_request: QueryRequest,
+        x_database_id: Optional[str] = None,
+        _request_timeout: Union[None, float, Tuple[float, float]] = None,
+        *,
+        auto_follow: Optional[bool] = None,
+        max_auto_rows: Any = _UNSET,
+    ) -> ArrowQueryResult:
+        """Execute a query and get the rows as a :class:`pyarrow.Table`.
+
+        One request: ``POST /v1/query`` answers with an Arrow IPC stream, and
+        the run id, result id, row count, timing, warning and rollup outcome
+        come back as response headers. Requires ``pip install 'hotdata[arrow]'``.
+
+        HTTP 429 (``OVERLOADED``) is retried per the instance
+        :class:`RetryPolicy`, as in :meth:`query`.
+
+        A result too large to send inline is not sent as Arrow. With
+        ``auto_follow`` on, this waits for the saved result and reads all of it
+        from the Results API (``followed`` is then ``True``); ``max_auto_rows``
+        guards how much is pulled into memory.
+
+        Async submission (``async=true``) is not supported here: use
+        :meth:`query`, then :meth:`hotdata.arrow.ResultsApi.get_result_arrow`.
+
+        :param auto_follow: Override the instance default for this call.
+        :param max_auto_rows: Override the instance row guard for this call.
+            ``None`` opts into unbounded materialization.
+        :raises ValueError: the request sets ``async``.
+        :raises ServerOverloadedError: 429 retries exhausted.
+        :raises ResultNotInlineError: the result was not sent inline and
+            ``auto_follow`` is off.
+        :raises ResultTooLargeError: the followed result exceeds ``max_auto_rows``.
+        :raises ResultFailedError: the followed result failed.
+        :raises ResultTimeoutError: the followed result never became ready.
+        :raises ResultUnavailableError: not sent inline, with no ``result_id``.
+        """
+        if query_request.var_async:
+            raise ValueError(
+                "query_arrow does not support async submission; use query() and "
+                "then hotdata.arrow.ResultsApi.get_result_arrow"
+            )
+        follow = self.auto_follow if auto_follow is None else auto_follow
+        row_guard = self.max_auto_rows if max_auto_rows is _UNSET else max_auto_rows
+
+        outcome = self._retry_overloaded(
+            lambda: self._send_arrow_query(
+                query_request, x_database_id, _request_timeout
+            )
+        )
+        if isinstance(outcome, ArrowQueryResult):
+            return outcome
+
+        # 202: the result is larger than an inline response holds. The server
+        # names the saved result in X-Result-Id instead of sending partial rows.
+        ticket, result_id = outcome
+        if result_id is None:
+            raise ResultUnavailableError(warning=ticket.reason)
+        effective_db = x_database_id or query_request.database_id or ""
+        if not follow:
+            raise ResultNotInlineError(
+                result_id=result_id, query_run_id=ticket.query_run_id
+            )
+        return self._follow_arrow(
+            ticket.query_run_id, result_id, effective_db, row_guard, _request_timeout
         )
 
     def wait_for_result(
@@ -463,13 +614,18 @@ class QueryApi(_GeneratedQueryApi):
     # -- internals ---------------------------------------------------------
 
     def _query_with_retry(self, *args: Any, **kwargs: Any) -> QueryResponse:
+        return self._retry_overloaded(
+            lambda: super(QueryApi, self).query(*args, **kwargs)
+        )
+
+    def _retry_overloaded(self, send: Callable[[], Any]) -> Any:
         policy = self.retry
         deadline = time.monotonic() + policy.deadline_s
         attempts = 0
         while True:
             attempts += 1
             try:
-                return super().query(*args, **kwargs)
+                return send()
             except ApiException as exc:
                 if exc.status != _HTTP_TOO_MANY_REQUESTS:
                     raise
@@ -493,6 +649,112 @@ class QueryApi(_GeneratedQueryApi):
                         last_exc=exc,
                     ) from exc
                 time.sleep(delay)
+
+    def _send_arrow_query(
+        self,
+        query_request: QueryRequest,
+        x_database_id: Optional[str],
+        _request_timeout: Any,
+    ) -> Union[ArrowQueryResult, Tuple[AsyncQueryResponse, Optional[str]]]:
+        """One ``POST /v1/query`` asking for Arrow. Returns the result on 200,
+        or the run ticket and ``X-Result-Id`` on 202; raises on an error."""
+        ipc = _import_pyarrow()
+        # Same request the generated op builds, with two headers overridden.
+        # `Accept-Encoding: identity`: see hotdata.arrow.ResultsApi._call_arrow.
+        params = self._query_serialize(
+            query_request=query_request,
+            x_database_id=x_database_id,
+            _request_auth=None,
+            _content_type=None,
+            _headers={
+                "Accept": ARROW_STREAM_MEDIA_TYPE,
+                "Accept-Encoding": "identity",
+            },
+            _host_index=0,
+        )
+        response_data = self.api_client.call_api(
+            *params,
+            _request_timeout=_request_timeout,
+        )
+        headers = response_data.headers
+
+        if response_data.status == 200:
+            try:
+                table = ipc.open_stream(response_data.response).read_all()
+            finally:
+                _release_conn(response_data.response)
+            return ArrowQueryResult(
+                table=table,
+                query_run_id=_header(headers, "X-Query-Run-Id"),
+                result_id=_header(headers, "X-Result-Id"),
+                total_row_count=_int_header(headers, "X-Total-Row-Count"),
+                execution_time_ms=_int_header(headers, "X-Execution-Time-Ms"),
+                warning=_header(headers, "X-Query-Warning"),
+                rollup=_rollup_header(headers),
+            )
+
+        # Non-200 is JSON. response_deserialize raises ApiException for status
+        # >= 400 itself (headers attached, so 429 retry sees Retry-After).
+        try:
+            response_data.read()
+            ticket = self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map={
+                    "202": "AsyncQueryResponse",
+                    "400": "ApiErrorResponse",
+                    "403": "ApiErrorResponse",
+                    "404": "ApiErrorResponse",
+                    "408": "ApiErrorResponse",
+                    "429": "ApiErrorResponse",
+                    "500": "ApiErrorResponse",
+                    "503": "ApiErrorResponse",
+                },
+            ).data
+        finally:
+            response_data.response.release_conn()
+        return ticket, _header(headers, "X-Result-Id")
+
+    def _follow_arrow(
+        self,
+        query_run_id: str,
+        result_id: str,
+        x_database_id: str,
+        max_auto_rows: Optional[int],
+        _request_timeout: Any,
+    ) -> ArrowQueryResult:
+        self.wait_for_result(result_id, x_database_id)
+        # The run record carries what the inline headers would have: the total,
+        # timing, warning and rollup outcome. Best effort: the rows matter more.
+        try:
+            run = _QueryRunsApi(self.api_client).get_query_run(
+                query_run_id, x_database_id=x_database_id
+            )
+        except ApiException:
+            run = None
+        total = getattr(run, "row_count", None)
+        _log.info(
+            "following result %s (%s rows) as Arrow for query run %s",
+            result_id,
+            total if total is not None else "unknown",
+            query_run_id,
+        )
+        if max_auto_rows is not None and total is not None and total > max_auto_rows:
+            raise ResultTooLargeError(
+                result_id=result_id, kind="rows", observed=total, limit=max_auto_rows
+            )
+        table = _ArrowResultsApi(self.api_client).get_result_arrow(
+            result_id, x_database_id, _request_timeout=_request_timeout
+        )
+        return ArrowQueryResult(
+            table=table,
+            query_run_id=query_run_id,
+            result_id=result_id,
+            total_row_count=total if total is not None else table.num_rows,
+            execution_time_ms=getattr(run, "execution_time_ms", None),
+            warning=getattr(run, "warning_message", None),
+            rollup=getattr(run, "rollup", None),
+            followed=True,
+        )
 
     def _backoff_delay(self, exc: ApiException, attempt: int) -> float:
         """Delay before the next retry: honor ``Retry-After`` when present,
@@ -645,6 +907,7 @@ class QueryApi(_GeneratedQueryApi):
 
 
 __all__ = [
+    "ArrowQueryResult",
     "DEFAULT_MAX_AUTO_BYTES",
     "DEFAULT_MAX_AUTO_ROWS",
     "OVERLOADED_ERROR_CODE",
@@ -653,6 +916,7 @@ __all__ = [
     "ResultError",
     "ResultFailedError",
     "ResultIncompleteError",
+    "ResultNotInlineError",
     "ResultTimeoutError",
     "ResultTooLargeError",
     "ResultUnavailableError",

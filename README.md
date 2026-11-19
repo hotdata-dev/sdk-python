@@ -122,6 +122,26 @@ with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
 
 Both methods accept `offset` and `limit` for pagination. They raise `hotdata.arrow.ResultNotReadyError` if the result is still pending or processing — poll `results.get_result(result_id, database_id)` until `status == "ready"` first.
 
+### Arrow from the query call
+
+`QueryApi.query_arrow` runs a query and returns the rows as Arrow in one request, without fetching the stored result afterwards. The values the JSON response would carry come back on the result:
+
+```python
+from hotdata import ApiClient, Configuration, QueryApi, QueryRequest
+
+with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
+    out = QueryApi(client).query_arrow(
+        QueryRequest(sql="SELECT toStartOfHour(ts) AS h, count() FROM events GROUP BY h",
+                     dialect="clickhouse"),
+        x_database_id="your_database_id",
+    )
+    out.table          # pyarrow.Table, with the server's column types
+    out.rollup         # RollupUsage.USED / NOT_MATCHED / NOT_READY / UNAVAILABLE, or None
+    out.query_run_id, out.result_id, out.total_row_count, out.execution_time_ms, out.warning
+```
+
+HTTP 429 is retried as in `query`. A result too large to send inline is read from the Results API instead (`out.followed` is `True`), up to `max_auto_rows`; pass `auto_follow=False` to get a `ResultNotInlineError` carrying the `result_id` and stream it yourself.
+
 ## File uploads
 
 `hotdata.uploads.UploadsApi` (also the default `hotdata.UploadsApi`) adds
