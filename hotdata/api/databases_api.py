@@ -77,7 +77,7 @@ class DatabasesApi:
     ) -> ManagedSchemaResponse:
         """Add schema to database default catalog
 
-        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
+        Add a schema, and optionally its tables, to the database's `default` catalog. Names are stored in lowercase.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -151,7 +151,7 @@ class DatabasesApi:
     ) -> ApiResponse[ManagedSchemaResponse]:
         """Add schema to database default catalog
 
-        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
+        Add a schema, and optionally its tables, to the database's `default` catalog. Names are stored in lowercase.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -225,7 +225,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Add schema to database default catalog
 
-        Declare a new schema (and optionally its tables) on the database's auto-created default catalog after creation. The schema becomes reachable inside the database scope (e.g. `default.<schema>.<table>` and `information_schema.schemata`) without the caller naming the database's default connection. Identifiers are normalized to lowercase.
+        Add a schema, and optionally its tables, to the database's `default` catalog. Names are stored in lowercase.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -377,7 +377,7 @@ class DatabasesApi:
     ) -> ManagedTableResponse:
         """Add table to database default catalog
 
-        Declare a new table on an existing schema of the database's default catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint targeting the default connection. Identifiers are normalized to lowercase.
+        Add an empty table to a schema in the database's `default` catalog. Names are stored in lowercase. You do not have to declare tables first: a load creates the table if it is missing.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -455,7 +455,7 @@ class DatabasesApi:
     ) -> ApiResponse[ManagedTableResponse]:
         """Add table to database default catalog
 
-        Declare a new table on an existing schema of the database's default catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint targeting the default connection. Identifiers are normalized to lowercase.
+        Add an empty table to a schema in the database's `default` catalog. Names are stored in lowercase. You do not have to declare tables first: a load creates the table if it is missing.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -533,7 +533,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Add table to database default catalog
 
-        Declare a new table on an existing schema of the database's default catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint targeting the default connection. Identifiers are normalized to lowercase.
+        Add an empty table to a schema in the database's `default` catalog. Names are stored in lowercase. You do not have to declare tables first: a load creates the table if it is missing.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -690,7 +690,7 @@ class DatabasesApi:
     ) -> None:
         """Attach catalog to database
 
-        Attach a catalog to a database so its tables are queryable alongside the database's own. Pass another database's `default_connection_id` as `connection_id` to read across the two in one query. Inside the database the catalog answers to `alias` when set, otherwise to the name it already answers to in its own scope. That name may not be `default`, a reserved name, or this database's own default catalog name — so attaching a database that kept the stock `default` catalog needs an `alias`. Attaching is read-only and copies nothing: loads still target the database's own default catalog, and detaching withdraws visibility rather than deleting data. A database's own default catalog is always attached and cannot be attached again. Attaching is not transitive — a database sees the catalog it attached, not that catalog's own attachments.
+        Attach a catalog so its tables can be queried in this database. To query across two databases, pass the other database's `default_connection_id` as `connection_id`.  The catalog is read-only here and nothing is copied. It answers to `alias`, or to its own name if you omit it. That name cannot be `default` or a reserved name, so attaching another database's `default` catalog needs an `alias`. Attaching is not transitive: you do not see the attached catalog's own attachments.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -764,7 +764,7 @@ class DatabasesApi:
     ) -> ApiResponse[None]:
         """Attach catalog to database
 
-        Attach a catalog to a database so its tables are queryable alongside the database's own. Pass another database's `default_connection_id` as `connection_id` to read across the two in one query. Inside the database the catalog answers to `alias` when set, otherwise to the name it already answers to in its own scope. That name may not be `default`, a reserved name, or this database's own default catalog name — so attaching a database that kept the stock `default` catalog needs an `alias`. Attaching is read-only and copies nothing: loads still target the database's own default catalog, and detaching withdraws visibility rather than deleting data. A database's own default catalog is always attached and cannot be attached again. Attaching is not transitive — a database sees the catalog it attached, not that catalog's own attachments.
+        Attach a catalog so its tables can be queried in this database. To query across two databases, pass the other database's `default_connection_id` as `connection_id`.  The catalog is read-only here and nothing is copied. It answers to `alias`, or to its own name if you omit it. That name cannot be `default` or a reserved name, so attaching another database's `default` catalog needs an `alias`. Attaching is not transitive: you do not see the attached catalog's own attachments.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -838,7 +838,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Attach catalog to database
 
-        Attach a catalog to a database so its tables are queryable alongside the database's own. Pass another database's `default_connection_id` as `connection_id` to read across the two in one query. Inside the database the catalog answers to `alias` when set, otherwise to the name it already answers to in its own scope. That name may not be `default`, a reserved name, or this database's own default catalog name — so attaching a database that kept the stock `default` catalog needs an `alias`. Attaching is read-only and copies nothing: loads still target the database's own default catalog, and detaching withdraws visibility rather than deleting data. A database's own default catalog is always attached and cannot be attached again. Attaching is not transitive — a database sees the catalog it attached, not that catalog's own attachments.
+        Attach a catalog so its tables can be queried in this database. To query across two databases, pass the other database's `default_connection_id` as `connection_id`.  The catalog is read-only here and nothing is copied. It answers to `alias`, or to its own name if you omit it. That name cannot be `default` or a reserved name, so attaching another database's `default` catalog needs an `alias`. Attaching is not transitive: you do not see the attached catalog's own attachments.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -988,7 +988,7 @@ class DatabasesApi:
     ) -> DatabaseBatchResponse:
         """Create many databases at once
 
-        Create many databases from one template in a single request. The databases are created in the background: the response returns immediately with a batch and a job to poll.  The databases are not returned inline. List the ones a batch created with `GET /databases?batch=<batch_id>`; they also appear in the normal database listing alongside every other database.  Each database gets a default catalog and schema. Declare tables on all of them by passing `schemas`, in the same shape a single create accepts — a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load, with no follow-up call per database. Omit `schemas` and the databases are created empty. Either way, load data into them exactly as you would a database created individually.
+        Create many databases from one template, in the background. The response returns at once with a `batch_id` and a job to poll.  Pass `schemas` to declare the same tables in every database. List the databases a batch created with `GET /v1/databases?batch=<batch_id>`.
 
         :param bulk_create_databases_request: (required)
         :type bulk_create_databases_request: BulkCreateDatabasesRequest
@@ -1057,7 +1057,7 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseBatchResponse]:
         """Create many databases at once
 
-        Create many databases from one template in a single request. The databases are created in the background: the response returns immediately with a batch and a job to poll.  The databases are not returned inline. List the ones a batch created with `GET /databases?batch=<batch_id>`; they also appear in the normal database listing alongside every other database.  Each database gets a default catalog and schema. Declare tables on all of them by passing `schemas`, in the same shape a single create accepts — a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load, with no follow-up call per database. Omit `schemas` and the databases are created empty. Either way, load data into them exactly as you would a database created individually.
+        Create many databases from one template, in the background. The response returns at once with a `batch_id` and a job to poll.  Pass `schemas` to declare the same tables in every database. List the databases a batch created with `GET /v1/databases?batch=<batch_id>`.
 
         :param bulk_create_databases_request: (required)
         :type bulk_create_databases_request: BulkCreateDatabasesRequest
@@ -1126,7 +1126,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Create many databases at once
 
-        Create many databases from one template in a single request. The databases are created in the background: the response returns immediately with a batch and a job to poll.  The databases are not returned inline. List the ones a batch created with `GET /databases?batch=<batch_id>`; they also appear in the normal database listing alongside every other database.  Each database gets a default catalog and schema. Declare tables on all of them by passing `schemas`, in the same shape a single create accepts — a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load, with no follow-up call per database. Omit `schemas` and the databases are created empty. Either way, load data into them exactly as you would a database created individually.
+        Create many databases from one template, in the background. The response returns at once with a `batch_id` and a job to poll.  Pass `schemas` to declare the same tables in every database. List the databases a batch created with `GET /v1/databases?batch=<batch_id>`.
 
         :param bulk_create_databases_request: (required)
         :type bulk_create_databases_request: BulkCreateDatabasesRequest
@@ -1253,8 +1253,8 @@ class DatabasesApi:
     @validate_call
     def count_databases(
         self,
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.")] = None,
-        batch: Annotated[Optional[StrictStr], Field(description="Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Count only databases whose name contains this text, ignoring case.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Count only databases from this bulk-create batch.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1270,11 +1270,11 @@ class DatabasesApi:
     ) -> DatabaseCountResponse:
         """Count databases
 
-        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text, ignoring the case of unaccented Latin letters and digits, or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+        Count the databases in the workspace. `search` and `batch` filter the same way as on `GET /v1/databases`.
 
-        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
+        :param search: Count only databases whose name contains this text, ignoring case.
         :type search: str
-        :param batch: Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.
+        :param batch: Count only databases from this bulk-create batch.
         :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1324,8 +1324,8 @@ class DatabasesApi:
     @validate_call
     def count_databases_with_http_info(
         self,
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.")] = None,
-        batch: Annotated[Optional[StrictStr], Field(description="Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Count only databases whose name contains this text, ignoring case.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Count only databases from this bulk-create batch.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1341,11 +1341,11 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseCountResponse]:
         """Count databases
 
-        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text, ignoring the case of unaccented Latin letters and digits, or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+        Count the databases in the workspace. `search` and `batch` filter the same way as on `GET /v1/databases`.
 
-        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
+        :param search: Count only databases whose name contains this text, ignoring case.
         :type search: str
-        :param batch: Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.
+        :param batch: Count only databases from this bulk-create batch.
         :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1395,8 +1395,8 @@ class DatabasesApi:
     @validate_call
     def count_databases_without_preload_content(
         self,
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.")] = None,
-        batch: Annotated[Optional[StrictStr], Field(description="Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Count only databases whose name contains this text, ignoring case.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Count only databases from this bulk-create batch.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1412,11 +1412,11 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Count databases
 
-        Return the total number of databases in the workspace. This is the whole-workspace total, not a page size: the `count` field on the listing reports how many rows that one page returned, so totalling a workspace from `GET /v1/databases` means walking every page. Pass `search` to count only databases whose name contains that text, ignoring the case of unaccented Latin letters and digits, or `batch` with the `batch_id` returned by a bulk-creation call to count only that batch's databases. The filters mean exactly what they mean on the listing, so a count and a listing given the same filters describe the same set.
+        Count the databases in the workspace. `search` and `batch` filter the same way as on `GET /v1/databases`.
 
-        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are counted.
+        :param search: Count only databases whose name contains this text, ignoring case.
         :type search: str
-        :param batch: Count only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.
+        :param batch: Count only databases from this bulk-create batch.
         :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1550,7 +1550,7 @@ class DatabasesApi:
     ) -> CreateDatabaseResponse:
         """Create database
 
-        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp. Optional `if_not_exists` makes this a get-or-create: when a database already carries the requested `name`, it is returned with status `200` and nothing is created, which lets a client bind to its database on every start-up without first looking one up.
+        Create a database. Each database gets its own `default` catalog with a `main` schema, so `default.main.<table>` works right away. You can declare more schemas and tables in `schemas`.  `name` is a label and does not have to be unique. Set `if_not_exists` to get back the database that already has this `name` (status 200) instead of creating a new one; the rest of the request is then ignored. Set `expires_at` to have the database deleted after that time. Deletion never happens earlier, but can happen later.
 
         :param create_database_request: (required)
         :type create_database_request: CreateDatabaseRequest
@@ -1621,7 +1621,7 @@ class DatabasesApi:
     ) -> ApiResponse[CreateDatabaseResponse]:
         """Create database
 
-        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp. Optional `if_not_exists` makes this a get-or-create: when a database already carries the requested `name`, it is returned with status `200` and nothing is created, which lets a client bind to its database on every start-up without first looking one up.
+        Create a database. Each database gets its own `default` catalog with a `main` schema, so `default.main.<table>` works right away. You can declare more schemas and tables in `schemas`.  `name` is a label and does not have to be unique. Set `if_not_exists` to get back the database that already has this `name` (status 200) instead of creating a new one; the rest of the request is then ignored. Set `expires_at` to have the database deleted after that time. Deletion never happens earlier, but can happen later.
 
         :param create_database_request: (required)
         :type create_database_request: CreateDatabaseRequest
@@ -1692,7 +1692,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Create database
 
-        Create a new database (a metadata-only grouping). A managed default catalog is auto-created and addressable inside the database as `default` (or the optional `default_catalog` name), with a `main` schema pre-declared so `default.main.<table>` works out of the box. The optional `name` is a free-form display label and is not required to be unique; when omitted, a label derived from the new database's ID is assigned. Optional `default_catalog` overrides the name the default catalog answers to; it must be a valid SQL identifier and may not collide with the reserved catalog names `hotdata` or `information_schema`. Optional `schemas` declares additional schemas/tables on the default catalog at create time; declared tables can be loaded via the standard managed-tables-load endpoint targeting `default_connection_id`. Optional `expires_at` sets when the database expires — accepts either an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `48h`, `90m`, `7d`. When omitted, the database never expires. Expiry is best-effort: the database will not be deleted before `expires_at`, but cleanup may run later than the exact timestamp. Optional `if_not_exists` makes this a get-or-create: when a database already carries the requested `name`, it is returned with status `200` and nothing is created, which lets a client bind to its database on every start-up without first looking one up.
+        Create a database. Each database gets its own `default` catalog with a `main` schema, so `default.main.<table>` works right away. You can declare more schemas and tables in `schemas`.  `name` is a label and does not have to be unique. Set `if_not_exists` to get back the database that already has this `name` (status 200) instead of creating a new one; the rest of the request is then ignored. Set `expires_at` to have the database deleted after that time. Deletion never happens earlier, but can happen later.
 
         :param create_database_request: (required)
         :type create_database_request: CreateDatabaseRequest
@@ -1837,7 +1837,7 @@ class DatabasesApi:
     ) -> None:
         """Delete database
 
-        Delete a database and its auto-created default catalog. Catalogs attached to it are detached (the catalogs themselves are not deleted). Refused while another database attaches this one's catalog — detach it there first — unless this database is past its `expires_at`, in which case it can be deleted regardless and the attaching database loses the catalog. A database that attaches one should watch that date.
+        Delete a database and its `default` catalog. Catalogs attached to it are detached, not deleted.  Returns 409 while another database has this database's catalog attached; detach it there first. After `expires_at` the database is deleted anyway, and the other database loses access.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -1906,7 +1906,7 @@ class DatabasesApi:
     ) -> ApiResponse[None]:
         """Delete database
 
-        Delete a database and its auto-created default catalog. Catalogs attached to it are detached (the catalogs themselves are not deleted). Refused while another database attaches this one's catalog — detach it there first — unless this database is past its `expires_at`, in which case it can be deleted regardless and the attaching database loses the catalog. A database that attaches one should watch that date.
+        Delete a database and its `default` catalog. Catalogs attached to it are detached, not deleted.  Returns 409 while another database has this database's catalog attached; detach it there first. After `expires_at` the database is deleted anyway, and the other database loses access.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -1975,7 +1975,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Delete database
 
-        Delete a database and its auto-created default catalog. Catalogs attached to it are detached (the catalogs themselves are not deleted). Refused while another database attaches this one's catalog — detach it there first — unless this database is past its `expires_at`, in which case it can be deleted regardless and the attaching database loses the catalog. A database that attaches one should watch that date.
+        Delete a database and its `default` catalog. Catalogs attached to it are detached, not deleted.  Returns 409 while another database has this database's catalog attached; detach it there first. After `expires_at` the database is deleted anyway, and the other database loses access.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2105,7 +2105,7 @@ class DatabasesApi:
     ) -> DeleteDatabaseBatchResponse:
         """Delete a database batch
 
-        Stop a batch that is still filling and delete the databases it created, then the batch itself.  Only batches whose databases hold no data can be removed this way. Tables that were declared but never loaded do not prevent it, so a batch created with `schemas` stays deletable. If any database in the batch has had data loaded into it, the request is rejected and those databases must be deleted one at a time — removing a database that holds data is per-database work that cannot be batched.
+        Stop a batch and delete the databases it created, then the batch.  This works only while no database in the batch holds loaded data. Declared but unloaded tables are fine. If any database has data, the request returns 409; delete those databases one at a time.
 
         :param batch_id: Batch ID (required)
         :type batch_id: str
@@ -2174,7 +2174,7 @@ class DatabasesApi:
     ) -> ApiResponse[DeleteDatabaseBatchResponse]:
         """Delete a database batch
 
-        Stop a batch that is still filling and delete the databases it created, then the batch itself.  Only batches whose databases hold no data can be removed this way. Tables that were declared but never loaded do not prevent it, so a batch created with `schemas` stays deletable. If any database in the batch has had data loaded into it, the request is rejected and those databases must be deleted one at a time — removing a database that holds data is per-database work that cannot be batched.
+        Stop a batch and delete the databases it created, then the batch.  This works only while no database in the batch holds loaded data. Declared but unloaded tables are fine. If any database has data, the request returns 409; delete those databases one at a time.
 
         :param batch_id: Batch ID (required)
         :type batch_id: str
@@ -2243,7 +2243,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Delete a database batch
 
-        Stop a batch that is still filling and delete the databases it created, then the batch itself.  Only batches whose databases hold no data can be removed this way. Tables that were declared but never loaded do not prevent it, so a batch created with `schemas` stays deletable. If any database in the batch has had data loaded into it, the request is rejected and those databases must be deleted one at a time — removing a database that holds data is per-database work that cannot be batched.
+        Stop a batch and delete the databases it created, then the batch.  This works only while no database in the batch holds loaded data. Declared but unloaded tables are fine. If any database has data, the request returns 409; delete those databases one at a time.
 
         :param batch_id: Batch ID (required)
         :type batch_id: str
@@ -2374,6 +2374,7 @@ class DatabasesApi:
     ) -> None:
         """Detach catalog from database
 
+        Detach a catalog from a database. The catalog and its data are not deleted.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2446,6 +2447,7 @@ class DatabasesApi:
     ) -> ApiResponse[None]:
         """Detach catalog from database
 
+        Detach a catalog from a database. The catalog and its data are not deleted.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2518,6 +2520,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Detach catalog from database
 
+        Detach a catalog from a database. The catalog and its data are not deleted.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -2654,7 +2657,7 @@ class DatabasesApi:
     ) -> CreateDatabaseResponse:
         """Fork database
 
-        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `description` records why the fork is being taken; it is returned with the fork's `forked_from` and in the lineage of both databases. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Indexes on the source's tables are carried over and can be used on the fork straight away, however large they are, with two exceptions that are not carried over and must be created again on the fork: a vector index that uses the `ivf` algorithm, and an index that is not up to date with its table's latest load when the fork is taken. A fork adds no stored bytes at first, because it starts out sharing the source's storage, indexes included. Loading data into a forked table gives it its own copy of that table's indexes from then on. Routine maintenance can later rewrite a shared table into the fork's own storage, and the fork is billed for that copy from then on. Whether and when that happens depends on the table, so a fork that is only read can keep sharing indefinitely.
+        Create a new database that starts as a copy of an existing one: same schemas, tables, data and attached catalogs. The two are independent after that; the source does not change.  Indexes come across and work at once, except vector indexes that use the `ivf` algorithm and indexes not up to date with the table's latest load. Create those again on the fork. A fork shares the source's storage at first, so it adds no stored bytes until it is written to or maintenance rewrites a table.
 
         :param database_id: Source database ID (required)
         :type database_id: str
@@ -2728,7 +2731,7 @@ class DatabasesApi:
     ) -> ApiResponse[CreateDatabaseResponse]:
         """Fork database
 
-        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `description` records why the fork is being taken; it is returned with the fork's `forked_from` and in the lineage of both databases. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Indexes on the source's tables are carried over and can be used on the fork straight away, however large they are, with two exceptions that are not carried over and must be created again on the fork: a vector index that uses the `ivf` algorithm, and an index that is not up to date with its table's latest load when the fork is taken. A fork adds no stored bytes at first, because it starts out sharing the source's storage, indexes included. Loading data into a forked table gives it its own copy of that table's indexes from then on. Routine maintenance can later rewrite a shared table into the fork's own storage, and the fork is billed for that copy from then on. Whether and when that happens depends on the table, so a fork that is only read can keep sharing indefinitely.
+        Create a new database that starts as a copy of an existing one: same schemas, tables, data and attached catalogs. The two are independent after that; the source does not change.  Indexes come across and work at once, except vector indexes that use the `ivf` algorithm and indexes not up to date with the table's latest load. Create those again on the fork. A fork shares the source's storage at first, so it adds no stored bytes until it is written to or maintenance rewrites a table.
 
         :param database_id: Source database ID (required)
         :type database_id: str
@@ -2802,7 +2805,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Fork database
 
-        Create a new database that is an independent fork of an existing one. The fork has its own default catalog and contains the same schemas, tables, and data as the source; the source is left unchanged. External catalogs attached to the source are re-attached to the fork. Optional `description` records why the fork is being taken; it is returned with the fork's `forked_from` and in the lineage of both databases. Optional `name` sets the fork's display label; when omitted, the fork takes the source's label followed by a short suffix derived from the fork's own ID, so the two stay distinguishable. Optional `expires_at` sets when the fork expires — accepts an RFC 3339 timestamp or a relative duration suffixed with `h` (hours), `m` (minutes), or `d` (days), e.g. `24h`, `90m`, `7d`. When omitted, a still-future expiry on the source is carried over; otherwise the fork never expires. Indexes on the source's tables are carried over and can be used on the fork straight away, however large they are, with two exceptions that are not carried over and must be created again on the fork: a vector index that uses the `ivf` algorithm, and an index that is not up to date with its table's latest load when the fork is taken. A fork adds no stored bytes at first, because it starts out sharing the source's storage, indexes included. Loading data into a forked table gives it its own copy of that table's indexes from then on. Routine maintenance can later rewrite a shared table into the fork's own storage, and the fork is billed for that copy from then on. Whether and when that happens depends on the table, so a fork that is only read can keep sharing indefinitely.
+        Create a new database that starts as a copy of an existing one: same schemas, tables, data and attached catalogs. The two are independent after that; the source does not change.  Indexes come across and work at once, except vector indexes that use the `ivf` algorithm and indexes not up to date with the table's latest load. Create those again on the fork. A fork shares the source's storage at first, so it adds no stored bytes until it is written to or maintenance rewrites a table.
 
         :param database_id: Source database ID (required)
         :type database_id: str
@@ -2952,7 +2955,7 @@ class DatabasesApi:
     ) -> DatabaseDetailResponse:
         """Get database
 
-        Fetch a database by id. The `name` field is a display label only and is not accepted as an identifier here; to fetch a database by its name instead, use `GET /v1/databases/by-name`.
+        Get a database by ID. To find one by name, use `GET /v1/databases/by-name`.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3020,7 +3023,7 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseDetailResponse]:
         """Get database
 
-        Fetch a database by id. The `name` field is a display label only and is not accepted as an identifier here; to fetch a database by its name instead, use `GET /v1/databases/by-name`.
+        Get a database by ID. To find one by name, use `GET /v1/databases/by-name`.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3088,7 +3091,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Get database
 
-        Fetch a database by id. The `name` field is a display label only and is not accepted as an identifier here; to fetch a database by its name instead, use `GET /v1/databases/by-name`.
+        Get a database by ID. To find one by name, use `GET /v1/databases/by-name`.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -3217,7 +3220,7 @@ class DatabasesApi:
     ) -> DatabaseBatchResponse:
         """Get a database batch
 
-        Fetch a batch by id: how many databases were requested and how many exist so far. Poll this to follow progress.
+        Get a batch: how many databases were requested and how many exist so far. Poll this to follow progress.
 
         :param batch_id: Batch ID (required)
         :type batch_id: str
@@ -3285,7 +3288,7 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseBatchResponse]:
         """Get a database batch
 
-        Fetch a batch by id: how many databases were requested and how many exist so far. Poll this to follow progress.
+        Get a batch: how many databases were requested and how many exist so far. Poll this to follow progress.
 
         :param batch_id: Batch ID (required)
         :type batch_id: str
@@ -3353,7 +3356,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Get a database batch
 
-        Fetch a batch by id: how many databases were requested and how many exist so far. Poll this to follow progress.
+        Get a batch: how many databases were requested and how many exist so far. Poll this to follow progress.
 
         :param batch_id: Batch ID (required)
         :type batch_id: str
@@ -3467,7 +3470,7 @@ class DatabasesApi:
     def get_database_lineage(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.")] = None,
+        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of direct forks to list, 1 to 100. Defaults to 25.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3483,11 +3486,11 @@ class DatabasesApi:
     ) -> DatabaseLineageResponse:
         """Get database lineage
 
-        Trace where a database came from and what came from it.  `ancestors` walks the fork chain from this database's immediate source up to the original it descends from, nearest first, and each entry says which state of that source the next database down copied. `forks` lists the databases forked directly from this one, most recently forked first, with `fork_count` giving the true total when the list is only a sample of it.  Lineage is a historical record, not a live link: a fork is an independent database from the moment it is created, and either side can change or be deleted without affecting the other. Deleting either one does not erase the record: a deleted ancestor keeps its place in the chain, a deleted fork still appears among `forks`, and both are marked with `exists` set to false.  A database that was never forked, and was never forked from, answers with empty lists and itself as `root_id`. Forks taken before lineage was recorded carry none: their provenance was never written and cannot be reconstructed.
+        Show where a database was forked from and what was forked from it.  `ancestors` lists the fork chain up to the original, nearest first. `forks` lists databases forked directly from this one, newest first; `fork_count` is the full total when the list is cut short. Deleted databases stay in the record with `exists` set to false. A database with no forks returns empty lists and itself as `root_id`.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param forks_limit: How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.
+        :param forks_limit: Number of direct forks to list, 1 to 100. Defaults to 25.
         :type forks_limit: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3539,7 +3542,7 @@ class DatabasesApi:
     def get_database_lineage_with_http_info(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.")] = None,
+        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of direct forks to list, 1 to 100. Defaults to 25.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3555,11 +3558,11 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseLineageResponse]:
         """Get database lineage
 
-        Trace where a database came from and what came from it.  `ancestors` walks the fork chain from this database's immediate source up to the original it descends from, nearest first, and each entry says which state of that source the next database down copied. `forks` lists the databases forked directly from this one, most recently forked first, with `fork_count` giving the true total when the list is only a sample of it.  Lineage is a historical record, not a live link: a fork is an independent database from the moment it is created, and either side can change or be deleted without affecting the other. Deleting either one does not erase the record: a deleted ancestor keeps its place in the chain, a deleted fork still appears among `forks`, and both are marked with `exists` set to false.  A database that was never forked, and was never forked from, answers with empty lists and itself as `root_id`. Forks taken before lineage was recorded carry none: their provenance was never written and cannot be reconstructed.
+        Show where a database was forked from and what was forked from it.  `ancestors` lists the fork chain up to the original, nearest first. `forks` lists databases forked directly from this one, newest first; `fork_count` is the full total when the list is cut short. Deleted databases stay in the record with `exists` set to false. A database with no forks returns empty lists and itself as `root_id`.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param forks_limit: How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.
+        :param forks_limit: Number of direct forks to list, 1 to 100. Defaults to 25.
         :type forks_limit: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3611,7 +3614,7 @@ class DatabasesApi:
     def get_database_lineage_without_preload_content(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.")] = None,
+        forks_limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of direct forks to list, 1 to 100. Defaults to 25.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3627,11 +3630,11 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Get database lineage
 
-        Trace where a database came from and what came from it.  `ancestors` walks the fork chain from this database's immediate source up to the original it descends from, nearest first, and each entry says which state of that source the next database down copied. `forks` lists the databases forked directly from this one, most recently forked first, with `fork_count` giving the true total when the list is only a sample of it.  Lineage is a historical record, not a live link: a fork is an independent database from the moment it is created, and either side can change or be deleted without affecting the other. Deleting either one does not erase the record: a deleted ancestor keeps its place in the chain, a deleted fork still appears among `forks`, and both are marked with `exists` set to false.  A database that was never forked, and was never forked from, answers with empty lists and itself as `root_id`. Forks taken before lineage was recorded carry none: their provenance was never written and cannot be reconstructed.
+        Show where a database was forked from and what was forked from it.  `ancestors` lists the fork chain up to the original, nearest first. `forks` lists databases forked directly from this one, newest first; `fork_count` is the full total when the list is cut short. Deleted databases stay in the record with `exists` set to false. A database with no forks returns empty lists and itself as `root_id`.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param forks_limit: How many of the databases forked from this one to list (1-100, default 25). Values outside the range are clamped. `fork_count` always reports the true total, whatever this is set to.
+        :param forks_limit: Number of direct forks to list, 1 to 100. Defaults to 25.
         :type forks_limit: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3748,10 +3751,10 @@ class DatabasesApi:
     @validate_call
     def list_databases(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
-        batch: Annotated[Optional[StrictStr], Field(description="List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Databases per page, 1 to 100. Defaults to 100.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="`next_cursor` from the previous page.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Return only databases whose name contains this text, ignoring case.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Return only databases from this bulk-create batch, ordered by ID.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3767,15 +3770,15 @@ class DatabasesApi:
     ) -> ListDatabasesResponse:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name *contains* that text, ignoring the case of unaccented Latin letters and digits; to fetch the single database whose name matches exactly, use `GET /v1/databases/by-name` instead. Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
+        List databases, newest first, one page at a time. If `has_more` is true, pass `next_cursor` as `cursor` to get the next page.  `search` matches names that contain the text. To get the one database with an exact name, use `GET /v1/databases/by-name`. `batch` lists only the databases a bulk create made.
 
-        :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
+        :param limit: Databases per page, 1 to 100. Defaults to 100.
         :type limit: int
-        :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
+        :param cursor: `next_cursor` from the previous page.
         :type cursor: str
-        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
+        :param search: Return only databases whose name contains this text, ignoring case.
         :type search: str
-        :param batch: List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.
+        :param batch: Return only databases from this bulk-create batch, ordered by ID.
         :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3827,10 +3830,10 @@ class DatabasesApi:
     @validate_call
     def list_databases_with_http_info(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
-        batch: Annotated[Optional[StrictStr], Field(description="List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Databases per page, 1 to 100. Defaults to 100.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="`next_cursor` from the previous page.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Return only databases whose name contains this text, ignoring case.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Return only databases from this bulk-create batch, ordered by ID.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3846,15 +3849,15 @@ class DatabasesApi:
     ) -> ApiResponse[ListDatabasesResponse]:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name *contains* that text, ignoring the case of unaccented Latin letters and digits; to fetch the single database whose name matches exactly, use `GET /v1/databases/by-name` instead. Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
+        List databases, newest first, one page at a time. If `has_more` is true, pass `next_cursor` as `cursor` to get the next page.  `search` matches names that contain the text. To get the one database with an exact name, use `GET /v1/databases/by-name`. `batch` lists only the databases a bulk create made.
 
-        :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
+        :param limit: Databases per page, 1 to 100. Defaults to 100.
         :type limit: int
-        :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
+        :param cursor: `next_cursor` from the previous page.
         :type cursor: str
-        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
+        :param search: Return only databases whose name contains this text, ignoring case.
         :type search: str
-        :param batch: List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.
+        :param batch: Return only databases from this bulk-create batch, ordered by ID.
         :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3906,10 +3909,10 @@ class DatabasesApi:
     @validate_call
     def list_databases_without_preload_content(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of databases to return in this page (1–100). Values outside the range are clamped.")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Opaque pagination cursor from a previous response's `next_cursor`.")] = None,
-        search: Annotated[Optional[StrictStr], Field(description="Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.")] = None,
-        batch: Annotated[Optional[StrictStr], Field(description="List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Databases per page, 1 to 100. Defaults to 100.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="`next_cursor` from the previous page.")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Return only databases whose name contains this text, ignoring case.")] = None,
+        batch: Annotated[Optional[StrictStr], Field(description="Return only databases from this bulk-create batch, ordered by ID.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3925,15 +3928,15 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """List databases
 
-        List databases in the workspace, newest first, one page at a time. When no `limit` is given a default page size is applied, so a single call returns at most one page rather than every database. If the response's `has_more` is true, pass its `next_cursor` value back as the `cursor` query parameter to fetch the next page. Pass `search` to return only databases whose name *contains* that text, ignoring the case of unaccented Latin letters and digits; to fetch the single database whose name matches exactly, use `GET /v1/databases/by-name` instead. Pass `batch` with the `batch_id` returned by a bulk-creation call to list only that batch's databases.
+        List databases, newest first, one page at a time. If `has_more` is true, pass `next_cursor` as `cursor` to get the next page.  `search` matches names that contain the text. To get the one database with an exact name, use `GET /v1/databases/by-name`. `batch` lists only the databases a bulk create made.
 
-        :param limit: Maximum number of databases to return in this page (1–100). Values outside the range are clamped.
+        :param limit: Databases per page, 1 to 100. Defaults to 100.
         :type limit: int
-        :param cursor: Opaque pagination cursor from a previous response's `next_cursor`.
+        :param cursor: `next_cursor` from the previous page.
         :type cursor: str
-        :param search: Case-insensitive substring filter on the database name. When set, only databases whose name contains this text are returned; paging and newest-first ordering are unchanged.
+        :param search: Return only databases whose name contains this text, ignoring case.
         :type search: str
-        :param batch: List only the databases belonging to one bulk-creation batch, identified by the `batch_id` that call returned.  Bulk-created databases also appear in the unfiltered listing alongside every other database; this narrows the listing to one batch. Paging works the same way, but results are ordered by database id rather than newest-first, because every database in a batch is created at once.
+        :param batch: Return only databases from this bulk-create batch, ordered by ID.
         :type batch: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4082,7 +4085,7 @@ class DatabasesApi:
     ) -> LoadManagedTableResponse:
         """Load database table from inline data, upload, or query result
 
-        Publish data as the new contents of a table on the database's default catalog, from one of three sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously. While background maintenance holds the table, a load waits for it to finish, for up to 60 seconds, before it starts, in every mode; with `async`, the 202 can arrive only after that wait. A load refused because another write to the table is running gets 409 with the error code `RESOURCE_LOCKED` and a `Retry-After` header.
+        Load data into a table in the database's `default` catalog. Give exactly one source: `data` (inline CSV, up to 2 MiB), `upload_id` (a CSV, JSON or Parquet file from `POST /v1/uploads`) or `result_id` (a saved query result). The table and its schema are created if they do not exist. `mode` sets how the rows apply.  Set `async` to run an upload or inline load as a background job; a `result_id` load always runs inline. If maintenance is running on the table, the load waits up to 60 seconds before it starts. If another write holds the table, you get 409 with `RESOURCE_LOCKED` and a `Retry-After` header.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -4167,7 +4170,7 @@ class DatabasesApi:
     ) -> ApiResponse[LoadManagedTableResponse]:
         """Load database table from inline data, upload, or query result
 
-        Publish data as the new contents of a table on the database's default catalog, from one of three sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously. While background maintenance holds the table, a load waits for it to finish, for up to 60 seconds, before it starts, in every mode; with `async`, the 202 can arrive only after that wait. A load refused because another write to the table is running gets 409 with the error code `RESOURCE_LOCKED` and a `Retry-After` header.
+        Load data into a table in the database's `default` catalog. Give exactly one source: `data` (inline CSV, up to 2 MiB), `upload_id` (a CSV, JSON or Parquet file from `POST /v1/uploads`) or `result_id` (a saved query result). The table and its schema are created if they do not exist. `mode` sets how the rows apply.  Set `async` to run an upload or inline load as a background job; a `result_id` load always runs inline. If maintenance is running on the table, the load waits up to 60 seconds before it starts. If another write holds the table, you get 409 with `RESOURCE_LOCKED` and a `Retry-After` header.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -4252,7 +4255,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Load database table from inline data, upload, or query result
 
-        Publish data as the new contents of a table on the database's default catalog, from one of three sources — provide exactly one. The database-scoped equivalent of the connection-scoped managed-table load — addressed by `database_id`, so no `default_connection_id` is needed. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected or set via `format`. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied: `replace` overwrites the table's contents, `append` inserts the new rows on top of the existing data. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously. While background maintenance holds the table, a load waits for it to finish, for up to 60 seconds, before it starts, in every mode; with `async`, the 202 can arrive only after that wait. A load refused because another write to the table is running gets 409 with the error code `RESOURCE_LOCKED` and a `Retry-After` header.
+        Load data into a table in the database's `default` catalog. Give exactly one source: `data` (inline CSV, up to 2 MiB), `upload_id` (a CSV, JSON or Parquet file from `POST /v1/uploads`) or `result_id` (a saved query result). The table and its schema are created if they do not exist. `mode` sets how the rows apply.  Set `async` to run an upload or inline load as a background job; a `result_id` load always runs inline. If maintenance is running on the table, the load waits up to 60 seconds before it starts. If another write holds the table, you get 409 with `RESOURCE_LOCKED` and a `Retry-After` header.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -4401,7 +4404,7 @@ class DatabasesApi:
     @validate_call
     def lookup_database_by_name(
         self,
-        name: Annotated[StrictStr, Field(description="Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with.")],
+        name: Annotated[StrictStr, Field(description="Full name of the database. Case is ignored for ASCII letters only.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4417,9 +4420,9 @@ class DatabasesApi:
     ) -> DatabaseDetailResponse:
         """Look up a database by name
 
-        Fetch a single database by its exact name. This is the counterpart to the listing's `search` filter, which matches any database whose name merely contains the text.  Matching ignores case for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so a name containing an accented letter or a non-Latin script must be looked up with the capitalisation it was created with.  Returns 404 when no database has that name. A name shared by more than one database returns 409 rather than picking one of them; address those by id.
+        Get the database with this exact name. Matching ignores case only for unaccented Latin letters; all other characters must match exactly.  Returns 409 if more than one database has the name. Use the database ID for those.
 
-        :param name: Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with. (required)
+        :param name: Full name of the database. Case is ignored for ASCII letters only. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4471,7 +4474,7 @@ class DatabasesApi:
     @validate_call
     def lookup_database_by_name_with_http_info(
         self,
-        name: Annotated[StrictStr, Field(description="Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with.")],
+        name: Annotated[StrictStr, Field(description="Full name of the database. Case is ignored for ASCII letters only.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4487,9 +4490,9 @@ class DatabasesApi:
     ) -> ApiResponse[DatabaseDetailResponse]:
         """Look up a database by name
 
-        Fetch a single database by its exact name. This is the counterpart to the listing's `search` filter, which matches any database whose name merely contains the text.  Matching ignores case for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so a name containing an accented letter or a non-Latin script must be looked up with the capitalisation it was created with.  Returns 404 when no database has that name. A name shared by more than one database returns 409 rather than picking one of them; address those by id.
+        Get the database with this exact name. Matching ignores case only for unaccented Latin letters; all other characters must match exactly.  Returns 409 if more than one database has the name. Use the database ID for those.
 
-        :param name: Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with. (required)
+        :param name: Full name of the database. Case is ignored for ASCII letters only. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4541,7 +4544,7 @@ class DatabasesApi:
     @validate_call
     def lookup_database_by_name_without_preload_content(
         self,
-        name: Annotated[StrictStr, Field(description="Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with.")],
+        name: Annotated[StrictStr, Field(description="Full name of the database. Case is ignored for ASCII letters only.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4557,9 +4560,9 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Look up a database by name
 
-        Fetch a single database by its exact name. This is the counterpart to the listing's `search` filter, which matches any database whose name merely contains the text.  Matching ignores case for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so a name containing an accented letter or a non-Latin script must be looked up with the capitalisation it was created with.  Returns 404 when no database has that name. A name shared by more than one database returns 409 rather than picking one of them; address those by id.
+        Get the database with this exact name. Matching ignores case only for unaccented Latin letters; all other characters must match exactly.  Returns 409 if more than one database has the name. Use the database ID for those.
 
-        :param name: Exact name to look up. Unlike the listing's `search`, which matches any database whose name *contains* the text, this matches the whole name.  Case is ignored for unaccented Latin letters and digits, and only for those. Every other character has to match exactly, so look a name holding one up with the capitalisation it was created with. (required)
+        :param name: Full name of the database. Case is ignored for ASCII letters only. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4693,7 +4696,7 @@ class DatabasesApi:
     ) -> ManagedTableConstantPerKeyResponse:
         """Declare which columns are constant per key
 
-        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created — it changes only which files a mutation opens, never how rows are written — so a populated table can adopt it with no rewrite, taking effect on the next load. Send an empty array to revoke it.  **Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.
+        Set which columns never change for a given key. Keyed loads (`delete`, `update`, `upsert`) use this to search fewer files. You can change it at any time; it applies from the next load. Send an empty array to clear it.  Only declare columns that really are constant per key. If they are not, a keyed load can leave duplicate rows.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -4775,7 +4778,7 @@ class DatabasesApi:
     ) -> ApiResponse[ManagedTableConstantPerKeyResponse]:
         """Declare which columns are constant per key
 
-        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created — it changes only which files a mutation opens, never how rows are written — so a populated table can adopt it with no rewrite, taking effect on the next load. Send an empty array to revoke it.  **Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.
+        Set which columns never change for a given key. Keyed loads (`delete`, `update`, `upsert`) use this to search fewer files. You can change it at any time; it applies from the next load. Send an empty array to clear it.  Only declare columns that really are constant per key. If they are not, a keyed load can leave duplicate rows.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -4857,7 +4860,7 @@ class DatabasesApi:
     ) -> RESTResponseType:
         """Declare which columns are constant per key
 
-        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created — it changes only which files a mutation opens, never how rows are written — so a populated table can adopt it with no rewrite, taking effect on the next load. Send an empty array to revoke it.  **Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.
+        Set which columns never change for a given key. Keyed loads (`delete`, `update`, `upsert`) use this to search fewer files. You can change it at any time; it applies from the next load. Send an empty array to clear it.  Only declare columns that really are constant per key. If they are not, a keyed load can leave duplicate rows.
 
         :param database_id: Database ID (required)
         :type database_id: str

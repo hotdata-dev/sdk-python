@@ -26,14 +26,14 @@ from typing_extensions import Self
 
 class LineageForkInfo(BaseModel):
     """
-    One database forked directly from the one being asked about.
+    A database forked directly from this one.
     """ # noqa: E501
     database_id: StrictStr
-    description: Optional[StrictStr] = Field(default=None, description="Why the fork was taken, as given when it was created. Absent when none was given.")
-    exists: StrictBool = Field(description="False once the fork has been deleted. The record of it is kept either way, so a source can still account for everything taken from it.")
+    description: Optional[StrictStr] = Field(default=None, description="Why the fork was taken, if given.")
+    exists: StrictBool = Field(description="False if the fork has been deleted.")
     forked_at: Optional[datetime] = Field(default=None, description="When the fork was taken.")
-    name: Optional[StrictStr] = Field(default=None, description="Absent once the fork has been deleted — only the record of it remains.")
-    snapshot_id: Optional[StrictInt] = Field(default=None, description="Version of this database's data that the fork copied. See `forked_from.snapshot_id`.")
+    name: Optional[StrictStr] = Field(default=None, description="The fork's name. Absent once the fork is deleted.")
+    snapshot_id: Optional[StrictInt] = Field(default=None, description="Point in time of this database's data that the fork copied.")
     __properties: ClassVar[List[str]] = ["database_id", "description", "exists", "forked_at", "name", "snapshot_id"]
 
     model_config = ConfigDict(

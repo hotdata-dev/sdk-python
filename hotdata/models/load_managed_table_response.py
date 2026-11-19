@@ -26,13 +26,13 @@ from typing_extensions import Self
 
 class LoadManagedTableResponse(BaseModel):
     """
-    Result of a managed-table load: row count after the load plus the published table schema. Returned inline (`200`) for a synchronous load, and as the `GET /v1/jobs/{id}` result payload for a completed background load.
+    Result of a table load: the row count and schema after the load.
     """ # noqa: E501
-    arrow_schema_json: StrictStr = Field(description="Schema of the loaded table, as JSON.")
-    connection_id: StrictStr
-    row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Total number of rows in the table after the load.")
-    schema_name: StrictStr
-    table_name: StrictStr
+    arrow_schema_json: StrictStr = Field(description="The table's schema, as a JSON string.")
+    connection_id: StrictStr = Field(description="ID of the connection that holds the table.")
+    row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Total rows in the table after the load.")
+    schema_name: StrictStr = Field(description="Schema of the table.")
+    table_name: StrictStr = Field(description="Table that was loaded.")
     __properties: ClassVar[List[str]] = ["arrow_schema_json", "connection_id", "row_count", "schema_name", "table_name"]
 
     model_config = ConfigDict(

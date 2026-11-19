@@ -1,13 +1,13 @@
 # ApiErrorDetail
 
-Error detail within an API error response
+Details of an API error.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**code** | **str** |  | 
-**message** | **str** |  | 
+**code** | **str** | Machine-readable error code, such as &#x60;BAD_REQUEST&#x60; or &#x60;NOT_FOUND&#x60;. | 
+**message** | **str** | Human-readable description of the error. | 
 
 ## Example
 

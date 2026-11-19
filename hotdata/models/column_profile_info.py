@@ -30,11 +30,11 @@ class ColumnProfileInfo(BaseModel):
     Statistics for a single column.
     """ # noqa: E501
     cardinality: Annotated[int, Field(strict=True, ge=0)] = Field(description="Approximate number of distinct non-null values")
-    data_type: StrictStr = Field(description="Arrow data type (e.g. \"Utf8\", \"Int32\", \"Timestamp(Microsecond, Some(\\\"UTC\\\"))\")")
+    data_type: StrictStr = Field(description="Column data type, such as `Utf8` or `Int32`.")
     name: StrictStr = Field(description="Column name")
     null_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of null values")
     null_percentage: Union[StrictFloat, StrictInt] = Field(description="Percentage of null values (0.0 to 100.0)")
-    profile: Optional[ColumnProfileDetail] = Field(default=None, description="Type-specific profile detail. Null when the column is all-null or has an unsupported type.")
+    profile: Optional[ColumnProfileDetail] = Field(default=None, description="Statistics for the column's type. Absent when the column is all null or its type is not profiled.")
     __properties: ClassVar[List[str]] = ["cardinality", "data_type", "name", "null_count", "null_percentage", "profile"]
 
     model_config = ConfigDict(

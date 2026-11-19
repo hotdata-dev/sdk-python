@@ -18,18 +18,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
 class ColumnInfo(BaseModel):
     """
-    Column metadata for API responses
+    A table column.
     """ # noqa: E501
-    data_type: StrictStr
-    name: StrictStr
-    nullable: StrictBool
+    data_type: StrictStr = Field(description="Column type, such as `Int64`, `Utf8` or `Timestamp(µs)`.")
+    name: StrictStr = Field(description="Column name.")
+    nullable: StrictBool = Field(description="Whether the column can hold nulls.")
     __properties: ClassVar[List[str]] = ["data_type", "name", "nullable"]
 
     model_config = ConfigDict(

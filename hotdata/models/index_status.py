@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class IndexStatus(str, Enum):
     """
-    Index build status exposed to API consumers.
+    Index build status: `ready` once built, `pending` until then.
     """
 
     """

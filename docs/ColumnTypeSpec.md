@@ -1,14 +1,14 @@
 # ColumnTypeSpec
 
-A column type plus the parameters that cannot be expressed by a bare name.
+A column type with its parameters as separate fields.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**precision** | **int** | Total number of digits for &#x60;DECIMAL&#x60; / &#x60;NUMERIC&#x60; (1–38). | [optional] 
-**scale** | **int** | Number of digits after the decimal point for &#x60;DECIMAL&#x60; / &#x60;NUMERIC&#x60;. Requires &#x60;precision&#x60;, and cannot exceed it. | [optional] 
-**type** | **str** | The type name, e.g. &#x60;\&quot;DECIMAL\&quot;&#x60;, &#x60;\&quot;TIMESTAMP\&quot;&#x60;, &#x60;\&quot;VARCHAR\&quot;&#x60;. | 
+**precision** | **int** | Total digits for &#x60;DECIMAL&#x60; or &#x60;NUMERIC&#x60;, from 1 to 38. | [optional] 
+**scale** | **int** | Digits after the decimal point for &#x60;DECIMAL&#x60; or &#x60;NUMERIC&#x60;. Requires &#x60;precision&#x60; and cannot exceed it; defaults to 0. | [optional] 
+**type** | **str** | Type name, such as &#x60;\&quot;DECIMAL\&quot;&#x60;, &#x60;\&quot;TIMESTAMP\&quot;&#x60; or &#x60;\&quot;VARCHAR\&quot;&#x60;. | 
 
 ## Example
 

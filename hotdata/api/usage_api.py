@@ -42,7 +42,7 @@ class UsageApi:
     @validate_call
     def get_usage(
         self,
-        since: Annotated[Optional[StrictStr], Field(description="Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.")] = None,
+        since: Annotated[Optional[StrictStr], Field(description="Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -58,9 +58,9 @@ class UsageApi:
     ) -> WorkspaceUsageResponse:
         """Get workspace usage snapshot
 
-        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the start of your billing period so the totals line up with your invoice rather than the calendar month.
+        Get bytes scanned and query count since `since`, plus current storage size. Set `since` to the start of your billing period so the totals match your invoice.
 
-        :param since: Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.
+        :param since: Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC.
         :type since: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -109,7 +109,7 @@ class UsageApi:
     @validate_call
     def get_usage_with_http_info(
         self,
-        since: Annotated[Optional[StrictStr], Field(description="Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.")] = None,
+        since: Annotated[Optional[StrictStr], Field(description="Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -125,9 +125,9 @@ class UsageApi:
     ) -> ApiResponse[WorkspaceUsageResponse]:
         """Get workspace usage snapshot
 
-        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the start of your billing period so the totals line up with your invoice rather than the calendar month.
+        Get bytes scanned and query count since `since`, plus current storage size. Set `since` to the start of your billing period so the totals match your invoice.
 
-        :param since: Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.
+        :param since: Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC.
         :type since: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -176,7 +176,7 @@ class UsageApi:
     @validate_call
     def get_usage_without_preload_content(
         self,
-        since: Annotated[Optional[StrictStr], Field(description="Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.")] = None,
+        since: Annotated[Optional[StrictStr], Field(description="Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -192,9 +192,9 @@ class UsageApi:
     ) -> RESTResponseType:
         """Get workspace usage snapshot
 
-        Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the start of your billing period so the totals line up with your invoice rather than the calendar month.
+        Get bytes scanned and query count since `since`, plus current storage size. Set `since` to the start of your billing period so the totals match your invoice.
 
-        :param since: Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted.
+        :param since: Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC.
         :type since: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

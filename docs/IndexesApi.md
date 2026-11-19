@@ -15,7 +15,9 @@ Method | HTTP request | Description
 
 Create an index on a table
 
-Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded, and must not declare a sort order (`sorted_by`): a table with a sort order cannot be indexed. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request refused for any of these reasons gets 400, including when `async` is set. The request body describes the rules in full.
+Create a sorted, BM25 full-text or vector index on a table. The table must hold loaded data and must not declare `sorted_by`.
+
+A table can have only one vector index. A vector index that generates its own embeddings (with `embedding_provider_id`) must be the only index on its table. Requests that break these rules return 400, even with `async` set.
 
 ### Example
 
@@ -55,7 +57,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | The database's `default_connection_id`, as returned when the database is created or fetched
+    connection_id = 'connection_id_example' # str | The database's `default_connection_id`
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
     create_index_request = hotdata.CreateIndexRequest() # CreateIndexRequest | 
@@ -76,7 +78,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60;, as returned when the database is created or fetched | 
+ **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60; | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
  **create_index_request** | [**CreateIndexRequest**](CreateIndexRequest.md)|  | 
@@ -99,7 +101,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Index created |  -  |
-**202** | Index build accepted and running in the background; poll the returned job for status |  -  |
+**202** | The index is building in the background. Poll the returned job. |  -  |
 **400** | Invalid request |  -  |
 **404** | Table not found |  -  |
 **500** | Internal server error |  -  |
@@ -111,7 +113,7 @@ Name | Type | Description  | Notes
 
 Delete an index
 
-Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
+Delete an index from a table. Returns 409 while a load into the table is running; retry when it finishes. Deleting a vector index that generated its own embeddings keeps the embedding column in the table.
 
 ### Example
 
@@ -149,7 +151,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | The database's `default_connection_id`, as returned when the database is created or fetched
+    connection_id = 'connection_id_example' # str | The database's `default_connection_id`
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
     index_name = 'index_name_example' # str | Index name
@@ -168,7 +170,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60;, as returned when the database is created or fetched | 
+ **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60; | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
  **index_name** | **str**| Index name | 
@@ -192,7 +194,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 **204** | Index deleted |  -  |
 **404** | Index not found |  -  |
-**409** | A load into the table is running; retry once it finishes |  -  |
+**409** | A load into the table is running. Retry when it finishes. |  -  |
 **500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -202,7 +204,7 @@ void (empty response body)
 
 List indexes on a table
 
-List all indexes created on a table.
+List the indexes on a table.
 
 ### Example
 
@@ -241,7 +243,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    connection_id = 'connection_id_example' # str | The database's `default_connection_id`, as returned when the database is created or fetched
+    connection_id = 'connection_id_example' # str | The database's `default_connection_id`
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
 
@@ -261,7 +263,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60;, as returned when the database is created or fetched | 
+ **connection_id** | **str**| The database&#39;s &#x60;default_connection_id&#x60; | 
  **var_schema** | **str**| Schema name | 
  **table** | **str**| Table name | 
 
@@ -293,7 +295,7 @@ Name | Type | Description  | Notes
 
 List indexes across tables in a database
 
-List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+List the indexes in the database named by the `X-Database-Id` header, one page at a time. Filter by connection, schema, table or index type.
 
 ### Example
 
@@ -332,13 +334,13 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.IndexesApi(api_client)
-    x_database_id = 'x_database_id_example' # str | Database to scope to (required)
-    connection_id = 'connection_id_example' # str | Filter to one connection (optional)
+    x_database_id = 'x_database_id_example' # str | Database ID. Required.
+    connection_id = 'connection_id_example' # str | Filter by connection ID (optional)
     var_schema = 'var_schema_example' # str | Filter by schema name (optional)
     table = 'table_example' # str | Filter by table name (optional)
-    index_type = 'index_type_example' # str | Filter by index type (optional)
-    limit = 56 # int | Max indexes per page (optional)
-    cursor = 'cursor_example' # str | Pagination cursor (optional)
+    index_type = 'index_type_example' # str | Filter by index type: `sorted`, `bm25` or `vector` (optional)
+    limit = 56 # int | Indexes per page. Default 100, maximum 1000. (optional)
+    cursor = 'cursor_example' # str | The `next_cursor` from the previous page (optional)
 
     try:
         # List indexes across tables in a database
@@ -356,13 +358,13 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **x_database_id** | **str**| Database to scope to (required) | 
- **connection_id** | **str**| Filter to one connection | [optional] 
+ **x_database_id** | **str**| Database ID. Required. | 
+ **connection_id** | **str**| Filter by connection ID | [optional] 
  **var_schema** | **str**| Filter by schema name | [optional] 
  **table** | **str**| Filter by table name | [optional] 
- **index_type** | **str**| Filter by index type | [optional] 
- **limit** | **int**| Max indexes per page | [optional] 
- **cursor** | **str**| Pagination cursor | [optional] 
+ **index_type** | **str**| Filter by index type: &#x60;sorted&#x60;, &#x60;bm25&#x60; or &#x60;vector&#x60; | [optional] 
+ **limit** | **int**| Indexes per page. Default 100, maximum 1000. | [optional] 
+ **cursor** | **str**| The &#x60;next_cursor&#x60; from the previous page | [optional] 
 
 ### Return type
 
@@ -382,7 +384,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Indexes listed |  -  |
-**400** | Missing X-Database-Id or bad cursor |  -  |
+**400** | Missing &#x60;X-Database-Id&#x60;, a bad filter value, or a bad cursor |  -  |
 **404** | Database not found |  -  |
 **500** | Internal server error |  -  |
 

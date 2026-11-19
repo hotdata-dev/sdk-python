@@ -1,15 +1,15 @@
 # AsyncQueryResponse
 
-Response returned when a query is submitted asynchronously (202 Accepted).  Poll GET /query-runs/{id} to track progress, sending the same `X-Database-Id` header used to submit the query — the endpoint is scoped to that database and returns 400 without it. Once status is \"succeeded\", retrieve results via GET /results/{result_id}.
+Returned with 202 when a query runs in the background.  Poll `status_url` with the same `X-Database-Id` header until the run's `status` is `succeeded`, then fetch the result with its `result_id`.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**query_run_id** | **str** | Unique identifier for the query run. | 
-**reason** | **str** | Human-readable reason why the query went async (e.g., caching tables for the first time). | [optional] 
-**status** | **str** | Current status of the query run. | 
-**status_url** | **str** | URL to poll for query run status. Requires the same &#x60;X-Database-Id&#x60; header used to submit the query. | 
+**query_run_id** | **str** | ID of the query run. | 
+**reason** | **str** | Why the query went to the background, when known. | [optional] 
+**status** | **str** | Status of the query run. Always &#x60;running&#x60; here. | 
+**status_url** | **str** | URL to poll for the run&#39;s status. Send the same &#x60;X-Database-Id&#x60; header. | 
 
 ## Example
 

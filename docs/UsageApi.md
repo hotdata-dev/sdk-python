@@ -12,7 +12,7 @@ Method | HTTP request | Description
 
 Get workspace usage snapshot
 
-Return aggregated bytes scanned and current storage size for a billing period. Pass `since` as the start of your billing period so the totals line up with your invoice rather than the calendar month.
+Get bytes scanned and query count since `since`, plus current storage size. Set `since` to the start of your billing period so the totals match your invoice.
 
 ### Example
 
@@ -51,7 +51,7 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.UsageApi(api_client)
-    since = 'since_example' # str | Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted. (optional)
+    since = 'since_example' # str | Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC. (optional)
 
     try:
         # Get workspace usage snapshot
@@ -69,7 +69,7 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **since** | **str**| Billing period start (ISO-8601). Defaults to the start of the current UTC calendar month when omitted. | [optional] 
+ **since** | **str**| Start of the period, as an ISO 8601 timestamp. Default: the start of the current calendar month, in UTC. | [optional] 
 
 ### Return type
 

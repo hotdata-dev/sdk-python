@@ -1,6 +1,6 @@
 # TableProfileResponse
 
-Column-level statistics for a synced table. Profiles are computed at sync time and include per-column cardinality, null counts, and type-specific details.
+Column statistics for a table.
 
 ## Properties
 

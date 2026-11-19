@@ -64,7 +64,7 @@ class SavedQueriesApi:
     ) -> SavedQueryDetail:
         """Create saved query
 
-        Save a named SQL query. The SQL is stored as version 1 and automatically analyzed for classification metadata (category, table count, predicate/join/aggregation flags).
+        Save a named SQL query as version 1. Hotdata classifies the SQL, for example its category, table count, and whether it filters, joins or aggregates.
 
         :param create_saved_query_request: (required)
         :type create_saved_query_request: CreateSavedQueryRequest
@@ -132,7 +132,7 @@ class SavedQueriesApi:
     ) -> ApiResponse[SavedQueryDetail]:
         """Create saved query
 
-        Save a named SQL query. The SQL is stored as version 1 and automatically analyzed for classification metadata (category, table count, predicate/join/aggregation flags).
+        Save a named SQL query as version 1. Hotdata classifies the SQL, for example its category, table count, and whether it filters, joins or aggregates.
 
         :param create_saved_query_request: (required)
         :type create_saved_query_request: CreateSavedQueryRequest
@@ -200,7 +200,7 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """Create saved query
 
-        Save a named SQL query. The SQL is stored as version 1 and automatically analyzed for classification metadata (category, table count, predicate/join/aggregation flags).
+        Save a named SQL query as version 1. Hotdata classifies the SQL, for example its category, table count, and whether it filters, joins or aggregates.
 
         :param create_saved_query_request: (required)
         :type create_saved_query_request: CreateSavedQueryRequest
@@ -342,6 +342,7 @@ class SavedQueriesApi:
     ) -> None:
         """Delete saved query
 
+        Delete a saved query and all its versions.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -409,6 +410,7 @@ class SavedQueriesApi:
     ) -> ApiResponse[None]:
         """Delete saved query
 
+        Delete a saved query and all its versions.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -476,6 +478,7 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """Delete saved query
 
+        Delete a saved query and all its versions.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -589,8 +592,8 @@ class SavedQueriesApi:
     def execute_saved_query(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.")],
-        execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to execute")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database to run the query in. Required.")],
+        execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to run")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -606,13 +609,13 @@ class SavedQueriesApi:
     ) -> QueryResponse:
         """Execute saved query
 
-        Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
+        Run a saved query in the database named by the `X-Database-Id` header. Runs the latest version unless you pass `version`. Returns the same response as `POST /v1/query`. Write statements are refused.
 
         :param id: Saved query ID (required)
         :type id: str
-        :param x_database_id: Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. (required)
+        :param x_database_id: ID of the database to run the query in. Required. (required)
         :type x_database_id: str
-        :param execute_saved_query_request: Optional version to execute
+        :param execute_saved_query_request: Optional version to run
         :type execute_saved_query_request: ExecuteSavedQueryRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -650,6 +653,7 @@ class SavedQueriesApi:
             '200': "QueryResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '408': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -666,8 +670,8 @@ class SavedQueriesApi:
     def execute_saved_query_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.")],
-        execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to execute")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database to run the query in. Required.")],
+        execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to run")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -683,13 +687,13 @@ class SavedQueriesApi:
     ) -> ApiResponse[QueryResponse]:
         """Execute saved query
 
-        Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
+        Run a saved query in the database named by the `X-Database-Id` header. Runs the latest version unless you pass `version`. Returns the same response as `POST /v1/query`. Write statements are refused.
 
         :param id: Saved query ID (required)
         :type id: str
-        :param x_database_id: Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. (required)
+        :param x_database_id: ID of the database to run the query in. Required. (required)
         :type x_database_id: str
-        :param execute_saved_query_request: Optional version to execute
+        :param execute_saved_query_request: Optional version to run
         :type execute_saved_query_request: ExecuteSavedQueryRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -727,6 +731,7 @@ class SavedQueriesApi:
             '200': "QueryResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '408': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -743,8 +748,8 @@ class SavedQueriesApi:
     def execute_saved_query_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.")],
-        execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to execute")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database to run the query in. Required.")],
+        execute_saved_query_request: Annotated[Optional[ExecuteSavedQueryRequest], Field(description="Optional version to run")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -760,13 +765,13 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """Execute saved query
 
-        Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
+        Run a saved query in the database named by the `X-Database-Id` header. Runs the latest version unless you pass `version`. Returns the same response as `POST /v1/query`. Write statements are refused.
 
         :param id: Saved query ID (required)
         :type id: str
-        :param x_database_id: Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. (required)
+        :param x_database_id: ID of the database to run the query in. Required. (required)
         :type x_database_id: str
-        :param execute_saved_query_request: Optional version to execute
+        :param execute_saved_query_request: Optional version to run
         :type execute_saved_query_request: ExecuteSavedQueryRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -804,6 +809,7 @@ class SavedQueriesApi:
             '200': "QueryResponse",
             '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '408': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -915,6 +921,7 @@ class SavedQueriesApi:
     ) -> SavedQueryDetail:
         """Get saved query
 
+        Get a saved query and its latest version.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -982,6 +989,7 @@ class SavedQueriesApi:
     ) -> ApiResponse[SavedQueryDetail]:
         """Get saved query
 
+        Get a saved query and its latest version.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -1049,6 +1057,7 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """Get saved query
 
+        Get a saved query and its latest version.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -1161,8 +1170,8 @@ class SavedQueriesApi:
     @validate_call
     def list_saved_queries(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Saved queries to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of saved queries to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1178,10 +1187,11 @@ class SavedQueriesApi:
     ) -> ListSavedQueriesResponse:
         """List saved queries
 
+        List saved queries, sorted by name.
 
-        :param limit: Maximum number of results
+        :param limit: Saved queries to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset
+        :param offset: Number of saved queries to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1231,8 +1241,8 @@ class SavedQueriesApi:
     @validate_call
     def list_saved_queries_with_http_info(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Saved queries to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of saved queries to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1248,10 +1258,11 @@ class SavedQueriesApi:
     ) -> ApiResponse[ListSavedQueriesResponse]:
         """List saved queries
 
+        List saved queries, sorted by name.
 
-        :param limit: Maximum number of results
+        :param limit: Saved queries to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset
+        :param offset: Number of saved queries to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1301,8 +1312,8 @@ class SavedQueriesApi:
     @validate_call
     def list_saved_queries_without_preload_content(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Saved queries to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of saved queries to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1318,10 +1329,11 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """List saved queries
 
+        List saved queries, sorted by name.
 
-        :param limit: Maximum number of results
+        :param limit: Saved queries to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset
+        :param offset: Number of saved queries to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1440,8 +1452,8 @@ class SavedQueriesApi:
     def list_saved_query_versions(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of versions")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Versions to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of versions to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1457,12 +1469,13 @@ class SavedQueriesApi:
     ) -> ListSavedQueryVersionsResponse:
         """List saved query versions
 
+        List the versions of a saved query, newest first.
 
         :param id: Saved query ID (required)
         :type id: str
-        :param limit: Maximum number of versions
+        :param limit: Versions to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset
+        :param offset: Number of versions to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1515,8 +1528,8 @@ class SavedQueriesApi:
     def list_saved_query_versions_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of versions")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Versions to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of versions to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1532,12 +1545,13 @@ class SavedQueriesApi:
     ) -> ApiResponse[ListSavedQueryVersionsResponse]:
         """List saved query versions
 
+        List the versions of a saved query, newest first.
 
         :param id: Saved query ID (required)
         :type id: str
-        :param limit: Maximum number of versions
+        :param limit: Versions to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset
+        :param offset: Number of versions to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1590,8 +1604,8 @@ class SavedQueriesApi:
     def list_saved_query_versions_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Saved query ID")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of versions")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Versions to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of versions to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1607,12 +1621,13 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """List saved query versions
 
+        List the versions of a saved query, newest first.
 
         :param id: Saved query ID (required)
         :type id: str
-        :param limit: Maximum number of versions
+        :param limit: Versions to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset
+        :param offset: Number of versions to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1752,7 +1767,7 @@ class SavedQueriesApi:
     ) -> SavedQueryDetail:
         """Update saved query
 
-        Update a saved query. If the SQL changes, a new version is created (previous versions are preserved). Name, tags, description, and classification overrides can also be updated.
+        Update a saved query. Send at least one field; fields you omit do not change. Changing the SQL creates a new version and keeps the old ones.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -1825,7 +1840,7 @@ class SavedQueriesApi:
     ) -> ApiResponse[SavedQueryDetail]:
         """Update saved query
 
-        Update a saved query. If the SQL changes, a new version is created (previous versions are preserved). Name, tags, description, and classification overrides can also be updated.
+        Update a saved query. Send at least one field; fields you omit do not change. Changing the SQL creates a new version and keeps the old ones.
 
         :param id: Saved query ID (required)
         :type id: str
@@ -1898,7 +1913,7 @@ class SavedQueriesApi:
     ) -> RESTResponseType:
         """Update saved query
 
-        Update a saved query. If the SQL changes, a new version is created (previous versions are preserved). Name, tags, description, and classification overrides can also be updated.
+        Update a saved query. Send at least one field; fields you omit do not change. Changing the SQL creates a new version and keeps the old ones.
 
         :param id: Saved query ID (required)
         :type id: str

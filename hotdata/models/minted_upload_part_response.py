@@ -25,10 +25,10 @@ from typing_extensions import Self
 
 class MintedUploadPartResponse(BaseModel):
     """
-    One minted part URL.
+    An upload URL for one part.
     """ # noqa: E501
-    part_number: StrictInt = Field(description="The 1-based part number this URL is for.")
-    url: StrictStr = Field(description="Short-lived URL to `PUT` this part's bytes to. Keep the response's `ETag` and pass the `{part_number, e_tag}` pair to finalize.")
+    part_number: StrictInt = Field(description="Part number, starting at 1.")
+    url: StrictStr = Field(description="URL to `PUT` the part to. Expires soon. Keep the response's `ETag` for finalize.")
     __properties: ClassVar[List[str]] = ["part_number", "url"]
 
     model_config = ConfigDict(

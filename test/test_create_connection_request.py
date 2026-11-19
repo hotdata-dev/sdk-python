@@ -36,17 +36,15 @@ class TestCreateConnectionRequest(unittest.TestCase):
         model = CreateConnectionRequest()
         if include_optional:
             return CreateConnectionRequest(
-                config = {host=db.example.com, port=5432, database=analytics, user=readonly},
-                name = 'prod-postgres',
-                secret_id = '',
-                secret_name = 'prod-postgres-password',
-                source_type = 'postgres'
+                config = {schemas=[{name=public, tables=[{name=orders}]}]},
+                name = 'sales',
+                source_type = 'managed'
             )
         else:
             return CreateConnectionRequest(
-                config = {host=db.example.com, port=5432, database=analytics, user=readonly},
-                name = 'prod-postgres',
-                source_type = 'postgres',
+                config = {schemas=[{name=public, tables=[{name=orders}]}]},
+                name = 'sales',
+                source_type = 'managed',
         )
         """
 

@@ -13,26 +13,19 @@ Method | HTTP request | Description
 
 Get result
 
-Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.
+Get a saved query result by ID. Send the `X-Database-Id` header of the database it belongs to. Choose the format with `?format=` (`json`, `arrow`, `csv`, `md` or `parquet`) or the `Accept` header. `?format=` wins; an unknown value is ignored.
 
-| Result status         | Status × body                                                                |
-|-----------------------|------------------------------------------------------------------------------|
-| `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    |
-| `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       |
-| `ready` + CSV         | 200 `text/csv; charset=utf-8` — single header row, streamed batch-by-batch   |
-| `ready` + Markdown    | 200 `text/markdown; charset=utf-8` — GitHub-flavored pipe table, streamed   |
-| `ready` + Parquet     | 200 `application/vnd.apache.parquet` — raw parquet bytes (no conversion)     |
-| `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 |
-| `failed`              | 409 `application/json` `{status, result_id, error_message}`                  |
-| not found             | 404 `application/json` (`ApiErrorResponse`)                                  |
+| Result status              | Response                                        |
+|----------------------------|-------------------------------------------------|
+| `ready`                    | 200 with the rows in the chosen format          |
+| `pending` or `processing`  | 202 with a `Retry-After` header. Poll again.    |
+| `failed`                   | 409 with `error_message`                        |
 
-`?format=` accepts `arrow`, `json`, `csv`, `md`, `parquet` and takes precedence over `Accept`. `markdown` is accepted as a runtime alias for `md`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel="next"` points at the following page. `?offset`/`?limit` are ignored for `format=parquet` since that path returns the underlying file unchanged.
+Use `offset` and `limit` to read part of the result. When more rows follow, a `Link` header with `rel="next"` points to the next page. Rows have no guaranteed order, so paging is not a reliable way to read a whole result. Parquet ignores `offset` and `limit` and returns the whole file.
 
-JSON is the only format with a size limit. Building a JSON body requires holding the whole slice in memory at once, so a request whose JSON body would exceed the instance's per-fetch memory budget is refused with 413 and the error code `RESULT_TOO_LARGE`, and a request that would push the total across concurrent JSON fetches over that budget is refused with 429. If the result's size cannot be determined at all, the fetch is refused with 503 rather than served unchecked. None of the three returns partial data. To read a result of any size, request it as `?format=arrow`, `csv`, `md`, or `parquet` — those stream and are never size-limited. Paging with `offset`/`limit` is not an alternative: the rows come back in no guaranteed order, so pages are not a reliable way to read one result in parts.
+JSON responses have a size limit: a result too large to return as JSON gets 413 `RESULT_TOO_LARGE`. Arrow, CSV, Markdown and Parquet stream with no size limit, so use them for large results. All formats except Parquet carry `X-Total-Row-Count`, the row count of the whole result.
 
-Ready responses (Arrow, CSV, Markdown, JSON) carry `X-Total-Row-Count` (the full result row count, independent of offset/limit); the JSON body repeats it as `total_row_count`, so a client that cannot read response headers can still compare it against `row_count` to tell a complete result from a windowed one. Responses are streamed end-to-end, so a client can disconnect at any time and the server stops reading.
-
-IEEE special floats (`±Inf`, `NaN`) have no canonical JSON representation. For cross-format consistency the JSON, CSV, and Markdown paths emit them as `null` / empty cells, and JSON `nullable[]` is widened to match. The Arrow IPC and Parquet bodies are binary round-trip formats and preserve the raw IEEE values; callers cross-checking a result across CSV and Parquet should not byte-compare those slots.
+JSON, CSV and Markdown write `NaN` and `±Inf` as `null` or an empty cell. Arrow and Parquet keep the original values.
 
 ### Example
 
@@ -73,10 +66,10 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.ResultsApi(api_client)
     id = 'id_example' # str | Result ID
-    x_database_id = 'x_database_id_example' # str | Database the result belongs to (required)
-    offset = 56 # int | Rows to skip (default: 0) (optional)
-    limit = 56 # int | Maximum rows to return (default: unbounded) (optional)
-    format = hotdata.ResultsFormatQuery() # ResultsFormatQuery | `arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`. (optional)
+    x_database_id = 'x_database_id_example' # str | ID of the database the result belongs to. Required.
+    offset = 56 # int | Rows to skip. Default 0. (optional)
+    limit = 56 # int | Maximum rows to return. Default: all rows. (optional)
+    format = hotdata.ResultsFormatQuery() # ResultsFormatQuery | `json`, `arrow`, `csv`, `md` (or `markdown`) or `parquet`. Overrides the `Accept` header. (optional)
 
     try:
         # Get result
@@ -95,10 +88,10 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Result ID | 
- **x_database_id** | **str**| Database the result belongs to (required) | 
- **offset** | **int**| Rows to skip (default: 0) | [optional] 
- **limit** | **int**| Maximum rows to return (default: unbounded) | [optional] 
- **format** | [**ResultsFormatQuery**](.md)| &#x60;arrow&#x60;, &#x60;json&#x60;, &#x60;csv&#x60;, &#x60;md&#x60;, or &#x60;parquet&#x60; — overrides the &#x60;Accept&#x60; header. &#x60;markdown&#x60; is also accepted at runtime as an alias for &#x60;md&#x60;. | [optional] 
+ **x_database_id** | **str**| ID of the database the result belongs to. Required. | 
+ **offset** | **int**| Rows to skip. Default 0. | [optional] 
+ **limit** | **int**| Maximum rows to return. Default: all rows. | [optional] 
+ **format** | [**ResultsFormatQuery**](.md)| &#x60;json&#x60;, &#x60;arrow&#x60;, &#x60;csv&#x60;, &#x60;md&#x60; (or &#x60;markdown&#x60;) or &#x60;parquet&#x60;. Overrides the &#x60;Accept&#x60; header. | [optional] 
 
 ### Return type
 
@@ -117,14 +110,14 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Result data. The body depends on the negotiated format: JSON callers receive &#x60;GetResultResponse&#x60;; Arrow callers receive an Arrow IPC stream; CSV callers receive comma-separated text (LF-terminated, double-quote escaped, RFC 4180-style quoting but not RFC 4180-strict on line endings); Markdown callers receive a single GitHub-flavored pipe table; Parquet callers receive the raw parquet bytes, served as-is. Non-finite floats (&#x60;±Inf&#x60;, &#x60;NaN&#x60;) render as &#x60;null&#x60; (JSON) or empty cells (CSV, Markdown) for cross-format consistency. &#x60;Accept&#x60; is treated as a flat content-type list — &#x60;q&#x3D;&#x60; quality values are ignored; use &#x60;?format&#x3D;&#x60; to disambiguate. |  * Link - RFC 5988 &#x60;Link&#x60; header with &#x60;rel&#x3D;\&quot;next\&quot;&#x60; pointing at the next page when a finite &#x60;limit&#x60; does not reach the end of the result. <br>  * X-Total-Row-Count - Total rows in the full result, ignoring offset/limit. Present only when status is &#x60;ready&#x60;. <br>  |
-**202** | Result is still being computed (&#x60;pending&#x60; or &#x60;processing&#x60;). Poll the same URL. |  * Retry-After - Suggested seconds before retrying. <br>  |
-**400** | Invalid offset, limit, or format. |  -  |
-**404** | Result not found. |  -  |
-**409** | Result computation failed. Body carries &#x60;error_message&#x60; describing the failure. |  -  |
-**413** | The requested slice is too large to return as JSON (error code &#x60;RESULT_TOO_LARGE&#x60;). No partial data is returned. Retrying the same request will fail again; request the result as &#x60;?format&#x3D;arrow&#x60;, &#x60;csv&#x60;, &#x60;md&#x60;, or &#x60;parquet&#x60; instead, which stream and have no size limit. JSON only. |  -  |
-**429** | Concurrent JSON fetches have already committed the instance&#39;s per-fetch memory budget. Transient — retry shortly, or request the result in a streaming format, which has no size limit. JSON only. |  -  |
-**503** | The result&#39;s size could not be determined, so it could not be checked against the memory budget and was not served. Transient — retry shortly, or request the result in a streaming format, which needs no size check. JSON only. |  * Retry-After - Suggested seconds before retrying. <br>  |
+**200** | The result rows. JSON returns &#x60;GetResultResponse&#x60;. Arrow returns an IPC stream. CSV uses LF line endings and double-quote escaping. Markdown returns one pipe table. Parquet returns the stored file. &#x60;q&#x3D;&#x60; values in &#x60;Accept&#x60; are ignored; use &#x60;?format&#x3D;&#x60; to choose. |  * Link - Link to the next page (&#x60;rel&#x3D;\&quot;next\&quot;&#x60;), when &#x60;limit&#x60; stops before the end of the result <br>  * X-Total-Row-Count - Rows in the whole result, ignoring &#x60;offset&#x60; and &#x60;limit&#x60; <br>  |
+**202** | The result is not ready yet. Poll the same URL. |  * Retry-After - Suggested seconds before retrying. <br>  |
+**400** | Invalid &#x60;offset&#x60; or &#x60;limit&#x60; |  -  |
+**404** | Result not found |  -  |
+**409** | The query failed. &#x60;error_message&#x60; says why. |  -  |
+**413** | JSON only: the rows are too large to return as JSON (&#x60;RESULT_TOO_LARGE&#x60;). Retrying will not help. Request &#x60;arrow&#x60;, &#x60;csv&#x60;, &#x60;md&#x60; or &#x60;parquet&#x60; instead. |  -  |
+**429** | JSON only: too many large JSON reads are running. Retry shortly, or use a streaming format. |  -  |
+**503** | JSON only: the result&#39;s size could not be checked. Retry shortly, or use a streaming format. |  * Retry-After - Suggested seconds before retrying. <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -133,7 +126,7 @@ Name | Type | Description  | Notes
 
 List results
 
-List stored results for the database named by the required X-Database-Id header.
+List saved query results in the database named by the `X-Database-Id` header, newest first.
 
 ### Example
 
@@ -172,9 +165,9 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.ResultsApi(api_client)
-    x_database_id = 'x_database_id_example' # str | Database to scope the results to (required)
-    limit = 56 # int | Maximum number of results (default: 100, max: 1000) (optional)
-    offset = 56 # int | Pagination offset (default: 0) (optional)
+    x_database_id = 'x_database_id_example' # str | Database ID. Required.
+    limit = 56 # int | Results to return. Default 100, maximum 1000. (optional)
+    offset = 56 # int | Number of results to skip. Default 0. (optional)
 
     try:
         # List results
@@ -192,9 +185,9 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **x_database_id** | **str**| Database to scope the results to (required) | 
- **limit** | **int**| Maximum number of results (default: 100, max: 1000) | [optional] 
- **offset** | **int**| Pagination offset (default: 0) | [optional] 
+ **x_database_id** | **str**| Database ID. Required. | 
+ **limit** | **int**| Results to return. Default 100, maximum 1000. | [optional] 
+ **offset** | **int**| Number of results to skip. Default 0. | [optional] 
 
 ### Return type
 
@@ -214,7 +207,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of results |  -  |
-**400** | Missing or malformed X-Database-Id header |  -  |
+**400** | Missing or malformed &#x60;X-Database-Id&#x60; header |  -  |
 **404** | Database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

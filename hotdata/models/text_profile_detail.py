@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class TextProfileDetail(BaseModel):
     """
-    High-cardinality text column (>200 distinct values).
+    Text column with more than 200 distinct values.
     """ # noqa: E501
     avg_length: Union[StrictFloat, StrictInt] = Field(description="Average string length")
     max_length: Annotated[int, Field(strict=True, ge=0)] = Field(description="Longest string length in the column")

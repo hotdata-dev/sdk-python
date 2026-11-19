@@ -43,6 +43,7 @@ class TestQueryRunInfo(unittest.TestCase):
                 execution_time_ms = 56,
                 id = '',
                 result_id = '',
+                rollup = 'used',
                 row_count = 56,
                 rows_scanned = 56,
                 saved_query_id = '',

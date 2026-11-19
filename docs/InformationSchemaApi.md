@@ -12,7 +12,9 @@ Method | HTTP request | Description
 
 List tables
 
-List discovered tables with optional filtering and pagination. Supports wildcard patterns (SQL %) for schema and table name filters. Set include_columns=true to include column definitions (omitted by default). Every table carries its declared storage layout — `partition_by` and `sorted_by` — which is fixed when the table is created and cannot be changed afterwards. Both are always present; an empty array means none was declared. Only tables in a Hotdata instant database declare a layout here, so a table discovered from an external connection always reports empty arrays.
+List tables, with optional filters and pagination. `schema` and `table` accept SQL `%` wildcards. Set `include_columns=true` to include each table's columns.
+
+Each table reports its `partition_by` and `sorted_by` layout, which is fixed when the table is created. An empty array means none was set. An API key limited to one database must pass that database's `connection_id`.
 
 ### Example
 
@@ -54,9 +56,9 @@ with hotdata.ApiClient(configuration) as api_client:
     connection_id = 'connection_id_example' # str | Filter by connection ID (optional)
     var_schema = 'var_schema_example' # str | Filter by schema name (supports % wildcards) (optional)
     table = 'table_example' # str | Filter by table name (supports % wildcards) (optional)
-    include_columns = True # bool | Include column definitions (default: false) (optional)
-    limit = 56 # int | Maximum number of tables per page (optional)
-    cursor = 'cursor_example' # str | Pagination cursor from a previous response (optional)
+    include_columns = True # bool | Include each table's columns. Default: false. (optional)
+    limit = 56 # int | Tables per page. Default 100, maximum 1000. (optional)
+    cursor = 'cursor_example' # str | The `next_cursor` from the previous page (optional)
 
     try:
         # List tables
@@ -77,9 +79,9 @@ Name | Type | Description  | Notes
  **connection_id** | **str**| Filter by connection ID | [optional] 
  **var_schema** | **str**| Filter by schema name (supports % wildcards) | [optional] 
  **table** | **str**| Filter by table name (supports % wildcards) | [optional] 
- **include_columns** | **bool**| Include column definitions (default: false) | [optional] 
- **limit** | **int**| Maximum number of tables per page | [optional] 
- **cursor** | **str**| Pagination cursor from a previous response | [optional] 
+ **include_columns** | **bool**| Include each table&#39;s columns. Default: false. | [optional] 
+ **limit** | **int**| Tables per page. Default 100, maximum 1000. | [optional] 
+ **cursor** | **str**| The &#x60;next_cursor&#x60; from the previous page | [optional] 
 
 ### Return type
 
@@ -99,7 +101,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Table metadata |  -  |
-**403** | The credential is limited to one database, and the request does not name that database&#39;s connection |  -  |
+**403** | The API key is limited to one database, and &#x60;connection_id&#x60; does not name that database&#39;s connection |  -  |
 **404** | Connection not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

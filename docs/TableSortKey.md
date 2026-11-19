@@ -1,14 +1,14 @@
 # TableSortKey
 
-One key of a table's sort order.  Rows are written in this order, which keeps the values in each file within a narrow range and lets queries filtering on those columns skip files entirely. Most useful on columns you filter by ranges, such as a timestamp.
+A sort key. Rows are written in this order, so queries that filter on these columns can skip files. Most useful on columns filtered by range, such as a timestamp.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**column** | **str** |  | 
-**direction** | **str** | &#x60;asc&#x60; (the default) or &#x60;desc&#x60;. Null when the table was declared without an explicit direction for this key. | [optional] 
-**nulls** | **str** | Where nulls are placed: &#x60;first&#x60; or &#x60;last&#x60;. Defaults to the SQL default for the chosen direction. Null when the table was declared without an explicit placement for this key. | [optional] 
+**column** | **str** | Column to sort by. | 
+**direction** | **str** | &#x60;asc&#x60; (default) or &#x60;desc&#x60;. Null in a response when it was not set. | [optional] 
+**nulls** | **str** | Where nulls go: &#x60;first&#x60; or &#x60;last&#x60;. Defaults to &#x60;last&#x60; for &#x60;asc&#x60; and &#x60;first&#x60; for &#x60;desc&#x60;; null in a response when it was not set. | [optional] 
 
 ## Example
 

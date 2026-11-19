@@ -21,7 +21,7 @@ Method | HTTP request | Description
 
 Add managed schema
 
-Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+Add a schema, and optionally its tables, to a `managed` connection. Names are stored in lowercase. To add a schema to a database, use `POST /v1/databases/{database_id}/schemas`.
 
 ### Example
 
@@ -101,7 +101,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Schema added |  -  |
-**400** | Connection is not a managed catalog or identifier is invalid |  -  |
+**400** | The connection is not &#x60;managed&#x60;, or a name is invalid |  -  |
 **404** | Connection not found |  -  |
 **409** | Schema already exists |  -  |
 
@@ -112,7 +112,7 @@ Name | Type | Description  | Notes
 
 Add managed table
 
-Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+Add an empty table to a schema in a `managed` connection. Names are stored in lowercase. You do not have to declare tables first: a load creates the table if it is missing.
 
 ### Example
 
@@ -194,7 +194,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **201** | Table added |  -  |
-**400** | Connection is not a managed catalog or identifier is invalid |  -  |
+**400** | The connection is not &#x60;managed&#x60;, or a name is invalid |  -  |
 **404** | Connection or schema not found |  -  |
 **409** | Table already exists |  -  |
 
@@ -205,7 +205,7 @@ Name | Type | Description  | Notes
 
 Create connection
 
-Register a new database connection. Provide the source type and connection config (host, port, database, etc.). Credentials can be supplied inline (password/token fields are auto-converted to secrets) or by referencing an existing secret by name or ID. Schema discovery runs automatically after registration.
+Create a catalog that holds data you load into it. `source_type` must be `managed`; other source types are refused with a 400. A managed connection takes no credentials. You can declare its schemas and tables in `config` now, or add them later.
 
 ### Example
 
@@ -284,7 +284,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **201** | Connection created |  -  |
 **400** | Invalid request |  -  |
-**409** | Connection already exists |  -  |
+**409** | A connection with this name already exists |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -293,7 +293,7 @@ Name | Type | Description  | Notes
 
 Delete connection
 
-Delete a connection and its cached data.
+Delete a connection and all of its tables and data.
 
 ### Example
 
@@ -368,7 +368,7 @@ void (empty response body)
 |-------------|-------------|------------------|
 **204** | Connection deleted |  -  |
 **404** | Connection not found |  -  |
-**409** | Connection backs a database&#39;s default catalog, or is attached to one or more databases as a non-default catalog; detach via DELETE /v1/databases/{database_id}/catalogs/{connection_id} first |  -  |
+**409** | The connection is attached to a database, or is a database&#39;s &#x60;default&#x60; catalog. Detach it with &#x60;DELETE /v1/databases/{database_id}/catalogs/{connection_id}&#x60;, or delete the database. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -377,7 +377,7 @@ void (empty response body)
 
 Delete managed table
 
-Delete a single managed-catalog table. The table and its data are removed. Only valid against connections whose source type is `managed`.
+Delete a table and its data from a `managed` connection.
 
 ### Example
 
@@ -455,7 +455,7 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **204** | Managed table deleted |  -  |
-**400** | Connection is not a managed catalog |  -  |
+**400** | The connection is not &#x60;managed&#x60; |  -  |
 **404** | Connection or table not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -465,7 +465,7 @@ void (empty response body)
 
 Get connection
 
-Get details for a specific connection, including table and sync counts.
+Get a connection, with its table count and how many of its tables hold loaded data.
 
 ### Example
 
@@ -551,7 +551,7 @@ Name | Type | Description  | Notes
 
 Get table profile
 
-Get column-level statistics for a synced table. Returns per-column profiles including cardinality, null counts, and type-specific details (distinct values for categorical columns, min/max for temporal/numeric, length stats for text). Profiles are computed at sync time.
+Get column statistics for a table: row count, null counts, cardinality, and per-type details such as top values, min/max, or text lengths. Returns 404 if the table has no stored profile.
 
 ### Example
 
@@ -632,7 +632,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Column profile statistics |  -  |
-**404** | Table or profile not found |  -  |
+**404** | Table not found, or the table has no profile |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -641,7 +641,7 @@ Name | Type | Description  | Notes
 
 List connections
 
-List all registered database connections.
+List the connections in this workspace.
 
 ### Example
 
@@ -722,7 +722,9 @@ This endpoint does not need any parameter.
 
 Load managed table from inline data, upload, or query result
 
-Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously. While background maintenance holds the table, a load waits for it to finish, for up to 60 seconds, before it starts, in every mode; with `async`, the 202 can arrive only after that wait. A load refused because another write to the table is running gets 409 with the error code `RESOURCE_LOCKED` and a `Retry-After` header.
+Load data into a table in a `managed` connection. Give exactly one source: `data` (inline CSV, up to 2 MiB), `upload_id` (a CSV, JSON or Parquet file from `POST /v1/uploads`) or `result_id` (a saved query result). The table and its schema are created if they do not exist. `mode` sets how the rows apply.
+
+Set `async` to run an upload or inline load as a background job; a `result_id` load always runs inline. If maintenance is running on the table, the load waits up to 60 seconds before it starts. If another write holds the table, you get 409 with `RESOURCE_LOCKED` and a `Retry-After` header.
 
 ### Example
 
@@ -765,7 +767,7 @@ with hotdata.ApiClient(configuration) as api_client:
     connection_id = 'connection_id_example' # str | Connection ID
     var_schema = 'var_schema_example' # str | Schema name
     table = 'table_example' # str | Table name
-    load_managed_table_request = {"mode":"replace","data":"order_id,customer_id,amount\n1001,42,1999\n1002,7,4550\n"} # LoadManagedTableRequest | 
+    load_managed_table_request = {"mode":"replace","data":"order_id,customer_id,amount\n1001,42,1999\n1002,7,4550\n","format":"csv","columns":{"order_id":"BIGINT","customer_id":"BIGINT","amount":{"type":"DECIMAL","precision":10,"scale":2}}} # LoadManagedTableRequest | 
 
     try:
         # Load managed table from inline data, upload, or query result
@@ -806,12 +808,12 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Managed table loaded |  -  |
-**202** | Load accepted and running in the background; poll the returned job for status and result |  -  |
-**400** | Invalid request (bad mode, none or several of &#x60;upload_id&#x60;/&#x60;result_id&#x60;/&#x60;data&#x60;, &#x60;format&#x60; combined with &#x60;result_id&#x60;, &#x60;columns&#x60; without &#x60;data&#x60;, a non-CSV inline &#x60;format&#x60;, unparseable inline data, non-managed connection, invalid identifier, bad parquet, or the result failed to compute) |  -  |
+**202** | The load is running in the background. Poll the returned job. |  -  |
+**400** | Invalid request, such as a bad &#x60;mode&#x60;, not exactly one data source, data that cannot be parsed, a connection that is not &#x60;managed&#x60;, or a result that failed to compute |  -  |
 **404** | Connection, upload, or result not found, or the table was deleted |  -  |
-**409** | Upload already consumed or in flight, the result is still being computed, or the incoming data changes a column&#39;s type incompatibly (only widening to a larger compatible type can be applied automatically); the existing data is unchanged and remains queryable. Error code &#x60;RESOURCE_LOCKED&#x60;: another write to the table is running; retry after the &#x60;Retry-After&#x60; delay. |  -  |
-**413** | Inline &#x60;data&#x60; is over the 2 MiB limit (error code &#x60;INLINE_DATA_TOO_LARGE&#x60;); upload the data and load it by &#x60;upload_id&#x60; instead |  -  |
-**503** | The catalog is busy: no pooled catalog connection came free within the acquire window (error code &#x60;CATALOG_BUSY&#x60;). The load may already have committed data if the timeout hit after the write, so check the table, or load with an idempotency key, before retrying after the &#x60;Retry-After&#x60; delay |  -  |
+**409** | Conflict: the upload was already used or is in use, the result is not ready, or the data changes a column&#39;s type in a way that cannot be widened. The table is unchanged. With &#x60;RESOURCE_LOCKED&#x60;, another write holds the table; retry after the &#x60;Retry-After&#x60; delay. |  -  |
+**413** | Inline &#x60;data&#x60; is over 2 MiB (&#x60;INLINE_DATA_TOO_LARGE&#x60;). Upload the file and load it by &#x60;upload_id&#x60;. |  -  |
+**503** | The catalog is busy (&#x60;CATALOG_BUSY&#x60;). The load may already have written its data, so check the table or use an idempotency key before you retry after the &#x60;Retry-After&#x60; delay. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -820,13 +822,9 @@ Name | Type | Description  | Notes
 
 Declare which columns are constant per key
 
-Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics do not discriminate.
+Set which columns never change for a given key. Keyed loads (`delete`, `update`, `upsert`) use this to search fewer files. You can change it at any time; it applies from the next load. Send an empty array to clear it.
 
-Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created. It changes only which files a mutation opens, never how rows are written, so nothing stored becomes wrong when it changes and a populated table can adopt it with no rewrite. It takes effect on the next load.
-
-Send an empty array to revoke it, restoring the unrestricted search — this is the way to undo a declaration that turns out to be false.
-
-**This is correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it, and the pruning conceals its own evidence because the file holding the missed row is never opened. Declare it only where the invariant is established.
+Only declare columns that really are constant per key. If they are not, a keyed load can leave duplicate rows.
 
 ### Example
 
@@ -910,9 +908,9 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | The table&#39;s declaration as it now stands |  -  |
-**400** | Not a managed catalog, an invalid column name, or a table with no key |  -  |
+**400** | The connection is not &#x60;managed&#x60;, a column name is invalid, or the table has no key |  -  |
 **404** | Connection, schema or table not found |  -  |
-**409** | The declaration changed concurrently; retry |  -  |
+**409** | The setting changed at the same time. Retry. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -27,12 +27,12 @@ COLUMNDEFINITION_ONE_OF_SCHEMAS = ["ColumnTypeSpec", "str"]
 
 class ColumnDefinition(BaseModel):
     """
-    The declared type of one column, as written in a load request's `columns` map.  Accepts either a bare type name or an object carrying the extra parameters some types need:  - simple: `\"VARCHAR\"`, `\"BIGINT\"`, `\"DECIMAL(10,2)\"` - detailed: `{ \"type\": \"DECIMAL\", \"precision\": 10, \"scale\": 2 }`
+    A column's type in a load request's `columns` map. Either a type name, such as `\"BIGINT\"` or `\"DECIMAL(10,2)\"`, or an object such as `{ \"type\": \"DECIMAL\", \"precision\": 10, \"scale\": 2 }`.
     """
     # data type: str
-    oneof_schema_1_validator: Optional[StrictStr] = Field(default=None, description="A bare type name, optionally parameterized: `\"VARCHAR\"`, `\"DECIMAL(10,2)\"`.")
+    oneof_schema_1_validator: Optional[StrictStr] = Field(default=None, description="A type name, such as `\"VARCHAR\"` or `\"DECIMAL(10,2)\"`.")
     # data type: ColumnTypeSpec
-    oneof_schema_2_validator: Optional[ColumnTypeSpec] = Field(default=None, description="A type name plus explicit parameters.")
+    oneof_schema_2_validator: Optional[ColumnTypeSpec] = Field(default=None, description="A type name with its parameters as separate fields.")
     actual_instance: Optional[Union[ColumnTypeSpec, str]] = None
     one_of_schemas: Set[str] = { "ColumnTypeSpec", "str" }
 

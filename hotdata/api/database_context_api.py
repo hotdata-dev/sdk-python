@@ -45,7 +45,7 @@ class DatabaseContextApi:
     def delete_database_context(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
+        name: Annotated[StrictStr, Field(description="Context name. Follows the same rules as a table name.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -61,11 +61,11 @@ class DatabaseContextApi:
     ) -> None:
         """Delete database context
 
-        Removes a named context document from a database.
+        Delete a context document from a database.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a table name (required)
+        :param name: Context name. Follows the same rules as a table name. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -118,7 +118,7 @@ class DatabaseContextApi:
     def delete_database_context_with_http_info(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
+        name: Annotated[StrictStr, Field(description="Context name. Follows the same rules as a table name.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -134,11 +134,11 @@ class DatabaseContextApi:
     ) -> ApiResponse[None]:
         """Delete database context
 
-        Removes a named context document from a database.
+        Delete a context document from a database.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a table name (required)
+        :param name: Context name. Follows the same rules as a table name. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -191,7 +191,7 @@ class DatabaseContextApi:
     def delete_database_context_without_preload_content(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
+        name: Annotated[StrictStr, Field(description="Context name. Follows the same rules as a table name.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -207,11 +207,11 @@ class DatabaseContextApi:
     ) -> RESTResponseType:
         """Delete database context
 
-        Removes a named context document from a database.
+        Delete a context document from a database.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a table name (required)
+        :param name: Context name. Follows the same rules as a table name. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -328,7 +328,7 @@ class DatabaseContextApi:
     def get_database_context(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
+        name: Annotated[StrictStr, Field(description="Context name. Follows the same rules as a table name.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -344,10 +344,11 @@ class DatabaseContextApi:
     ) -> GetDatabaseContextResponse:
         """Get one database context
 
+        Get one context document by name.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a table name (required)
+        :param name: Context name. Follows the same rules as a table name. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -400,7 +401,7 @@ class DatabaseContextApi:
     def get_database_context_with_http_info(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
+        name: Annotated[StrictStr, Field(description="Context name. Follows the same rules as a table name.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -416,10 +417,11 @@ class DatabaseContextApi:
     ) -> ApiResponse[GetDatabaseContextResponse]:
         """Get one database context
 
+        Get one context document by name.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a table name (required)
+        :param name: Context name. Follows the same rules as a table name. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -472,7 +474,7 @@ class DatabaseContextApi:
     def get_database_context_without_preload_content(
         self,
         database_id: Annotated[StrictStr, Field(description="Database ID")],
-        name: Annotated[StrictStr, Field(description="Context key: same character rules as a table name")],
+        name: Annotated[StrictStr, Field(description="Context name. Follows the same rules as a table name.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -488,10 +490,11 @@ class DatabaseContextApi:
     ) -> RESTResponseType:
         """Get one database context
 
+        Get one context document by name.
 
         :param database_id: Database ID (required)
         :type database_id: str
-        :param name: Context key: same character rules as a table name (required)
+        :param name: Context name. Follows the same rules as a table name. (required)
         :type name: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -623,6 +626,7 @@ class DatabaseContextApi:
     ) -> ListDatabaseContextsResponse:
         """List database contexts
 
+        List the context documents saved on a database, sorted by name.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -690,6 +694,7 @@ class DatabaseContextApi:
     ) -> ApiResponse[ListDatabaseContextsResponse]:
         """List database contexts
 
+        List the context documents saved on a database, sorted by name.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -757,6 +762,7 @@ class DatabaseContextApi:
     ) -> RESTResponseType:
         """List database contexts
 
+        List the context documents saved on a database, sorted by name.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -886,7 +892,7 @@ class DatabaseContextApi:
     ) -> UpsertDatabaseContextResponse:
         """Create or update database context
 
-        Stores a named document (for example Markdown) scoped to a database. Reuses the same name to replace content.
+        Save a named text or Markdown document on a database. Saving under an existing name replaces its content. Content can be up to 512,000 characters.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -959,7 +965,7 @@ class DatabaseContextApi:
     ) -> ApiResponse[UpsertDatabaseContextResponse]:
         """Create or update database context
 
-        Stores a named document (for example Markdown) scoped to a database. Reuses the same name to replace content.
+        Save a named text or Markdown document on a database. Saving under an existing name replaces its content. Content can be up to 512,000 characters.
 
         :param database_id: Database ID (required)
         :type database_id: str
@@ -1032,7 +1038,7 @@ class DatabaseContextApi:
     ) -> RESTResponseType:
         """Create or update database context
 
-        Stores a named document (for example Markdown) scoped to a database. Reuses the same name to replace content.
+        Save a named text or Markdown document on a database. Saving under an existing name replaces its content. Content can be up to 512,000 characters.
 
         :param database_id: Database ID (required)
         :type database_id: str

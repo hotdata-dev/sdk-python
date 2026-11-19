@@ -1,14 +1,14 @@
 # ColumnInfo
 
-Column metadata for API responses
+A table column.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data_type** | **str** |  | 
-**name** | **str** |  | 
-**nullable** | **bool** |  | 
+**data_type** | **str** | Column type, such as &#x60;Int64&#x60;, &#x60;Utf8&#x60; or &#x60;Timestamp(µs)&#x60;. | 
+**name** | **str** | Column name. | 
+**nullable** | **bool** | Whether the column can hold nulls. | 
 
 ## Example
 

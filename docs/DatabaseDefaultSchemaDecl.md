@@ -1,13 +1,13 @@
 # DatabaseDefaultSchemaDecl
 
-One schema declaration inside the database's default catalog, supplied at create time. `tables` defaults to empty, so you can declare just a schema name and add tables later.
+A schema to create with the database.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **str** |  | 
-**tables** | [**List[DatabaseDefaultTableDecl]**](DatabaseDefaultTableDecl.md) |  | [optional] 
+**tables** | [**List[DatabaseDefaultTableDecl]**](DatabaseDefaultTableDecl.md) | Tables to create in the schema. You can also add tables later. | [optional] 
 
 ## Example
 

@@ -70,7 +70,7 @@ class ConnectionsApi:
     ) -> ManagedSchemaResponse:
         """Add managed schema
 
-        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+        Add a schema, and optionally its tables, to a `managed` connection. Names are stored in lowercase. To add a schema to a database, use `POST /v1/databases/{database_id}/schemas`.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -144,7 +144,7 @@ class ConnectionsApi:
     ) -> ApiResponse[ManagedSchemaResponse]:
         """Add managed schema
 
-        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+        Add a schema, and optionally its tables, to a `managed` connection. Names are stored in lowercase. To add a schema to a database, use `POST /v1/databases/{database_id}/schemas`.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -218,7 +218,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Add managed schema
 
-        Declare a new schema (and optionally its tables) on an existing managed catalog after creation. The schema is added to the connection's declaration; declared tables can then be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+        Add a schema, and optionally its tables, to a `managed` connection. Names are stored in lowercase. To add a schema to a database, use `POST /v1/databases/{database_id}/schemas`.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -370,7 +370,7 @@ class ConnectionsApi:
     ) -> ManagedTableResponse:
         """Add managed table
 
-        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+        Add an empty table to a schema in a `managed` connection. Names are stored in lowercase. You do not have to declare tables first: a load creates the table if it is missing.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -448,7 +448,7 @@ class ConnectionsApi:
     ) -> ApiResponse[ManagedTableResponse]:
         """Add managed table
 
-        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+        Add an empty table to a schema in a `managed` connection. Names are stored in lowercase. You do not have to declare tables first: a load creates the table if it is missing.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -526,7 +526,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Add managed table
 
-        Declare a new table on an existing schema of a managed catalog after creation. The table is added empty (declared-but-unloaded) and can be populated via the managed-table load endpoint. Only valid against connections whose source type is `managed`. Identifiers are normalized to lowercase.
+        Add an empty table to a schema in a `managed` connection. Names are stored in lowercase. You do not have to declare tables first: a load creates the table if it is missing.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -682,7 +682,7 @@ class ConnectionsApi:
     ) -> CreateConnectionResponse:
         """Create connection
 
-        Register a new database connection. Provide the source type and connection config (host, port, database, etc.). Credentials can be supplied inline (password/token fields are auto-converted to secrets) or by referencing an existing secret by name or ID. Schema discovery runs automatically after registration.
+        Create a catalog that holds data you load into it. `source_type` must be `managed`; other source types are refused with a 400. A managed connection takes no credentials. You can declare its schemas and tables in `config` now, or add them later.
 
         :param create_connection_request: (required)
         :type create_connection_request: CreateConnectionRequest
@@ -751,7 +751,7 @@ class ConnectionsApi:
     ) -> ApiResponse[CreateConnectionResponse]:
         """Create connection
 
-        Register a new database connection. Provide the source type and connection config (host, port, database, etc.). Credentials can be supplied inline (password/token fields are auto-converted to secrets) or by referencing an existing secret by name or ID. Schema discovery runs automatically after registration.
+        Create a catalog that holds data you load into it. `source_type` must be `managed`; other source types are refused with a 400. A managed connection takes no credentials. You can declare its schemas and tables in `config` now, or add them later.
 
         :param create_connection_request: (required)
         :type create_connection_request: CreateConnectionRequest
@@ -820,7 +820,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Create connection
 
-        Register a new database connection. Provide the source type and connection config (host, port, database, etc.). Credentials can be supplied inline (password/token fields are auto-converted to secrets) or by referencing an existing secret by name or ID. Schema discovery runs automatically after registration.
+        Create a catalog that holds data you load into it. `source_type` must be `managed`; other source types are refused with a 400. A managed connection takes no credentials. You can declare its schemas and tables in `config` now, or add them later.
 
         :param create_connection_request: (required)
         :type create_connection_request: CreateConnectionRequest
@@ -963,7 +963,7 @@ class ConnectionsApi:
     ) -> None:
         """Delete connection
 
-        Delete a connection and its cached data.
+        Delete a connection and all of its tables and data.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1032,7 +1032,7 @@ class ConnectionsApi:
     ) -> ApiResponse[None]:
         """Delete connection
 
-        Delete a connection and its cached data.
+        Delete a connection and all of its tables and data.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1101,7 +1101,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Delete connection
 
-        Delete a connection and its cached data.
+        Delete a connection and all of its tables and data.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1233,7 +1233,7 @@ class ConnectionsApi:
     ) -> None:
         """Delete managed table
 
-        Delete a single managed-catalog table. The table and its data are removed. Only valid against connections whose source type is `managed`.
+        Delete a table and its data from a `managed` connection.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1310,7 +1310,7 @@ class ConnectionsApi:
     ) -> ApiResponse[None]:
         """Delete managed table
 
-        Delete a single managed-catalog table. The table and its data are removed. Only valid against connections whose source type is `managed`.
+        Delete a table and its data from a `managed` connection.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1387,7 +1387,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Delete managed table
 
-        Delete a single managed-catalog table. The table and its data are removed. Only valid against connections whose source type is `managed`.
+        Delete a table and its data from a `managed` connection.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1529,7 +1529,7 @@ class ConnectionsApi:
     ) -> GetConnectionResponse:
         """Get connection
 
-        Get details for a specific connection, including table and sync counts.
+        Get a connection, with its table count and how many of its tables hold loaded data.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1597,7 +1597,7 @@ class ConnectionsApi:
     ) -> ApiResponse[GetConnectionResponse]:
         """Get connection
 
-        Get details for a specific connection, including table and sync counts.
+        Get a connection, with its table count and how many of its tables hold loaded data.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1665,7 +1665,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Get connection
 
-        Get details for a specific connection, including table and sync counts.
+        Get a connection, with its table count and how many of its tables hold loaded data.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1796,7 +1796,7 @@ class ConnectionsApi:
     ) -> TableProfileResponse:
         """Get table profile
 
-        Get column-level statistics for a synced table. Returns per-column profiles including cardinality, null counts, and type-specific details (distinct values for categorical columns, min/max for temporal/numeric, length stats for text). Profiles are computed at sync time.
+        Get column statistics for a table: row count, null counts, cardinality, and per-type details such as top values, min/max, or text lengths. Returns 404 if the table has no stored profile.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1872,7 +1872,7 @@ class ConnectionsApi:
     ) -> ApiResponse[TableProfileResponse]:
         """Get table profile
 
-        Get column-level statistics for a synced table. Returns per-column profiles including cardinality, null counts, and type-specific details (distinct values for categorical columns, min/max for temporal/numeric, length stats for text). Profiles are computed at sync time.
+        Get column statistics for a table: row count, null counts, cardinality, and per-type details such as top values, min/max, or text lengths. Returns 404 if the table has no stored profile.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -1948,7 +1948,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Get table profile
 
-        Get column-level statistics for a synced table. Returns per-column profiles including cardinality, null counts, and type-specific details (distinct values for categorical columns, min/max for temporal/numeric, length stats for text). Profiles are computed at sync time.
+        Get column statistics for a table: row count, null counts, cardinality, and per-type details such as top values, min/max, or text lengths. Returns 404 if the table has no stored profile.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2088,7 +2088,7 @@ class ConnectionsApi:
     ) -> ListConnectionsResponse:
         """List connections
 
-        List all registered database connections.
+        List the connections in this workspace.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2151,7 +2151,7 @@ class ConnectionsApi:
     ) -> ApiResponse[ListConnectionsResponse]:
         """List connections
 
-        List all registered database connections.
+        List the connections in this workspace.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2214,7 +2214,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """List connections
 
-        List all registered database connections.
+        List the connections in this workspace.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2339,7 +2339,7 @@ class ConnectionsApi:
     ) -> LoadManagedTableResponse:
         """Load managed table from inline data, upload, or query result
 
-        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously. While background maintenance holds the table, a load waits for it to finish, for up to 60 seconds, before it starts, in every mode; with `async`, the 202 can arrive only after that wait. A load refused because another write to the table is running gets 409 with the error code `RESOURCE_LOCKED` and a `Retry-After` header.
+        Load data into a table in a `managed` connection. Give exactly one source: `data` (inline CSV, up to 2 MiB), `upload_id` (a CSV, JSON or Parquet file from `POST /v1/uploads`) or `result_id` (a saved query result). The table and its schema are created if they do not exist. `mode` sets how the rows apply.  Set `async` to run an upload or inline load as a background job; a `result_id` load always runs inline. If maintenance is running on the table, the load waits up to 60 seconds before it starts. If another write holds the table, you get 409 with `RESOURCE_LOCKED` and a `Retry-After` header.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2424,7 +2424,7 @@ class ConnectionsApi:
     ) -> ApiResponse[LoadManagedTableResponse]:
         """Load managed table from inline data, upload, or query result
 
-        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously. While background maintenance holds the table, a load waits for it to finish, for up to 60 seconds, before it starts, in every mode; with `async`, the 202 can arrive only after that wait. A load refused because another write to the table is running gets 409 with the error code `RESOURCE_LOCKED` and a `Retry-After` header.
+        Load data into a table in a `managed` connection. Give exactly one source: `data` (inline CSV, up to 2 MiB), `upload_id` (a CSV, JSON or Parquet file from `POST /v1/uploads`) or `result_id` (a saved query result). The table and its schema are created if they do not exist. `mode` sets how the rows apply.  Set `async` to run an upload or inline load as a background job; a `result_id` load always runs inline. If maintenance is running on the table, the load waits up to 60 seconds before it starts. If another write holds the table, you get 409 with `RESOURCE_LOCKED` and a `Retry-After` header.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2509,7 +2509,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Load managed table from inline data, upload, or query result
 
-        Publish data as the new contents of a managed table from one of three sources — provide exactly one. With `data`, CSV text is sent inline in this request, up to 2 MiB; column types are detected from the data unless `columns` declares them, and a larger payload is rejected with 413 and the error code `INLINE_DATA_TOO_LARGE`, at which point the data should be uploaded and loaded by `upload_id` instead. With `upload_id`, a previously-uploaded file is published: CSV, JSON, and Parquet are supported; the format is auto-detected from the upload's `Content-Type` and file contents, or set explicitly via the `format` field. With `result_id`, a persisted query result is copied into the table, so the table keeps its data even after the result expires; a result can be loaded into any number of tables. If the target table (or its schema) has not been declared yet, it is created automatically as part of the load — declaring tables up front is optional. `mode` selects how the data is applied and accepts five values: `replace` makes the uploaded rows the table's entire contents, `append` inserts them on top of the existing data, and `delete`, `update`, and `upsert` match rows by key — removing, replacing, or inserting-or-replacing the matched rows respectively. The three key-matching modes need a key: the one the table was created with, or one given in `key` on the request. Concurrent loads against the same upload return 409. For an upload or inline data, set `async` to run the load in the background and get back a job ID to poll; add `async_after_ms` to wait briefly for it to finish before falling back to a job ID. A `result_id` load runs synchronously. While background maintenance holds the table, a load waits for it to finish, for up to 60 seconds, before it starts, in every mode; with `async`, the 202 can arrive only after that wait. A load refused because another write to the table is running gets 409 with the error code `RESOURCE_LOCKED` and a `Retry-After` header.
+        Load data into a table in a `managed` connection. Give exactly one source: `data` (inline CSV, up to 2 MiB), `upload_id` (a CSV, JSON or Parquet file from `POST /v1/uploads`) or `result_id` (a saved query result). The table and its schema are created if they do not exist. `mode` sets how the rows apply.  Set `async` to run an upload or inline load as a background job; a `result_id` load always runs inline. If maintenance is running on the table, the load waits up to 60 seconds before it starts. If another write holds the table, you get 409 with `RESOURCE_LOCKED` and a `Retry-After` header.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2677,7 +2677,7 @@ class ConnectionsApi:
     ) -> ManagedTableConstantPerKeyResponse:
         """Declare which columns are constant per key
 
-        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics do not discriminate.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created. It changes only which files a mutation opens, never how rows are written, so nothing stored becomes wrong when it changes and a populated table can adopt it with no rewrite. It takes effect on the next load.  Send an empty array to revoke it, restoring the unrestricted search — this is the way to undo a declaration that turns out to be false.  **This is correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it, and the pruning conceals its own evidence because the file holding the missed row is never opened. Declare it only where the invariant is established.
+        Set which columns never change for a given key. Keyed loads (`delete`, `update`, `upsert`) use this to search fewer files. You can change it at any time; it applies from the next load. Send an empty array to clear it.  Only declare columns that really are constant per key. If they are not, a keyed load can leave duplicate rows.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2759,7 +2759,7 @@ class ConnectionsApi:
     ) -> ApiResponse[ManagedTableConstantPerKeyResponse]:
         """Declare which columns are constant per key
 
-        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics do not discriminate.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created. It changes only which files a mutation opens, never how rows are written, so nothing stored becomes wrong when it changes and a populated table can adopt it with no rewrite. It takes effect on the next load.  Send an empty array to revoke it, restoring the unrestricted search — this is the way to undo a declaration that turns out to be false.  **This is correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it, and the pruning conceals its own evidence because the file holding the missed row is never opened. Declare it only where the invariant is established.
+        Set which columns never change for a given key. Keyed loads (`delete`, `update`, `upsert`) use this to search fewer files. You can change it at any time; it applies from the next load. Send an empty array to clear it.  Only declare columns that really are constant per key. If they are not, a keyed load can leave duplicate rows.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str
@@ -2841,7 +2841,7 @@ class ConnectionsApi:
     ) -> RESTResponseType:
         """Declare which columns are constant per key
 
-        Replace the columns a table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns. Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) narrow its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics do not discriminate.  Unlike `partition_by` and `sorted_by`, this is NOT fixed when the table is created. It changes only which files a mutation opens, never how rows are written, so nothing stored becomes wrong when it changes and a populated table can adopt it with no rewrite. It takes effect on the next load.  Send an empty array to revoke it, restoring the unrestricted search — this is the way to undo a declaration that turns out to be false.  **This is correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it, and the pruning conceals its own evidence because the file holding the missed row is never opened. Declare it only where the invariant is established.
+        Set which columns never change for a given key. Keyed loads (`delete`, `update`, `upsert`) use this to search fewer files. You can change it at any time; it applies from the next load. Send an empty array to clear it.  Only declare columns that really are constant per key. If they are not, a keyed load can leave duplicate rows.
 
         :param connection_id: Connection ID (required)
         :type connection_id: str

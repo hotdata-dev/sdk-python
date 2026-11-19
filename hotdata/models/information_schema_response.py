@@ -27,13 +27,13 @@ from typing_extensions import Self
 
 class InformationSchemaResponse(BaseModel):
     """
-    Response body for GET /information_schema
+    A page of tables.
     """ # noqa: E501
-    count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of tables in this response, the same meaning `count` carries on the results and databases listings.  This is a page size, not a total for the whole filter. Page with `has_more` and `next_cursor`: an empty `tables` array on its own does not mean the listing is finished.")
-    has_more: StrictBool = Field(description="True when more tables follow this page. Pass `next_cursor` to fetch them.")
-    limit: Annotated[int, Field(strict=True, ge=0)] = Field(description="The page size in effect for this response — the `limit` you asked for, clamped to the server's maximum, or the server default when you sent none.")
-    next_cursor: Optional[StrictStr] = Field(default=None, description="Cursor for the next page, present only when `has_more` is `true`. Send it back as the `cursor` query parameter.")
-    tables: List[TableInfo] = Field(description="The tables on this page.")
+    count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of tables on this page, not the total. An empty `tables` array does not mean the listing is finished: check `has_more`.")
+    has_more: StrictBool = Field(description="Whether more tables follow. Fetch them with `next_cursor`.")
+    limit: Annotated[int, Field(strict=True, ge=0)] = Field(description="Page size used: the `limit` you sent, capped at the maximum, or the default when omitted.")
+    next_cursor: Optional[StrictStr] = Field(default=None, description="Cursor for the next page, present only when `has_more` is true. Pass it as the `cursor` query parameter.")
+    tables: List[TableInfo] = Field(description="Tables on this page.")
     __properties: ClassVar[List[str]] = ["count", "has_more", "limit", "next_cursor", "tables"]
 
     model_config = ConfigDict(

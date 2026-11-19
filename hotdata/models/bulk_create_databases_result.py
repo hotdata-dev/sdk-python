@@ -26,12 +26,12 @@ from typing_extensions import Self
 
 class BulkCreateDatabasesResult(BaseModel):
     """
-    What a bulk-create job reports when it finishes.
+    Result of a bulk database creation.
     """ # noqa: E501
-    batch_id: StrictStr = Field(description="Batch these databases belong to.")
-    cancelled: StrictBool = Field(description="True when the batch was stopped before finishing.")
-    created: Annotated[int, Field(strict=True, ge=0)] = Field(description="How many were created.")
-    requested: Annotated[int, Field(strict=True, ge=0)] = Field(description="How many databases were asked for.")
+    batch_id: StrictStr = Field(description="ID of the batch.")
+    cancelled: StrictBool = Field(description="Whether the batch was stopped before it finished.")
+    created: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of databases created.")
+    requested: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of databases requested.")
     __properties: ClassVar[List[str]] = ["batch_id", "cancelled", "created", "requested"]
 
     model_config = ConfigDict(

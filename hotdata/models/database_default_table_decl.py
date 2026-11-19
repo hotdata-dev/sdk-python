@@ -28,14 +28,14 @@ from typing_extensions import Self
 
 class DatabaseDefaultTableDecl(BaseModel):
     """
-    One table declaration inside a default-catalog schema, supplied at database-create time.
+    A table to create with the database. Its columns come from the first data you load.
     """ # noqa: E501
-    constant_per_key: Optional[List[StrictStr]] = Field(default=None, description="Columns whose value is determined by this table's `key`: for every uploaded row, every stored row sharing its key holds the same value of these columns.  Declaring this lets a keyed mutation (`delete`, `update`, `upsert`) restrict its search for prior versions to the values the upload carries, which prunes far harder than the key alone when the key's own file statistics are weak. Omit (the default) for the unrestricted search.  **Correctness-affecting, not a hint.** If the assertion is false, a mutation supersedes one version of a key and appends beside another, silently duplicating it. Declare it only where the invariant is established.")
-    key: Optional[List[StrictStr]] = Field(default=None, description="Columns that uniquely identify a row, enabling the key-based load modes (`delete`, `update`, `upsert`) on this table: those loads match rows by these columns' values. Omit (the default) to declare no key; the table can still be loaded with `replace` and `append`, but key-based modes are then rejected.")
-    layout: Optional[TableLayout] = Field(default=None, description="Storage layout of the table: `analytical` (the default), or `point_lookup`, which writes small data pages so the table's rows can be fetched by id cheaply, which is what a vector index's answers do; analytical scans of it read more pages. Declared when the table is created and fixed thereafter.")
+    constant_per_key: Optional[List[StrictStr]] = Field(default=None, description="Columns that always hold the same value for rows with the same `key`. Makes keyed loads faster, but if it is not true, keyed loads silently duplicate rows.")
+    key: Optional[List[StrictStr]] = Field(default=None, description="Columns that identify a row. Required for `delete`, `update` and `upsert` loads unless the load request gives its own `key`.")
+    layout: Optional[TableLayout] = Field(default=None, description="`analytical` (default) for fast scans, or `point_lookup` for fast fetches of single rows, as vector search does. Cannot be changed later.")
     name: StrictStr
-    partition_by: Optional[List[TablePartitionKey]] = Field(default=None, description="Partition keys for this table, applied in order. Omit for no partitioning. Declared when the table is created and fixed thereafter.")
-    sorted_by: Optional[List[TableSortKey]] = Field(default=None, description="Sort keys for this table, applied in order. Omit for no sort order. Declared when the table is created and fixed thereafter. A table with a sort order cannot be indexed: creating any index on it is refused, so leave this empty on a table you plan to search.")
+    partition_by: Optional[List[TablePartitionKey]] = Field(default=None, description="Columns to partition the table by, in order. Cannot be changed later.")
+    sorted_by: Optional[List[TableSortKey]] = Field(default=None, description="Columns to sort the table by, in order. Cannot be changed later, and a sorted table cannot be indexed.")
     __properties: ClassVar[List[str]] = ["constant_per_key", "key", "layout", "name", "partition_by", "sorted_by"]
 
     model_config = ConfigDict(

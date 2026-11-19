@@ -46,6 +46,7 @@ class TestQueryResponse(unittest.TestCase):
                 preview_row_count = 56,
                 query_run_id = '',
                 result_id = '',
+                rollup = 'used',
                 row_count = 0,
                 rows = [
                     [

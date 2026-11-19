@@ -11,7 +11,9 @@ from hotdata.api.jobs_api import JobsApi
 from hotdata.api.query_api import QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi
 from hotdata.api.results_api import ResultsApi
+from hotdata.api.rollups_api import RollupsApi
 from hotdata.api.saved_queries_api import SavedQueriesApi
+from hotdata.api.streams_api import StreamsApi
 from hotdata.api.uploads_api import UploadsApi
 from hotdata.api.usage_api import UsageApi
 from hotdata.api.workspaces_api import WorkspacesApi

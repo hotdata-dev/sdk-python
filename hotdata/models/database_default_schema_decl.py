@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl
 from typing import Optional, Set
@@ -26,10 +26,10 @@ from typing_extensions import Self
 
 class DatabaseDefaultSchemaDecl(BaseModel):
     """
-    One schema declaration inside the database's default catalog, supplied at create time. `tables` defaults to empty, so you can declare just a schema name and add tables later.
+    A schema to create with the database.
     """ # noqa: E501
     name: StrictStr
-    tables: Optional[List[DatabaseDefaultTableDecl]] = None
+    tables: Optional[List[DatabaseDefaultTableDecl]] = Field(default=None, description="Tables to create in the schema. You can also add tables later.")
     __properties: ClassVar[List[str]] = ["name", "tables"]
 
     model_config = ConfigDict(

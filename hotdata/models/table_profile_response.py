@@ -27,7 +27,7 @@ from typing_extensions import Self
 
 class TableProfileResponse(BaseModel):
     """
-    Column-level statistics for a synced table. Profiles are computed at sync time and include per-column cardinality, null counts, and type-specific details.
+    Column statistics for a table.
     """ # noqa: E501
     columns: List[ColumnProfileInfo] = Field(description="Per-column profile statistics")
     connection: StrictStr = Field(description="Connection name")

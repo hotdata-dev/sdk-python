@@ -1,21 +1,21 @@
 # TableInfo
 
-Single table metadata
+A table and its metadata.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**columns** | [**List[ColumnInfo]**](ColumnInfo.md) |  | [optional] 
-**connection** | **str** |  | 
-**constant_per_key** | **List[str]** | Columns the table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns.  Declaring this lets a keyed mutation narrow its search for prior versions to the values the upload carries. Empty when none is declared, which is the unrestricted search.  Unlike &#x60;partition_by&#x60; and &#x60;sorted_by&#x60; this is NOT fixed at creation — it changes only which files a mutation opens, never how rows are written — so read it here rather than assuming a declaration took effect. | 
-**last_sync** | **str** |  | [optional] 
-**layout** | [**TableLayout**](TableLayout.md) | The table&#39;s storage layout: &#x60;analytical&#x60;, or &#x60;point_lookup&#x60;, whose small data pages make fetching its rows by id cheap. Fixed at creation. | 
-**partition_by** | [**List[TablePartitionKey]**](TablePartitionKey.md) | The table&#39;s partition keys, in the order they were declared when the table was created. Empty when the table is not partitioned.  A table&#39;s storage layout is fixed when the table is created and cannot be changed afterwards, so this is how to confirm a table really was created with the layout that was asked for. The field is always present: an empty array means \&quot;no partitioning declared\&quot;, which is not the same as a response that omits the field entirely.  Reported for tables in a Hotdata instant database, which are the only ones whose layout is declared here. A table discovered from an external connection always reports an empty array — its layout belongs to the upstream system, so an empty array there means \&quot;not known from here\&quot;, not \&quot;confirmed unpartitioned\&quot;. | 
-**var_schema** | **str** |  | 
-**sorted_by** | [**List[TableSortKey]**](TableSortKey.md) | The table&#39;s sort keys, in the order they were declared when the table was created. Empty when no sort order was declared. Always present, and limited to tables in a Hotdata instant database, for the same reasons as &#x60;partition_by&#x60;. | 
-**synced** | **bool** |  | 
-**table** | **str** |  | 
+**columns** | [**List[ColumnInfo]**](ColumnInfo.md) | Table columns. Present only when the request sets &#x60;include_columns&#x3D;true&#x60;. | [optional] 
+**connection** | **str** | Name of the connection that holds the table. | 
+**constant_per_key** | **List[str]** | Columns that hold the same value for every row sharing a key, which lets keyed mutations search fewer files; empty when none are declared. Unlike &#x60;partition_by&#x60; and &#x60;sorted_by&#x60;, this can change after creation. | 
+**last_sync** | **str** | When the table&#39;s data was last loaded or synced; null if never. | [optional] 
+**layout** | [**TableLayout**](TableLayout.md) | Storage layout. Fixed at creation. | 
+**partition_by** | [**List[TablePartitionKey]**](TablePartitionKey.md) | Partition keys, in the order declared when the table was created; empty when it is not partitioned. Reported only for tables in a Hotdata-instant database: other tables always return an empty array. | 
+**var_schema** | **str** | Schema name. | 
+**sorted_by** | [**List[TableSortKey]**](TableSortKey.md) | Sort keys, in the order declared when the table was created; empty when none were declared. Reported only for tables in a Hotdata-managed database, like &#x60;partition_by&#x60;. | 
+**synced** | **bool** | Whether the table has data loaded. | 
+**table** | **str** | Table name. | 
 
 ## Example
 

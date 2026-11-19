@@ -21,25 +21,27 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
+from hotdata.models.rollup_usage import RollupUsage
 from typing import Optional, Set
 from typing_extensions import Self
 
 class QueryResponse(BaseModel):
     """
-    Response body for POST /query  Query results are returned immediately along with a `result_id` for later retrieval. Saving the result for later retrieval happens asynchronously in the background.  To wait until the saved result can be retrieved, poll `GET /query-runs/{id}` with this response's `query_run_id` and read the run's `status`. Send the `X-Database-Id` header for the database the query ran in: that endpoint is scoped by the header alone and returns 400 without it, including when the query itself was scoped with the `database_id` body field instead. - `\"running\"`: still executing, or still being saved - `\"succeeded\"`: finished. A `result_id` on the run names a saved result that   is ready to retrieve, and needs no second check against `GET /results/{id}`   — the result is saved and marked ready before the run is marked succeeded,   never after. A run carrying no `result_id` saved nothing; see below - `\"failed\"`: the query or the save failed — see the run's `error_message` - `\"interrupted\"`: the run was interrupted before it finished, for example   because the server handling it was replaced. Terminal, and safe to retry  Read `result_id` off the query run rather than off this body, and treat `succeeded` and \"there is a result to fetch\" as two questions. A run can succeed having saved nothing: when every row was returned here but the result could not be saved for later retrieval, the run is `succeeded` with no `result_id` at all — the field is omitted from the run, not sent as null, so test for its absence — and the run's `warning_message` says why. This response body's `result_id` is issued while the save is still in flight, so on its own it does not mean the result can be retrieved.  Do not poll `GET /results/{id}` to wait for readiness. That endpoint returns the result *data*: once the result is ready, a JSON response carries all of it, so a status check made against it transfers the entire result to read one field. It also stops working as the result grows, and the two refusals mean opposite things to a caller: a JSON body that cannot fit the per-fetch memory budget at all is refused with 413 and will be refused again, while one that would fit alone but not alongside the JSON fetches already in flight is refused with 429 and can be retried. `GET /query-runs/{id}` returns no rows at any size.
+    Result of a query that finished within the request.  `rows` holds the result, or a preview of it when `truncated` is true. The result is also saved in the background so you can fetch it again with `result_id`. To know when the saved copy is ready, poll `GET /v1/query-runs/{query_run_id}` (with the `X-Database-Id` header) until its `status` is `succeeded`, then read `result_id` from the run. Do not poll `GET /v1/results/{id}` for this: it returns the full result data.
     """ # noqa: E501
-    columns: List[StrictStr]
-    execution_time_ms: Annotated[int, Field(strict=True, ge=0)]
-    nullable: List[StrictBool] = Field(description="Nullable flags for each column (parallel to columns vec). True if the column allows NULL values, false if NOT NULL.")
-    preview_row_count: StrictInt = Field(description="Number of rows in *this* response body. Always present. For a large result this is a bounded preview, not the grand total — see `total_row_count` and `truncated`.")
-    query_run_id: StrictStr = Field(description="Unique identifier for the query run record (qrun...).")
-    result_id: Optional[StrictStr] = Field(default=None, description="Unique identifier for retrieving this result via GET /results/{id}. When non-null, the result is being persisted asynchronously. Null only when the result fit entirely in this response (`truncated: false`) but could not be persisted for later retrieval — see the `warning` field. A `truncated: true` response ALWAYS carries a non-null, resolvable `result_id`: a truncated result that cannot be persisted fails the request with a retryable HTTP 503 (`PERSISTENCE_UNAVAILABLE`, with a `Retry-After` header) rather than returning a partial body with a dead ticket.")
-    row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="**Deprecated** — use `preview_row_count` (rows in this body) and `total_row_count` (grand total) instead. Retained as a back-compat alias and always equal to `preview_row_count`; for a truncated result it is the preview count, *not* the grand total — read `total_row_count` for that. Will be removed in a future release once clients migrate.")
-    rows: List[List[Any]] = Field(description="Array of rows, where each row is an array of column values. Values can be strings, numbers, booleans, or null.")
-    total_row_count: Optional[StrictInt] = Field(default=None, description="Grand total rows in the full result. Present (and equal to `preview_row_count`) when the whole result fit in this response; `null` while a truncated result is still being persisted. When `null`, read the authoritative total from `GET /v1/query-runs/{id}` (`row_count`) or the `X-Total-Row-Count` header on `GET /v1/results/{id}`.")
-    truncated: StrictBool = Field(description="True when `rows` is a bounded preview of a larger result. Fetch the full result via `result_id`.")
-    warning: Optional[StrictStr] = Field(default=None, description="Warning message if result persistence could not be initiated. Present only when the full result is returned inline (`truncated: false`) but could not be persisted: `result_id` is then null and the result cannot be re-fetched later, though every row is in this response. A truncated result never carries a warning — if it cannot be persisted the request fails with a retryable HTTP 503 (`PERSISTENCE_UNAVAILABLE`, with a `Retry-After` header) instead.")
-    __properties: ClassVar[List[str]] = ["columns", "execution_time_ms", "nullable", "preview_row_count", "query_run_id", "result_id", "row_count", "rows", "total_row_count", "truncated", "warning"]
+    columns: List[StrictStr] = Field(description="Column names, in order.")
+    execution_time_ms: Annotated[int, Field(strict=True, ge=0)] = Field(description="Time the query took to run, in milliseconds.")
+    nullable: List[StrictBool] = Field(description="Whether each column, in the same order as `columns`, can hold nulls.")
+    preview_row_count: StrictInt = Field(description="Number of rows in this response.")
+    query_run_id: StrictStr = Field(description="ID of the query run.")
+    result_id: Optional[StrictStr] = Field(default=None, description="ID to fetch this result again with `GET /v1/results/{id}`. Null only when every row is in this response but the result could not be saved; see `warning`.")
+    rollup: Optional[RollupUsage] = Field(default=None, description="Whether a rollup answered the query. Absent when no table the query read has a rollup, or rollups are turned off for the query.")
+    row_count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Deprecated: use `preview_row_count` or `total_row_count`. Always equal to `preview_row_count`.")
+    rows: List[List[Any]] = Field(description="Result rows. Each row is an array of values in column order.")
+    total_row_count: Optional[StrictInt] = Field(default=None, description="Number of rows in the full result. Null while a truncated result is still being saved; read `row_count` from the query run once it succeeds.")
+    truncated: StrictBool = Field(description="True when `rows` is only a preview of a larger result. Fetch the full result with `result_id`.")
+    warning: Optional[StrictStr] = Field(default=None, description="Why the result could not be saved. Present only when `result_id` is null; every row is still in this response.")
+    __properties: ClassVar[List[str]] = ["columns", "execution_time_ms", "nullable", "preview_row_count", "query_run_id", "result_id", "rollup", "row_count", "rows", "total_row_count", "truncated", "warning"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,6 +87,11 @@ class QueryResponse(BaseModel):
         if self.result_id is None and "result_id" in self.model_fields_set:
             _dict['result_id'] = None
 
+        # set to None if rollup (nullable) is None
+        # and model_fields_set contains the field
+        if self.rollup is None and "rollup" in self.model_fields_set:
+            _dict['rollup'] = None
+
         # set to None if total_row_count (nullable) is None
         # and model_fields_set contains the field
         if self.total_row_count is None and "total_row_count" in self.model_fields_set:
@@ -113,6 +120,7 @@ class QueryResponse(BaseModel):
             "preview_row_count": obj.get("preview_row_count"),
             "query_run_id": obj.get("query_run_id"),
             "result_id": obj.get("result_id"),
+            "rollup": obj.get("rollup"),
             "row_count": obj.get("row_count"),
             "rows": obj.get("rows"),
             "total_row_count": obj.get("total_row_count"),

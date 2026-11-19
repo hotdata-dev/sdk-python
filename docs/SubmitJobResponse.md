@@ -1,14 +1,14 @@
 # SubmitJobResponse
 
-Response returned by APIs that submit a background job (e.g., async refresh).
+A background job that was started. Poll `status_url` to follow it.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** | Job ID for status polling. | 
-**status** | [**JobStatus**](JobStatus.md) | Current status of the submitted job. | 
-**status_url** | **str** | URL to poll for job status. | 
+**id** | **str** | Job ID. | 
+**status** | [**JobStatus**](JobStatus.md) | Current job status. | 
+**status_url** | **str** | Path to poll for the job&#39;s status. | 
 
 ## Example
 

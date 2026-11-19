@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class BatchCreateUploadResponse(BaseModel):
     """
-    Response body for `POST /v1/uploads/batch`: one created session per requested file, in request order.
+    The new uploads, in the order requested.
     """ # noqa: E501
     uploads: List[UploadSessionResponse]
     __properties: ClassVar[List[str]] = ["uploads"]

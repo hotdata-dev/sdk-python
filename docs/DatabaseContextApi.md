@@ -15,7 +15,7 @@ Method | HTTP request | Description
 
 Delete database context
 
-Removes a named context document from a database.
+Delete a context document from a database.
 
 ### Example
 
@@ -54,7 +54,7 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.DatabaseContextApi(api_client)
     database_id = 'database_id_example' # str | Database ID
-    name = 'name_example' # str | Context key: same character rules as a table name
+    name = 'name_example' # str | Context name. Follows the same rules as a table name.
 
     try:
         # Delete database context
@@ -71,7 +71,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **database_id** | **str**| Database ID | 
- **name** | **str**| Context key: same character rules as a table name | 
+ **name** | **str**| Context name. Follows the same rules as a table name. | 
 
 ### Return type
 
@@ -100,6 +100,8 @@ void (empty response body)
 > GetDatabaseContextResponse get_database_context(database_id, name)
 
 Get one database context
+
+Get one context document by name.
 
 ### Example
 
@@ -139,7 +141,7 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.DatabaseContextApi(api_client)
     database_id = 'database_id_example' # str | Database ID
-    name = 'name_example' # str | Context key: same character rules as a table name
+    name = 'name_example' # str | Context name. Follows the same rules as a table name.
 
     try:
         # Get one database context
@@ -158,7 +160,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **database_id** | **str**| Database ID | 
- **name** | **str**| Context key: same character rules as a table name | 
+ **name** | **str**| Context name. Follows the same rules as a table name. | 
 
 ### Return type
 
@@ -187,6 +189,8 @@ Name | Type | Description  | Notes
 > ListDatabaseContextsResponse list_database_contexts(database_id)
 
 List database contexts
+
+List the context documents saved on a database, sorted by name.
 
 ### Example
 
@@ -272,7 +276,7 @@ Name | Type | Description  | Notes
 
 Create or update database context
 
-Stores a named document (for example Markdown) scoped to a database. Reuses the same name to replace content.
+Save a named text or Markdown document on a database. Saving under an existing name replaces its content. Content can be up to 512,000 characters.
 
 ### Example
 

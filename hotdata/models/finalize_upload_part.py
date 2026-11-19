@@ -25,10 +25,10 @@ from typing_extensions import Self
 
 class FinalizeUploadPart(BaseModel):
     """
-    One part of a multi-part upload, supplied at finalize. Single-`PUT` uploads have no parts.
+    One uploaded part of a multi-part upload.
     """ # noqa: E501
-    e_tag: StrictStr = Field(description="The `ETag` response header returned by that part's `PUT`.")
-    part_number: StrictInt = Field(description="The 1-based part number you uploaded this part as.")
+    e_tag: StrictStr = Field(description="`ETag` header returned by the part's `PUT`.")
+    part_number: StrictInt = Field(description="Part number, starting at 1.")
     __properties: ClassVar[List[str]] = ["e_tag", "part_number"]
 
     model_config = ConfigDict(

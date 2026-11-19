@@ -27,13 +27,13 @@ from typing_extensions import Self
 
 class ListDatabasesResponse(BaseModel):
     """
-    Response body for GET /databases. Results are returned one page at a time, newest first. When `has_more` is true, pass `next_cursor` back as the `cursor` query parameter to fetch the following page.
+    A page of databases, newest first. When `has_more` is true, pass `next_cursor` as `cursor` to get the next page.
     """ # noqa: E501
     count: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Number of databases returned in this page.")
     databases: List[DatabaseSummary]
-    has_more: Optional[StrictBool] = Field(default=None, description="Whether more databases exist beyond this page.")
-    limit: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Page size applied to this response (after clamping to the maximum).")
-    next_cursor: Optional[StrictStr] = Field(default=None, description="Opaque cursor for the next page; present only when `has_more` is true.")
+    has_more: Optional[StrictBool] = Field(default=None, description="Whether more databases exist after this page.")
+    limit: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Page size used for this response.")
+    next_cursor: Optional[StrictStr] = Field(default=None, description="Cursor for the next page. Present only when `has_more` is true.")
     __properties: ClassVar[List[str]] = ["count", "databases", "has_more", "limit", "next_cursor"]
 
     model_config = ConfigDict(

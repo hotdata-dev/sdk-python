@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**max** | **str** | Maximum value (string to preserve precision for large integers and decimals) | 
+**max** | **str** | Maximum value, as a string so large numbers keep full precision. | 
 **mean** | **float** | Arithmetic mean | 
-**min** | **str** | Minimum value (string to preserve precision for large integers and decimals) | 
+**min** | **str** | Minimum value, as a string so large numbers keep full precision. | 
 **type** | **str** |  | 
 
 ## Example

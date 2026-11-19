@@ -6,12 +6,12 @@ Request body for PUT /v1/queries/{id}
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**category_override** | **str** | Override the auto-detected category. Send &#x60;null&#x60; to clear (revert to auto). | [optional] 
-**description** | **str** |  | [optional] 
-**name** | **str** | Optional new name. When omitted the existing name is preserved. | [optional] 
-**sql** | **str** | Optional new SQL. When omitted the existing SQL is preserved. | [optional] 
-**table_size_override** | **str** | User annotation for table size. Send &#x60;null&#x60; to clear. | [optional] 
-**tags** | **List[str]** |  | [optional] 
+**category_override** | **str** | Category to use instead of the detected one, such as &#x60;point_lookup&#x60; or &#x60;join&#x60;. Send &#x60;null&#x60; to go back to the detected category. | [optional] 
+**description** | **str** | New description. Omit to keep the current one. | [optional] 
+**name** | **str** | New name. Omit to keep the current one. | [optional] 
+**sql** | **str** | New SQL. Omit to keep the current SQL. | [optional] 
+**table_size_override** | **str** | Your own label for the table size. Send &#x60;null&#x60; to clear it. | [optional] 
+**tags** | **List[str]** | New tags, replacing the current ones. Omit to keep them. | [optional] 
 
 ## Example
 

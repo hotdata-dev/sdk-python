@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class DatabaseContextEntry(BaseModel):
     """
-    One context entry returned by the API.
+    A named piece of text stored with a database.
     """ # noqa: E501
     content: StrictStr
     name: StrictStr

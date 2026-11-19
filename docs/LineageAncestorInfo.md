@@ -1,17 +1,17 @@
 # LineageAncestorInfo
 
-One database up a fork chain.
+A database up the fork chain.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **database_id** | **str** |  | 
-**description** | **str** | Why the next database down the chain was forked from it, as given at the time. Absent when none was given. | [optional] 
-**exists** | **bool** | False once the ancestor has been deleted. Its place in the chain is kept either way, and the ancestry continues past it. | 
-**forked_at** | **datetime** | When the next database down the chain was forked from it. | [optional] 
-**name** | **str** | The ancestor&#39;s current label, or the one captured at fork time when it no longer exists. | [optional] 
-**snapshot_id** | **int** | Version of this ancestor&#39;s data that the next database down the chain copied. See &#x60;forked_from.snapshot_id&#x60;. | [optional] 
+**description** | **str** | Why that fork was taken, if given. | [optional] 
+**exists** | **bool** | False if the database has been deleted. | 
+**forked_at** | **datetime** | When the next database down the chain was forked from this one. | [optional] 
+**name** | **str** | The database&#39;s current name, or its name at fork time if deleted. | [optional] 
+**snapshot_id** | **int** | Point in time of this database&#39;s data that the next database down the chain copied. | [optional] 
 
 ## Example
 

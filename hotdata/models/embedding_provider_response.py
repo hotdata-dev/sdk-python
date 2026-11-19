@@ -34,7 +34,7 @@ class EmbeddingProviderResponse(BaseModel):
     id: StrictStr
     name: StrictStr
     provider_type: StrictStr
-    source: StrictStr = Field(description="Provider source: \"system\" (from config) or \"user\" (created via API).")
+    source: StrictStr = Field(description="`system` for a built-in provider, which cannot be changed, or `user` for one created through the API.")
     updated_at: datetime
     __properties: ClassVar[List[str]] = ["config", "created_at", "has_secret", "id", "name", "provider_type", "source", "updated_at"]
 

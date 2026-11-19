@@ -1,30 +1,31 @@
 # QueryRunInfo
 
-Single query run for listing
+One execution of a query.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**bytes_scanned** | **int** | Bytes this query actually fetched from storage. Not a measure of how much data the query covered — it counts the reads that reached storage, so the same SQL over the same rows reports a different number depending on what was already cached.  &#x60;null&#x60; means the query touched no table at all (for example a constant expression like &#x60;SELECT 1&#x60;).  &#x60;0&#x60; means the query read a table but fetched nothing from storage. It is a normal, common answer, not an error or a missing measurement, and it does not mean the query did no work — &#x60;rows_scanned&#x60; shows the rows it went through. The usual cause is a warm cache: re-running a query whose data or file metadata is already held in memory reports far fewer bytes than the first run, frequently &#x60;0&#x60;, with &#x60;rows_scanned&#x60; unchanged. A query answered from table statistics alone (a row count, say) also reports &#x60;0&#x60;.  Because of this, &#x60;bytes_scanned&#x60; is not a proxy for query cost or query volume. &#x60;GET /v1/usage&#x60; sums this field over a period, so that total is the storage read a workspace caused, not the work its queries did: repeating one query cheaply adds little or nothing to it. | [optional] 
+**bytes_scanned** | **int** | Bytes the query read from storage. Cached data is not counted, so a repeated query often reports &#x60;0&#x60;; null when the query read no table. | [optional] 
 **completed_at** | **datetime** |  | [optional] 
 **created_at** | **datetime** |  | 
-**error_message** | **str** |  | [optional] 
+**error_message** | **str** | Why the run failed. | [optional] 
 **execution_time_ms** | **int** |  | [optional] 
 **id** | **str** |  | 
-**result_id** | **str** |  | [optional] 
-**row_count** | **int** |  | [optional] 
-**rows_scanned** | **int** | Total rows read from storage to run this query, before any filtering or aggregation. Distinct from &#x60;row_count&#x60;, which is how many rows the query returned. &#x60;null&#x60; when the query reads no table data from storage. | [optional] 
-**saved_query_id** | **str** |  | [optional] 
-**saved_query_version** | **int** |  | [optional] 
-**server_processing_ms** | **int** | Total server-side processing time for this query (milliseconds). Measured from query start to result ready. Includes SQL execution, task spawning, and result preparation. Does not include network transit. Populated for all completed query runs (sync and async). | [optional] 
+**result_id** | **str** | ID of the saved result, ready to fetch once &#x60;status&#x60; is &#x60;succeeded&#x60;. Absent when no result was saved; &#x60;warning_message&#x60; then says why. | [optional] 
+**rollup** | [**RollupUsage**](RollupUsage.md) | Whether a rollup answered the query. Absent when no table the query read has a rollup, rollups were turned off for the query, or the run has not been planned yet. On a failed run it says what planning chose. | [optional] 
+**row_count** | **int** | Number of rows in the full result. | [optional] 
+**rows_scanned** | **int** | Rows the query read, before filtering or aggregation. Null when the query read no table. | [optional] 
+**saved_query_id** | **str** | ID of the saved query this run executed, if any. | [optional] 
+**saved_query_version** | **int** | Version of the saved query this run executed, if any. | [optional] 
+**server_processing_ms** | **int** | Time from query start until the result was ready, in milliseconds. Excludes network time. | [optional] 
 **snapshot_id** | **str** |  | 
 **sql_hash** | **str** |  | 
 **sql_text** | **str** |  | 
-**status** | **str** |  | 
+**status** | **str** | &#x60;running&#x60;, &#x60;succeeded&#x60;, &#x60;failed&#x60; or &#x60;interrupted&#x60;. An interrupted run stopped before finishing and is safe to retry. | 
 **trace_id** | **str** |  | [optional] 
-**user_public_id** | **str** | Who ran this query: the account id from the access token the request was made with. Use it to group a caller&#39;s query history.  Requests made with a credential that identifies no account instead record an opaque &#x60;user_&#x60;-prefixed identifier, which is stable for that credential but cannot be resolved to an account. | [optional] 
-**warning_message** | **str** |  | [optional] 
+**user_public_id** | **str** | Account that ran the query, taken from the access token. A credential with no account gets a stable &#x60;user_&#x60;-prefixed ID instead. | [optional] 
+**warning_message** | **str** | A problem that did not fail the run, such as a result that could not be saved. | [optional] 
 
 ## Example
 

@@ -1,18 +1,18 @@
 # UploadSessionResponse
 
-A created upload session: everything needed to upload the file and later finalize it.
+A new upload, with everything needed to upload and finalize the file.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**finalize_token** | **str** | One-time token that authorizes finalizing this upload. Returned exactly once at create time — store it; it cannot be retrieved again. | 
-**headers** | **Dict[str, str]** | Headers you must send verbatim with each &#x60;PUT&#x60;. Currently always empty; present so a future mode can require signed headers without changing the response shape. | 
-**mode** | **str** | Upload mode: &#x60;single&#x60; (upload the whole file with one &#x60;PUT&#x60; to &#x60;url&#x60;) or &#x60;multipart&#x60; (upload each part with one &#x60;PUT&#x60; to the matching entry in &#x60;part_urls&#x60;). Modeled as a string so additional modes can be added later without breaking clients. | 
-**part_size** | **int** | For a &#x60;multipart&#x60; upload (both known-size and streaming), the size in bytes to split the file into: send bytes &#x60;[(i-1) * part_size, i * part_size)&#x60; as part *i*, with the last part carrying the remainder. Slice by this value — do **not** divide the file evenly by the number of parts, which can make a non-final part smaller than the 5 MiB minimum for a non-final part (the upload then fails at finalize). Absent for &#x60;single&#x60; uploads. | [optional] 
-**part_urls** | **List[str]** | For a known-size &#x60;multipart&#x60; upload, the per-part URLs in ascending part order: &#x60;PUT&#x60; your file&#39;s part *i* (1-based) to &#x60;part_urls[i - 1]&#x60; and keep each response&#39;s &#x60;ETag&#x60;, then pass the &#x60;{part_number, e_tag}&#x60; list to finalize. Absent for &#x60;single&#x60; uploads, and also absent for a streaming (unknown-size) &#x60;multipart&#x60; upload — there, mint part URLs on demand via &#x60;POST /v1/uploads/{upload_id}/parts&#x60;. | [optional] 
-**upload_id** | **str** | Identifier for this upload. Pass it to the finalize endpoint and to the managed-table load endpoint once finalized. | 
-**url** | **str** | The URL to &#x60;PUT&#x60; the raw file bytes to, for a &#x60;single&#x60; upload. Short-lived — upload promptly and finalize. Absent for &#x60;multipart&#x60; uploads (use &#x60;part_urls&#x60;). | [optional] 
+**finalize_token** | **str** | Token to send in the &#x60;X-Upload-Finalize-Token&#x60; header when you request part URLs or finalize. Returned only once. | 
+**headers** | **Dict[str, str]** | Headers to send with each &#x60;PUT&#x60;. Currently always empty. | 
+**mode** | **str** | &#x60;single&#x60;: &#x60;PUT&#x60; the whole file to &#x60;url&#x60;. &#x60;multipart&#x60;: &#x60;PUT&#x60; each part to its own URL. | 
+**part_size** | **int** | For a &#x60;multipart&#x60; upload, the size of every part except the last, in bytes. Split the file by this size, not evenly by part count, or a part may fall under the 5 MiB minimum and finalize fails. | [optional] 
+**part_urls** | **List[str]** | For a &#x60;multipart&#x60; upload of known size, one URL per part, in order: &#x60;PUT&#x60; part *i* to &#x60;part_urls[i - 1]&#x60; and keep each response&#39;s &#x60;ETag&#x60; for finalize. Absent for a streaming upload. | [optional] 
+**upload_id** | **str** | ID of the upload. Use it to finalize the upload and then to load it. | 
+**url** | **str** | URL to &#x60;PUT&#x60; the file to, for a &#x60;single&#x60; upload. Expires soon. | [optional] 
 
 ## Example
 

@@ -1,12 +1,12 @@
 # DatabaseAttachmentInfo
 
-One attached catalog inside a database.
+A catalog attached to a database.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**alias** | **str** | Alias under which this catalog is reachable inside the database. When &#x60;None&#x60;, the catalog is reachable by its original connection name. | [optional] 
+**alias** | **str** | Name of the catalog in SQL. When absent, use the connection&#39;s name. | [optional] 
 **connection_id** | **str** |  | 
 
 ## Example

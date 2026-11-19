@@ -27,9 +27,9 @@ class ColumnProfileDetailOneOf2(BaseModel):
     """
     ColumnProfileDetailOneOf2
     """ # noqa: E501
-    max: StrictStr = Field(description="Maximum value (string to preserve precision for large integers and decimals)")
+    max: StrictStr = Field(description="Maximum value, as a string so large numbers keep full precision.")
     mean: Union[StrictFloat, StrictInt] = Field(description="Arithmetic mean")
-    min: StrictStr = Field(description="Minimum value (string to preserve precision for large integers and decimals)")
+    min: StrictStr = Field(description="Minimum value, as a string so large numbers keep full precision.")
     type: StrictStr
     __properties: ClassVar[List[str]] = ["max", "mean", "min", "type"]
 

@@ -1,17 +1,17 @@
 # LineageForkInfo
 
-One database forked directly from the one being asked about.
+A database forked directly from this one.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **database_id** | **str** |  | 
-**description** | **str** | Why the fork was taken, as given when it was created. Absent when none was given. | [optional] 
-**exists** | **bool** | False once the fork has been deleted. The record of it is kept either way, so a source can still account for everything taken from it. | 
+**description** | **str** | Why the fork was taken, if given. | [optional] 
+**exists** | **bool** | False if the fork has been deleted. | 
 **forked_at** | **datetime** | When the fork was taken. | [optional] 
-**name** | **str** | Absent once the fork has been deleted — only the record of it remains. | [optional] 
-**snapshot_id** | **int** | Version of this database&#39;s data that the fork copied. See &#x60;forked_from.snapshot_id&#x60;. | [optional] 
+**name** | **str** | The fork&#39;s name. Absent once the fork is deleted. | [optional] 
+**snapshot_id** | **int** | Point in time of this database&#39;s data that the fork copied. | [optional] 
 
 ## Example
 

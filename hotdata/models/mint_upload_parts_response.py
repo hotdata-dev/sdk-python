@@ -26,9 +26,9 @@ from typing_extensions import Self
 
 class MintUploadPartsResponse(BaseModel):
     """
-    Response body for `POST /v1/uploads/{upload_id}/parts`: the minted part URLs, in ascending part-number order.
+    Upload URLs for the requested parts.
     """ # noqa: E501
-    parts: List[MintedUploadPartResponse] = Field(description="The minted part URLs, in ascending part-number order. `PUT` each part's bytes to its URL and keep the response's `ETag` to pass to finalize.")
+    parts: List[MintedUploadPartResponse] = Field(description="One URL per requested part, by part number.")
     __properties: ClassVar[List[str]] = ["parts"]
 
     model_config = ConfigDict(

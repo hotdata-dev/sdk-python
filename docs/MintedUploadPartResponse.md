@@ -1,13 +1,13 @@
 # MintedUploadPartResponse
 
-One minted part URL.
+An upload URL for one part.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**part_number** | **int** | The 1-based part number this URL is for. | 
-**url** | **str** | Short-lived URL to &#x60;PUT&#x60; this part&#39;s bytes to. Keep the response&#39;s &#x60;ETag&#x60; and pass the &#x60;{part_number, e_tag}&#x60; pair to finalize. | 
+**part_number** | **int** | Part number, starting at 1. | 
+**url** | **str** | URL to &#x60;PUT&#x60; the part to. Expires soon. Keep the response&#39;s &#x60;ETag&#x60; for finalize. | 
 
 ## Example
 

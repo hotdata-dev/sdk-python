@@ -1,17 +1,17 @@
 # DatabaseLineageResponse
 
-Response body for GET /databases/{database_id}/lineage.  Answers where a database came from and what came from it. Everything here is a historical record: forks are independent databases, and lineage does not make one depend on another.
+Where a database was forked from, and which databases were forked from it.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ancestors** | [**List[LineageAncestorInfo]**](LineageAncestorInfo.md) | Fork ancestry, nearest parent first, ending at the database named by &#x60;root_id&#x60; unless &#x60;ancestors_truncated&#x60; says otherwise. A deleted generation does not cut the chain short — it is listed with &#x60;exists&#x60; false and the ancestry continues past it. Empty when this database is not a fork. | 
-**ancestors_truncated** | **bool** | True when the ancestry is longer than one response carries, so &#x60;ancestors&#x60; stops before reaching &#x60;root_id&#x60;. | 
+**ancestors** | [**List[LineageAncestorInfo]**](LineageAncestorInfo.md) | Databases this one descends from, nearest parent first. Deleted ones stay in the list with &#x60;exists: false&#x60;. Empty when this is not a fork. | 
+**ancestors_truncated** | **bool** | True when &#x60;ancestors&#x60; stops before reaching &#x60;root_id&#x60;. | 
 **database_id** | **str** | The database this lineage describes. | 
-**fork_count** | **int** | How many databases were forked directly from this one in total — so you can tell whether &#x60;forks&#x60; is the whole set or only the newest of it. | 
-**forks** | [**List[LineageForkInfo]**](LineageForkInfo.md) | The databases forked directly from this one, most recently forked first, including any that have since been deleted. A fork of a fork appears in its own parent&#39;s lineage, not here. | 
-**root_id** | **str** | Top of the family tree: the database the whole chain of forks descends from. Equal to &#x60;database_id&#x60; when this database is not a fork. | 
+**fork_count** | **int** | Total number of databases forked directly from this one. | 
+**forks** | [**List[LineageForkInfo]**](LineageForkInfo.md) | Databases forked directly from this one, newest first, including deleted ones. Limited by &#x60;forks_limit&#x60;. | 
+**root_id** | **str** | The original database at the top of the fork chain. Equal to &#x60;database_id&#x60; when this database is not a fork. | 
 
 ## Example
 

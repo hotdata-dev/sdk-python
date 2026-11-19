@@ -25,9 +25,9 @@ from typing_extensions import Self
 
 class DatabaseAttachmentInfo(BaseModel):
     """
-    One attached catalog inside a database.
+    A catalog attached to a database.
     """ # noqa: E501
-    alias: Optional[StrictStr] = Field(default=None, description="Alias under which this catalog is reachable inside the database. When `None`, the catalog is reachable by its original connection name.")
+    alias: Optional[StrictStr] = Field(default=None, description="Name of the catalog in SQL. When absent, use the connection's name.")
     connection_id: StrictStr
     __properties: ClassVar[List[str]] = ["alias", "connection_id"]
 

@@ -26,14 +26,14 @@ from typing_extensions import Self
 
 class DatabaseBatchResponse(BaseModel):
     """
-    A bulk-creation batch: the handle for progress, listing, and cancellation.  The databases themselves are listed with `GET /databases?batch=<batch_id>`; this carries the batch's own state rather than its members.
+    A bulk-create batch. List its databases with `GET /v1/databases?batch=<batch_id>`.
     """ # noqa: E501
     batch_id: StrictStr
-    cancel_requested: StrictBool = Field(description="True once stopping has been requested. Databases already created are kept; only further creation stops.")
-    count: StrictInt = Field(description="How many databases the batch was asked to create.")
-    created_count: StrictInt = Field(description="How many exist so far. Advances as the batch fills.")
+    cancel_requested: StrictBool = Field(description="True once cancellation is requested. Databases already created are kept.")
+    count: StrictInt = Field(description="Number of databases requested.")
+    created_count: StrictInt = Field(description="Number of databases created so far.")
     expires_at: Optional[datetime] = None
-    job_id: Optional[StrictStr] = Field(default=None, description="Job filling this batch. Poll it for status.")
+    job_id: Optional[StrictStr] = Field(default=None, description="ID of the job creating the databases. Poll it for status.")
     status_url: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["batch_id", "cancel_requested", "count", "created_count", "expires_at", "job_id", "status_url"]
 

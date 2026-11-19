@@ -1,12 +1,12 @@
 # ManagedSchemaResponse
 
-Response body for a successful add-schema request. Echoes the normalized (lowercased) names so callers see exactly what was persisted.
+A newly added schema. Names are returned in lowercase, as stored.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**connection_id** | **str** | Connection backing the catalog the schema was added to. For a database default catalog this is the database&#39;s &#x60;default_connection_id&#x60;. | 
+**connection_id** | **str** | ID of the connection that holds the schema. For a database, this is its &#x60;default_connection_id&#x60;. | 
 **var_schema** | **str** |  | 
 **tables** | **List[str]** |  | 
 

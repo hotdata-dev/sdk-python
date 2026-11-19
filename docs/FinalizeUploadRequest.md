@@ -1,12 +1,12 @@
 # FinalizeUploadRequest
 
-Request body for `POST /v1/uploads/{upload_id}/finalize`.  Finalizing confirms the bytes were uploaded and makes the upload usable as managed-table contents. The request body is optional for single-`PUT` uploads; send `parts` only for a multi-part upload.
+Completes an upload so it can be loaded into a table. A `single` upload needs no body.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**parts** | [**List[FinalizeUploadPart]**](FinalizeUploadPart.md) | Parts to assemble, for a multi-part upload. Omit for single-&#x60;PUT&#x60; uploads (the common case). | [optional] 
+**parts** | [**List[FinalizeUploadPart]**](FinalizeUploadPart.md) | Every uploaded part, for a &#x60;multipart&#x60; upload. | [optional] 
 
 ## Example
 

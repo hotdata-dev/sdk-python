@@ -1,17 +1,17 @@
 # DatabaseBatchResponse
 
-A bulk-creation batch: the handle for progress, listing, and cancellation.  The databases themselves are listed with `GET /databases?batch=<batch_id>`; this carries the batch's own state rather than its members.
+A bulk-create batch. List its databases with `GET /v1/databases?batch=<batch_id>`.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **batch_id** | **str** |  | 
-**cancel_requested** | **bool** | True once stopping has been requested. Databases already created are kept; only further creation stops. | 
-**count** | **int** | How many databases the batch was asked to create. | 
-**created_count** | **int** | How many exist so far. Advances as the batch fills. | 
+**cancel_requested** | **bool** | True once cancellation is requested. Databases already created are kept. | 
+**count** | **int** | Number of databases requested. | 
+**created_count** | **int** | Number of databases created so far. | 
 **expires_at** | **datetime** |  | [optional] 
-**job_id** | **str** | Job filling this batch. Poll it for status. | [optional] 
+**job_id** | **str** | ID of the job creating the databases. Poll it for status. | [optional] 
 **status_url** | **str** |  | [optional] 
 
 ## Example

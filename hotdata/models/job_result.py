@@ -29,14 +29,14 @@ JOBRESULT_ONE_OF_SCHEMAS = ["BulkCreateDatabasesResult", "IndexInfoResponse", "L
 
 class JobResult(BaseModel):
     """
-    What a finished background job produced. Absent while the job is `pending` or `running`, and absent for job types that report no payload.  Which shape you get is decided by the job's `job_type`, so read `job_type` first and then the matching object — the payload carries no discriminator of its own:  - `create_index` — the created index, in the same shape the index listing   returns. - `managed_load` — the load receipt: rows published and the table's schema   as published, in the same shape a synchronous load returns. - `bulk_create_databases` — the batch's counters: how many databases were   requested, how many were created, and whether the batch was stopped early.  The remaining job types — `noop` and the vacuum, compaction, and cleanup sweeps — report their outcome through `status` and `error_message` alone and leave this absent even once they finish.
+    What a finished job produced. The shape depends on the job's `job_type`:  - `create_index`: the created index. - `managed_load`: the table's row count and schema after the load. - `bulk_create_databases`: how many databases were requested and created,   and whether the batch was cancelled.  Other job types have no result.
     """
     # data type: IndexInfoResponse
-    oneof_schema_1_validator: Optional[IndexInfoResponse] = Field(default=None, description="Result of an index creation.")
+    oneof_schema_1_validator: Optional[IndexInfoResponse] = Field(default=None, description="Result of a `create_index` job.")
     # data type: LoadManagedTableResponse
-    oneof_schema_2_validator: Optional[LoadManagedTableResponse] = Field(default=None, description="Result of a managed-table load (row count + published schema).")
+    oneof_schema_2_validator: Optional[LoadManagedTableResponse] = Field(default=None, description="Result of a `managed_load` job.")
     # data type: BulkCreateDatabasesResult
-    oneof_schema_3_validator: Optional[BulkCreateDatabasesResult] = Field(default=None, description="Counters from a bulk database creation.")
+    oneof_schema_3_validator: Optional[BulkCreateDatabasesResult] = Field(default=None, description="Result of a `bulk_create_databases` job.")
     actual_instance: Optional[Union[BulkCreateDatabasesResult, IndexInfoResponse, LoadManagedTableResponse]] = None
     one_of_schemas: Set[str] = { "BulkCreateDatabasesResult", "IndexInfoResponse", "LoadManagedTableResponse" }
 

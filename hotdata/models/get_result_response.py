@@ -25,16 +25,16 @@ from typing_extensions import Self
 
 class GetResultResponse(BaseModel):
     """
-    Response body for GET /results/{id} Returns status and optionally the result data
+    A saved query result: its status and, once `ready`, its data.
     """ # noqa: E501
-    columns: Optional[List[StrictStr]] = None
-    error_message: Optional[StrictStr] = None
-    nullable: Optional[List[StrictBool]] = None
+    columns: Optional[List[StrictStr]] = Field(default=None, description="Column names, in order. Present when `status` is `ready`.")
+    error_message: Optional[StrictStr] = Field(default=None, description="Why the result failed. Present only when `status` is `failed`.")
+    nullable: Optional[List[StrictBool]] = Field(default=None, description="Whether each column, in the same order as `columns`, can hold nulls.")
     result_id: StrictStr
-    row_count: Optional[StrictInt] = None
-    rows: Optional[List[List[Any]]] = Field(default=None, description="Array of rows, where each row is an array of column values.")
-    status: StrictStr
-    total_row_count: Optional[StrictInt] = Field(default=None, description="Grand total rows in the full result, ignoring `offset` and `limit`. Present whenever the result is `ready`, and carrying the same value as the `X-Total-Row-Count` response header.  Compare it against `row_count` to tell whether this body is the whole result: `row_count < total_row_count` means the rest is still there, one page further on. Without it a windowed fetch cannot tell a full result from a truncated one from the body alone.")
+    row_count: Optional[StrictInt] = Field(default=None, description="Number of rows in this response.")
+    rows: Optional[List[List[Any]]] = Field(default=None, description="Result rows. Each row is an array of values in column order.")
+    status: StrictStr = Field(description="`pending`, `processing`, `ready` or `failed`.")
+    total_row_count: Optional[StrictInt] = Field(default=None, description="Number of rows in the full result, ignoring `offset` and `limit`. If `row_count` is smaller, more rows are available on later pages.")
     __properties: ClassVar[List[str]] = ["columns", "error_message", "nullable", "result_id", "row_count", "rows", "status", "total_row_count"]
 
     model_config = ConfigDict(

@@ -27,15 +27,15 @@ from typing_extensions import Self
 
 class BulkCreateDatabasesRequest(BaseModel):
     """
-    Request body for POST /databases/bulk.  One template plus a count, so the body stays small whatever `count` is. Any schemas and tables declared here are applied to every database in the batch; load data into them afterwards exactly as you would for a database created one at a time.
+    Creates many databases from one template. Each database gets the same schemas and tables.
     """ # noqa: E501
     count: Annotated[int, Field(le=10000, strict=True, ge=1)] = Field(description="How many databases to create.")
-    default_catalog: Optional[StrictStr] = Field(default=None, description="Name the default catalog answers to inside each database, as on a single create. Defaults to `default`.")
-    default_schema: Optional[StrictStr] = Field(default=None, description="Schema that unqualified table names resolve to inside each database.")
-    expires_at: Optional[StrictStr] = Field(default=None, description="When the created databases expire. Accepts an RFC 3339 timestamp or a relative duration such as `24h`, `90m`, or `7d`.")
-    idempotency_key: Optional[StrictStr] = Field(default=None, description="Repeat this value to retry a request safely. A retry carrying a key that was already used returns the original batch — the same `batch_id` and the same databases — instead of creating a second set.  The key identifies the request, not its contents: reusing a key with a different `count` or template returns the original batch unchanged rather than reporting a mismatch. Use a fresh key per distinct request.")
-    name_template: Optional[StrictStr] = Field(default=None, description="Optional display-label pattern for each database. Must contain `{index}`, which is replaced with the database's zero-based position, padded with leading zeros to the width of the batch's largest index — with a `count` of 100, `tenant-{index}` produces `tenant-00` through `tenant-99`. A pattern without `{index}` is rejected, since every database in the batch would be given the same label.  Each label also carries a suffix identifying the batch, so repeating the same pattern on a later call does not reuse labels from this one. When omitted, each database is labelled from its own ID.")
-    schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Schemas and tables to declare on every database in the batch, in the same shape a single create accepts. The declaration applies identically to each database, so a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load — with no follow-up call per database. Omitted or empty means each database starts with no tables.")
+    default_catalog: Optional[StrictStr] = Field(default=None, description="Name of each database's own catalog in SQL. Defaults to `default`.")
+    default_schema: Optional[StrictStr] = Field(default=None, description="Schema that unqualified table names resolve to in each database.")
+    expires_at: Optional[StrictStr] = Field(default=None, description="When the databases expire: a future RFC 3339 timestamp, or a duration such as `24h`, `90m` or `7d`.")
+    idempotency_key: Optional[StrictStr] = Field(default=None, description="Key that makes the request safe to retry. A repeated key returns the original batch, even if the rest of the request differs.")
+    name_template: Optional[StrictStr] = Field(default=None, description="Name pattern for the databases. Must contain `{index}`, which becomes each database's zero-padded position (`tenant-00` to `tenant-99` for a count of 100); a batch suffix is added to each name.")
+    schemas: Optional[List[DatabaseDefaultSchemaDecl]] = Field(default=None, description="Schemas and tables to create in every database.")
     __properties: ClassVar[List[str]] = ["count", "default_catalog", "default_schema", "expires_at", "idempotency_key", "name_template", "schemas"]
 
     model_config = ConfigDict(

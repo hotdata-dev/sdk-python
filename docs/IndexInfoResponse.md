@@ -1,23 +1,23 @@
 # IndexInfoResponse
 
-Result payload for a `create_index` job, and response for index endpoints.
+An index on a table.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**algorithm** | **str** | How this vector index organises the vectors it searches: &#x60;hnsw&#x60; or &#x60;ivf&#x60;. Absent for BM25 and sorted indexes. | [optional] 
-**columns** | **List[str]** |  | 
-**created_at** | **datetime** |  | 
-**index_name** | **str** |  | 
-**index_type** | **str** |  | 
-**metric** | **str** | Distance metric this index was built with. Only present for vector indexes. | [optional] 
-**nlist** | **int** | Number of clusters an &#x60;ivf&#x60; index was built with. This can be smaller than the &#x60;nlist&#x60; requested when the index was created, because the number is capped by how many vectors the clusters were fitted to. Absent for every other kind of index. | [optional] 
-**probe_fraction** | **float** | How much of an &#x60;ivf&#x60; index a search reads, as a fraction greater than 0 and at most 1, when the index was created with one. When absent, the server chooses how much each search reads: a width measured on this index&#39;s own data when it was built, scaled to the number of results a search asks for, or a server default when no measurement could be made. Absent for every other kind of index. | [optional] 
-**source_column** | **str** | Source text column for an embedding-backed vector index. A query searches it via &#x60;vector_distance(&lt;source_column&gt;, …)&#x60;; the indexed &#x60;columns&#x60; hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes. | [optional] 
+**algorithm** | **str** | Vector index algorithm: &#x60;hnsw&#x60; or &#x60;ivf&#x60;. Absent for other index types. | [optional] 
+**columns** | **List[str]** | Indexed columns. | 
+**created_at** | **datetime** | When the index was created. | 
+**index_name** | **str** | Index name. | 
+**index_type** | **str** | Index type: &#x60;sorted&#x60;, &#x60;bm25&#x60; or &#x60;vector&#x60;. | 
+**metric** | **str** | Distance metric of a vector index. Absent for other index types. | [optional] 
+**nlist** | **int** | Number of clusters an &#x60;ivf&#x60; index was built with. Can be lower than the requested &#x60;nlist&#x60;, because it is capped by the number of vectors the clusters were fitted to. | [optional] 
+**probe_fraction** | **float** | Share of an &#x60;ivf&#x60; index each search reads, from 0 (exclusive) to 1, when set at creation. When absent, Hotdata picks the share for each search. | [optional] 
+**source_column** | **str** | Text column an embedding-based vector index was built from; search it with &#x60;vector_distance(&lt;source_column&gt;, …)&#x60;. &#x60;columns&#x60; then holds the generated embedding column. Absent for other indexes. | [optional] 
 **status** | [**IndexStatus**](IndexStatus.md) |  | 
-**updated_at** | **datetime** |  | 
-**vector_precision** | **str** | How precisely this vector index stores each number of a vector. Always present for an &#x60;ivf&#x60; index, which stores &#x60;int8&#x60; unless it was created with another precision. For an &#x60;hnsw&#x60; index it is present only when the index was created with an explicit precision; absent means it stores at the same precision as the column. Absent for BM25 and sorted indexes. | [optional] 
+**updated_at** | **datetime** | When the index was last updated. | 
+**vector_precision** | **str** | Precision a vector index stores each number at, such as &#x60;int8&#x60;. Always set for &#x60;ivf&#x60; (default &#x60;int8&#x60;); for &#x60;hnsw&#x60;, set only when chosen at creation, and otherwise it matches the column. | [optional] 
 
 ## Example
 

@@ -26,9 +26,9 @@ from typing_extensions import Self
 
 class FinalizeUploadRequest(BaseModel):
     """
-    Request body for `POST /v1/uploads/{upload_id}/finalize`.  Finalizing confirms the bytes were uploaded and makes the upload usable as managed-table contents. The request body is optional for single-`PUT` uploads; send `parts` only for a multi-part upload.
+    Completes an upload so it can be loaded into a table. A `single` upload needs no body.
     """ # noqa: E501
-    parts: Optional[List[FinalizeUploadPart]] = Field(default=None, description="Parts to assemble, for a multi-part upload. Omit for single-`PUT` uploads (the common case).")
+    parts: Optional[List[FinalizeUploadPart]] = Field(default=None, description="Every uploaded part, for a `multipart` upload.")
     __properties: ClassVar[List[str]] = ["parts"]
 
     model_config = ConfigDict(

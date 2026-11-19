@@ -26,11 +26,11 @@ from typing_extensions import Self
 
 class ColumnTypeSpec(BaseModel):
     """
-    A column type plus the parameters that cannot be expressed by a bare name.
+    A column type with its parameters as separate fields.
     """ # noqa: E501
-    precision: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Total number of digits for `DECIMAL` / `NUMERIC` (1–38).")
-    scale: Optional[StrictInt] = Field(default=None, description="Number of digits after the decimal point for `DECIMAL` / `NUMERIC`. Requires `precision`, and cannot exceed it.")
-    type: StrictStr = Field(description="The type name, e.g. `\"DECIMAL\"`, `\"TIMESTAMP\"`, `\"VARCHAR\"`.")
+    precision: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Total digits for `DECIMAL` or `NUMERIC`, from 1 to 38.")
+    scale: Optional[StrictInt] = Field(default=None, description="Digits after the decimal point for `DECIMAL` or `NUMERIC`. Requires `precision` and cannot exceed it; defaults to 0.")
+    type: StrictStr = Field(description="Type name, such as `\"DECIMAL\"`, `\"TIMESTAMP\"` or `\"VARCHAR\"`.")
     __properties: ClassVar[List[str]] = ["precision", "scale", "type"]
 
     model_config = ConfigDict(
