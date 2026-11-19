@@ -140,7 +140,7 @@ with ApiClient(Configuration(api_key="...", workspace_id="...")) as client:
     out.query_run_id, out.result_id, out.total_row_count, out.execution_time_ms, out.warning
 ```
 
-HTTP 429 is retried as in `query`. A result too large to send inline is read from the Results API instead (`out.followed` is `True`), up to `max_auto_rows`; pass `auto_follow=False` to get a `ResultNotInlineError` carrying the `result_id` and stream it yourself.
+HTTP 429 is retried as in `query`. A result too large to send inline is read from the Results API instead (`out.followed` is `True`), up to `max_auto_rows` and `max_auto_bytes` (64 MiB of Arrow data by default; past a guard it raises `ResultTooLargeError`); pass `auto_follow=False` to get a `ResultNotInlineError` carrying the `result_id` and stream it yourself.
 
 ## File uploads
 
