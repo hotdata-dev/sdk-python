@@ -759,8 +759,11 @@ class QueryApi(_GeneratedQueryApi):
 
         batches = []
         fetched = 0
+        # Ask for one row past the guard at most: enough to detect the overflow,
+        # without downloading an oversized result only to discard it.
+        limit = max_auto_rows + 1 if max_auto_rows is not None else None
         with _ArrowResultsApi(self.api_client).stream_result_arrow(
-            result_id, x_database_id, _request_timeout=_request_timeout
+            result_id, x_database_id, limit=limit, _request_timeout=_request_timeout
         ) as reader:
             for batch in reader:
                 fetched += batch.num_rows
