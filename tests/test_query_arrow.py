@@ -324,3 +324,30 @@ def test_too_large_without_result_id(calls: Any) -> None:
         _api().query_arrow(REQ, x_database_id="db1", auto_follow=False)
     assert "qrun1" in str(ei.value)
     assert "preview" not in str(ei.value)
+
+
+def test_follow_byte_guard(calls: Any) -> None:
+    calls.responses = [
+        _too_large(),
+        _result_status("ready"),
+        _query_run(row_count=3),
+        _arrow_response(_table()),
+    ]
+    # Three int64 rows are 24 bytes: within the row guard, past this one.
+    with pytest.raises(ResultTooLargeError) as ei:
+        _api().query_arrow(REQ, x_database_id="db1", max_auto_bytes=8)
+    assert ei.value.kind == "bytes"
+    assert ei.value.observed == 24
+
+
+def test_non_arrow_200_keeps_the_body(calls: Any) -> None:
+    # A server that ignored Accept and answered in JSON: the query ran.
+    fake = _json_response(200, {"query_run_id": "qrun1", "rows": [[1]]})
+    calls.responses = [fake]
+    with pytest.raises(ApiException) as ei:
+        _api().query_arrow(REQ)
+    assert ei.value.status == 200
+    assert "qrun1" in (ei.value.body or "")
+    assert "the query ran" in ei.value.reason
+    assert len(calls) == 1  # not retried: a write must not run twice
+    assert fake.release_conn_called

@@ -441,6 +441,7 @@ class QueryApi(_GeneratedQueryApi):
         *,
         auto_follow: Optional[bool] = None,
         max_auto_rows: Any = _UNSET,
+        max_auto_bytes: Any = _UNSET,
     ) -> ArrowQueryResult:
         """Execute a query and get the rows as a :class:`pyarrow.Table`.
 
@@ -454,7 +455,8 @@ class QueryApi(_GeneratedQueryApi):
         A result too large to send inline is not sent as Arrow. With
         ``auto_follow`` on, this waits for the saved result and reads all of it
         from the Results API (``followed`` is then ``True``); ``max_auto_rows``
-        guards how much is pulled into memory.
+        and ``max_auto_bytes`` (the size of the Arrow data) guard how much is
+        pulled into memory.
 
         Async submission (``async=true``) is not supported here: use
         :meth:`query`, then :meth:`hotdata.arrow.ResultsApi.get_result_arrow`.
@@ -462,11 +464,15 @@ class QueryApi(_GeneratedQueryApi):
         :param auto_follow: Override the instance default for this call.
         :param max_auto_rows: Override the instance row guard for this call.
             ``None`` opts into unbounded materialization.
+        :param max_auto_bytes: Override the instance byte guard for this call.
+            ``None`` opts into unbounded materialization.
         :raises ValueError: the request sets ``async``.
         :raises ServerOverloadedError: 429 retries exhausted.
         :raises ResultNotInlineError: the result was not sent inline and
             ``auto_follow`` is off.
-        :raises ResultTooLargeError: the followed result exceeds ``max_auto_rows``.
+        :raises ResultTooLargeError: the followed result exceeds a guard (rows/bytes).
+        :raises ApiException: an HTTP error; also a 200 that is not Arrow, with
+            the response body kept (the query ran).
         :raises ResultFailedError: the followed result failed.
         :raises ResultTimeoutError: the followed result never became ready.
         :raises ResultUnavailableError: not sent inline, with no ``result_id``.
@@ -478,6 +484,9 @@ class QueryApi(_GeneratedQueryApi):
             )
         follow = self.auto_follow if auto_follow is None else auto_follow
         row_guard = self.max_auto_rows if max_auto_rows is _UNSET else max_auto_rows
+        byte_guard = (
+            self.max_auto_bytes if max_auto_bytes is _UNSET else max_auto_bytes
+        )
 
         outcome = self._retry_overloaded(
             lambda: self._send_arrow_query(
@@ -506,7 +515,12 @@ class QueryApi(_GeneratedQueryApi):
                 result_id=result_id, query_run_id=ticket.query_run_id
             )
         return self._follow_arrow(
-            ticket.query_run_id, result_id, effective_db, row_guard, _request_timeout
+            ticket.query_run_id,
+            result_id,
+            effective_db,
+            row_guard,
+            byte_guard,
+            _request_timeout,
         )
 
     def wait_for_result(
@@ -690,6 +704,22 @@ class QueryApi(_GeneratedQueryApi):
         headers = response_data.headers
 
         if response_data.status == 200:
+            # A 200 that is not Arrow (a server that ignored `Accept`) still ran
+            # the query. Raise with its body rather than a decode error, so the
+            # run id is not lost and the caller is not led to re-run a write.
+            content_type = (_header(headers, "Content-Type") or "").split(";")[0]
+            if content_type.strip().lower() != ARROW_STREAM_MEDIA_TYPE:
+                try:
+                    response_data.read()
+                finally:
+                    response_data.response.release_conn()
+                raise ApiException(
+                    reason=(
+                        "expected an Arrow stream from POST /v1/query, got "
+                        f"{content_type or 'no content type'}; the query ran"
+                    ),
+                    http_resp=response_data,
+                )
             try:
                 table = ipc.open_stream(response_data.response).read_all()
             finally:
@@ -731,6 +761,7 @@ class QueryApi(_GeneratedQueryApi):
         result_id: str,
         x_database_id: str,
         max_auto_rows: Optional[int],
+        max_auto_bytes: Optional[int],
         _request_timeout: Any,
     ) -> ArrowQueryResult:
         self.wait_for_result(result_id, x_database_id)
@@ -759,6 +790,7 @@ class QueryApi(_GeneratedQueryApi):
 
         batches = []
         fetched = 0
+        fetched_bytes = 0
         # Ask for one row past the guard at most: enough to detect the overflow,
         # without downloading an oversized result only to discard it.
         limit = max_auto_rows + 1 if max_auto_rows is not None else None
@@ -773,6 +805,15 @@ class QueryApi(_GeneratedQueryApi):
                         kind="rows",
                         observed=fetched,
                         limit=max_auto_rows,
+                    )
+                # The row guard alone does not bound memory: rows can be wide.
+                fetched_bytes += batch.nbytes
+                if max_auto_bytes is not None and fetched_bytes > max_auto_bytes:
+                    raise ResultTooLargeError(
+                        result_id=result_id,
+                        kind="bytes",
+                        observed=fetched_bytes,
+                        limit=max_auto_bytes,
                     )
                 batches.append(batch)
             table = pyarrow.Table.from_batches(batches, schema=reader.schema)
