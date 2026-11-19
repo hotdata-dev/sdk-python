@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-11-19
+
 ### Fixed
 
 - fix(query): `query_arrow` enforces `max_auto_bytes` when it reads a large result from the Results API, and keeps the response body when a 200 is not Arrow
