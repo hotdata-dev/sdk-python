@@ -31,6 +31,7 @@ from hotdata.query import (
     QueryApi,
     ResultNotInlineError,
     ResultTooLargeError,
+    ResultUnavailableError,
     RetryPolicy,
     ServerOverloadedError,
 )
@@ -287,3 +288,37 @@ def test_too_large_without_auto_follow(calls: Any) -> None:
     assert ei.value.result_id == "rslt1"
     assert ei.value.query_run_id == "qrun1"
     assert len(calls) == 1
+
+
+def test_follow_row_guard_holds_when_run_lookup_fails(calls: Any) -> None:
+    # No total from the run record: the guard must still stop the read.
+    calls.responses = [
+        _too_large(),
+        _result_status("ready"),
+        _json_response(500, {"error": {"code": "INTERNAL", "message": "boom"}}),
+        _arrow_response(_table()),
+    ]
+    with pytest.raises(ResultTooLargeError) as ei:
+        _api().query_arrow(REQ, x_database_id="db1", max_auto_rows=2)
+    assert ei.value.observed == 3
+
+
+def test_follow_survives_failed_run_lookup(calls: Any) -> None:
+    calls.responses = [
+        _too_large(),
+        _result_status("ready"),
+        _json_response(500, {"error": {"code": "INTERNAL", "message": "boom"}}),
+        _arrow_response(_table()),
+    ]
+    out = _api().query_arrow(REQ, x_database_id="db1")
+    assert out.table.equals(_table())
+    assert out.total_row_count == 3
+    assert out.rollup is None
+
+
+def test_too_large_without_result_id(calls: Any) -> None:
+    calls.responses = [_too_large(result_id=None)]
+    with pytest.raises(ResultUnavailableError) as ei:
+        _api().query_arrow(REQ, x_database_id="db1", auto_follow=False)
+    assert "qrun1" in str(ei.value)
+    assert "preview" not in str(ei.value)

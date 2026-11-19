@@ -231,10 +231,13 @@ class ResultUnavailableError(ResultError):
     follow (persistence failed — see the response ``warning`` field).
     """
 
-    def __init__(self, *, warning: Optional[str]) -> None:
+    def __init__(
+        self, *, warning: Optional[str], message: Optional[str] = None
+    ) -> None:
         self.warning = warning
         super().__init__(
-            "Query result is truncated but no result_id is available to fetch "
+            message
+            or "Query result is truncated but no result_id is available to fetch "
             "the full result"
             + (f": {warning}" if warning else "")
             + ". Re-run with auto_follow=False to use the preview."
@@ -488,7 +491,15 @@ class QueryApi(_GeneratedQueryApi):
         # names the saved result in X-Result-Id instead of sending partial rows.
         ticket, result_id = outcome
         if result_id is None:
-            raise ResultUnavailableError(warning=ticket.reason)
+            raise ResultUnavailableError(
+                warning=ticket.reason,
+                message=(
+                    f"Query run {ticket.query_run_id} was not answered inline and "
+                    "names no result_id to read the result from"
+                    + (f": {ticket.reason}" if ticket.reason else "")
+                    + ". Check the run with QueryRunsApi.get_query_run."
+                ),
+            )
         effective_db = x_database_id or query_request.database_id or ""
         if not follow:
             raise ResultNotInlineError(
@@ -742,9 +753,26 @@ class QueryApi(_GeneratedQueryApi):
             raise ResultTooLargeError(
                 result_id=result_id, kind="rows", observed=total, limit=max_auto_rows
             )
-        table = _ArrowResultsApi(self.api_client).get_result_arrow(
+        # Count rows while reading, so the guard also holds when the run lookup
+        # failed and the total is unknown.
+        import pyarrow  # type: ignore[import-untyped]
+
+        batches = []
+        fetched = 0
+        with _ArrowResultsApi(self.api_client).stream_result_arrow(
             result_id, x_database_id, _request_timeout=_request_timeout
-        )
+        ) as reader:
+            for batch in reader:
+                fetched += batch.num_rows
+                if max_auto_rows is not None and fetched > max_auto_rows:
+                    raise ResultTooLargeError(
+                        result_id=result_id,
+                        kind="rows",
+                        observed=fetched,
+                        limit=max_auto_rows,
+                    )
+                batches.append(batch)
+            table = pyarrow.Table.from_batches(batches, schema=reader.schema)
         return ArrowQueryResult(
             table=table,
             query_run_id=query_run_id,
