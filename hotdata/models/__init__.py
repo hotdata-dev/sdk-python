@@ -47,6 +47,7 @@ from hotdata.models.create_embedding_provider_request import CreateEmbeddingProv
 from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse
 from hotdata.models.create_index_request import CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest
+from hotdata.models.create_stream_request import CreateStreamRequest
 from hotdata.models.create_upload_request import CreateUploadRequest
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse
@@ -59,6 +60,7 @@ from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl
 from hotdata.models.database_detail_response import DatabaseDetailResponse
 from hotdata.models.database_lineage_response import DatabaseLineageResponse
 from hotdata.models.database_summary import DatabaseSummary
+from hotdata.models.declare_rollup_request import DeclareRollupRequest
 from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse
 from hotdata.models.discovery_status import DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse
@@ -76,6 +78,8 @@ from hotdata.models.index_entry_response import IndexEntryResponse
 from hotdata.models.index_info_response import IndexInfoResponse
 from hotdata.models.index_status import IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse
+from hotdata.models.ingest_stream_request import IngestStreamRequest
+from hotdata.models.ingest_stream_response import IngestStreamResponse
 from hotdata.models.job_result import JobResult
 from hotdata.models.job_status import JobStatus
 from hotdata.models.job_status_response import JobStatusResponse
@@ -91,6 +95,7 @@ from hotdata.models.list_indexes_response import ListIndexesResponse
 from hotdata.models.list_jobs_response import ListJobsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse
+from hotdata.models.list_rollups_response import ListRollupsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse
@@ -108,9 +113,19 @@ from hotdata.models.query_response import QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo
 from hotdata.models.result_info import ResultInfo
 from hotdata.models.results_format_query import ResultsFormatQuery
+from hotdata.models.rollup import Rollup
+from hotdata.models.rollup_build_response import RollupBuildResponse
+from hotdata.models.rollup_measure import RollupMeasure
+from hotdata.models.rollup_status import RollupStatus
+from hotdata.models.rollup_usage import RollupUsage
 from hotdata.models.saved_query_detail import SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo
+from hotdata.models.set_rollup_window_request import SetRollupWindowRequest
+from hotdata.models.stream_column import StreamColumn
+from hotdata.models.stream_column_hint import StreamColumnHint
+from hotdata.models.stream_column_source import StreamColumnSource
+from hotdata.models.stream_response import StreamResponse
 from hotdata.models.submit_job_response import SubmitJobResponse
 from hotdata.models.table_info import TableInfo
 from hotdata.models.table_layout import TableLayout

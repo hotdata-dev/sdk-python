@@ -1,12 +1,12 @@
 # MintUploadPartsRequest
 
-Request body for `POST /v1/uploads/{upload_id}/parts`: get short-lived upload URLs for specific parts of a streaming (unknown-size) multi-part upload.  Provide the 1-based part numbers you want URLs for. Mint parts as you upload, and re-request a part number if its URL expires before you finish — the parts you have already uploaded are unaffected.
+Part numbers to get upload URLs for. Use this for a streaming upload, or to replace a part URL that expired.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**part_numbers** | **List[int]** | The 1-based part numbers to mint URLs for. Must be non-empty; each number must be between 1 and the maximum number of parts allowed. | 
+**part_numbers** | **List[int]** | Part numbers, from 1 to 10000, at most 100 per request. | 
 
 ## Example
 

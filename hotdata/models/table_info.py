@@ -29,18 +29,18 @@ from typing_extensions import Self
 
 class TableInfo(BaseModel):
     """
-    Single table metadata
+    A table and its metadata.
     """ # noqa: E501
-    columns: Optional[List[ColumnInfo]] = None
-    connection: StrictStr
-    constant_per_key: List[StrictStr] = Field(description="Columns the table declares constant for a given key: for every row, any other row sharing its key holds the same value of these columns.  Declaring this lets a keyed mutation narrow its search for prior versions to the values the upload carries. Empty when none is declared, which is the unrestricted search.  Unlike `partition_by` and `sorted_by` this is NOT fixed at creation — it changes only which files a mutation opens, never how rows are written — so read it here rather than assuming a declaration took effect.")
-    last_sync: Optional[StrictStr] = None
-    layout: TableLayout = Field(description="The table's storage layout: `analytical`, or `point_lookup`, whose small data pages make fetching its rows by id cheap. Fixed at creation.")
-    partition_by: List[TablePartitionKey] = Field(description="The table's partition keys, in the order they were declared when the table was created. Empty when the table is not partitioned.  A table's storage layout is fixed when the table is created and cannot be changed afterwards, so this is how to confirm a table really was created with the layout that was asked for. The field is always present: an empty array means \"no partitioning declared\", which is not the same as a response that omits the field entirely.  Reported for tables in a Hotdata instant database, which are the only ones whose layout is declared here. A table discovered from an external connection always reports an empty array — its layout belongs to the upstream system, so an empty array there means \"not known from here\", not \"confirmed unpartitioned\".")
-    var_schema: StrictStr = Field(alias="schema")
-    sorted_by: List[TableSortKey] = Field(description="The table's sort keys, in the order they were declared when the table was created. Empty when no sort order was declared. Always present, and limited to tables in a Hotdata instant database, for the same reasons as `partition_by`.")
-    synced: StrictBool
-    table: StrictStr
+    columns: Optional[List[ColumnInfo]] = Field(default=None, description="Table columns. Present only when the request sets `include_columns=true`.")
+    connection: StrictStr = Field(description="Name of the connection that holds the table.")
+    constant_per_key: List[StrictStr] = Field(description="Columns that hold the same value for every row sharing a key, which lets keyed mutations search fewer files; empty when none are declared. Unlike `partition_by` and `sorted_by`, this can change after creation.")
+    last_sync: Optional[StrictStr] = Field(default=None, description="When the table's data was last loaded or synced; null if never.")
+    layout: TableLayout = Field(description="Storage layout. Fixed at creation.")
+    partition_by: List[TablePartitionKey] = Field(description="Partition keys, in the order declared when the table was created; empty when it is not partitioned. Reported only for tables in a Hotdata-instant database: other tables always return an empty array.")
+    var_schema: StrictStr = Field(description="Schema name.", alias="schema")
+    sorted_by: List[TableSortKey] = Field(description="Sort keys, in the order declared when the table was created; empty when none were declared. Reported only for tables in a Hotdata-managed database, like `partition_by`.")
+    synced: StrictBool = Field(description="Whether the table has data loaded.")
+    table: StrictStr = Field(description="Table name.")
     __properties: ClassVar[List[str]] = ["columns", "connection", "constant_per_key", "last_sync", "layout", "partition_by", "schema", "sorted_by", "synced", "table"]
 
     model_config = ConfigDict(

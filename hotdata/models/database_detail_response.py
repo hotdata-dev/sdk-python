@@ -30,13 +30,13 @@ class DatabaseDetailResponse(BaseModel):
     """
     Response body for GET /databases/{database_id}
     """ # noqa: E501
-    attachments: List[DatabaseAttachmentInfo]
+    attachments: List[DatabaseAttachmentInfo] = Field(description="Catalogs attached from other connections or databases.")
     created_at: Optional[datetime] = Field(default=None, description="When the database was created.")
-    default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope (`default` unless overridden at create time).")
-    default_connection_id: StrictStr = Field(description="Id of the connection backing this database's `default` catalog. Pass it as `connection_id` to `POST /v1/databases/{other}/catalogs` to attach this database's catalog into another database. In SQL, address the catalog as `default` inside an `X-Database-Id` scope, not by id.")
-    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
-    expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
-    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Set on a database created by forking another one: where it came from and which state of the source it copied. `GET /databases/{database_id}/lineage` returns the whole family tree.")
+    default_catalog: StrictStr = Field(description="Name of the database's own catalog in SQL.")
+    default_connection_id: StrictStr = Field(description="ID of the connection behind the database's own catalog. Use it to load tables through the connection endpoints, or to attach this catalog to another database.")
+    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to.")
+    expires_at: Optional[datetime] = Field(default=None, description="When the database expires.")
+    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Present on a fork: the database it was copied from.")
     id: StrictStr
     name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["attachments", "created_at", "default_catalog", "default_connection_id", "default_schema", "expires_at", "forked_from", "id", "name"]

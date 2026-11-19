@@ -45,9 +45,9 @@ class InformationSchemaApi:
         connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name (supports % wildcards)")] = None,
         table: Annotated[Optional[StrictStr], Field(description="Filter by table name (supports % wildcards)")] = None,
-        include_columns: Annotated[Optional[StrictBool], Field(description="Include column definitions (default: false)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of tables per page")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor from a previous response")] = None,
+        include_columns: Annotated[Optional[StrictBool], Field(description="Include each table's columns. Default: false.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Tables per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -63,7 +63,7 @@ class InformationSchemaApi:
     ) -> InformationSchemaResponse:
         """List tables
 
-        List discovered tables with optional filtering and pagination. Supports wildcard patterns (SQL %) for schema and table name filters. Set include_columns=true to include column definitions (omitted by default). Every table carries its declared storage layout — `partition_by` and `sorted_by` — which is fixed when the table is created and cannot be changed afterwards. Both are always present; an empty array means none was declared. Only tables in a Hotdata instant database declare a layout here, so a table discovered from an external connection always reports empty arrays.
+        List tables, with optional filters and pagination. `schema` and `table` accept SQL `%` wildcards. Set `include_columns=true` to include each table's columns.  Each table reports its `partition_by` and `sorted_by` layout, which is fixed when the table is created. An empty array means none was set. An API key limited to one database must pass that database's `connection_id`.
 
         :param connection_id: Filter by connection ID
         :type connection_id: str
@@ -71,11 +71,11 @@ class InformationSchemaApi:
         :type var_schema: str
         :param table: Filter by table name (supports % wildcards)
         :type table: str
-        :param include_columns: Include column definitions (default: false)
+        :param include_columns: Include each table's columns. Default: false.
         :type include_columns: bool
-        :param limit: Maximum number of tables per page
+        :param limit: Tables per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor from a previous response
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -134,9 +134,9 @@ class InformationSchemaApi:
         connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name (supports % wildcards)")] = None,
         table: Annotated[Optional[StrictStr], Field(description="Filter by table name (supports % wildcards)")] = None,
-        include_columns: Annotated[Optional[StrictBool], Field(description="Include column definitions (default: false)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of tables per page")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor from a previous response")] = None,
+        include_columns: Annotated[Optional[StrictBool], Field(description="Include each table's columns. Default: false.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Tables per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -152,7 +152,7 @@ class InformationSchemaApi:
     ) -> ApiResponse[InformationSchemaResponse]:
         """List tables
 
-        List discovered tables with optional filtering and pagination. Supports wildcard patterns (SQL %) for schema and table name filters. Set include_columns=true to include column definitions (omitted by default). Every table carries its declared storage layout — `partition_by` and `sorted_by` — which is fixed when the table is created and cannot be changed afterwards. Both are always present; an empty array means none was declared. Only tables in a Hotdata instant database declare a layout here, so a table discovered from an external connection always reports empty arrays.
+        List tables, with optional filters and pagination. `schema` and `table` accept SQL `%` wildcards. Set `include_columns=true` to include each table's columns.  Each table reports its `partition_by` and `sorted_by` layout, which is fixed when the table is created. An empty array means none was set. An API key limited to one database must pass that database's `connection_id`.
 
         :param connection_id: Filter by connection ID
         :type connection_id: str
@@ -160,11 +160,11 @@ class InformationSchemaApi:
         :type var_schema: str
         :param table: Filter by table name (supports % wildcards)
         :type table: str
-        :param include_columns: Include column definitions (default: false)
+        :param include_columns: Include each table's columns. Default: false.
         :type include_columns: bool
-        :param limit: Maximum number of tables per page
+        :param limit: Tables per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor from a previous response
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -223,9 +223,9 @@ class InformationSchemaApi:
         connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name (supports % wildcards)")] = None,
         table: Annotated[Optional[StrictStr], Field(description="Filter by table name (supports % wildcards)")] = None,
-        include_columns: Annotated[Optional[StrictBool], Field(description="Include column definitions (default: false)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of tables per page")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor from a previous response")] = None,
+        include_columns: Annotated[Optional[StrictBool], Field(description="Include each table's columns. Default: false.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Tables per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -241,7 +241,7 @@ class InformationSchemaApi:
     ) -> RESTResponseType:
         """List tables
 
-        List discovered tables with optional filtering and pagination. Supports wildcard patterns (SQL %) for schema and table name filters. Set include_columns=true to include column definitions (omitted by default). Every table carries its declared storage layout — `partition_by` and `sorted_by` — which is fixed when the table is created and cannot be changed afterwards. Both are always present; an empty array means none was declared. Only tables in a Hotdata instant database declare a layout here, so a table discovered from an external connection always reports empty arrays.
+        List tables, with optional filters and pagination. `schema` and `table` accept SQL `%` wildcards. Set `include_columns=true` to include each table's columns.  Each table reports its `partition_by` and `sorted_by` layout, which is fixed when the table is created. An empty array means none was set. An API key limited to one database must pass that database's `connection_id`.
 
         :param connection_id: Filter by connection ID
         :type connection_id: str
@@ -249,11 +249,11 @@ class InformationSchemaApi:
         :type var_schema: str
         :param table: Filter by table name (supports % wildcards)
         :type table: str
-        :param include_columns: Include column definitions (default: false)
+        :param include_columns: Include each table's columns. Default: false.
         :type include_columns: bool
-        :param limit: Maximum number of tables per page
+        :param limit: Tables per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor from a previous response
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

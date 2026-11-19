@@ -27,13 +27,13 @@ from typing_extensions import Self
 
 class ListIndexesPageResponse(BaseModel):
     """
-    Response body for `GET /v1/indexes` (paginated, cross-table).
+    A page of indexes, across tables.
     """ # noqa: E501
-    count: Annotated[int, Field(strict=True, ge=0)]
-    has_more: StrictBool
-    indexes: List[IndexEntryResponse]
-    limit: Annotated[int, Field(strict=True, ge=0)]
-    next_cursor: Optional[StrictStr] = None
+    count: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of indexes on this page.")
+    has_more: StrictBool = Field(description="Whether more indexes follow. Fetch them with `next_cursor`.")
+    indexes: List[IndexEntryResponse] = Field(description="Indexes on this page.")
+    limit: Annotated[int, Field(strict=True, ge=0)] = Field(description="Page size used.")
+    next_cursor: Optional[StrictStr] = Field(default=None, description="Cursor for the next page, present only when `has_more` is true. Pass it as the `cursor` query parameter.")
     __properties: ClassVar[List[str]] = ["count", "has_more", "indexes", "limit", "next_cursor"]
 
     model_config = ConfigDict(

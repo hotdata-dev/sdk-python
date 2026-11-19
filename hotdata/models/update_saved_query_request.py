@@ -27,12 +27,12 @@ class UpdateSavedQueryRequest(BaseModel):
     """
     Request body for PUT /v1/queries/{id}
     """ # noqa: E501
-    category_override: Optional[StrictStr] = Field(default=None, description="Override the auto-detected category. Send `null` to clear (revert to auto).")
-    description: Optional[StrictStr] = None
-    name: Optional[StrictStr] = Field(default=None, description="Optional new name. When omitted the existing name is preserved.")
-    sql: Optional[StrictStr] = Field(default=None, description="Optional new SQL. When omitted the existing SQL is preserved.")
-    table_size_override: Optional[StrictStr] = Field(default=None, description="User annotation for table size. Send `null` to clear.")
-    tags: Optional[List[StrictStr]] = None
+    category_override: Optional[StrictStr] = Field(default=None, description="Category to use instead of the detected one, such as `point_lookup` or `join`. Send `null` to go back to the detected category.")
+    description: Optional[StrictStr] = Field(default=None, description="New description. Omit to keep the current one.")
+    name: Optional[StrictStr] = Field(default=None, description="New name. Omit to keep the current one.")
+    sql: Optional[StrictStr] = Field(default=None, description="New SQL. Omit to keep the current SQL.")
+    table_size_override: Optional[StrictStr] = Field(default=None, description="Your own label for the table size. Send `null` to clear it.")
+    tags: Optional[List[StrictStr]] = Field(default=None, description="New tags, replacing the current ones. Omit to keep them.")
     __properties: ClassVar[List[str]] = ["category_override", "description", "name", "sql", "table_size_override", "tags"]
 
     model_config = ConfigDict(

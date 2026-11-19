@@ -1,16 +1,16 @@
 # LoadManagedTableResponse
 
-Result of a managed-table load: row count after the load plus the published table schema. Returned inline (`200`) for a synchronous load, and as the `GET /v1/jobs/{id}` result payload for a completed background load.
+Result of a table load: the row count and schema after the load.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**arrow_schema_json** | **str** | Schema of the loaded table, as JSON. | 
-**connection_id** | **str** |  | 
-**row_count** | **int** | Total number of rows in the table after the load. | 
-**schema_name** | **str** |  | 
-**table_name** | **str** |  | 
+**arrow_schema_json** | **str** | The table&#39;s schema, as a JSON string. | 
+**connection_id** | **str** | ID of the connection that holds the table. | 
+**row_count** | **int** | Total rows in the table after the load. | 
+**schema_name** | **str** | Schema of the table. | 
+**table_name** | **str** | Table that was loaded. | 
 
 ## Example
 

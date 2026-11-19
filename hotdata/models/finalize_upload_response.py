@@ -26,11 +26,11 @@ from typing_extensions import Self
 
 class FinalizeUploadResponse(BaseModel):
     """
-    Response body for `POST /v1/uploads/{upload_id}/finalize`: the finalized upload, ready to be loaded into a managed table.
+    A finalized upload, ready to load into a table.
     """ # noqa: E501
     content_type: Optional[StrictStr] = None
     created_at: datetime
-    size_bytes: StrictInt = Field(description="The validated size of the uploaded file in bytes.")
+    size_bytes: StrictInt = Field(description="Size of the uploaded file in bytes.")
     status: StrictStr
     upload_id: StrictStr
     __properties: ClassVar[List[str]] = ["content_type", "created_at", "size_bytes", "status", "upload_id"]

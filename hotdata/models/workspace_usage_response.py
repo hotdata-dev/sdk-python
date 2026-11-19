@@ -26,13 +26,13 @@ from typing_extensions import Self
 
 class WorkspaceUsageResponse(BaseModel):
     """
-    Response for GET /v1/usage
+    Query and storage usage for a workspace.
     """ # noqa: E501
-    bytes_scanned: StrictInt = Field(description="Sum of `bytes_scanned` across all completed/failed query runs since `since`. Null bytes (queries that touched no row data) contribute 0.  This is the storage read the workspace's queries caused, not how much data they covered: a query whose data was already cached contributes little or nothing (see `bytes_scanned` on a query run). Two periods with identical query histories can therefore report different totals, and this figure will not reconcile against a per-query estimate of rows or bytes touched.")
-    query_count: StrictInt = Field(description="Number of query runs (succeeded + failed) since `since`.")
-    since: datetime = Field(description="The period start used for this response (echoed back for the caller to verify).")
-    storage_bytes: StrictInt = Field(description="The workspace's current stored-data footprint in bytes, measured at request time: instant-database data, plus un-consumed uploads, connection caches, and search-index artifacts.")
-    storage_captured_at: Optional[datetime] = Field(default=None, description="When `storage_bytes` was measured (the time this response was produced).")
+    bytes_scanned: StrictInt = Field(description="Total `bytes_scanned` of succeeded and failed query runs since `since`. Reads served from cache are not counted.")
+    query_count: StrictInt = Field(description="Number of succeeded and failed query runs since `since`.")
+    since: datetime = Field(description="Start of the period these totals cover.")
+    storage_bytes: StrictInt = Field(description="Bytes the workspace stores now: table data, uploads not yet loaded, and caches and indexes.")
+    storage_captured_at: Optional[datetime] = Field(default=None, description="When `storage_bytes` was measured.")
     __properties: ClassVar[List[str]] = ["bytes_scanned", "query_count", "since", "storage_bytes", "storage_captured_at"]
 
     model_config = ConfigDict(

@@ -1,16 +1,16 @@
 # ListIndexesPageResponse
 
-Response body for `GET /v1/indexes` (paginated, cross-table).
+A page of indexes, across tables.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**count** | **int** |  | 
-**has_more** | **bool** |  | 
-**indexes** | [**List[IndexEntryResponse]**](IndexEntryResponse.md) |  | 
-**limit** | **int** |  | 
-**next_cursor** | **str** |  | [optional] 
+**count** | **int** | Number of indexes on this page. | 
+**has_more** | **bool** | Whether more indexes follow. Fetch them with &#x60;next_cursor&#x60;. | 
+**indexes** | [**List[IndexEntryResponse]**](IndexEntryResponse.md) | Indexes on this page. | 
+**limit** | **int** | Page size used. | 
+**next_cursor** | **str** | Cursor for the next page, present only when &#x60;has_more&#x60; is true. Pass it as the &#x60;cursor&#x60; query parameter. | [optional] 
 
 ## Example
 

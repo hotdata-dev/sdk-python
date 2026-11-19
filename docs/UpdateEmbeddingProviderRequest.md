@@ -6,10 +6,10 @@ Request body for PUT /embedding-providers/{id}
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**api_key** | **str** | Inline API key. If provided, updates (or creates) the auto-managed secret. | [optional] 
+**api_key** | **str** | New API key. Hotdata stores it as a secret for you. | [optional] 
 **config** | **object** |  | [optional] 
 **name** | **str** |  | [optional] 
-**secret_name** | **str** | Secret name containing the API key. Pass null to clear. | [optional] 
+**secret_name** | **str** | Name of a stored secret that holds the API key. Send &#x60;null&#x60; to remove the key from the provider. | [optional] 
 
 ## Example
 

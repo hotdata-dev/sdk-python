@@ -1,6 +1,6 @@
 # CreateConnectionResponse
 
-Response body for POST /connections
+A newly created connection.
 
 ## Properties
 
@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **id** | **str** |  | 
 **name** | **str** |  | 
 **source_type** | **str** |  | 
-**tables_discovered** | **int** |  | 
+**tables_discovered** | **int** | Number of tables the connection declares. | 
 
 ## Example
 

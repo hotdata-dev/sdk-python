@@ -26,14 +26,14 @@ from typing_extensions import Self
 
 class LineageAncestorInfo(BaseModel):
     """
-    One database up a fork chain.
+    A database up the fork chain.
     """ # noqa: E501
     database_id: StrictStr
-    description: Optional[StrictStr] = Field(default=None, description="Why the next database down the chain was forked from it, as given at the time. Absent when none was given.")
-    exists: StrictBool = Field(description="False once the ancestor has been deleted. Its place in the chain is kept either way, and the ancestry continues past it.")
-    forked_at: Optional[datetime] = Field(default=None, description="When the next database down the chain was forked from it.")
-    name: Optional[StrictStr] = Field(default=None, description="The ancestor's current label, or the one captured at fork time when it no longer exists.")
-    snapshot_id: Optional[StrictInt] = Field(default=None, description="Version of this ancestor's data that the next database down the chain copied. See `forked_from.snapshot_id`.")
+    description: Optional[StrictStr] = Field(default=None, description="Why that fork was taken, if given.")
+    exists: StrictBool = Field(description="False if the database has been deleted.")
+    forked_at: Optional[datetime] = Field(default=None, description="When the next database down the chain was forked from this one.")
+    name: Optional[StrictStr] = Field(default=None, description="The database's current name, or its name at fork time if deleted.")
+    snapshot_id: Optional[StrictInt] = Field(default=None, description="Point in time of this database's data that the next database down the chain copied.")
     __properties: ClassVar[List[str]] = ["database_id", "description", "exists", "forked_at", "name", "snapshot_id"]
 
     model_config = ConfigDict(

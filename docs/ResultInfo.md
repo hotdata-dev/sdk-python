@@ -1,6 +1,6 @@
 # ResultInfo
 
-Summary of a persisted query result for listing
+A saved query result in a listing.
 
 ## Properties
 

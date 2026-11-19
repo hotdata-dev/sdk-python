@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,7 +27,7 @@ class ExecuteSavedQueryRequest(BaseModel):
     """
     Request body for POST /v1/queries/{id}/execute
     """ # noqa: E501
-    version: Optional[StrictInt] = None
+    version: Optional[StrictInt] = Field(default=None, description="Version to run. Defaults to the latest.")
     __properties: ClassVar[List[str]] = ["version"]
 
     model_config = ConfigDict(

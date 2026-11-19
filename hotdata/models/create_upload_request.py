@@ -26,15 +26,15 @@ from typing_extensions import Self
 
 class CreateUploadRequest(BaseModel):
     """
-    Request body for `POST /v1/uploads` and for each entry of `POST /v1/uploads/batch`.  Describes a single file you intend to upload. The response carries a short-lived URL to `PUT` the bytes to, so the file never passes through the API itself. The declared size is validated against the bytes you actually upload when you finalize.  One upload may be at most 16 GiB by default, whatever its format. To load more data than that into a single table, split it across several uploads and load each one with `mode: append`.
+    A file you plan to upload. The response gives you short-lived URLs to `PUT` the bytes to. One upload can be at most 16 GiB by default; for more data, load several uploads with `mode: append`.
     """ # noqa: E501
-    checksum_algo: Optional[StrictStr] = Field(default=None, description="Integrity checksum algorithm you are volunteering for this file. Currently only `sha256` is accepted. Optional; pair with `checksum_value`.")
-    checksum_value: Optional[StrictStr] = Field(default=None, description="Integrity checksum value, paired with `checksum_algo`. Optional.")
-    content_encoding: Optional[StrictStr] = Field(default=None, description="Content encoding to record for the uploaded file (for example `gzip`). Optional.")
-    content_type: Optional[StrictStr] = Field(default=None, description="Content type to record for the uploaded file (for example the Parquet, CSV, or JSON MIME type). Optional.")
-    declared_size_bytes: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="The exact size, in bytes, of the file you will upload. Optional. When provided, it is checked at create time against the maximum upload size (16 GiB by default, the same for every file format), so an oversized file is refused before you transfer any of it; it is checked again at finalize against the bytes actually uploaded — a mismatch fails the finalize. Omit it to create a streaming (unknown-size) upload: the session is always multi-part and returns no part URLs up front; instead you mint part URLs on demand from `POST /v1/uploads/{upload_id}/parts` as you upload, and finalize checks only that the file is non-empty and within the maximum upload size.")
-    filename: Optional[StrictStr] = Field(default=None, description="Original file name, recorded with the upload for your own bookkeeping. Optional and advisory — it does not affect how the file is uploaded or loaded.")
-    part_size: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Preferred size, in bytes, of each part for a large (multi-part) upload. Optional hint — the service clamps it to the allowed part-size range and to the maximum number of parts, and ignores it for small files uploaded with a single `PUT`. Omit to let the service choose.")
+    checksum_algo: Optional[StrictStr] = Field(default=None, description="Checksum algorithm for `checksum_value`. Only `sha256` is accepted.")
+    checksum_value: Optional[StrictStr] = Field(default=None, description="Checksum of the file. Stored with the upload but not verified.")
+    content_encoding: Optional[StrictStr] = Field(default=None, description="Content encoding, such as `gzip`, kept with the upload.")
+    content_type: Optional[StrictStr] = Field(default=None, description="MIME type of the file. A load uses it to detect the file format when `format` is not set.")
+    declared_size_bytes: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Exact file size in bytes, checked again when you finalize. Omit it to stream a file of unknown size and get part URLs from `POST /v1/uploads/{upload_id}/parts` as you go.")
+    filename: Optional[StrictStr] = Field(default=None, description="File name, kept for your reference. It does not affect the upload or load.")
+    part_size: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Preferred part size in bytes for a multi-part upload. Hotdata adjusts it to the allowed range; the size it uses is returned as `part_size`.")
     __properties: ClassVar[List[str]] = ["checksum_algo", "checksum_value", "content_encoding", "content_type", "declared_size_bytes", "filename", "part_size"]
 
     model_config = ConfigDict(

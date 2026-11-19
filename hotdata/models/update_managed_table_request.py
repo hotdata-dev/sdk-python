@@ -25,9 +25,9 @@ from typing_extensions import Self
 
 class UpdateManagedTableRequest(BaseModel):
     """
-    Request body for setting the columns a table declares constant per key: `PUT /v1/connections/{id}/schemas/{schema}/tables/{table}/constant-per-key` and `PUT /v1/databases/{id}/schemas/{schema}/tables/{table}/constant-per-key`.  The body carries the complete new value: send an empty array to remove the declaration. Sending any other field is rejected — `key`, `partition_by` and `sorted_by` are fixed when the table is created.
+    New value for a table's `constant_per_key` setting. Other fields are rejected, because a table's `key`, `partition_by` and `sorted_by` cannot be changed.
     """ # noqa: E501
-    constant_per_key: Optional[List[StrictStr]] = Field(default=None, description="Columns whose value is the same for every row sharing this table's key.  Send `[]` to revoke the declaration, which restores the unrestricted search on the next load — this is the kill switch if a declaration turns out to be false.  **Correctness-affecting, not a hint.** If the assertion is false, a keyed mutation supersedes one version of a key and appends beside another, silently duplicating it.")
+    constant_per_key: Optional[List[StrictStr]] = Field(default=None, description="Columns that always hold the same value for rows with the same `key`. Replaces the current list; send `[]` to clear it. If it is not true, keyed loads silently duplicate rows.")
     __properties: ClassVar[List[str]] = ["constant_per_key"]
 
     model_config = ConfigDict(

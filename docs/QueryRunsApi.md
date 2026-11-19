@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 Get query run
 
-Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
+Get a query run's status and details. Send the `X-Database-Id` header of the database the query ran in.
 
 ### Example
 
@@ -53,7 +53,7 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.QueryRunsApi(api_client)
     id = 'id_example' # str | Query run ID
-    x_database_id = 'x_database_id_example' # str | Database the query run belongs to (required)
+    x_database_id = 'x_database_id_example' # str | ID of the database the query ran in. Required.
 
     try:
         # Get query run
@@ -72,7 +72,7 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Query run ID | 
- **x_database_id** | **str**| Database the query run belongs to (required) | 
+ **x_database_id** | **str**| ID of the database the query ran in. Required. | 
 
 ### Return type
 
@@ -92,7 +92,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Query run details |  -  |
-**400** | Missing or malformed X-Database-Id header |  -  |
+**400** | Missing or malformed &#x60;X-Database-Id&#x60; header |  -  |
 **404** | Query run or database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -102,7 +102,7 @@ Name | Type | Description  | Notes
 
 List query runs
 
-List query runs for the database named by the required X-Database-Id header.
+List the query runs in the database named by the `X-Database-Id` header, newest first, one page at a time. If `has_more` is true, pass `next_cursor` as `cursor` to get the next page.
 
 ### Example
 
@@ -141,10 +141,10 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.QueryRunsApi(api_client)
-    x_database_id = 'x_database_id_example' # str | Database to scope the query runs to (required)
-    limit = 56 # int | Maximum number of results (optional)
-    cursor = 'cursor_example' # str | Pagination cursor (optional)
-    status = 'status_example' # str | Filter by status (comma-separated, e.g. status=running,failed) (optional)
+    x_database_id = 'x_database_id_example' # str | Database ID. Required.
+    limit = 56 # int | Runs per page. Default 100, maximum 1000. (optional)
+    cursor = 'cursor_example' # str | The `next_cursor` from the previous page (optional)
+    status = 'status_example' # str | Filter by status, comma-separated, for example `status=running,failed`. Values: `running`, `succeeded`, `failed`, `interrupted`. (optional)
     saved_query_id = 'saved_query_id_example' # str | Filter by saved query ID (optional)
 
     try:
@@ -163,10 +163,10 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **x_database_id** | **str**| Database to scope the query runs to (required) | 
- **limit** | **int**| Maximum number of results | [optional] 
- **cursor** | **str**| Pagination cursor | [optional] 
- **status** | **str**| Filter by status (comma-separated, e.g. status&#x3D;running,failed) | [optional] 
+ **x_database_id** | **str**| Database ID. Required. | 
+ **limit** | **int**| Runs per page. Default 100, maximum 1000. | [optional] 
+ **cursor** | **str**| The &#x60;next_cursor&#x60; from the previous page | [optional] 
+ **status** | **str**| Filter by status, comma-separated, for example &#x60;status&#x3D;running,failed&#x60;. Values: &#x60;running&#x60;, &#x60;succeeded&#x60;, &#x60;failed&#x60;, &#x60;interrupted&#x60;. | [optional] 
  **saved_query_id** | **str**| Filter by saved query ID | [optional] 
 
 ### Return type
@@ -187,7 +187,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of query runs |  -  |
-**400** | Missing or malformed X-Database-Id header |  -  |
+**400** | Missing or malformed &#x60;X-Database-Id&#x60; header |  -  |
 **404** | Database not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

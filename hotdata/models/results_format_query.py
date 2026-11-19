@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class ResultsFormatQuery(str, Enum):
     """
-    The `?format=` query parameter on `GET /v1/results/{id}`. One of `arrow`, `json`, `csv`, `md`, or `parquet`.
+    Format to return a result in: `arrow`, `json`, `csv`, `md` (Markdown) or `parquet`.
     """
 
     """

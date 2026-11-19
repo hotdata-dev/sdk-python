@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,12 +27,10 @@ class CreateConnectionRequest(BaseModel):
     """
     Request body for POST /connections
     """ # noqa: E501
-    config: Dict[str, Any] = Field(description="Connection configuration object. Fields vary by source type (host, port, database, etc.).")
+    config: Dict[str, Any] = Field(description="Connection settings. For `managed`, an optional `schemas` list declaring schemas and their tables.")
     name: StrictStr
-    secret_id: Optional[StrictStr] = Field(default=None, description="Optional reference to a secret by ID (e.g., \"secr_abc123\"). If provided, this secret will be used for authentication. Mutually exclusive with `secret_name`.")
-    secret_name: Optional[StrictStr] = Field(default=None, description="Optional reference to a secret by name. If provided, this secret will be used for authentication. Mutually exclusive with `secret_id`.")
-    source_type: StrictStr
-    __properties: ClassVar[List[str]] = ["config", "name", "secret_id", "secret_name", "source_type"]
+    source_type: StrictStr = Field(description="Connection type. Only `managed` can be created: a catalog of tables you load data into.")
+    __properties: ClassVar[List[str]] = ["config", "name", "source_type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -77,16 +75,6 @@ class CreateConnectionRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # set to None if secret_id (nullable) is None
-        # and model_fields_set contains the field
-        if self.secret_id is None and "secret_id" in self.model_fields_set:
-            _dict['secret_id'] = None
-
-        # set to None if secret_name (nullable) is None
-        # and model_fields_set contains the field
-        if self.secret_name is None and "secret_name" in self.model_fields_set:
-            _dict['secret_name'] = None
-
         return _dict
 
     @classmethod
@@ -101,8 +89,6 @@ class CreateConnectionRequest(BaseModel):
         _obj = cls.model_validate({
             "config": obj.get("config"),
             "name": obj.get("name"),
-            "secret_id": obj.get("secret_id"),
-            "secret_name": obj.get("secret_name"),
             "source_type": obj.get("source_type")
         })
         return _obj

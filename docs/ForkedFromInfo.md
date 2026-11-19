@@ -1,16 +1,16 @@
 # ForkedFromInfo
 
-Where a forked database came from, and which state of the source it copied.  Present only on a database that was created by forking another one. It is a record of how this database came to exist, not a live link: the fork and its source are independent from the moment the fork is created, and either can change or be deleted without affecting the other.  Forks created before lineage was recorded carry no `forked_from`.
+The database a fork was copied from. A fork is independent of its source: changing or deleting either does not affect the other.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**database_id** | **str** | ID of the database that was forked. The database may since have been deleted — the record outlives it — so this is not guaranteed to resolve. | 
-**description** | **str** | Why the fork was taken, as given when it was created. Absent when none was given. | [optional] 
+**database_id** | **str** | ID of the source database. It may have been deleted since. | 
+**description** | **str** | Why the fork was taken, if given. | [optional] 
 **forked_at** | **datetime** | When the fork was taken. | [optional] 
-**name** | **str** | Display label the source carried when the fork was taken, kept so a deleted source still reads as more than an ID. | [optional] 
-**snapshot_id** | **int** | Marks the version of the source that this fork copied — its table set and their contents as of that moment. It is a point in time rather than a per-database revision count, so two forks of a source that did not change still report different values, and the numbers are not a way to tell whether a source has changed. Absent only on forks taken before the version was recorded. | [optional] 
+**name** | **str** | Name of the source when the fork was taken. | [optional] 
+**snapshot_id** | **int** | Point in time of the source data that the fork copied. Not a revision count: two forks of an unchanged source get different values. | [optional] 
 
 ## Example
 

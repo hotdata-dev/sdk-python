@@ -1,12 +1,12 @@
 # ApiErrorResponse
 
-Standard error response body
+Error response body.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**error** | [**ApiErrorDetail**](ApiErrorDetail.md) |  | 
+**error** | [**ApiErrorDetail**](ApiErrorDetail.md) | The error. | 
 
 ## Example
 

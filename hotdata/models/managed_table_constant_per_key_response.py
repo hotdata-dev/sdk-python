@@ -25,12 +25,12 @@ from typing_extensions import Self
 
 class ManagedTableConstantPerKeyResponse(BaseModel):
     """
-    The declaration as it now stands after a `constant-per-key` write.  Echoed back rather than returning `204` so a caller can confirm what actually took effect instead of assuming its request applied — the same reason `/v1/information_schema` reports the field.
+    A table's `constant_per_key` setting after an update.
     """ # noqa: E501
-    connection_id: StrictStr = Field(description="Connection backing the catalog the table belongs to. For a database default catalog this is the database's `default_connection_id`, so it is the value that addresses the table through the connection-scoped endpoints — not the database id the request may have used.")
-    constant_per_key: List[StrictStr] = Field(description="The columns now declared constant per key. Empty means no declaration, i.e. the unrestricted search.")
-    var_schema: StrictStr = Field(description="Schema the table belongs to, as stored: lowercased, which may differ from the spelling in the request path.", alias="schema")
-    table: StrictStr = Field(description="Table the declaration was written to, as stored: lowercased, which may differ from the spelling in the request path.")
+    connection_id: StrictStr = Field(description="ID of the connection that holds the table. For a database, this is its `default_connection_id`.")
+    constant_per_key: List[StrictStr] = Field(description="Columns now set as constant per key. Empty means none.")
+    var_schema: StrictStr = Field(description="Schema name, in lowercase.", alias="schema")
+    table: StrictStr = Field(description="Table name, in lowercase.")
     __properties: ClassVar[List[str]] = ["connection_id", "constant_per_key", "schema", "table"]
 
     model_config = ConfigDict(

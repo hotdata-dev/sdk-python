@@ -44,7 +44,7 @@ class QueryRunsApi:
     def get_query_run(
         self,
         id: Annotated[StrictStr, Field(description="Query run ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Database the query run belongs to (required)")],
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database the query ran in. Required.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -60,11 +60,11 @@ class QueryRunsApi:
     ) -> QueryRunInfo:
         """Get query run
 
-        Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
+        Get a query run's status and details. Send the `X-Database-Id` header of the database the query ran in.
 
         :param id: Query run ID (required)
         :type id: str
-        :param x_database_id: Database the query run belongs to (required) (required)
+        :param x_database_id: ID of the database the query ran in. Required. (required)
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -117,7 +117,7 @@ class QueryRunsApi:
     def get_query_run_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Query run ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Database the query run belongs to (required)")],
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database the query ran in. Required.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -133,11 +133,11 @@ class QueryRunsApi:
     ) -> ApiResponse[QueryRunInfo]:
         """Get query run
 
-        Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
+        Get a query run's status and details. Send the `X-Database-Id` header of the database the query ran in.
 
         :param id: Query run ID (required)
         :type id: str
-        :param x_database_id: Database the query run belongs to (required) (required)
+        :param x_database_id: ID of the database the query ran in. Required. (required)
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -190,7 +190,7 @@ class QueryRunsApi:
     def get_query_run_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Query run ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Database the query run belongs to (required)")],
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database the query ran in. Required.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -206,11 +206,11 @@ class QueryRunsApi:
     ) -> RESTResponseType:
         """Get query run
 
-        Get the status and details of a specific query run by ID, scoped to the database named by the required X-Database-Id header.
+        Get a query run's status and details. Send the `X-Database-Id` header of the database the query ran in.
 
         :param id: Query run ID (required)
         :type id: str
-        :param x_database_id: Database the query run belongs to (required) (required)
+        :param x_database_id: ID of the database the query ran in. Required. (required)
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -326,10 +326,10 @@ class QueryRunsApi:
     @validate_call
     def list_query_runs(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope the query runs to (required)")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=running,failed)")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Runs per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status, comma-separated, for example `status=running,failed`. Values: `running`, `succeeded`, `failed`, `interrupted`.")] = None,
         saved_query_id: Annotated[Optional[StrictStr], Field(description="Filter by saved query ID")] = None,
         _request_timeout: Union[
             None,
@@ -346,15 +346,15 @@ class QueryRunsApi:
     ) -> ListQueryRunsResponse:
         """List query runs
 
-        List query runs for the database named by the required X-Database-Id header.
+        List the query runs in the database named by the `X-Database-Id` header, newest first, one page at a time. If `has_more` is true, pass `next_cursor` as `cursor` to get the next page.
 
-        :param x_database_id: Database to scope the query runs to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param limit: Maximum number of results
+        :param limit: Runs per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
-        :param status: Filter by status (comma-separated, e.g. status=running,failed)
+        :param status: Filter by status, comma-separated, for example `status=running,failed`. Values: `running`, `succeeded`, `failed`, `interrupted`.
         :type status: str
         :param saved_query_id: Filter by saved query ID
         :type saved_query_id: str
@@ -411,10 +411,10 @@ class QueryRunsApi:
     @validate_call
     def list_query_runs_with_http_info(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope the query runs to (required)")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=running,failed)")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Runs per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status, comma-separated, for example `status=running,failed`. Values: `running`, `succeeded`, `failed`, `interrupted`.")] = None,
         saved_query_id: Annotated[Optional[StrictStr], Field(description="Filter by saved query ID")] = None,
         _request_timeout: Union[
             None,
@@ -431,15 +431,15 @@ class QueryRunsApi:
     ) -> ApiResponse[ListQueryRunsResponse]:
         """List query runs
 
-        List query runs for the database named by the required X-Database-Id header.
+        List the query runs in the database named by the `X-Database-Id` header, newest first, one page at a time. If `has_more` is true, pass `next_cursor` as `cursor` to get the next page.
 
-        :param x_database_id: Database to scope the query runs to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param limit: Maximum number of results
+        :param limit: Runs per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
-        :param status: Filter by status (comma-separated, e.g. status=running,failed)
+        :param status: Filter by status, comma-separated, for example `status=running,failed`. Values: `running`, `succeeded`, `failed`, `interrupted`.
         :type status: str
         :param saved_query_id: Filter by saved query ID
         :type saved_query_id: str
@@ -496,10 +496,10 @@ class QueryRunsApi:
     @validate_call
     def list_query_runs_without_preload_content(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope the query runs to (required)")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status (comma-separated, e.g. status=running,failed)")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Runs per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status, comma-separated, for example `status=running,failed`. Values: `running`, `succeeded`, `failed`, `interrupted`.")] = None,
         saved_query_id: Annotated[Optional[StrictStr], Field(description="Filter by saved query ID")] = None,
         _request_timeout: Union[
             None,
@@ -516,15 +516,15 @@ class QueryRunsApi:
     ) -> RESTResponseType:
         """List query runs
 
-        List query runs for the database named by the required X-Database-Id header.
+        List the query runs in the database named by the `X-Database-Id` header, newest first, one page at a time. If `has_more` is true, pass `next_cursor` as `cursor` to get the next page.
 
-        :param x_database_id: Database to scope the query runs to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param limit: Maximum number of results
+        :param limit: Runs per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
-        :param status: Filter by status (comma-separated, e.g. status=running,failed)
+        :param status: Filter by status, comma-separated, for example `status=running,failed`. Values: `running`, `succeeded`, `failed`, `interrupted`.
         :type status: str
         :param saved_query_id: Filter by saved query ID
         :type saved_query_id: str

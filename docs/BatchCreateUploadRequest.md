@@ -1,6 +1,6 @@
 # BatchCreateUploadRequest
 
-Request body for `POST /v1/uploads/batch`: create several upload sessions in one call. Each entry is planned independently; the response returns one session per request, in the same order.
+Several files to upload in one call.
 
 ## Properties
 

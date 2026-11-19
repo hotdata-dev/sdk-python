@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **id** | **str** |  | 
 **name** | **str** |  | 
 **provider_type** | **str** |  | 
-**source** | **str** | Provider source: \&quot;system\&quot; (from config) or \&quot;user\&quot; (created via API). | 
+**source** | **str** | &#x60;system&#x60; for a built-in provider, which cannot be changed, or &#x60;user&#x60; for one created through the API. | 
 **updated_at** | **datetime** |  | 
 
 ## Example

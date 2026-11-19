@@ -25,11 +25,11 @@ from typing_extensions import Self
 
 class TableSortKey(BaseModel):
     """
-    One key of a table's sort order.  Rows are written in this order, which keeps the values in each file within a narrow range and lets queries filtering on those columns skip files entirely. Most useful on columns you filter by ranges, such as a timestamp.
+    A sort key. Rows are written in this order, so queries that filter on these columns can skip files. Most useful on columns filtered by range, such as a timestamp.
     """ # noqa: E501
-    column: StrictStr
-    direction: Optional[StrictStr] = Field(default=None, description="`asc` (the default) or `desc`. Null when the table was declared without an explicit direction for this key.")
-    nulls: Optional[StrictStr] = Field(default=None, description="Where nulls are placed: `first` or `last`. Defaults to the SQL default for the chosen direction. Null when the table was declared without an explicit placement for this key.")
+    column: StrictStr = Field(description="Column to sort by.")
+    direction: Optional[StrictStr] = Field(default=None, description="`asc` (default) or `desc`. Null in a response when it was not set.")
+    nulls: Optional[StrictStr] = Field(default=None, description="Where nulls go: `first` or `last`. Defaults to `last` for `asc` and `first` for `desc`; null in a response when it was not set.")
     __properties: ClassVar[List[str]] = ["column", "direction", "nulls"]
 
     model_config = ConfigDict(

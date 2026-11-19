@@ -1,15 +1,15 @@
 # BulkCreateDatabasesResult
 
-What a bulk-create job reports when it finishes.
+Result of a bulk database creation.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**batch_id** | **str** | Batch these databases belong to. | 
-**cancelled** | **bool** | True when the batch was stopped before finishing. | 
-**created** | **int** | How many were created. | 
-**requested** | **int** | How many databases were asked for. | 
+**batch_id** | **str** | ID of the batch. | 
+**cancelled** | **bool** | Whether the batch was stopped before it finished. | 
+**created** | **int** | Number of databases created. | 
+**requested** | **int** | Number of databases requested. | 
 
 ## Example
 

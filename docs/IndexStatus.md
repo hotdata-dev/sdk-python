@@ -1,6 +1,6 @@
 # IndexStatus
 
-Index build status exposed to API consumers.
+Index build status: `ready` once built, `pending` until then.
 
 ## Enum
 

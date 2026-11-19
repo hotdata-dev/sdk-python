@@ -6,8 +6,8 @@ Request body for POST `/v1/databases/{database_id}/context`.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**content** | **str** |  | 
-**name** | **str** | Upsert key in the catalog. Validated with table-name rules (preserves case): ASCII letter or &#x60;_&#x60; first; then alphanumeric or &#x60;_&#x60; only; 1–128 chars; not a SQL reserved word. | 
+**content** | **str** | Text or Markdown, up to 512,000 characters. | 
+**name** | **str** | Name of the entry; an existing entry with this name is replaced. 1 to 128 ASCII letters, digits or &#x60;_&#x60;, not starting with a digit, and not a SQL reserved word. | 
 
 ## Example
 

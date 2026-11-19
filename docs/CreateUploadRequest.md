@@ -1,18 +1,18 @@
 # CreateUploadRequest
 
-Request body for `POST /v1/uploads` and for each entry of `POST /v1/uploads/batch`.  Describes a single file you intend to upload. The response carries a short-lived URL to `PUT` the bytes to, so the file never passes through the API itself. The declared size is validated against the bytes you actually upload when you finalize.  One upload may be at most 16 GiB by default, whatever its format. To load more data than that into a single table, split it across several uploads and load each one with `mode: append`.
+A file you plan to upload. The response gives you short-lived URLs to `PUT` the bytes to. One upload can be at most 16 GiB by default; for more data, load several uploads with `mode: append`.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**checksum_algo** | **str** | Integrity checksum algorithm you are volunteering for this file. Currently only &#x60;sha256&#x60; is accepted. Optional; pair with &#x60;checksum_value&#x60;. | [optional] 
-**checksum_value** | **str** | Integrity checksum value, paired with &#x60;checksum_algo&#x60;. Optional. | [optional] 
-**content_encoding** | **str** | Content encoding to record for the uploaded file (for example &#x60;gzip&#x60;). Optional. | [optional] 
-**content_type** | **str** | Content type to record for the uploaded file (for example the Parquet, CSV, or JSON MIME type). Optional. | [optional] 
-**declared_size_bytes** | **int** | The exact size, in bytes, of the file you will upload. Optional. When provided, it is checked at create time against the maximum upload size (16 GiB by default, the same for every file format), so an oversized file is refused before you transfer any of it; it is checked again at finalize against the bytes actually uploaded — a mismatch fails the finalize. Omit it to create a streaming (unknown-size) upload: the session is always multi-part and returns no part URLs up front; instead you mint part URLs on demand from &#x60;POST /v1/uploads/{upload_id}/parts&#x60; as you upload, and finalize checks only that the file is non-empty and within the maximum upload size. | [optional] 
-**filename** | **str** | Original file name, recorded with the upload for your own bookkeeping. Optional and advisory — it does not affect how the file is uploaded or loaded. | [optional] 
-**part_size** | **int** | Preferred size, in bytes, of each part for a large (multi-part) upload. Optional hint — the service clamps it to the allowed part-size range and to the maximum number of parts, and ignores it for small files uploaded with a single &#x60;PUT&#x60;. Omit to let the service choose. | [optional] 
+**checksum_algo** | **str** | Checksum algorithm for &#x60;checksum_value&#x60;. Only &#x60;sha256&#x60; is accepted. | [optional] 
+**checksum_value** | **str** | Checksum of the file. Stored with the upload but not verified. | [optional] 
+**content_encoding** | **str** | Content encoding, such as &#x60;gzip&#x60;, kept with the upload. | [optional] 
+**content_type** | **str** | MIME type of the file. A load uses it to detect the file format when &#x60;format&#x60; is not set. | [optional] 
+**declared_size_bytes** | **int** | Exact file size in bytes, checked again when you finalize. Omit it to stream a file of unknown size and get part URLs from &#x60;POST /v1/uploads/{upload_id}/parts&#x60; as you go. | [optional] 
+**filename** | **str** | File name, kept for your reference. It does not affect the upload or load. | [optional] 
+**part_size** | **int** | Preferred part size in bytes for a multi-part upload. Hotdata adjusts it to the allowed range; the size it uses is returned as &#x60;part_size&#x60;. | [optional] 
 
 ## Example
 

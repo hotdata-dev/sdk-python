@@ -18,17 +18,17 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
 class ApiErrorDetail(BaseModel):
     """
-    Error detail within an API error response
+    Details of an API error.
     """ # noqa: E501
-    code: StrictStr
-    message: StrictStr
+    code: StrictStr = Field(description="Machine-readable error code, such as `BAD_REQUEST` or `NOT_FOUND`.")
+    message: StrictStr = Field(description="Human-readable description of the error.")
     __properties: ClassVar[List[str]] = ["code", "message"]
 
     model_config = ConfigDict(

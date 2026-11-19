@@ -1,6 +1,6 @@
 # DiscoveryStatus
 
-Discovery status for connection creation
+Result of looking up a new connection's tables. A `managed` connection declares its tables, so this is always `skipped`.
 
 ## Enum
 

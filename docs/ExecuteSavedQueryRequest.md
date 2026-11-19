@@ -6,7 +6,7 @@ Request body for POST /v1/queries/{id}/execute
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**version** | **int** |  | [optional] 
+**version** | **int** | Version to run. Defaults to the latest. | [optional] 
 
 ## Example
 

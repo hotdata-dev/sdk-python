@@ -18,7 +18,7 @@ Method | HTTP request | Description
 
 Create saved query
 
-Save a named SQL query. The SQL is stored as version 1 and automatically analyzed for classification metadata (category, table count, predicate/join/aggregation flags).
+Save a named SQL query as version 1. Hotdata classifies the SQL, for example its category, table count, and whether it filters, joins or aggregates.
 
 ### Example
 
@@ -105,6 +105,8 @@ Name | Type | Description  | Notes
 
 Delete saved query
 
+Delete a saved query and all its versions.
+
 ### Example
 
 * Api Key Authentication (WorkspaceId):
@@ -186,7 +188,7 @@ void (empty response body)
 
 Execute saved query
 
-Execute a saved query, scoped to a database (required `X-Database-Id` header). By default runs the latest version. Optionally specify a version number to execute a previous version. The SQL runs inside the given database scope, the same way POST /v1/query does. Returns the same response format as POST /v1/query.
+Run a saved query in the database named by the `X-Database-Id` header. Runs the latest version unless you pass `version`. Returns the same response as `POST /v1/query`. Write statements are refused.
 
 ### Example
 
@@ -227,8 +229,8 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.SavedQueriesApi(api_client)
     id = 'id_example' # str | Saved query ID
-    x_database_id = 'x_database_id_example' # str | Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404.
-    execute_saved_query_request = hotdata.ExecuteSavedQueryRequest() # ExecuteSavedQueryRequest | Optional version to execute (optional)
+    x_database_id = 'x_database_id_example' # str | ID of the database to run the query in. Required.
+    execute_saved_query_request = hotdata.ExecuteSavedQueryRequest() # ExecuteSavedQueryRequest | Optional version to run (optional)
 
     try:
         # Execute saved query
@@ -247,8 +249,8 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Saved query ID | 
- **x_database_id** | **str**| Required. Scope execution to this database (its id). A missing or malformed value is a 400; an unknown database id is a 404. | 
- **execute_saved_query_request** | [**ExecuteSavedQueryRequest**](ExecuteSavedQueryRequest.md)| Optional version to execute | [optional] 
+ **x_database_id** | **str**| ID of the database to run the query in. Required. | 
+ **execute_saved_query_request** | [**ExecuteSavedQueryRequest**](ExecuteSavedQueryRequest.md)| Optional version to run | [optional] 
 
 ### Return type
 
@@ -268,8 +270,9 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Query executed |  -  |
-**400** | Invalid request (including a missing X-Database-Id header) |  -  |
+**400** | Invalid request, such as a missing &#x60;X-Database-Id&#x60; header |  -  |
 **404** | Saved query or database not found |  -  |
+**408** | The query ran past the time limit and was stopped. A query this slow is likely to time out again: narrow it, for example with a filter, or read from a rollup or an index. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -277,6 +280,8 @@ Name | Type | Description  | Notes
 > SavedQueryDetail get_saved_query(id)
 
 Get saved query
+
+Get a saved query and its latest version.
 
 ### Example
 
@@ -362,6 +367,8 @@ Name | Type | Description  | Notes
 
 List saved queries
 
+List saved queries, sorted by name.
+
 ### Example
 
 * Api Key Authentication (WorkspaceId):
@@ -399,8 +406,8 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.SavedQueriesApi(api_client)
-    limit = 56 # int | Maximum number of results (optional)
-    offset = 56 # int | Pagination offset (optional)
+    limit = 56 # int | Saved queries to return. Default 100, maximum 1000. (optional)
+    offset = 56 # int | Number of saved queries to skip. Default 0. (optional)
 
     try:
         # List saved queries
@@ -418,8 +425,8 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **limit** | **int**| Maximum number of results | [optional] 
- **offset** | **int**| Pagination offset | [optional] 
+ **limit** | **int**| Saved queries to return. Default 100, maximum 1000. | [optional] 
+ **offset** | **int**| Number of saved queries to skip. Default 0. | [optional] 
 
 ### Return type
 
@@ -446,6 +453,8 @@ Name | Type | Description  | Notes
 > ListSavedQueryVersionsResponse list_saved_query_versions(id, limit=limit, offset=offset)
 
 List saved query versions
+
+List the versions of a saved query, newest first.
 
 ### Example
 
@@ -485,8 +494,8 @@ with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.SavedQueriesApi(api_client)
     id = 'id_example' # str | Saved query ID
-    limit = 56 # int | Maximum number of versions (optional)
-    offset = 56 # int | Pagination offset (optional)
+    limit = 56 # int | Versions to return. Default 100, maximum 1000. (optional)
+    offset = 56 # int | Number of versions to skip. Default 0. (optional)
 
     try:
         # List saved query versions
@@ -505,8 +514,8 @@ with hotdata.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| Saved query ID | 
- **limit** | **int**| Maximum number of versions | [optional] 
- **offset** | **int**| Pagination offset | [optional] 
+ **limit** | **int**| Versions to return. Default 100, maximum 1000. | [optional] 
+ **offset** | **int**| Number of versions to skip. Default 0. | [optional] 
 
 ### Return type
 
@@ -535,7 +544,7 @@ Name | Type | Description  | Notes
 
 Update saved query
 
-Update a saved query. If the SQL changes, a new version is created (previous versions are preserved). Name, tags, description, and classification overrides can also be updated.
+Update a saved query. Send at least one field; fields you omit do not change. Changing the SQL creates a new version and keeps the old ones.
 
 ### Example
 

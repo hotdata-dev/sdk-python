@@ -1,6 +1,6 @@
 # BatchCreateUploadResponse
 
-Response body for `POST /v1/uploads/batch`: one created session per requested file, in request order.
+The new uploads, in the order requested.
 
 ## Properties
 

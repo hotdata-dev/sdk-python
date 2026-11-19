@@ -29,12 +29,12 @@ class CreateDatabaseResponse(BaseModel):
     """
     Response body for POST /databases
     """ # noqa: E501
-    created: Optional[StrictBool] = Field(default=None, description="Whether this call brought the database into existence.  Only `false` when `if_not_exists` found a database already carrying the requested name, in which case nothing was created and the existing one is returned. The response status says the same thing — `201` against `200` — but generated clients often surface only the body, so it is stated here as well.  Always sent. It is declared optional so that a client built against a newer version of this API still accepts a response from a deployment that predates the field. Absent therefore means \"this deployment cannot say\", which is not the same as `false` — test for the two values explicitly rather than for truthiness.")
-    default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope (`default` unless overridden at create time).")
-    default_connection_id: StrictStr = Field(description="Id of the connection that backs this database's `default` catalog. Two uses: pass it as `connection_id` to `POST /v1/databases/{other}/catalogs` to attach this database's catalog into another database, and as the connection in the managed-tables load endpoint (`POST /v1/connections/{id}/schemas/{s}/tables/{t}/loads`) to load tables declared at create time. Other connection endpoints (list, get, health, delete, cache purge) refuse to act on it. In SQL, address the catalog as `default` inside an `X-Database-Id` scope, not by this id.")
-    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
-    expires_at: Optional[datetime] = Field(default=None, description="When this database expires.")
-    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Set on a database created by forking another one: where it came from and which state of the source it copied.")
+    created: Optional[StrictBool] = Field(default=None, description="`true` if this call created the database; `false` if `if_not_exists` returned an existing one.")
+    default_catalog: StrictStr = Field(description="Name of the database's own catalog in SQL.")
+    default_connection_id: StrictStr = Field(description="ID of the connection behind the database's own catalog. Use it to load tables through the connection endpoints, or to attach this catalog to another database.")
+    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to.")
+    expires_at: Optional[datetime] = Field(default=None, description="When the database expires.")
+    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Present on a fork: the database it was copied from.")
     id: StrictStr
     name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["created", "default_catalog", "default_connection_id", "default_schema", "expires_at", "forked_from", "id", "name"]

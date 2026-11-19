@@ -6,11 +6,9 @@ Request body for POST /connections
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**config** | **Dict[str, object]** | Connection configuration object. Fields vary by source type (host, port, database, etc.). | 
+**config** | **Dict[str, object]** | Connection settings. For &#x60;managed&#x60;, an optional &#x60;schemas&#x60; list declaring schemas and their tables. | 
 **name** | **str** |  | 
-**secret_id** | **str** | Optional reference to a secret by ID (e.g., \&quot;secr_abc123\&quot;). If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_name&#x60;. | [optional] 
-**secret_name** | **str** | Optional reference to a secret by name. If provided, this secret will be used for authentication. Mutually exclusive with &#x60;secret_id&#x60;. | [optional] 
-**source_type** | **str** |  | 
+**source_type** | **str** | Connection type. Only &#x60;managed&#x60; can be created: a catalog of tables you load data into. | 
 
 ## Example
 

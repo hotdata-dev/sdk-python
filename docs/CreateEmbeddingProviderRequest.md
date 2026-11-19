@@ -6,11 +6,11 @@ Request body for POST /embedding-providers
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**api_key** | **str** | Inline API key. If provided, a secret is auto-created and referenced. Cannot be used together with &#x60;secret_name&#x60;. | [optional] 
-**config** | **Dict[str, object]** | Provider-specific configuration (model name, base URL, dimensions, etc.) | [optional] 
+**api_key** | **str** | API key. Hotdata stores it as a secret for you. Cannot be combined with &#x60;secret_name&#x60;. | [optional] 
+**config** | **Dict[str, object]** | Provider settings, such as &#x60;model&#x60;, &#x60;base_url&#x60; and &#x60;dimensions&#x60;. | [optional] 
 **name** | **str** |  | 
-**provider_type** | **str** | Provider type: \&quot;local\&quot; or \&quot;service\&quot; | 
-**secret_name** | **str** | Reference an existing stored secret by name (for service providers).  A stored secret is only sent to an approved provider origin — by default OpenAI&#39;s public API. To use a different endpoint, supply the key inline with &#x60;api_key&#x60; instead, or ask your operator to approve the origin. | [optional] 
+**provider_type** | **str** | Provider type. Only &#x60;service&#x60; (a hosted embedding API) is supported. | 
+**secret_name** | **str** | Name of a stored secret that holds the API key. It is only sent to approved endpoints (by default, OpenAI&#39;s API); for other endpoints use &#x60;api_key&#x60;. | [optional] 
 
 ## Example
 

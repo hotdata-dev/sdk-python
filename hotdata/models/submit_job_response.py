@@ -26,11 +26,11 @@ from typing_extensions import Self
 
 class SubmitJobResponse(BaseModel):
     """
-    Response returned by APIs that submit a background job (e.g., async refresh).
+    A background job that was started. Poll `status_url` to follow it.
     """ # noqa: E501
-    id: StrictStr = Field(description="Job ID for status polling.")
-    status: JobStatus = Field(description="Current status of the submitted job.")
-    status_url: StrictStr = Field(description="URL to poll for job status.")
+    id: StrictStr = Field(description="Job ID.")
+    status: JobStatus = Field(description="Current job status.")
+    status_url: StrictStr = Field(description="Path to poll for the job's status.")
     __properties: ClassVar[List[str]] = ["id", "status", "status_url"]
 
     model_config = ConfigDict(

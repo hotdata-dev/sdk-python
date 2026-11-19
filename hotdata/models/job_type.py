@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class JobType(str, Enum):
     """
-    Background job types returned by the API.
+    Type of background job.
     """
 
     """

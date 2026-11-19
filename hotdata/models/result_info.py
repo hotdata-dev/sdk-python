@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 class ResultInfo(BaseModel):
     """
-    Summary of a persisted query result for listing
+    A saved query result in a listing.
     """ # noqa: E501
     created_at: datetime
     error_message: Optional[StrictStr] = None

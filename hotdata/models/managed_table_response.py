@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class ManagedTableResponse(BaseModel):
     """
-    Response body for a successful add-table request.
+    A newly added table.
     """ # noqa: E501
     connection_id: StrictStr
     var_schema: StrictStr = Field(alias="schema")

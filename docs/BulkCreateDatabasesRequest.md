@@ -1,18 +1,18 @@
 # BulkCreateDatabasesRequest
 
-Request body for POST /databases/bulk.  One template plus a count, so the body stays small whatever `count` is. Any schemas and tables declared here are applied to every database in the batch; load data into them afterwards exactly as you would for a database created one at a time.
+Creates many databases from one template. Each database gets the same schemas and tables.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **count** | **int** | How many databases to create. | 
-**default_catalog** | **str** | Name the default catalog answers to inside each database, as on a single create. Defaults to &#x60;default&#x60;. | [optional] 
-**default_schema** | **str** | Schema that unqualified table names resolve to inside each database. | [optional] 
-**expires_at** | **str** | When the created databases expire. Accepts an RFC 3339 timestamp or a relative duration such as &#x60;24h&#x60;, &#x60;90m&#x60;, or &#x60;7d&#x60;. | [optional] 
-**idempotency_key** | **str** | Repeat this value to retry a request safely. A retry carrying a key that was already used returns the original batch — the same &#x60;batch_id&#x60; and the same databases — instead of creating a second set.  The key identifies the request, not its contents: reusing a key with a different &#x60;count&#x60; or template returns the original batch unchanged rather than reporting a mismatch. Use a fresh key per distinct request. | [optional] 
-**name_template** | **str** | Optional display-label pattern for each database. Must contain &#x60;{index}&#x60;, which is replaced with the database&#39;s zero-based position, padded with leading zeros to the width of the batch&#39;s largest index — with a &#x60;count&#x60; of 100, &#x60;tenant-{index}&#x60; produces &#x60;tenant-00&#x60; through &#x60;tenant-99&#x60;. A pattern without &#x60;{index}&#x60; is rejected, since every database in the batch would be given the same label.  Each label also carries a suffix identifying the batch, so repeating the same pattern on a later call does not reuse labels from this one. When omitted, each database is labelled from its own ID. | [optional] 
-**schemas** | [**List[DatabaseDefaultSchemaDecl]**](DatabaseDefaultSchemaDecl.md) | Schemas and tables to declare on every database in the batch, in the same shape a single create accepts. The declaration applies identically to each database, so a batch of 10,000 declaring one table yields 10,000 databases that each hold that table and are ready to load — with no follow-up call per database. Omitted or empty means each database starts with no tables. | [optional] 
+**default_catalog** | **str** | Name of each database&#39;s own catalog in SQL. Defaults to &#x60;default&#x60;. | [optional] 
+**default_schema** | **str** | Schema that unqualified table names resolve to in each database. | [optional] 
+**expires_at** | **str** | When the databases expire: a future RFC 3339 timestamp, or a duration such as &#x60;24h&#x60;, &#x60;90m&#x60; or &#x60;7d&#x60;. | [optional] 
+**idempotency_key** | **str** | Key that makes the request safe to retry. A repeated key returns the original batch, even if the rest of the request differs. | [optional] 
+**name_template** | **str** | Name pattern for the databases. Must contain &#x60;{index}&#x60;, which becomes each database&#39;s zero-padded position (&#x60;tenant-00&#x60; to &#x60;tenant-99&#x60; for a count of 100); a batch suffix is added to each name. | [optional] 
+**schemas** | [**List[DatabaseDefaultSchemaDecl]**](DatabaseDefaultSchemaDecl.md) | Schemas and tables to create in every database. | [optional] 
 
 ## Example
 

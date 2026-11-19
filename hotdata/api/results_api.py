@@ -45,10 +45,10 @@ class ResultsApi:
     def get_result(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Database the result belongs to (required)")],
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
-        format: Annotated[Optional[ResultsFormatQuery], Field(description="`arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database the result belongs to. Required.")],
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip. Default 0.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return. Default: all rows.")] = None,
+        format: Annotated[Optional[ResultsFormatQuery], Field(description="`json`, `arrow`, `csv`, `md` (or `markdown`) or `parquet`. Overrides the `Accept` header.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -64,17 +64,17 @@ class ResultsApi:
     ) -> GetResultResponse:
         """Get result
 
-        Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.  | Result status         | Status × body                                                                | |-----------------------|------------------------------------------------------------------------------| | `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    | | `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       | | `ready` + CSV         | 200 `text/csv; charset=utf-8` — single header row, streamed batch-by-batch   | | `ready` + Markdown    | 200 `text/markdown; charset=utf-8` — GitHub-flavored pipe table, streamed   | | `ready` + Parquet     | 200 `application/vnd.apache.parquet` — raw parquet bytes (no conversion)     | | `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 | | `failed`              | 409 `application/json` `{status, result_id, error_message}`                  | | not found             | 404 `application/json` (`ApiErrorResponse`)                                  |  `?format=` accepts `arrow`, `json`, `csv`, `md`, `parquet` and takes precedence over `Accept`. `markdown` is accepted as a runtime alias for `md`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel=\"next\"` points at the following page. `?offset`/`?limit` are ignored for `format=parquet` since that path returns the underlying file unchanged.  JSON is the only format with a size limit. Building a JSON body requires holding the whole slice in memory at once, so a request whose JSON body would exceed the instance's per-fetch memory budget is refused with 413 and the error code `RESULT_TOO_LARGE`, and a request that would push the total across concurrent JSON fetches over that budget is refused with 429. If the result's size cannot be determined at all, the fetch is refused with 503 rather than served unchecked. None of the three returns partial data. To read a result of any size, request it as `?format=arrow`, `csv`, `md`, or `parquet` — those stream and are never size-limited. Paging with `offset`/`limit` is not an alternative: the rows come back in no guaranteed order, so pages are not a reliable way to read one result in parts.  Ready responses (Arrow, CSV, Markdown, JSON) carry `X-Total-Row-Count` (the full result row count, independent of offset/limit); the JSON body repeats it as `total_row_count`, so a client that cannot read response headers can still compare it against `row_count` to tell a complete result from a windowed one. Responses are streamed end-to-end, so a client can disconnect at any time and the server stops reading.  IEEE special floats (`±Inf`, `NaN`) have no canonical JSON representation. For cross-format consistency the JSON, CSV, and Markdown paths emit them as `null` / empty cells, and JSON `nullable[]` is widened to match. The Arrow IPC and Parquet bodies are binary round-trip formats and preserve the raw IEEE values; callers cross-checking a result across CSV and Parquet should not byte-compare those slots.
+        Get a saved query result by ID. Send the `X-Database-Id` header of the database it belongs to. Choose the format with `?format=` (`json`, `arrow`, `csv`, `md` or `parquet`) or the `Accept` header. `?format=` wins; an unknown value is ignored.  | Result status              | Response                                        | |----------------------------|-------------------------------------------------| | `ready`                    | 200 with the rows in the chosen format          | | `pending` or `processing`  | 202 with a `Retry-After` header. Poll again.    | | `failed`                   | 409 with `error_message`                        |  Use `offset` and `limit` to read part of the result. When more rows follow, a `Link` header with `rel=\"next\"` points to the next page. Rows have no guaranteed order, so paging is not a reliable way to read a whole result. Parquet ignores `offset` and `limit` and returns the whole file.  JSON responses have a size limit: a result too large to return as JSON gets 413 `RESULT_TOO_LARGE`. Arrow, CSV, Markdown and Parquet stream with no size limit, so use them for large results. All formats except Parquet carry `X-Total-Row-Count`, the row count of the whole result.  JSON, CSV and Markdown write `NaN` and `±Inf` as `null` or an empty cell. Arrow and Parquet keep the original values.
 
         :param id: Result ID (required)
         :type id: str
-        :param x_database_id: Database the result belongs to (required) (required)
+        :param x_database_id: ID of the database the result belongs to. Required. (required)
         :type x_database_id: str
-        :param offset: Rows to skip (default: 0)
+        :param offset: Rows to skip. Default 0.
         :type offset: int
-        :param limit: Maximum rows to return (default: unbounded)
+        :param limit: Maximum rows to return. Default: all rows.
         :type limit: int
-        :param format: `arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.
+        :param format: `json`, `arrow`, `csv`, `md` (or `markdown`) or `parquet`. Overrides the `Accept` header.
         :type format: ResultsFormatQuery
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -135,10 +135,10 @@ class ResultsApi:
     def get_result_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Database the result belongs to (required)")],
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
-        format: Annotated[Optional[ResultsFormatQuery], Field(description="`arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database the result belongs to. Required.")],
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip. Default 0.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return. Default: all rows.")] = None,
+        format: Annotated[Optional[ResultsFormatQuery], Field(description="`json`, `arrow`, `csv`, `md` (or `markdown`) or `parquet`. Overrides the `Accept` header.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -154,17 +154,17 @@ class ResultsApi:
     ) -> ApiResponse[GetResultResponse]:
         """Get result
 
-        Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.  | Result status         | Status × body                                                                | |-----------------------|------------------------------------------------------------------------------| | `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    | | `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       | | `ready` + CSV         | 200 `text/csv; charset=utf-8` — single header row, streamed batch-by-batch   | | `ready` + Markdown    | 200 `text/markdown; charset=utf-8` — GitHub-flavored pipe table, streamed   | | `ready` + Parquet     | 200 `application/vnd.apache.parquet` — raw parquet bytes (no conversion)     | | `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 | | `failed`              | 409 `application/json` `{status, result_id, error_message}`                  | | not found             | 404 `application/json` (`ApiErrorResponse`)                                  |  `?format=` accepts `arrow`, `json`, `csv`, `md`, `parquet` and takes precedence over `Accept`. `markdown` is accepted as a runtime alias for `md`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel=\"next\"` points at the following page. `?offset`/`?limit` are ignored for `format=parquet` since that path returns the underlying file unchanged.  JSON is the only format with a size limit. Building a JSON body requires holding the whole slice in memory at once, so a request whose JSON body would exceed the instance's per-fetch memory budget is refused with 413 and the error code `RESULT_TOO_LARGE`, and a request that would push the total across concurrent JSON fetches over that budget is refused with 429. If the result's size cannot be determined at all, the fetch is refused with 503 rather than served unchecked. None of the three returns partial data. To read a result of any size, request it as `?format=arrow`, `csv`, `md`, or `parquet` — those stream and are never size-limited. Paging with `offset`/`limit` is not an alternative: the rows come back in no guaranteed order, so pages are not a reliable way to read one result in parts.  Ready responses (Arrow, CSV, Markdown, JSON) carry `X-Total-Row-Count` (the full result row count, independent of offset/limit); the JSON body repeats it as `total_row_count`, so a client that cannot read response headers can still compare it against `row_count` to tell a complete result from a windowed one. Responses are streamed end-to-end, so a client can disconnect at any time and the server stops reading.  IEEE special floats (`±Inf`, `NaN`) have no canonical JSON representation. For cross-format consistency the JSON, CSV, and Markdown paths emit them as `null` / empty cells, and JSON `nullable[]` is widened to match. The Arrow IPC and Parquet bodies are binary round-trip formats and preserve the raw IEEE values; callers cross-checking a result across CSV and Parquet should not byte-compare those slots.
+        Get a saved query result by ID. Send the `X-Database-Id` header of the database it belongs to. Choose the format with `?format=` (`json`, `arrow`, `csv`, `md` or `parquet`) or the `Accept` header. `?format=` wins; an unknown value is ignored.  | Result status              | Response                                        | |----------------------------|-------------------------------------------------| | `ready`                    | 200 with the rows in the chosen format          | | `pending` or `processing`  | 202 with a `Retry-After` header. Poll again.    | | `failed`                   | 409 with `error_message`                        |  Use `offset` and `limit` to read part of the result. When more rows follow, a `Link` header with `rel=\"next\"` points to the next page. Rows have no guaranteed order, so paging is not a reliable way to read a whole result. Parquet ignores `offset` and `limit` and returns the whole file.  JSON responses have a size limit: a result too large to return as JSON gets 413 `RESULT_TOO_LARGE`. Arrow, CSV, Markdown and Parquet stream with no size limit, so use them for large results. All formats except Parquet carry `X-Total-Row-Count`, the row count of the whole result.  JSON, CSV and Markdown write `NaN` and `±Inf` as `null` or an empty cell. Arrow and Parquet keep the original values.
 
         :param id: Result ID (required)
         :type id: str
-        :param x_database_id: Database the result belongs to (required) (required)
+        :param x_database_id: ID of the database the result belongs to. Required. (required)
         :type x_database_id: str
-        :param offset: Rows to skip (default: 0)
+        :param offset: Rows to skip. Default 0.
         :type offset: int
-        :param limit: Maximum rows to return (default: unbounded)
+        :param limit: Maximum rows to return. Default: all rows.
         :type limit: int
-        :param format: `arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.
+        :param format: `json`, `arrow`, `csv`, `md` (or `markdown`) or `parquet`. Overrides the `Accept` header.
         :type format: ResultsFormatQuery
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -225,10 +225,10 @@ class ResultsApi:
     def get_result_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Result ID")],
-        x_database_id: Annotated[StrictStr, Field(description="Database the result belongs to (required)")],
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip (default: 0)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return (default: unbounded)")] = None,
-        format: Annotated[Optional[ResultsFormatQuery], Field(description="`arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="ID of the database the result belongs to. Required.")],
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Rows to skip. Default 0.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum rows to return. Default: all rows.")] = None,
+        format: Annotated[Optional[ResultsFormatQuery], Field(description="`json`, `arrow`, `csv`, `md` (or `markdown`) or `parquet`. Overrides the `Accept` header.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -244,17 +244,17 @@ class ResultsApi:
     ) -> RESTResponseType:
         """Get result
 
-        Retrieve a persisted query result by ID. The response format for the `ready` state is selected by `Accept` header or `?format=` query param; non-ready states use the same status codes and JSON body shape regardless of format.  | Result status         | Status × body                                                                | |-----------------------|------------------------------------------------------------------------------| | `ready` + JSON        | 200 `application/json` — `GetResultResponse` with `columns`, `rows`, etc.    | | `ready` + Arrow       | 200 `application/vnd.apache.arrow.stream` — schema, RecordBatches, EOS       | | `ready` + CSV         | 200 `text/csv; charset=utf-8` — single header row, streamed batch-by-batch   | | `ready` + Markdown    | 200 `text/markdown; charset=utf-8` — GitHub-flavored pipe table, streamed   | | `ready` + Parquet     | 200 `application/vnd.apache.parquet` — raw parquet bytes (no conversion)     | | `pending`/`processing`| 202 `application/json` `{status, result_id}` + `Retry-After`                 | | `failed`              | 409 `application/json` `{status, result_id, error_message}`                  | | not found             | 404 `application/json` (`ApiErrorResponse`)                                  |  `?format=` accepts `arrow`, `json`, `csv`, `md`, `parquet` and takes precedence over `Accept`. `markdown` is accepted as a runtime alias for `md`. Use `?offset=N&limit=M` to slice the result; `offset` defaults to 0 and `limit` is unbounded by default. Both must be non-negative; invalid values return 400. When a finite `limit` doesn't reach the end of the result, a `Link` header with `rel=\"next\"` points at the following page. `?offset`/`?limit` are ignored for `format=parquet` since that path returns the underlying file unchanged.  JSON is the only format with a size limit. Building a JSON body requires holding the whole slice in memory at once, so a request whose JSON body would exceed the instance's per-fetch memory budget is refused with 413 and the error code `RESULT_TOO_LARGE`, and a request that would push the total across concurrent JSON fetches over that budget is refused with 429. If the result's size cannot be determined at all, the fetch is refused with 503 rather than served unchecked. None of the three returns partial data. To read a result of any size, request it as `?format=arrow`, `csv`, `md`, or `parquet` — those stream and are never size-limited. Paging with `offset`/`limit` is not an alternative: the rows come back in no guaranteed order, so pages are not a reliable way to read one result in parts.  Ready responses (Arrow, CSV, Markdown, JSON) carry `X-Total-Row-Count` (the full result row count, independent of offset/limit); the JSON body repeats it as `total_row_count`, so a client that cannot read response headers can still compare it against `row_count` to tell a complete result from a windowed one. Responses are streamed end-to-end, so a client can disconnect at any time and the server stops reading.  IEEE special floats (`±Inf`, `NaN`) have no canonical JSON representation. For cross-format consistency the JSON, CSV, and Markdown paths emit them as `null` / empty cells, and JSON `nullable[]` is widened to match. The Arrow IPC and Parquet bodies are binary round-trip formats and preserve the raw IEEE values; callers cross-checking a result across CSV and Parquet should not byte-compare those slots.
+        Get a saved query result by ID. Send the `X-Database-Id` header of the database it belongs to. Choose the format with `?format=` (`json`, `arrow`, `csv`, `md` or `parquet`) or the `Accept` header. `?format=` wins; an unknown value is ignored.  | Result status              | Response                                        | |----------------------------|-------------------------------------------------| | `ready`                    | 200 with the rows in the chosen format          | | `pending` or `processing`  | 202 with a `Retry-After` header. Poll again.    | | `failed`                   | 409 with `error_message`                        |  Use `offset` and `limit` to read part of the result. When more rows follow, a `Link` header with `rel=\"next\"` points to the next page. Rows have no guaranteed order, so paging is not a reliable way to read a whole result. Parquet ignores `offset` and `limit` and returns the whole file.  JSON responses have a size limit: a result too large to return as JSON gets 413 `RESULT_TOO_LARGE`. Arrow, CSV, Markdown and Parquet stream with no size limit, so use them for large results. All formats except Parquet carry `X-Total-Row-Count`, the row count of the whole result.  JSON, CSV and Markdown write `NaN` and `±Inf` as `null` or an empty cell. Arrow and Parquet keep the original values.
 
         :param id: Result ID (required)
         :type id: str
-        :param x_database_id: Database the result belongs to (required) (required)
+        :param x_database_id: ID of the database the result belongs to. Required. (required)
         :type x_database_id: str
-        :param offset: Rows to skip (default: 0)
+        :param offset: Rows to skip. Default 0.
         :type offset: int
-        :param limit: Maximum rows to return (default: unbounded)
+        :param limit: Maximum rows to return. Default: all rows.
         :type limit: int
-        :param format: `arrow`, `json`, `csv`, `md`, or `parquet` — overrides the `Accept` header. `markdown` is also accepted at runtime as an alias for `md`.
+        :param format: `json`, `arrow`, `csv`, `md` (or `markdown`) or `parquet`. Overrides the `Accept` header.
         :type format: ResultsFormatQuery
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -397,9 +397,9 @@ class ResultsApi:
     @validate_call
     def list_results(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope the results to (required)")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results (default: 100, max: 1000)")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset (default: 0)")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Results to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -415,13 +415,13 @@ class ResultsApi:
     ) -> ListResultsResponse:
         """List results
 
-        List stored results for the database named by the required X-Database-Id header.
+        List saved query results in the database named by the `X-Database-Id` header, newest first.
 
-        :param x_database_id: Database to scope the results to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param limit: Maximum number of results (default: 100, max: 1000)
+        :param limit: Results to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset (default: 0)
+        :param offset: Number of results to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -474,9 +474,9 @@ class ResultsApi:
     @validate_call
     def list_results_with_http_info(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope the results to (required)")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results (default: 100, max: 1000)")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset (default: 0)")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Results to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -492,13 +492,13 @@ class ResultsApi:
     ) -> ApiResponse[ListResultsResponse]:
         """List results
 
-        List stored results for the database named by the required X-Database-Id header.
+        List saved query results in the database named by the `X-Database-Id` header, newest first.
 
-        :param x_database_id: Database to scope the results to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param limit: Maximum number of results (default: 100, max: 1000)
+        :param limit: Results to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset (default: 0)
+        :param offset: Number of results to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -551,9 +551,9 @@ class ResultsApi:
     @validate_call
     def list_results_without_preload_content(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope the results to (required)")],
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum number of results (default: 100, max: 1000)")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Pagination offset (default: 0)")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Results to return. Default 100, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip. Default 0.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -569,13 +569,13 @@ class ResultsApi:
     ) -> RESTResponseType:
         """List results
 
-        List stored results for the database named by the required X-Database-Id header.
+        List saved query results in the database named by the `X-Database-Id` header, newest first.
 
-        :param x_database_id: Database to scope the results to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param limit: Maximum number of results (default: 100, max: 1000)
+        :param limit: Results to return. Default 100, maximum 1000.
         :type limit: int
-        :param offset: Pagination offset (default: 0)
+        :param offset: Number of results to skip. Default 0.
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

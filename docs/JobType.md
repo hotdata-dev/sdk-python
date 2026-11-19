@@ -1,6 +1,6 @@
 # JobType
 
-Background job types returned by the API.
+Type of background job.
 
 ## Enum
 

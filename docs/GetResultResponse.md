@@ -1,19 +1,19 @@
 # GetResultResponse
 
-Response body for GET /results/{id} Returns status and optionally the result data
+A saved query result: its status and, once `ready`, its data.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**columns** | **List[str]** |  | [optional] 
-**error_message** | **str** |  | [optional] 
-**nullable** | **List[bool]** |  | [optional] 
+**columns** | **List[str]** | Column names, in order. Present when &#x60;status&#x60; is &#x60;ready&#x60;. | [optional] 
+**error_message** | **str** | Why the result failed. Present only when &#x60;status&#x60; is &#x60;failed&#x60;. | [optional] 
+**nullable** | **List[bool]** | Whether each column, in the same order as &#x60;columns&#x60;, can hold nulls. | [optional] 
 **result_id** | **str** |  | 
-**row_count** | **int** |  | [optional] 
-**rows** | **List[List[object]]** | Array of rows, where each row is an array of column values. | [optional] 
-**status** | **str** |  | 
-**total_row_count** | **int** | Grand total rows in the full result, ignoring &#x60;offset&#x60; and &#x60;limit&#x60;. Present whenever the result is &#x60;ready&#x60;, and carrying the same value as the &#x60;X-Total-Row-Count&#x60; response header.  Compare it against &#x60;row_count&#x60; to tell whether this body is the whole result: &#x60;row_count &lt; total_row_count&#x60; means the rest is still there, one page further on. Without it a windowed fetch cannot tell a full result from a truncated one from the body alone. | [optional] 
+**row_count** | **int** | Number of rows in this response. | [optional] 
+**rows** | **List[List[object]]** | Result rows. Each row is an array of values in column order. | [optional] 
+**status** | **str** | &#x60;pending&#x60;, &#x60;processing&#x60;, &#x60;ready&#x60; or &#x60;failed&#x60;. | 
+**total_row_count** | **int** | Number of rows in the full result, ignoring &#x60;offset&#x60; and &#x60;limit&#x60;. If &#x60;row_count&#x60; is smaller, more rows are available on later pages. | [optional] 
 
 ## Example
 

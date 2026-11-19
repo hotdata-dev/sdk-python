@@ -1,6 +1,6 @@
 # DatabaseContextEntry
 
-One context entry returned by the API.
+A named piece of text stored with a database.
 
 ## Properties
 

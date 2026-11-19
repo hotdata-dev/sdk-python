@@ -16,7 +16,7 @@ Method | HTTP request | Description
 
 Create embedding provider
 
-Register a new embedding provider that can be used to generate vector embeddings for text columns. Providers can be service-based (e.g., OpenAI) or local.
+Register a provider that turns text into vector embeddings, for use by vector indexes. `provider_type` is `service` (a remote API such as OpenAI) or `local`. Pass the API key inline as `api_key` or as a stored secret with `secret_name`, not both.
 
 ### Example
 
@@ -95,7 +95,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **201** | Embedding provider created |  -  |
 **400** | Invalid request |  -  |
-**409** | Provider with this name already exists |  -  |
+**409** | A provider with this name already exists |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -103,6 +103,8 @@ Name | Type | Description  | Notes
 > delete_embedding_provider(id)
 
 Delete embedding provider
+
+Delete an embedding provider. System providers cannot be deleted, and a provider that a vector index uses cannot be deleted until you drop the index.
 
 ### Example
 
@@ -176,7 +178,9 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **204** | Embedding provider deleted |  -  |
+**400** | System providers cannot be deleted |  -  |
 **404** | Provider not found |  -  |
+**409** | A vector index uses this provider. The message lists the indexes. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -184,6 +188,8 @@ void (empty response body)
 > EmbeddingProviderResponse get_embedding_provider(id)
 
 Get embedding provider
+
+Get an embedding provider by ID.
 
 ### Example
 
@@ -269,7 +275,7 @@ Name | Type | Description  | Notes
 
 List embedding providers
 
-List all registered embedding providers.
+List embedding providers. Built-in system providers come first, then the ones you created.
 
 ### Example
 
@@ -350,6 +356,8 @@ This endpoint does not need any parameter.
 
 Update embedding provider
 
+Update an embedding provider. Only the fields you send change. System providers cannot be updated.
+
 ### Example
 
 * Api Key Authentication (WorkspaceId):
@@ -428,7 +436,9 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Embedding provider updated |  -  |
+**400** | Invalid request, such as a system provider, both &#x60;secret_name&#x60; and &#x60;api_key&#x60;, or a secret that does not exist |  -  |
 **404** | Provider not found |  -  |
+**409** | Another provider already has this name |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

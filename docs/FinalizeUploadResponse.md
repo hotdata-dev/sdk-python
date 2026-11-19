@@ -1,6 +1,6 @@
 # FinalizeUploadResponse
 
-Response body for `POST /v1/uploads/{upload_id}/finalize`: the finalized upload, ready to be loaded into a managed table.
+A finalized upload, ready to load into a table.
 
 ## Properties
 
@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **content_type** | **str** |  | [optional] 
 **created_at** | **datetime** |  | 
-**size_bytes** | **int** | The validated size of the uploaded file in bytes. | 
+**size_bytes** | **int** | Size of the uploaded file in bytes. | 
 **status** | **str** |  | 
 **upload_id** | **str** |  | 
 

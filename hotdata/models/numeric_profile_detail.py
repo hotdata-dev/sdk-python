@@ -25,11 +25,11 @@ from typing_extensions import Self
 
 class NumericProfileDetail(BaseModel):
     """
-    High-cardinality numeric column (>200 distinct values).
+    Numeric column with more than 200 distinct values.
     """ # noqa: E501
-    max: StrictStr = Field(description="Maximum value (string to preserve precision for large integers and decimals)")
+    max: StrictStr = Field(description="Maximum value, as a string so large numbers keep full precision.")
     mean: Union[StrictFloat, StrictInt] = Field(description="Arithmetic mean")
-    min: StrictStr = Field(description="Minimum value (string to preserve precision for large integers and decimals)")
+    min: StrictStr = Field(description="Minimum value, as a string so large numbers keep full precision.")
     __properties: ClassVar[List[str]] = ["max", "mean", "min"]
 
     model_config = ConfigDict(

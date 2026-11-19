@@ -30,10 +30,10 @@ class DatabaseSummary(BaseModel):
     Summary item in GET /databases
     """ # noqa: E501
     created_at: Optional[datetime] = Field(default=None, description="When the database was created.")
-    default_catalog: StrictStr = Field(description="Name the database's default catalog answers to inside its query scope.")
-    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to inside this database's query scope. `main` unless the database declares a single schema or a `default_schema` was set at create time.")
+    default_catalog: StrictStr = Field(description="Name of the database's own catalog in SQL.")
+    default_schema: StrictStr = Field(description="Schema that unqualified table names resolve to.")
     expires_at: Optional[datetime] = None
-    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Set on a fork: which database it came from. Distinguishes a fork from an original in a listing, where the two are otherwise indistinguishable.")
+    forked_from: Optional[ForkedFromInfo] = Field(default=None, description="Present on a fork: the database it was copied from.")
     id: StrictStr
     name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["created_at", "default_catalog", "default_schema", "expires_at", "forked_from", "id", "name"]

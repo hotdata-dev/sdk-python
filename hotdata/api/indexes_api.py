@@ -45,7 +45,7 @@ class IndexesApi:
     @validate_call
     def create_index(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -64,9 +64,9 @@ class IndexesApi:
     ) -> IndexInfoResponse:
         """Create an index on a table
 
-        Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded, and must not declare a sort order (`sorted_by`): a table with a sort order cannot be indexed. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request refused for any of these reasons gets 400, including when `async` is set. The request body describes the rules in full.
+        Create a sorted, BM25 full-text or vector index on a table. The table must hold loaded data and must not declare `sorted_by`.  A table can have only one vector index. A vector index that generates its own embeddings (with `embedding_provider_id`) must be the only index on its table. Requests that break these rules return 400, even with `async` set.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -128,7 +128,7 @@ class IndexesApi:
     @validate_call
     def create_index_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -147,9 +147,9 @@ class IndexesApi:
     ) -> ApiResponse[IndexInfoResponse]:
         """Create an index on a table
 
-        Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded, and must not declare a sort order (`sorted_by`): a table with a sort order cannot be indexed. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request refused for any of these reasons gets 400, including when `async` is set. The request body describes the rules in full.
+        Create a sorted, BM25 full-text or vector index on a table. The table must hold loaded data and must not declare `sorted_by`.  A table can have only one vector index. A vector index that generates its own embeddings (with `embedding_provider_id`) must be the only index on its table. Requests that break these rules return 400, even with `async` set.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -211,7 +211,7 @@ class IndexesApi:
     @validate_call
     def create_index_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         create_index_request: CreateIndexRequest,
@@ -230,9 +230,9 @@ class IndexesApi:
     ) -> RESTResponseType:
         """Create an index on a table
 
-        Create a sorted, BM25 full-text, or vector index on a table. The table must have data loaded, and must not declare a sort order (`sorted_by`): a table with a sort order cannot be indexed. A table can hold several indexes, with two limits: it holds at most one vector index, whichever algorithm it uses; and a vector index that generates its own embeddings (created with `embedding_provider_id`) must be the only index on its table, so it cannot be added alongside an existing index and no further index can be added alongside it. A request refused for any of these reasons gets 400, including when `async` is set. The request body describes the rules in full.
+        Create a sorted, BM25 full-text or vector index on a table. The table must hold loaded data and must not declare `sorted_by`.  A table can have only one vector index. A vector index that generates its own embeddings (with `embedding_provider_id`) must be the only index on its table. Requests that break these rules return 400, even with `async` set.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -377,7 +377,7 @@ class IndexesApi:
     @validate_call
     def delete_index(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -396,9 +396,9 @@ class IndexesApi:
     ) -> None:
         """Delete an index
 
-        Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
+        Delete an index from a table. Returns 409 while a load into the table is running; retry when it finishes. Deleting a vector index that generated its own embeddings keeps the embedding column in the table.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -459,7 +459,7 @@ class IndexesApi:
     @validate_call
     def delete_index_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -478,9 +478,9 @@ class IndexesApi:
     ) -> ApiResponse[None]:
         """Delete an index
 
-        Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
+        Delete an index from a table. Returns 409 while a load into the table is running; retry when it finishes. Deleting a vector index that generated its own embeddings keeps the embedding column in the table.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -541,7 +541,7 @@ class IndexesApi:
     @validate_call
     def delete_index_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         index_name: Annotated[StrictStr, Field(description="Index name")],
@@ -560,9 +560,9 @@ class IndexesApi:
     ) -> RESTResponseType:
         """Delete an index
 
-        Delete a specific index from a table. An index cannot be deleted while a load into its table is running; that request gets 409 and can be retried once the load finishes. Deleting a vector index that generated its own embeddings keeps the generated column as an ordinary column of the table.
+        Delete an index from a table. Returns 409 while a load into the table is running; retry when it finishes. Deleting a vector index that generated its own embeddings keeps the embedding column in the table.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -693,7 +693,7 @@ class IndexesApi:
     @validate_call
     def list_indexes(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -711,9 +711,9 @@ class IndexesApi:
     ) -> ListIndexesResponse:
         """List indexes on a table
 
-        List all indexes created on a table.
+        List the indexes on a table.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -770,7 +770,7 @@ class IndexesApi:
     @validate_call
     def list_indexes_with_http_info(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -788,9 +788,9 @@ class IndexesApi:
     ) -> ApiResponse[ListIndexesResponse]:
         """List indexes on a table
 
-        List all indexes created on a table.
+        List the indexes on a table.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -847,7 +847,7 @@ class IndexesApi:
     @validate_call
     def list_indexes_without_preload_content(
         self,
-        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`, as returned when the database is created or fetched")],
+        connection_id: Annotated[StrictStr, Field(description="The database's `default_connection_id`")],
         var_schema: Annotated[StrictStr, Field(description="Schema name")],
         table: Annotated[StrictStr, Field(description="Table name")],
         _request_timeout: Union[
@@ -865,9 +865,9 @@ class IndexesApi:
     ) -> RESTResponseType:
         """List indexes on a table
 
-        List all indexes created on a table.
+        List the indexes on a table.
 
-        :param connection_id: The database's `default_connection_id`, as returned when the database is created or fetched (required)
+        :param connection_id: The database's `default_connection_id` (required)
         :type connection_id: str
         :param var_schema: Schema name (required)
         :type var_schema: str
@@ -991,13 +991,13 @@ class IndexesApi:
     @validate_call
     def list_indexes_collection(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope to (required)")],
-        connection_id: Annotated[Optional[StrictStr], Field(description="Filter to one connection")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name")] = None,
         table: Annotated[Optional[StrictStr], Field(description="Filter by table name")] = None,
-        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max indexes per page")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
+        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type: `sorted`, `bm25` or `vector`")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Indexes per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1013,21 +1013,21 @@ class IndexesApi:
     ) -> ListIndexesPageResponse:
         """List indexes across tables in a database
 
-        List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+        List the indexes in the database named by the `X-Database-Id` header, one page at a time. Filter by connection, schema, table or index type.
 
-        :param x_database_id: Database to scope to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param connection_id: Filter to one connection
+        :param connection_id: Filter by connection ID
         :type connection_id: str
         :param var_schema: Filter by schema name
         :type var_schema: str
         :param table: Filter by table name
         :type table: str
-        :param index_type: Filter by index type
+        :param index_type: Filter by index type: `sorted`, `bm25` or `vector`
         :type index_type: str
-        :param limit: Max indexes per page
+        :param limit: Indexes per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1085,13 +1085,13 @@ class IndexesApi:
     @validate_call
     def list_indexes_collection_with_http_info(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope to (required)")],
-        connection_id: Annotated[Optional[StrictStr], Field(description="Filter to one connection")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name")] = None,
         table: Annotated[Optional[StrictStr], Field(description="Filter by table name")] = None,
-        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max indexes per page")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
+        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type: `sorted`, `bm25` or `vector`")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Indexes per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1107,21 +1107,21 @@ class IndexesApi:
     ) -> ApiResponse[ListIndexesPageResponse]:
         """List indexes across tables in a database
 
-        List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+        List the indexes in the database named by the `X-Database-Id` header, one page at a time. Filter by connection, schema, table or index type.
 
-        :param x_database_id: Database to scope to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param connection_id: Filter to one connection
+        :param connection_id: Filter by connection ID
         :type connection_id: str
         :param var_schema: Filter by schema name
         :type var_schema: str
         :param table: Filter by table name
         :type table: str
-        :param index_type: Filter by index type
+        :param index_type: Filter by index type: `sorted`, `bm25` or `vector`
         :type index_type: str
-        :param limit: Max indexes per page
+        :param limit: Indexes per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1179,13 +1179,13 @@ class IndexesApi:
     @validate_call
     def list_indexes_collection_without_preload_content(
         self,
-        x_database_id: Annotated[StrictStr, Field(description="Database to scope to (required)")],
-        connection_id: Annotated[Optional[StrictStr], Field(description="Filter to one connection")] = None,
+        x_database_id: Annotated[StrictStr, Field(description="Database ID. Required.")],
+        connection_id: Annotated[Optional[StrictStr], Field(description="Filter by connection ID")] = None,
         var_schema: Annotated[Optional[StrictStr], Field(description="Filter by schema name")] = None,
         table: Annotated[Optional[StrictStr], Field(description="Filter by table name")] = None,
-        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max indexes per page")] = None,
-        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor")] = None,
+        index_type: Annotated[Optional[StrictStr], Field(description="Filter by index type: `sorted`, `bm25` or `vector`")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Indexes per page. Default 100, maximum 1000.")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="The `next_cursor` from the previous page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1201,21 +1201,21 @@ class IndexesApi:
     ) -> RESTResponseType:
         """List indexes across tables in a database
 
-        List all indexes in the database identified by the required X-Database-Id header, paginated. Optional filters narrow by connection, schema, table, or index type.
+        List the indexes in the database named by the `X-Database-Id` header, one page at a time. Filter by connection, schema, table or index type.
 
-        :param x_database_id: Database to scope to (required) (required)
+        :param x_database_id: Database ID. Required. (required)
         :type x_database_id: str
-        :param connection_id: Filter to one connection
+        :param connection_id: Filter by connection ID
         :type connection_id: str
         :param var_schema: Filter by schema name
         :type var_schema: str
         :param table: Filter by table name
         :type table: str
-        :param index_type: Filter by index type
+        :param index_type: Filter by index type: `sorted`, `bm25` or `vector`
         :type index_type: str
-        :param limit: Max indexes per page
+        :param limit: Indexes per page. Default 100, maximum 1000.
         :type limit: int
-        :param cursor: Pagination cursor
+        :param cursor: The `next_cursor` from the previous page
         :type cursor: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

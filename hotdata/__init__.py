@@ -34,7 +34,9 @@ __all__ = [
     "QueryApi",
     "QueryRunsApi",
     "ResultsApi",
+    "RollupsApi",
     "SavedQueriesApi",
+    "StreamsApi",
     "UploadsApi",
     "UsageApi",
     "WorkspacesApi",
@@ -80,6 +82,7 @@ __all__ = [
     "CreateEmbeddingProviderResponse",
     "CreateIndexRequest",
     "CreateSavedQueryRequest",
+    "CreateStreamRequest",
     "CreateUploadRequest",
     "CreateWorkspaceRequest",
     "CreateWorkspaceResponse",
@@ -92,6 +95,7 @@ __all__ = [
     "DatabaseDetailResponse",
     "DatabaseLineageResponse",
     "DatabaseSummary",
+    "DeclareRollupRequest",
     "DeleteDatabaseBatchResponse",
     "DiscoveryStatus",
     "EmbeddingProviderResponse",
@@ -109,6 +113,8 @@ __all__ = [
     "IndexInfoResponse",
     "IndexStatus",
     "InformationSchemaResponse",
+    "IngestStreamRequest",
+    "IngestStreamResponse",
     "JobResult",
     "JobStatus",
     "JobStatusResponse",
@@ -124,6 +130,7 @@ __all__ = [
     "ListJobsResponse",
     "ListQueryRunsResponse",
     "ListResultsResponse",
+    "ListRollupsResponse",
     "ListSavedQueriesResponse",
     "ListSavedQueryVersionsResponse",
     "ListWorkspacesResponse",
@@ -141,9 +148,19 @@ __all__ = [
     "QueryRunInfo",
     "ResultInfo",
     "ResultsFormatQuery",
+    "Rollup",
+    "RollupBuildResponse",
+    "RollupMeasure",
+    "RollupStatus",
+    "RollupUsage",
     "SavedQueryDetail",
     "SavedQuerySummary",
     "SavedQueryVersionInfo",
+    "SetRollupWindowRequest",
+    "StreamColumn",
+    "StreamColumnHint",
+    "StreamColumnSource",
+    "StreamResponse",
     "SubmitJobResponse",
     "TableInfo",
     "TableLayout",
@@ -175,7 +192,9 @@ from hotdata.api.jobs_api import JobsApi as JobsApi
 from hotdata.api.query_api import QueryApi as QueryApi
 from hotdata.api.query_runs_api import QueryRunsApi as QueryRunsApi
 from hotdata.api.results_api import ResultsApi as ResultsApi
+from hotdata.api.rollups_api import RollupsApi as RollupsApi
 from hotdata.api.saved_queries_api import SavedQueriesApi as SavedQueriesApi
+from hotdata.api.streams_api import StreamsApi as StreamsApi
 from hotdata.api.uploads_api import UploadsApi as UploadsApi
 from hotdata.api.usage_api import UsageApi as UsageApi
 from hotdata.api.workspaces_api import WorkspacesApi as WorkspacesApi
@@ -225,6 +244,7 @@ from hotdata.models.create_embedding_provider_request import CreateEmbeddingProv
 from hotdata.models.create_embedding_provider_response import CreateEmbeddingProviderResponse as CreateEmbeddingProviderResponse
 from hotdata.models.create_index_request import CreateIndexRequest as CreateIndexRequest
 from hotdata.models.create_saved_query_request import CreateSavedQueryRequest as CreateSavedQueryRequest
+from hotdata.models.create_stream_request import CreateStreamRequest as CreateStreamRequest
 from hotdata.models.create_upload_request import CreateUploadRequest as CreateUploadRequest
 from hotdata.models.create_workspace_request import CreateWorkspaceRequest as CreateWorkspaceRequest
 from hotdata.models.create_workspace_response import CreateWorkspaceResponse as CreateWorkspaceResponse
@@ -237,6 +257,7 @@ from hotdata.models.database_default_table_decl import DatabaseDefaultTableDecl 
 from hotdata.models.database_detail_response import DatabaseDetailResponse as DatabaseDetailResponse
 from hotdata.models.database_lineage_response import DatabaseLineageResponse as DatabaseLineageResponse
 from hotdata.models.database_summary import DatabaseSummary as DatabaseSummary
+from hotdata.models.declare_rollup_request import DeclareRollupRequest as DeclareRollupRequest
 from hotdata.models.delete_database_batch_response import DeleteDatabaseBatchResponse as DeleteDatabaseBatchResponse
 from hotdata.models.discovery_status import DiscoveryStatus as DiscoveryStatus
 from hotdata.models.embedding_provider_response import EmbeddingProviderResponse as EmbeddingProviderResponse
@@ -254,6 +275,8 @@ from hotdata.models.index_entry_response import IndexEntryResponse as IndexEntry
 from hotdata.models.index_info_response import IndexInfoResponse as IndexInfoResponse
 from hotdata.models.index_status import IndexStatus as IndexStatus
 from hotdata.models.information_schema_response import InformationSchemaResponse as InformationSchemaResponse
+from hotdata.models.ingest_stream_request import IngestStreamRequest as IngestStreamRequest
+from hotdata.models.ingest_stream_response import IngestStreamResponse as IngestStreamResponse
 from hotdata.models.job_result import JobResult as JobResult
 from hotdata.models.job_status import JobStatus as JobStatus
 from hotdata.models.job_status_response import JobStatusResponse as JobStatusResponse
@@ -269,6 +292,7 @@ from hotdata.models.list_indexes_response import ListIndexesResponse as ListInde
 from hotdata.models.list_jobs_response import ListJobsResponse as ListJobsResponse
 from hotdata.models.list_query_runs_response import ListQueryRunsResponse as ListQueryRunsResponse
 from hotdata.models.list_results_response import ListResultsResponse as ListResultsResponse
+from hotdata.models.list_rollups_response import ListRollupsResponse as ListRollupsResponse
 from hotdata.models.list_saved_queries_response import ListSavedQueriesResponse as ListSavedQueriesResponse
 from hotdata.models.list_saved_query_versions_response import ListSavedQueryVersionsResponse as ListSavedQueryVersionsResponse
 from hotdata.models.list_workspaces_response import ListWorkspacesResponse as ListWorkspacesResponse
@@ -286,9 +310,19 @@ from hotdata.models.query_response import QueryResponse as QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo as QueryRunInfo
 from hotdata.models.result_info import ResultInfo as ResultInfo
 from hotdata.models.results_format_query import ResultsFormatQuery as ResultsFormatQuery
+from hotdata.models.rollup import Rollup as Rollup
+from hotdata.models.rollup_build_response import RollupBuildResponse as RollupBuildResponse
+from hotdata.models.rollup_measure import RollupMeasure as RollupMeasure
+from hotdata.models.rollup_status import RollupStatus as RollupStatus
+from hotdata.models.rollup_usage import RollupUsage as RollupUsage
 from hotdata.models.saved_query_detail import SavedQueryDetail as SavedQueryDetail
 from hotdata.models.saved_query_summary import SavedQuerySummary as SavedQuerySummary
 from hotdata.models.saved_query_version_info import SavedQueryVersionInfo as SavedQueryVersionInfo
+from hotdata.models.set_rollup_window_request import SetRollupWindowRequest as SetRollupWindowRequest
+from hotdata.models.stream_column import StreamColumn as StreamColumn
+from hotdata.models.stream_column_hint import StreamColumnHint as StreamColumnHint
+from hotdata.models.stream_column_source import StreamColumnSource as StreamColumnSource
+from hotdata.models.stream_response import StreamResponse as StreamResponse
 from hotdata.models.submit_job_response import SubmitJobResponse as SubmitJobResponse
 from hotdata.models.table_info import TableInfo as TableInfo
 from hotdata.models.table_layout import TableLayout as TableLayout

@@ -44,7 +44,7 @@ class QueryApi:
     def query(
         self,
         query_request: QueryRequest,
-        x_database_id: Annotated[Optional[StrictStr], Field(description="Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="ID of the database to query. Required unless you set the `database_id` body field.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -60,11 +60,11 @@ class QueryApi:
     ) -> QueryResponse:
         """Execute SQL query
 
-        Execute a SQL query scoped to a database. A database is the only window into catalogs: the query sees only that database's auto `default` catalog plus any catalogs explicitly attached to it. Select the database with EITHER the `X-Database-Id` header OR the `database_id` body field (exactly one must be given; if both are sent and disagree, that's a 400). Use standard Postgres-compatible SQL; reference the default catalog as `default.<schema>.<table>` (or just `<schema>.<table>` / `<table>`) and attached catalogs by their alias. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  To receive the rows as an Arrow IPC stream instead of JSON, send `Accept: application/vnd.apache.arrow.stream` (without also listing `application/json`). A query that completes within the request then returns 200 with an Arrow IPC stream body (schema, record batches, end-of-stream), and the values the JSON body would carry are sent as response headers: `X-Query-Run-Id`, `X-Result-Id` (when the result was saved), `X-Total-Row-Count`, `X-Execution-Time-Ms`, and `X-Query-Warning` (when there is a warning). Arrow keeps `±Inf` and `NaN` float values as they are. An Arrow response always holds the whole result: if the result is larger than an inline response can hold, the request returns 202 with the query run ticket and an `X-Result-Id` header instead, and the full result is read from `GET /v1/results/{id}?format=arrow` once it is ready. A query that goes async, and every error, return the same JSON bodies as without the header.  The endpoint also runs write statements: `INSERT INTO … VALUES … / SELECT …` (append only), `UPDATE … SET … [WHERE …]`, `DELETE FROM … [WHERE …]`, `CREATE TABLE`, `CREATE TABLE … AS SELECT …` and `DROP TABLE`. A write runs once, inline, and answers with a one-row result holding a single `rows_affected` column. Writes need an API key holding both the `read` and `write` permissions, may only target the database's own `default` catalog (attached catalogs stay read-only), and are never run from a saved query. A `DELETE` reports the number of rows its `WHERE` matched and deleted; `DELETE … LIMIT`, `USING` and `RETURNING` are refused. An `UPDATE` reports the number of rows its `WHERE` matched. Each `SET` value is computed from the row as it was before the statement, so `SET a = b, b = a` swaps two values. An `UPDATE` cannot use a table alias, `FROM`, `RETURNING`, `LIMIT` or `ORDER BY`, cannot set one column twice, and cannot set a column that a vector index generates; that column is computed again from its source text. On a table that declares `constant_per_key`, an `UPDATE` cannot set a key column or a `constant_per_key` column. Every other mutation (`ALTER`, views, `COPY`, transactions, `EXPLAIN` of a write) is refused.
+        Run a SQL query against one database. Choose the database with the `X-Database-Id` header or the `database_id` body field; if you send both, they must match. The query sees the database's `default` catalog and any catalogs attached to it, by their alias. Rows come back inline, with a `result_id` for reading the result again from the Results API.  **Async.** Set `async: true` to get a query run ID back at once and poll for the result. Add `async_after_ms` (1000 to 30000) to wait that long for an inline result first.  **Arrow.** Send `Accept: application/vnd.apache.arrow.stream` (without `application/json`) to get the rows as an Arrow IPC stream. The values the JSON body would carry come as `X-Query-Run-Id`, `X-Result-Id`, `X-Total-Row-Count`, `X-Execution-Time-Ms`, `X-Query-Warning` and `X-Rollup` headers. If the result is too large to send inline, you get a 202 with an `X-Result-Id` header; read the full result from `GET /v1/results/{id}?format=arrow`. Async runs and errors still return JSON.  **Writes.** `INSERT`, `UPDATE`, `DELETE`, `CREATE TABLE`, `CREATE TABLE … AS SELECT` and `DROP TABLE` are supported. A write needs an API key with both the `read` and `write` permissions, can only change the database's `default` catalog, and returns one row with a `rows_affected` column. `INSERT` only appends. `UPDATE` and `DELETE` do not support `RETURNING`, `LIMIT` or `ORDER BY`. `UPDATE` also refuses table aliases, `FROM`, and setting a vector-index column, or a key or `constant_per_key` column. Other changes (`ALTER`, views, `COPY`, transactions) are refused.
 
         :param query_request: (required)
         :type query_request: QueryRequest
-        :param x_database_id: Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :param x_database_id: ID of the database to query. Required unless you set the `database_id` body field.
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -101,7 +101,9 @@ class QueryApi:
             '200': "QueryResponse",
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '408': "ApiErrorResponse",
             '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
             '503': "ApiErrorResponse",
@@ -121,7 +123,7 @@ class QueryApi:
     def query_with_http_info(
         self,
         query_request: QueryRequest,
-        x_database_id: Annotated[Optional[StrictStr], Field(description="Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="ID of the database to query. Required unless you set the `database_id` body field.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -137,11 +139,11 @@ class QueryApi:
     ) -> ApiResponse[QueryResponse]:
         """Execute SQL query
 
-        Execute a SQL query scoped to a database. A database is the only window into catalogs: the query sees only that database's auto `default` catalog plus any catalogs explicitly attached to it. Select the database with EITHER the `X-Database-Id` header OR the `database_id` body field (exactly one must be given; if both are sent and disagree, that's a 400). Use standard Postgres-compatible SQL; reference the default catalog as `default.<schema>.<table>` (or just `<schema>.<table>` / `<table>`) and attached catalogs by their alias. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  To receive the rows as an Arrow IPC stream instead of JSON, send `Accept: application/vnd.apache.arrow.stream` (without also listing `application/json`). A query that completes within the request then returns 200 with an Arrow IPC stream body (schema, record batches, end-of-stream), and the values the JSON body would carry are sent as response headers: `X-Query-Run-Id`, `X-Result-Id` (when the result was saved), `X-Total-Row-Count`, `X-Execution-Time-Ms`, and `X-Query-Warning` (when there is a warning). Arrow keeps `±Inf` and `NaN` float values as they are. An Arrow response always holds the whole result: if the result is larger than an inline response can hold, the request returns 202 with the query run ticket and an `X-Result-Id` header instead, and the full result is read from `GET /v1/results/{id}?format=arrow` once it is ready. A query that goes async, and every error, return the same JSON bodies as without the header.  The endpoint also runs write statements: `INSERT INTO … VALUES … / SELECT …` (append only), `UPDATE … SET … [WHERE …]`, `DELETE FROM … [WHERE …]`, `CREATE TABLE`, `CREATE TABLE … AS SELECT …` and `DROP TABLE`. A write runs once, inline, and answers with a one-row result holding a single `rows_affected` column. Writes need an API key holding both the `read` and `write` permissions, may only target the database's own `default` catalog (attached catalogs stay read-only), and are never run from a saved query. A `DELETE` reports the number of rows its `WHERE` matched and deleted; `DELETE … LIMIT`, `USING` and `RETURNING` are refused. An `UPDATE` reports the number of rows its `WHERE` matched. Each `SET` value is computed from the row as it was before the statement, so `SET a = b, b = a` swaps two values. An `UPDATE` cannot use a table alias, `FROM`, `RETURNING`, `LIMIT` or `ORDER BY`, cannot set one column twice, and cannot set a column that a vector index generates; that column is computed again from its source text. On a table that declares `constant_per_key`, an `UPDATE` cannot set a key column or a `constant_per_key` column. Every other mutation (`ALTER`, views, `COPY`, transactions, `EXPLAIN` of a write) is refused.
+        Run a SQL query against one database. Choose the database with the `X-Database-Id` header or the `database_id` body field; if you send both, they must match. The query sees the database's `default` catalog and any catalogs attached to it, by their alias. Rows come back inline, with a `result_id` for reading the result again from the Results API.  **Async.** Set `async: true` to get a query run ID back at once and poll for the result. Add `async_after_ms` (1000 to 30000) to wait that long for an inline result first.  **Arrow.** Send `Accept: application/vnd.apache.arrow.stream` (without `application/json`) to get the rows as an Arrow IPC stream. The values the JSON body would carry come as `X-Query-Run-Id`, `X-Result-Id`, `X-Total-Row-Count`, `X-Execution-Time-Ms`, `X-Query-Warning` and `X-Rollup` headers. If the result is too large to send inline, you get a 202 with an `X-Result-Id` header; read the full result from `GET /v1/results/{id}?format=arrow`. Async runs and errors still return JSON.  **Writes.** `INSERT`, `UPDATE`, `DELETE`, `CREATE TABLE`, `CREATE TABLE … AS SELECT` and `DROP TABLE` are supported. A write needs an API key with both the `read` and `write` permissions, can only change the database's `default` catalog, and returns one row with a `rows_affected` column. `INSERT` only appends. `UPDATE` and `DELETE` do not support `RETURNING`, `LIMIT` or `ORDER BY`. `UPDATE` also refuses table aliases, `FROM`, and setting a vector-index column, or a key or `constant_per_key` column. Other changes (`ALTER`, views, `COPY`, transactions) are refused.
 
         :param query_request: (required)
         :type query_request: QueryRequest
-        :param x_database_id: Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :param x_database_id: ID of the database to query. Required unless you set the `database_id` body field.
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -178,7 +180,9 @@ class QueryApi:
             '200': "QueryResponse",
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '408': "ApiErrorResponse",
             '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
             '503': "ApiErrorResponse",
@@ -198,7 +202,7 @@ class QueryApi:
     def query_without_preload_content(
         self,
         query_request: QueryRequest,
-        x_database_id: Annotated[Optional[StrictStr], Field(description="Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.")] = None,
+        x_database_id: Annotated[Optional[StrictStr], Field(description="ID of the database to query. Required unless you set the `database_id` body field.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -214,11 +218,11 @@ class QueryApi:
     ) -> RESTResponseType:
         """Execute SQL query
 
-        Execute a SQL query scoped to a database. A database is the only window into catalogs: the query sees only that database's auto `default` catalog plus any catalogs explicitly attached to it. Select the database with EITHER the `X-Database-Id` header OR the `database_id` body field (exactly one must be given; if both are sent and disagree, that's a 400). Use standard Postgres-compatible SQL; reference the default catalog as `default.<schema>.<table>` (or just `<schema>.<table>` / `<table>`) and attached catalogs by their alias. Results are returned inline and a `result_id` is provided for later retrieval via the Results API.  Set `async: true` to execute asynchronously — returns a query run ID for polling. Optionally set `async_after_ms` to attempt synchronous execution first, falling back to async if the query exceeds the timeout.  To receive the rows as an Arrow IPC stream instead of JSON, send `Accept: application/vnd.apache.arrow.stream` (without also listing `application/json`). A query that completes within the request then returns 200 with an Arrow IPC stream body (schema, record batches, end-of-stream), and the values the JSON body would carry are sent as response headers: `X-Query-Run-Id`, `X-Result-Id` (when the result was saved), `X-Total-Row-Count`, `X-Execution-Time-Ms`, and `X-Query-Warning` (when there is a warning). Arrow keeps `±Inf` and `NaN` float values as they are. An Arrow response always holds the whole result: if the result is larger than an inline response can hold, the request returns 202 with the query run ticket and an `X-Result-Id` header instead, and the full result is read from `GET /v1/results/{id}?format=arrow` once it is ready. A query that goes async, and every error, return the same JSON bodies as without the header.  The endpoint also runs write statements: `INSERT INTO … VALUES … / SELECT …` (append only), `UPDATE … SET … [WHERE …]`, `DELETE FROM … [WHERE …]`, `CREATE TABLE`, `CREATE TABLE … AS SELECT …` and `DROP TABLE`. A write runs once, inline, and answers with a one-row result holding a single `rows_affected` column. Writes need an API key holding both the `read` and `write` permissions, may only target the database's own `default` catalog (attached catalogs stay read-only), and are never run from a saved query. A `DELETE` reports the number of rows its `WHERE` matched and deleted; `DELETE … LIMIT`, `USING` and `RETURNING` are refused. An `UPDATE` reports the number of rows its `WHERE` matched. Each `SET` value is computed from the row as it was before the statement, so `SET a = b, b = a` swaps two values. An `UPDATE` cannot use a table alias, `FROM`, `RETURNING`, `LIMIT` or `ORDER BY`, cannot set one column twice, and cannot set a column that a vector index generates; that column is computed again from its source text. On a table that declares `constant_per_key`, an `UPDATE` cannot set a key column or a `constant_per_key` column. Every other mutation (`ALTER`, views, `COPY`, transactions, `EXPLAIN` of a write) is refused.
+        Run a SQL query against one database. Choose the database with the `X-Database-Id` header or the `database_id` body field; if you send both, they must match. The query sees the database's `default` catalog and any catalogs attached to it, by their alias. Rows come back inline, with a `result_id` for reading the result again from the Results API.  **Async.** Set `async: true` to get a query run ID back at once and poll for the result. Add `async_after_ms` (1000 to 30000) to wait that long for an inline result first.  **Arrow.** Send `Accept: application/vnd.apache.arrow.stream` (without `application/json`) to get the rows as an Arrow IPC stream. The values the JSON body would carry come as `X-Query-Run-Id`, `X-Result-Id`, `X-Total-Row-Count`, `X-Execution-Time-Ms`, `X-Query-Warning` and `X-Rollup` headers. If the result is too large to send inline, you get a 202 with an `X-Result-Id` header; read the full result from `GET /v1/results/{id}?format=arrow`. Async runs and errors still return JSON.  **Writes.** `INSERT`, `UPDATE`, `DELETE`, `CREATE TABLE`, `CREATE TABLE … AS SELECT` and `DROP TABLE` are supported. A write needs an API key with both the `read` and `write` permissions, can only change the database's `default` catalog, and returns one row with a `rows_affected` column. `INSERT` only appends. `UPDATE` and `DELETE` do not support `RETURNING`, `LIMIT` or `ORDER BY`. `UPDATE` also refuses table aliases, `FROM`, and setting a vector-index column, or a key or `constant_per_key` column. Other changes (`ALTER`, views, `COPY`, transactions) are refused.
 
         :param query_request: (required)
         :type query_request: QueryRequest
-        :param x_database_id: Database id to scope the query to. Required unless the `database_id` body field is set; if both are present they must match. Only that database's catalogs are visible during planning. A malformed value is a 400; an unknown database id is a 404.
+        :param x_database_id: ID of the database to query. Required unless you set the `database_id` body field.
         :type x_database_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -255,7 +259,9 @@ class QueryApi:
             '200': "QueryResponse",
             '202': "AsyncQueryResponse",
             '400': "ApiErrorResponse",
+            '403': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '408': "ApiErrorResponse",
             '429': "ApiErrorResponse",
             '500': "ApiErrorResponse",
             '503': "ApiErrorResponse",

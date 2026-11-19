@@ -28,23 +28,23 @@ from typing_extensions import Self
 
 class IndexEntryResponse(BaseModel):
     """
-    One index in a cross-table listing: the index itself plus the connection, schema, and table it belongs to.
+    An index, with the table it belongs to.
     """ # noqa: E501
-    algorithm: Optional[StrictStr] = Field(default=None, description="How this vector index organises the vectors it searches: `hnsw` or `ivf`. Absent for BM25 and sorted indexes.")
-    columns: List[StrictStr]
-    created_at: datetime
-    index_name: StrictStr
-    index_type: StrictStr
-    metric: Optional[StrictStr] = Field(default=None, description="Distance metric this index was built with. Only present for vector indexes.")
-    nlist: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Number of clusters an `ivf` index was built with. This can be smaller than the `nlist` requested when the index was created, because the number is capped by how many vectors the clusters were fitted to. Absent for every other kind of index.")
-    probe_fraction: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="How much of an `ivf` index a search reads, as a fraction greater than 0 and at most 1, when the index was created with one. When absent, the server chooses how much each search reads: a width measured on this index's own data when it was built, scaled to the number of results a search asks for, or a server default when no measurement could be made. Absent for every other kind of index.")
-    source_column: Optional[StrictStr] = Field(default=None, description="Source text column for an embedding-backed vector index. A query searches it via `vector_distance(<source_column>, …)`; the indexed `columns` hold the generated embedding column instead. Absent for BM25, sorted, and direct (existing-column) vector indexes.")
+    algorithm: Optional[StrictStr] = Field(default=None, description="Vector index algorithm: `hnsw` or `ivf`. Absent for other index types.")
+    columns: List[StrictStr] = Field(description="Indexed columns.")
+    created_at: datetime = Field(description="When the index was created.")
+    index_name: StrictStr = Field(description="Index name.")
+    index_type: StrictStr = Field(description="Index type: `sorted`, `bm25` or `vector`.")
+    metric: Optional[StrictStr] = Field(default=None, description="Distance metric of a vector index. Absent for other index types.")
+    nlist: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Number of clusters an `ivf` index was built with. Can be lower than the requested `nlist`, because it is capped by the number of vectors the clusters were fitted to.")
+    probe_fraction: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Share of an `ivf` index each search reads, from 0 (exclusive) to 1, when set at creation. When absent, Hotdata picks the share for each search.")
+    source_column: Optional[StrictStr] = Field(default=None, description="Text column an embedding-based vector index was built from; search it with `vector_distance(<source_column>, …)`. `columns` then holds the generated embedding column. Absent for other indexes.")
     status: IndexStatus
-    updated_at: datetime
-    vector_precision: Optional[StrictStr] = Field(default=None, description="How precisely this vector index stores each number of a vector. Always present for an `ivf` index, which stores `int8` unless it was created with another precision. For an `hnsw` index it is present only when the index was created with an explicit precision; absent means it stores at the same precision as the column. Absent for BM25 and sorted indexes.")
-    connection_id: Optional[StrictStr] = None
-    schema_name: StrictStr
-    table_name: StrictStr
+    updated_at: datetime = Field(description="When the index was last updated.")
+    vector_precision: Optional[StrictStr] = Field(default=None, description="Precision a vector index stores each number at, such as `int8`. Always set for `ivf` (default `int8`); for `hnsw`, set only when chosen at creation, and otherwise it matches the column.")
+    connection_id: Optional[StrictStr] = Field(default=None, description="ID of the connection that holds the table.")
+    schema_name: StrictStr = Field(description="Schema of the table.")
+    table_name: StrictStr = Field(description="Table the index is on.")
     __properties: ClassVar[List[str]] = ["algorithm", "columns", "created_at", "index_name", "index_type", "metric", "nlist", "probe_fraction", "source_column", "status", "updated_at", "vector_precision", "connection_id", "schema_name", "table_name"]
 
     model_config = ConfigDict(

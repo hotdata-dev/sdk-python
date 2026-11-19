@@ -1,15 +1,15 @@
 # ManagedTableConstantPerKeyResponse
 
-The declaration as it now stands after a `constant-per-key` write.  Echoed back rather than returning `204` so a caller can confirm what actually took effect instead of assuming its request applied — the same reason `/v1/information_schema` reports the field.
+A table's `constant_per_key` setting after an update.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**connection_id** | **str** | Connection backing the catalog the table belongs to. For a database default catalog this is the database&#39;s &#x60;default_connection_id&#x60;, so it is the value that addresses the table through the connection-scoped endpoints — not the database id the request may have used. | 
-**constant_per_key** | **List[str]** | The columns now declared constant per key. Empty means no declaration, i.e. the unrestricted search. | 
-**var_schema** | **str** | Schema the table belongs to, as stored: lowercased, which may differ from the spelling in the request path. | 
-**table** | **str** | Table the declaration was written to, as stored: lowercased, which may differ from the spelling in the request path. | 
+**connection_id** | **str** | ID of the connection that holds the table. For a database, this is its &#x60;default_connection_id&#x60;. | 
+**constant_per_key** | **List[str]** | Columns now set as constant per key. Empty means none. | 
+**var_schema** | **str** | Schema name, in lowercase. | 
+**table** | **str** | Table name, in lowercase. | 
 
 ## Example
 

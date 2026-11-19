@@ -1,12 +1,12 @@
 # MintUploadPartsResponse
 
-Response body for `POST /v1/uploads/{upload_id}/parts`: the minted part URLs, in ascending part-number order.
+Upload URLs for the requested parts.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**parts** | [**List[MintedUploadPartResponse]**](MintedUploadPartResponse.md) | The minted part URLs, in ascending part-number order. &#x60;PUT&#x60; each part&#39;s bytes to its URL and keep the response&#39;s &#x60;ETag&#x60; to pass to finalize. | 
+**parts** | [**List[MintedUploadPartResponse]**](MintedUploadPartResponse.md) | One URL per requested part, by part number. | 
 
 ## Example
 

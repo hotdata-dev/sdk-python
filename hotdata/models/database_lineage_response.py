@@ -27,14 +27,14 @@ from typing_extensions import Self
 
 class DatabaseLineageResponse(BaseModel):
     """
-    Response body for GET /databases/{database_id}/lineage.  Answers where a database came from and what came from it. Everything here is a historical record: forks are independent databases, and lineage does not make one depend on another.
+    Where a database was forked from, and which databases were forked from it.
     """ # noqa: E501
-    ancestors: List[LineageAncestorInfo] = Field(description="Fork ancestry, nearest parent first, ending at the database named by `root_id` unless `ancestors_truncated` says otherwise. A deleted generation does not cut the chain short — it is listed with `exists` false and the ancestry continues past it. Empty when this database is not a fork.")
-    ancestors_truncated: StrictBool = Field(description="True when the ancestry is longer than one response carries, so `ancestors` stops before reaching `root_id`.")
+    ancestors: List[LineageAncestorInfo] = Field(description="Databases this one descends from, nearest parent first. Deleted ones stay in the list with `exists: false`. Empty when this is not a fork.")
+    ancestors_truncated: StrictBool = Field(description="True when `ancestors` stops before reaching `root_id`.")
     database_id: StrictStr = Field(description="The database this lineage describes.")
-    fork_count: StrictInt = Field(description="How many databases were forked directly from this one in total — so you can tell whether `forks` is the whole set or only the newest of it.")
-    forks: List[LineageForkInfo] = Field(description="The databases forked directly from this one, most recently forked first, including any that have since been deleted. A fork of a fork appears in its own parent's lineage, not here.")
-    root_id: StrictStr = Field(description="Top of the family tree: the database the whole chain of forks descends from. Equal to `database_id` when this database is not a fork.")
+    fork_count: StrictInt = Field(description="Total number of databases forked directly from this one.")
+    forks: List[LineageForkInfo] = Field(description="Databases forked directly from this one, newest first, including deleted ones. Limited by `forks_limit`.")
+    root_id: StrictStr = Field(description="The original database at the top of the fork chain. Equal to `database_id` when this database is not a fork.")
     __properties: ClassVar[List[str]] = ["ancestors", "ancestors_truncated", "database_id", "fork_count", "forks", "root_id"]
 
     model_config = ConfigDict(

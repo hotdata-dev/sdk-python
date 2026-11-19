@@ -27,14 +27,14 @@ from typing_extensions import Self
 
 class CreateConnectionResponse(BaseModel):
     """
-    Response body for POST /connections
+    A newly created connection.
     """ # noqa: E501
     discovery_error: Optional[StrictStr] = None
     discovery_status: DiscoveryStatus
     id: StrictStr
     name: StrictStr
     source_type: StrictStr
-    tables_discovered: Annotated[int, Field(strict=True, ge=0)]
+    tables_discovered: Annotated[int, Field(strict=True, ge=0)] = Field(description="Number of tables the connection declares.")
     __properties: ClassVar[List[str]] = ["discovery_error", "discovery_status", "id", "name", "source_type", "tables_discovered"]
 
     model_config = ConfigDict(

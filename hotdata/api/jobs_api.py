@@ -60,7 +60,7 @@ class JobsApi:
     ) -> JobStatusResponse:
         """Get job status
 
-        Get the current status of a background job. Poll this endpoint to track job progress.
+        Get the status of a background job. Poll this until the job finishes.
 
         :param id: Job ID (required)
         :type id: str
@@ -129,7 +129,7 @@ class JobsApi:
     ) -> ApiResponse[JobStatusResponse]:
         """Get job status
 
-        Get the current status of a background job. Poll this endpoint to track job progress.
+        Get the status of a background job. Poll this until the job finishes.
 
         :param id: Job ID (required)
         :type id: str
@@ -198,7 +198,7 @@ class JobsApi:
     ) -> RESTResponseType:
         """Get job status
 
-        Get the current status of a background job. Poll this endpoint to track job progress.
+        Get the status of a background job. Poll this until the job finishes.
 
         :param id: Job ID (required)
         :type id: str
@@ -312,10 +312,10 @@ class JobsApi:
     @validate_call
     def list_jobs(
         self,
-        job_type: Annotated[Optional[JobType], Field(description="Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max results (default 50)")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Offset for pagination")] = None,
+        job_type: Annotated[Optional[JobType], Field(description="Filter by one job type. An unknown value returns 400.")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status, comma-separated, for example `status=pending,running`. Values: `pending`, `running`, `succeeded`, `partially_succeeded`, `failed`. An unknown value returns 400.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum jobs to return. Default 50, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of jobs to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -331,15 +331,15 @@ class JobsApi:
     ) -> ListJobsResponse:
         """List jobs
 
-        List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
+        List background jobs you started, newest first. Filter by `job_type` and `status`.
 
-        :param job_type: Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.
+        :param job_type: Filter by one job type. An unknown value returns 400.
         :type job_type: JobType
-        :param status: Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.
+        :param status: Filter by status, comma-separated, for example `status=pending,running`. Values: `pending`, `running`, `succeeded`, `partially_succeeded`, `failed`. An unknown value returns 400.
         :type status: str
-        :param limit: Max results (default 50)
+        :param limit: Maximum jobs to return. Default 50, maximum 1000.
         :type limit: int
-        :param offset: Offset for pagination
+        :param offset: Number of jobs to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -391,10 +391,10 @@ class JobsApi:
     @validate_call
     def list_jobs_with_http_info(
         self,
-        job_type: Annotated[Optional[JobType], Field(description="Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max results (default 50)")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Offset for pagination")] = None,
+        job_type: Annotated[Optional[JobType], Field(description="Filter by one job type. An unknown value returns 400.")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status, comma-separated, for example `status=pending,running`. Values: `pending`, `running`, `succeeded`, `partially_succeeded`, `failed`. An unknown value returns 400.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum jobs to return. Default 50, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of jobs to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -410,15 +410,15 @@ class JobsApi:
     ) -> ApiResponse[ListJobsResponse]:
         """List jobs
 
-        List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
+        List background jobs you started, newest first. Filter by `job_type` and `status`.
 
-        :param job_type: Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.
+        :param job_type: Filter by one job type. An unknown value returns 400.
         :type job_type: JobType
-        :param status: Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.
+        :param status: Filter by status, comma-separated, for example `status=pending,running`. Values: `pending`, `running`, `succeeded`, `partially_succeeded`, `failed`. An unknown value returns 400.
         :type status: str
-        :param limit: Max results (default 50)
+        :param limit: Maximum jobs to return. Default 50, maximum 1000.
         :type limit: int
-        :param offset: Offset for pagination
+        :param offset: Number of jobs to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -470,10 +470,10 @@ class JobsApi:
     @validate_call
     def list_jobs_without_preload_content(
         self,
-        job_type: Annotated[Optional[JobType], Field(description="Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.")] = None,
-        status: Annotated[Optional[StrictStr], Field(description="Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Max results (default 50)")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Offset for pagination")] = None,
+        job_type: Annotated[Optional[JobType], Field(description="Filter by one job type. An unknown value returns 400.")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status, comma-separated, for example `status=pending,running`. Values: `pending`, `running`, `succeeded`, `partially_succeeded`, `failed`. An unknown value returns 400.")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Maximum jobs to return. Default 50, maximum 1000.")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of jobs to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -489,15 +489,15 @@ class JobsApi:
     ) -> RESTResponseType:
         """List jobs
 
-        List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
+        List background jobs you started, newest first. Filter by `job_type` and `status`.
 
-        :param job_type: Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected.
+        :param job_type: Filter by one job type. An unknown value returns 400.
         :type job_type: JobType
-        :param status: Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected.
+        :param status: Filter by status, comma-separated, for example `status=pending,running`. Values: `pending`, `running`, `succeeded`, `partially_succeeded`, `failed`. An unknown value returns 400.
         :type status: str
-        :param limit: Max results (default 50)
+        :param limit: Maximum jobs to return. Default 50, maximum 1000.
         :type limit: int
-        :param offset: Offset for pagination
+        :param offset: Number of jobs to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

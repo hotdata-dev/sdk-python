@@ -6,7 +6,7 @@ Request body for POST /databases/{database_id}/catalogs
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**alias** | **str** | Optional alias under which this catalog is reachable inside the database. When omitted, it is reachable by the connection&#39;s name. | [optional] 
+**alias** | **str** | Name to use for the catalog in SQL. Defaults to the connection&#39;s name. | [optional] 
 **connection_id** | **str** |  | 
 
 ## Example

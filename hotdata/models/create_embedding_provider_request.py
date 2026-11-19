@@ -27,11 +27,11 @@ class CreateEmbeddingProviderRequest(BaseModel):
     """
     Request body for POST /embedding-providers
     """ # noqa: E501
-    api_key: Optional[StrictStr] = Field(default=None, description="Inline API key. If provided, a secret is auto-created and referenced. Cannot be used together with `secret_name`.")
-    config: Optional[Dict[str, Any]] = Field(default=None, description="Provider-specific configuration (model name, base URL, dimensions, etc.)")
+    api_key: Optional[StrictStr] = Field(default=None, description="API key. Hotdata stores it as a secret for you. Cannot be combined with `secret_name`.")
+    config: Optional[Dict[str, Any]] = Field(default=None, description="Provider settings, such as `model`, `base_url` and `dimensions`.")
     name: StrictStr
-    provider_type: StrictStr = Field(description="Provider type: \"local\" or \"service\"")
-    secret_name: Optional[StrictStr] = Field(default=None, description="Reference an existing stored secret by name (for service providers).  A stored secret is only sent to an approved provider origin — by default OpenAI's public API. To use a different endpoint, supply the key inline with `api_key` instead, or ask your operator to approve the origin.")
+    provider_type: StrictStr = Field(description="Provider type. Only `service` (a hosted embedding API) is supported.")
+    secret_name: Optional[StrictStr] = Field(default=None, description="Name of a stored secret that holds the API key. It is only sent to approved endpoints (by default, OpenAI's API); for other endpoints use `api_key`.")
     __properties: ClassVar[List[str]] = ["api_key", "config", "name", "provider_type", "secret_name"]
 
     model_config = ConfigDict(

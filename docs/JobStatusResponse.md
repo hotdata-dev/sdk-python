@@ -1,18 +1,18 @@
 # JobStatusResponse
 
-Response body for GET /v1/jobs/{id}
+A background job and its status.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**attempts** | **int** | Number of execution attempts (including the current one). | 
-**completed_at** | **datetime** |  | [optional] 
-**created_at** | **datetime** |  | 
-**error_message** | **str** | Error or warning message. Set when status is &#x60;failed&#x60; or &#x60;partially_succeeded&#x60;. | [optional] 
-**id** | **str** |  | 
+**attempts** | **int** | Number of attempts so far, including the current one. | 
+**completed_at** | **datetime** | When the job finished. Absent until then. | [optional] 
+**created_at** | **datetime** | When the job was created. | 
+**error_message** | **str** | What went wrong. Set when status is &#x60;failed&#x60; or &#x60;partially_succeeded&#x60;. | [optional] 
+**id** | **str** | Job ID. | 
 **job_type** | [**JobType**](JobType.md) |  | 
-**result** | [**JobResult**](JobResult.md) | What the job produced. Omitted entirely while the job is &#x60;pending&#x60; or &#x60;running&#x60;, and for job types that report no payload. Read &#x60;job_type&#x60; to know which shape to expect. | [optional] 
+**result** | [**JobResult**](JobResult.md) | What the job produced; its shape depends on &#x60;job_type&#x60;. Present only when the job is &#x60;succeeded&#x60; or &#x60;partially_succeeded&#x60; and its type has a result. | [optional] 
 **status** | [**JobStatus**](JobStatus.md) |  | 
 
 ## Example

@@ -7,10 +7,10 @@ Summary item in GET /databases
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **created_at** | **datetime** | When the database was created. | [optional] 
-**default_catalog** | **str** | Name the database&#39;s default catalog answers to inside its query scope. | 
-**default_schema** | **str** | Schema that unqualified table names resolve to inside this database&#39;s query scope. &#x60;main&#x60; unless the database declares a single schema or a &#x60;default_schema&#x60; was set at create time. | 
+**default_catalog** | **str** | Name of the database&#39;s own catalog in SQL. | 
+**default_schema** | **str** | Schema that unqualified table names resolve to. | 
 **expires_at** | **datetime** |  | [optional] 
-**forked_from** | [**ForkedFromInfo**](ForkedFromInfo.md) | Set on a fork: which database it came from. Distinguishes a fork from an original in a listing, where the two are otherwise indistinguishable. | [optional] 
+**forked_from** | [**ForkedFromInfo**](ForkedFromInfo.md) | Present on a fork: the database it was copied from. | [optional] 
 **id** | **str** |  | 
 **name** | **str** |  | [optional] 
 

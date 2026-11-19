@@ -1,13 +1,13 @@
 # TablePartitionKey
 
-One partition key of a table's storage layout.  Partitioning groups rows that share a key value into their own files, so a query filtering on that key reads only the matching files. Keys are applied in the order given, and several keys may read the same column: to get one partition per calendar month, declare `year` and `month` on the timestamp column. A single calendar transform on its own is rarely what you want — `month` alone puts every March of every year in one partition.
+A partition key. Rows with the same key value go into their own files, so queries that filter on the key read only the matching files.  Keys apply in order, and several can read one column. For one partition per month, use `year` and `month` on the same timestamp column: `month` alone puts every March of every year in one partition.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **column** | **str** | Column the key reads. | 
-**transform** | **str** | How the value is derived from the column. One of &#x60;identity&#x60; (the column value itself), &#x60;year&#x60;, &#x60;month&#x60;, &#x60;day&#x60;, or &#x60;hour&#x60;. | 
+**transform** | **str** | How the key is derived from the column: &#x60;identity&#x60; (the value itself), &#x60;year&#x60;, &#x60;month&#x60;, &#x60;day&#x60; or &#x60;hour&#x60;. | 
 
 ## Example
 

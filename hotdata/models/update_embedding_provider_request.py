@@ -27,10 +27,10 @@ class UpdateEmbeddingProviderRequest(BaseModel):
     """
     Request body for PUT /embedding-providers/{id}
     """ # noqa: E501
-    api_key: Optional[StrictStr] = Field(default=None, description="Inline API key. If provided, updates (or creates) the auto-managed secret.")
+    api_key: Optional[StrictStr] = Field(default=None, description="New API key. Hotdata stores it as a secret for you.")
     config: Optional[Any] = None
     name: Optional[StrictStr] = None
-    secret_name: Optional[StrictStr] = Field(default=None, description="Secret name containing the API key. Pass null to clear.")
+    secret_name: Optional[StrictStr] = Field(default=None, description="Name of a stored secret that holds the API key. Send `null` to remove the key from the provider.")
     __properties: ClassVar[List[str]] = ["api_key", "config", "name", "secret_name"]
 
     model_config = ConfigDict(

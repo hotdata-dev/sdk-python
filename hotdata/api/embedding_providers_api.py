@@ -62,7 +62,7 @@ class EmbeddingProvidersApi:
     ) -> CreateEmbeddingProviderResponse:
         """Create embedding provider
 
-        Register a new embedding provider that can be used to generate vector embeddings for text columns. Providers can be service-based (e.g., OpenAI) or local.
+        Register a provider that turns text into vector embeddings, for use by vector indexes. `provider_type` is `service` (a remote API such as OpenAI) or `local`. Pass the API key inline as `api_key` or as a stored secret with `secret_name`, not both.
 
         :param create_embedding_provider_request: (required)
         :type create_embedding_provider_request: CreateEmbeddingProviderRequest
@@ -131,7 +131,7 @@ class EmbeddingProvidersApi:
     ) -> ApiResponse[CreateEmbeddingProviderResponse]:
         """Create embedding provider
 
-        Register a new embedding provider that can be used to generate vector embeddings for text columns. Providers can be service-based (e.g., OpenAI) or local.
+        Register a provider that turns text into vector embeddings, for use by vector indexes. `provider_type` is `service` (a remote API such as OpenAI) or `local`. Pass the API key inline as `api_key` or as a stored secret with `secret_name`, not both.
 
         :param create_embedding_provider_request: (required)
         :type create_embedding_provider_request: CreateEmbeddingProviderRequest
@@ -200,7 +200,7 @@ class EmbeddingProvidersApi:
     ) -> RESTResponseType:
         """Create embedding provider
 
-        Register a new embedding provider that can be used to generate vector embeddings for text columns. Providers can be service-based (e.g., OpenAI) or local.
+        Register a provider that turns text into vector embeddings, for use by vector indexes. `provider_type` is `service` (a remote API such as OpenAI) or `local`. Pass the API key inline as `api_key` or as a stored secret with `secret_name`, not both.
 
         :param create_embedding_provider_request: (required)
         :type create_embedding_provider_request: CreateEmbeddingProviderRequest
@@ -343,6 +343,7 @@ class EmbeddingProvidersApi:
     ) -> None:
         """Delete embedding provider
 
+        Delete an embedding provider. System providers cannot be deleted, and a provider that a vector index uses cannot be deleted until you drop the index.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -378,7 +379,9 @@ class EmbeddingProvidersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -410,6 +413,7 @@ class EmbeddingProvidersApi:
     ) -> ApiResponse[None]:
         """Delete embedding provider
 
+        Delete an embedding provider. System providers cannot be deleted, and a provider that a vector index uses cannot be deleted until you drop the index.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -445,7 +449,9 @@ class EmbeddingProvidersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -477,6 +483,7 @@ class EmbeddingProvidersApi:
     ) -> RESTResponseType:
         """Delete embedding provider
 
+        Delete an embedding provider. System providers cannot be deleted, and a provider that a vector index uses cannot be deleted until you drop the index.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -512,7 +519,9 @@ class EmbeddingProvidersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -605,6 +614,7 @@ class EmbeddingProvidersApi:
     ) -> EmbeddingProviderResponse:
         """Get embedding provider
 
+        Get an embedding provider by ID.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -672,6 +682,7 @@ class EmbeddingProvidersApi:
     ) -> ApiResponse[EmbeddingProviderResponse]:
         """Get embedding provider
 
+        Get an embedding provider by ID.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -739,6 +750,7 @@ class EmbeddingProvidersApi:
     ) -> RESTResponseType:
         """Get embedding provider
 
+        Get an embedding provider by ID.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -866,7 +878,7 @@ class EmbeddingProvidersApi:
     ) -> ListEmbeddingProvidersResponse:
         """List embedding providers
 
-        List all registered embedding providers.
+        List embedding providers. Built-in system providers come first, then the ones you created.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -929,7 +941,7 @@ class EmbeddingProvidersApi:
     ) -> ApiResponse[ListEmbeddingProvidersResponse]:
         """List embedding providers
 
-        List all registered embedding providers.
+        List embedding providers. Built-in system providers come first, then the ones you created.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -992,7 +1004,7 @@ class EmbeddingProvidersApi:
     ) -> RESTResponseType:
         """List embedding providers
 
-        List all registered embedding providers.
+        List embedding providers. Built-in system providers come first, then the ones you created.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1115,6 +1127,7 @@ class EmbeddingProvidersApi:
     ) -> UpdateEmbeddingProviderResponse:
         """Update embedding provider
 
+        Update an embedding provider. Only the fields you send change. System providers cannot be updated.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -1153,7 +1166,9 @@ class EmbeddingProvidersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UpdateEmbeddingProviderResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1186,6 +1201,7 @@ class EmbeddingProvidersApi:
     ) -> ApiResponse[UpdateEmbeddingProviderResponse]:
         """Update embedding provider
 
+        Update an embedding provider. Only the fields you send change. System providers cannot be updated.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -1224,7 +1240,9 @@ class EmbeddingProvidersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UpdateEmbeddingProviderResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1257,6 +1275,7 @@ class EmbeddingProvidersApi:
     ) -> RESTResponseType:
         """Update embedding provider
 
+        Update an embedding provider. Only the fields you send change. System providers cannot be updated.
 
         :param id: Embedding provider ID (required)
         :type id: str
@@ -1295,7 +1314,9 @@ class EmbeddingProvidersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UpdateEmbeddingProviderResponse",
+            '400': "ApiErrorResponse",
             '404': "ApiErrorResponse",
+            '409': "ApiErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,

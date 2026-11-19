@@ -1,13 +1,13 @@
 # AddManagedSchemaRequest
 
-Request body for adding a schema to an existing managed catalog: `POST /v1/connections/{id}/schemas` and `POST /v1/databases/{id}/schemas`. `tables` is optional — omit it to declare an empty schema and add tables later.
+A schema to add to a database or connection.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **str** |  | 
-**tables** | [**List[AddManagedTableDecl]**](AddManagedTableDecl.md) |  | [optional] 
+**tables** | [**List[AddManagedTableDecl]**](AddManagedTableDecl.md) | Tables to create in the schema. You can also add tables later. | [optional] 
 
 ## Example
 

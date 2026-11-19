@@ -1,6 +1,6 @@
 # ManagedTableResponse
 
-Response body for a successful add-table request.
+A newly added table.
 
 ## Properties
 

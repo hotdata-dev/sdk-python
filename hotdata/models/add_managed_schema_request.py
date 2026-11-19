@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from hotdata.models.add_managed_table_decl import AddManagedTableDecl
 from typing import Optional, Set
@@ -26,10 +26,10 @@ from typing_extensions import Self
 
 class AddManagedSchemaRequest(BaseModel):
     """
-    Request body for adding a schema to an existing managed catalog: `POST /v1/connections/{id}/schemas` and `POST /v1/databases/{id}/schemas`. `tables` is optional — omit it to declare an empty schema and add tables later.
+    A schema to add to a database or connection.
     """ # noqa: E501
     name: StrictStr
-    tables: Optional[List[AddManagedTableDecl]] = None
+    tables: Optional[List[AddManagedTableDecl]] = Field(default=None, description="Tables to create in the schema. You can also add tables later.")
     __properties: ClassVar[List[str]] = ["name", "tables"]
 
     model_config = ConfigDict(

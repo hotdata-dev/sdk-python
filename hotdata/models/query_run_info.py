@@ -21,33 +21,35 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.rollup_usage import RollupUsage
 from typing import Optional, Set
 from typing_extensions import Self
 
 class QueryRunInfo(BaseModel):
     """
-    Single query run for listing
+    One execution of a query.
     """ # noqa: E501
-    bytes_scanned: Optional[StrictInt] = Field(default=None, description="Bytes this query actually fetched from storage. Not a measure of how much data the query covered — it counts the reads that reached storage, so the same SQL over the same rows reports a different number depending on what was already cached.  `null` means the query touched no table at all (for example a constant expression like `SELECT 1`).  `0` means the query read a table but fetched nothing from storage. It is a normal, common answer, not an error or a missing measurement, and it does not mean the query did no work — `rows_scanned` shows the rows it went through. The usual cause is a warm cache: re-running a query whose data or file metadata is already held in memory reports far fewer bytes than the first run, frequently `0`, with `rows_scanned` unchanged. A query answered from table statistics alone (a row count, say) also reports `0`.  Because of this, `bytes_scanned` is not a proxy for query cost or query volume. `GET /v1/usage` sums this field over a period, so that total is the storage read a workspace caused, not the work its queries did: repeating one query cheaply adds little or nothing to it.")
+    bytes_scanned: Optional[StrictInt] = Field(default=None, description="Bytes the query read from storage. Cached data is not counted, so a repeated query often reports `0`; null when the query read no table.")
     completed_at: Optional[datetime] = None
     created_at: datetime
-    error_message: Optional[StrictStr] = None
+    error_message: Optional[StrictStr] = Field(default=None, description="Why the run failed.")
     execution_time_ms: Optional[StrictInt] = None
     id: StrictStr
-    result_id: Optional[StrictStr] = None
-    row_count: Optional[StrictInt] = None
-    rows_scanned: Optional[StrictInt] = Field(default=None, description="Total rows read from storage to run this query, before any filtering or aggregation. Distinct from `row_count`, which is how many rows the query returned. `null` when the query reads no table data from storage.")
-    saved_query_id: Optional[StrictStr] = None
-    saved_query_version: Optional[StrictInt] = None
-    server_processing_ms: Optional[StrictInt] = Field(default=None, description="Total server-side processing time for this query (milliseconds). Measured from query start to result ready. Includes SQL execution, task spawning, and result preparation. Does not include network transit. Populated for all completed query runs (sync and async).")
+    result_id: Optional[StrictStr] = Field(default=None, description="ID of the saved result, ready to fetch once `status` is `succeeded`. Absent when no result was saved; `warning_message` then says why.")
+    rollup: Optional[RollupUsage] = Field(default=None, description="Whether a rollup answered the query. Absent when no table the query read has a rollup, rollups were turned off for the query, or the run has not been planned yet. On a failed run it says what planning chose.")
+    row_count: Optional[StrictInt] = Field(default=None, description="Number of rows in the full result.")
+    rows_scanned: Optional[StrictInt] = Field(default=None, description="Rows the query read, before filtering or aggregation. Null when the query read no table.")
+    saved_query_id: Optional[StrictStr] = Field(default=None, description="ID of the saved query this run executed, if any.")
+    saved_query_version: Optional[StrictInt] = Field(default=None, description="Version of the saved query this run executed, if any.")
+    server_processing_ms: Optional[StrictInt] = Field(default=None, description="Time from query start until the result was ready, in milliseconds. Excludes network time.")
     snapshot_id: StrictStr
     sql_hash: StrictStr
     sql_text: StrictStr
-    status: StrictStr
+    status: StrictStr = Field(description="`running`, `succeeded`, `failed` or `interrupted`. An interrupted run stopped before finishing and is safe to retry.")
     trace_id: Optional[StrictStr] = None
-    user_public_id: Optional[StrictStr] = Field(default=None, description="Who ran this query: the account id from the access token the request was made with. Use it to group a caller's query history.  Requests made with a credential that identifies no account instead record an opaque `user_`-prefixed identifier, which is stable for that credential but cannot be resolved to an account.")
-    warning_message: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["bytes_scanned", "completed_at", "created_at", "error_message", "execution_time_ms", "id", "result_id", "row_count", "rows_scanned", "saved_query_id", "saved_query_version", "server_processing_ms", "snapshot_id", "sql_hash", "sql_text", "status", "trace_id", "user_public_id", "warning_message"]
+    user_public_id: Optional[StrictStr] = Field(default=None, description="Account that ran the query, taken from the access token. A credential with no account gets a stable `user_`-prefixed ID instead.")
+    warning_message: Optional[StrictStr] = Field(default=None, description="A problem that did not fail the run, such as a result that could not be saved.")
+    __properties: ClassVar[List[str]] = ["bytes_scanned", "completed_at", "created_at", "error_message", "execution_time_ms", "id", "result_id", "rollup", "row_count", "rows_scanned", "saved_query_id", "saved_query_version", "server_processing_ms", "snapshot_id", "sql_hash", "sql_text", "status", "trace_id", "user_public_id", "warning_message"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -113,6 +115,11 @@ class QueryRunInfo(BaseModel):
         if self.result_id is None and "result_id" in self.model_fields_set:
             _dict['result_id'] = None
 
+        # set to None if rollup (nullable) is None
+        # and model_fields_set contains the field
+        if self.rollup is None and "rollup" in self.model_fields_set:
+            _dict['rollup'] = None
+
         # set to None if row_count (nullable) is None
         # and model_fields_set contains the field
         if self.row_count is None and "row_count" in self.model_fields_set:
@@ -172,6 +179,7 @@ class QueryRunInfo(BaseModel):
             "execution_time_ms": obj.get("execution_time_ms"),
             "id": obj.get("id"),
             "result_id": obj.get("result_id"),
+            "rollup": obj.get("rollup"),
             "row_count": obj.get("row_count"),
             "rows_scanned": obj.get("rows_scanned"),
             "saved_query_id": obj.get("saved_query_id"),

@@ -29,15 +29,15 @@ from typing_extensions import Self
 
 class JobStatusResponse(BaseModel):
     """
-    Response body for GET /v1/jobs/{id}
+    A background job and its status.
     """ # noqa: E501
-    attempts: StrictInt = Field(description="Number of execution attempts (including the current one).")
-    completed_at: Optional[datetime] = None
-    created_at: datetime
-    error_message: Optional[StrictStr] = Field(default=None, description="Error or warning message. Set when status is `failed` or `partially_succeeded`.")
-    id: StrictStr
+    attempts: StrictInt = Field(description="Number of attempts so far, including the current one.")
+    completed_at: Optional[datetime] = Field(default=None, description="When the job finished. Absent until then.")
+    created_at: datetime = Field(description="When the job was created.")
+    error_message: Optional[StrictStr] = Field(default=None, description="What went wrong. Set when status is `failed` or `partially_succeeded`.")
+    id: StrictStr = Field(description="Job ID.")
     job_type: JobType
-    result: Optional[JobResult] = Field(default=None, description="What the job produced. Omitted entirely while the job is `pending` or `running`, and for job types that report no payload. Read `job_type` to know which shape to expect.")
+    result: Optional[JobResult] = Field(default=None, description="What the job produced; its shape depends on `job_type`. Present only when the job is `succeeded` or `partially_succeeded` and its type has a result.")
     status: JobStatus
     __properties: ClassVar[List[str]] = ["attempts", "completed_at", "created_at", "error_message", "id", "job_type", "result", "status"]
 

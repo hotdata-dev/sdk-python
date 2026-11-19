@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List
 from hotdata.models.api_error_detail import ApiErrorDetail
 from typing import Optional, Set
@@ -26,9 +26,9 @@ from typing_extensions import Self
 
 class ApiErrorResponse(BaseModel):
     """
-    Standard error response body
+    Error response body.
     """ # noqa: E501
-    error: ApiErrorDetail
+    error: ApiErrorDetail = Field(description="The error.")
     __properties: ClassVar[List[str]] = ["error"]
 
     model_config = ConfigDict(

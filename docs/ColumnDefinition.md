@@ -1,14 +1,14 @@
 # ColumnDefinition
 
-The declared type of one column, as written in a load request's `columns` map.  Accepts either a bare type name or an object carrying the extra parameters some types need:  - simple: `\"VARCHAR\"`, `\"BIGINT\"`, `\"DECIMAL(10,2)\"` - detailed: `{ \"type\": \"DECIMAL\", \"precision\": 10, \"scale\": 2 }`
+A column's type in a load request's `columns` map. Either a type name, such as `\"BIGINT\"` or `\"DECIMAL(10,2)\"`, or an object such as `{ \"type\": \"DECIMAL\", \"precision\": 10, \"scale\": 2 }`.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**precision** | **int** | Total number of digits for &#x60;DECIMAL&#x60; / &#x60;NUMERIC&#x60; (1–38). | [optional] 
-**scale** | **int** | Number of digits after the decimal point for &#x60;DECIMAL&#x60; / &#x60;NUMERIC&#x60;. Requires &#x60;precision&#x60;, and cannot exceed it. | [optional] 
-**type** | **str** | The type name, e.g. &#x60;\&quot;DECIMAL\&quot;&#x60;, &#x60;\&quot;TIMESTAMP\&quot;&#x60;, &#x60;\&quot;VARCHAR\&quot;&#x60;. | 
+**precision** | **int** | Total digits for &#x60;DECIMAL&#x60; or &#x60;NUMERIC&#x60;, from 1 to 38. | [optional] 
+**scale** | **int** | Digits after the decimal point for &#x60;DECIMAL&#x60; or &#x60;NUMERIC&#x60;. Requires &#x60;precision&#x60; and cannot exceed it; defaults to 0. | [optional] 
+**type** | **str** | Type name, such as &#x60;\&quot;DECIMAL\&quot;&#x60;, &#x60;\&quot;TIMESTAMP\&quot;&#x60; or &#x60;\&quot;VARCHAR\&quot;&#x60;. | 
 
 ## Example
 

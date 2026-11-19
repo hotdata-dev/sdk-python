@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 Get job status
 
-Get the current status of a background job. Poll this endpoint to track job progress.
+Get the status of a background job. Poll this until the job finishes.
 
 ### Example
 
@@ -90,7 +90,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Job status |  -  |
-**403** | The credential is limited to one database, and the job does not act on it |  -  |
+**403** | The API key is limited to one database, and this job is for a different one |  -  |
 **404** | Job not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -100,7 +100,7 @@ Name | Type | Description  | Notes
 
 List jobs
 
-List background jobs with optional filters by type and status. Internal maintenance sweeps are never listed here, whatever the filters say; every job this returns is one a caller submitted.
+List background jobs you started, newest first. Filter by `job_type` and `status`.
 
 ### Example
 
@@ -140,10 +140,10 @@ configuration = hotdata.Configuration(
 with hotdata.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = hotdata.JobsApi(api_client)
-    job_type = hotdata.JobType() # JobType | Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected. (optional)
-    status = 'status_example' # str | Filter by status: one or more of `pending`, `running`, `succeeded`, `partially_succeeded`, and `failed`, comma-separated (for example `status=pending,running`). Omit to list every status. An unknown value is rejected. (optional)
-    limit = 56 # int | Max results (default 50) (optional)
-    offset = 56 # int | Offset for pagination (optional)
+    job_type = hotdata.JobType() # JobType | Filter by one job type. An unknown value returns 400. (optional)
+    status = 'status_example' # str | Filter by status, comma-separated, for example `status=pending,running`. Values: `pending`, `running`, `succeeded`, `partially_succeeded`, `failed`. An unknown value returns 400. (optional)
+    limit = 56 # int | Maximum jobs to return. Default 50, maximum 1000. (optional)
+    offset = 56 # int | Number of jobs to skip (optional)
 
     try:
         # List jobs
@@ -161,10 +161,10 @@ with hotdata.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **job_type** | [**JobType**](.md)| Filter by job type. One value only, and it must be one of the job types listed in the JobType schema; an unknown value is rejected. | [optional] 
- **status** | **str**| Filter by status: one or more of &#x60;pending&#x60;, &#x60;running&#x60;, &#x60;succeeded&#x60;, &#x60;partially_succeeded&#x60;, and &#x60;failed&#x60;, comma-separated (for example &#x60;status&#x3D;pending,running&#x60;). Omit to list every status. An unknown value is rejected. | [optional] 
- **limit** | **int**| Max results (default 50) | [optional] 
- **offset** | **int**| Offset for pagination | [optional] 
+ **job_type** | [**JobType**](.md)| Filter by one job type. An unknown value returns 400. | [optional] 
+ **status** | **str**| Filter by status, comma-separated, for example &#x60;status&#x3D;pending,running&#x60;. Values: &#x60;pending&#x60;, &#x60;running&#x60;, &#x60;succeeded&#x60;, &#x60;partially_succeeded&#x60;, &#x60;failed&#x60;. An unknown value returns 400. | [optional] 
+ **limit** | **int**| Maximum jobs to return. Default 50, maximum 1000. | [optional] 
+ **offset** | **int**| Number of jobs to skip | [optional] 
 
 ### Return type
 
