@@ -143,6 +143,7 @@ __all__ = [
     "MintUploadPartsResponse",
     "MintedUploadPartResponse",
     "NumericProfileDetail",
+    "QueryParam",
     "QueryRequest",
     "QueryResponse",
     "QueryRunInfo",
@@ -305,6 +306,7 @@ from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest as M
 from hotdata.models.mint_upload_parts_response import MintUploadPartsResponse as MintUploadPartsResponse
 from hotdata.models.minted_upload_part_response import MintedUploadPartResponse as MintedUploadPartResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail as NumericProfileDetail
+from hotdata.models.query_param import QueryParam as QueryParam
 from hotdata.models.query_request import QueryRequest as QueryRequest
 from hotdata.models.query_response import QueryResponse as QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo as QueryRunInfo

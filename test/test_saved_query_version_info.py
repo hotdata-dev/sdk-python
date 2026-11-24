@@ -45,6 +45,13 @@ class TestSavedQueryVersionInfo(unittest.TestCase):
                 has_order_by = True,
                 has_predicate = True,
                 num_tables = 56,
+                params = [
+                    hotdata.models.query_param.QueryParam(
+                        default = hotdata.models.default.default(), 
+                        description = '', 
+                        name = 'window_start', 
+                        type = 'timestamp', )
+                    ],
                 sql = '',
                 sql_hash = '',
                 table_size = '',
@@ -53,6 +60,13 @@ class TestSavedQueryVersionInfo(unittest.TestCase):
         else:
             return SavedQueryVersionInfo(
                 created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                params = [
+                    hotdata.models.query_param.QueryParam(
+                        default = hotdata.models.default.default(), 
+                        description = '', 
+                        name = 'window_start', 
+                        type = 'timestamp', )
+                    ],
                 sql = '',
                 sql_hash = '',
                 version = 56,

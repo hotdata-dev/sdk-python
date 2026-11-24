@@ -6,6 +6,7 @@ Request body for POST /v1/queries/{id}/execute
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**params** | **object** | A value for each parameter the version declares, by name. A parameter you leave out takes its default. &#x60;null&#x60; passes a null of the parameter&#39;s type. | [optional] 
 **version** | **int** | Version to run. Defaults to the latest. | [optional] 
 
 ## Example

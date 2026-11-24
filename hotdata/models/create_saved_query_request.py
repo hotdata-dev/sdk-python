@@ -18,8 +18,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.query_param import QueryParam
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,9 +30,10 @@ class CreateSavedQueryRequest(BaseModel):
     """ # noqa: E501
     description: Optional[StrictStr] = None
     name: StrictStr
+    params: Optional[List[QueryParam]] = Field(default=None, description="Parameters the SQL uses, written in it as `$name`. Each value is checked against its type and bound as a value when the query runs, never as SQL text. Every `$name` in the SQL must be declared here, and every declared parameter must appear in the SQL.")
     sql: StrictStr
     tags: Optional[List[StrictStr]] = None
-    __properties: ClassVar[List[str]] = ["description", "name", "sql", "tags"]
+    __properties: ClassVar[List[str]] = ["description", "name", "params", "sql", "tags"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -76,10 +78,22 @@ class CreateSavedQueryRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in params (list)
+        _items = []
+        if self.params:
+            for _item_params in self.params:
+                if _item_params:
+                    _items.append(_item_params.to_dict())
+            _dict['params'] = _items
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
             _dict['description'] = None
+
+        # set to None if params (nullable) is None
+        # and model_fields_set contains the field
+        if self.params is None and "params" in self.model_fields_set:
+            _dict['params'] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
@@ -100,6 +114,7 @@ class CreateSavedQueryRequest(BaseModel):
         _obj = cls.model_validate({
             "description": obj.get("description"),
             "name": obj.get("name"),
+            "params": [QueryParam.from_dict(_item) for _item in obj["params"]] if obj.get("params") is not None else None,
             "sql": obj.get("sql"),
             "tags": obj.get("tags")
         })
