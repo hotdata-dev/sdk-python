@@ -38,6 +38,7 @@ class TestCreateSavedQueryRequest(unittest.TestCase):
             return CreateSavedQueryRequest(
                 description = 'Ten highest-spending customers by order total',
                 name = 'top-customers',
+                params = [{name=start, type=timestamp}, {name=bucket, type=interval, default=1 hour}],
                 sql = 'SELECT customer_id, sum(amount) AS total FROM orders GROUP BY customer_id ORDER BY total DESC LIMIT 10',
                 tags = [sales, weekly]
             )

@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.query_param import QueryParam
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -30,10 +31,11 @@ class UpdateSavedQueryRequest(BaseModel):
     category_override: Optional[StrictStr] = Field(default=None, description="Category to use instead of the detected one, such as `point_lookup` or `join`. Send `null` to go back to the detected category.")
     description: Optional[StrictStr] = Field(default=None, description="New description. Omit to keep the current one.")
     name: Optional[StrictStr] = Field(default=None, description="New name. Omit to keep the current one.")
+    params: Optional[List[QueryParam]] = Field(default=None, description="New parameters, replacing the current ones; send `[]` to remove them. Omit to keep them. Changing the parameters creates a new version, as changing the SQL does.")
     sql: Optional[StrictStr] = Field(default=None, description="New SQL. Omit to keep the current SQL.")
     table_size_override: Optional[StrictStr] = Field(default=None, description="Your own label for the table size. Send `null` to clear it.")
     tags: Optional[List[StrictStr]] = Field(default=None, description="New tags, replacing the current ones. Omit to keep them.")
-    __properties: ClassVar[List[str]] = ["category_override", "description", "name", "sql", "table_size_override", "tags"]
+    __properties: ClassVar[List[str]] = ["category_override", "description", "name", "params", "sql", "table_size_override", "tags"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -78,6 +80,13 @@ class UpdateSavedQueryRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in params (list)
+        _items = []
+        if self.params:
+            for _item_params in self.params:
+                if _item_params:
+                    _items.append(_item_params.to_dict())
+            _dict['params'] = _items
         # set to None if category_override (nullable) is None
         # and model_fields_set contains the field
         if self.category_override is None and "category_override" in self.model_fields_set:
@@ -92,6 +101,11 @@ class UpdateSavedQueryRequest(BaseModel):
         # and model_fields_set contains the field
         if self.name is None and "name" in self.model_fields_set:
             _dict['name'] = None
+
+        # set to None if params (nullable) is None
+        # and model_fields_set contains the field
+        if self.params is None and "params" in self.model_fields_set:
+            _dict['params'] = None
 
         # set to None if sql (nullable) is None
         # and model_fields_set contains the field
@@ -123,6 +137,7 @@ class UpdateSavedQueryRequest(BaseModel):
             "category_override": obj.get("category_override"),
             "description": obj.get("description"),
             "name": obj.get("name"),
+            "params": [QueryParam.from_dict(_item) for _item in obj["params"]] if obj.get("params") is not None else None,
             "sql": obj.get("sql"),
             "table_size_override": obj.get("table_size_override"),
             "tags": obj.get("tags")

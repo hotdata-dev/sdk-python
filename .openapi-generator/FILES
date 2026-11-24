@@ -103,6 +103,7 @@ docs/MintUploadPartsResponse.md
 docs/MintedUploadPartResponse.md
 docs/NumericProfileDetail.md
 docs/QueryApi.md
+docs/QueryParam.md
 docs/QueryRequest.md
 docs/QueryResponse.md
 docs/QueryRunInfo.md
@@ -264,6 +265,7 @@ hotdata/models/mint_upload_parts_request.py
 hotdata/models/mint_upload_parts_response.py
 hotdata/models/minted_upload_part_response.py
 hotdata/models/numeric_profile_detail.py
+hotdata/models/query_param.py
 hotdata/models/query_request.py
 hotdata/models/query_response.py
 hotdata/models/query_run_info.py
@@ -406,6 +408,7 @@ test/test_mint_upload_parts_response.py
 test/test_minted_upload_part_response.py
 test/test_numeric_profile_detail.py
 test/test_query_api.py
+test/test_query_param.py
 test/test_query_request.py
 test/test_query_response.py
 test/test_query_run_info.py

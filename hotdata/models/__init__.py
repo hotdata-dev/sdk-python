@@ -108,6 +108,7 @@ from hotdata.models.mint_upload_parts_request import MintUploadPartsRequest
 from hotdata.models.mint_upload_parts_response import MintUploadPartsResponse
 from hotdata.models.minted_upload_part_response import MintedUploadPartResponse
 from hotdata.models.numeric_profile_detail import NumericProfileDetail
+from hotdata.models.query_param import QueryParam
 from hotdata.models.query_request import QueryRequest
 from hotdata.models.query_response import QueryResponse
 from hotdata.models.query_run_info import QueryRunInfo

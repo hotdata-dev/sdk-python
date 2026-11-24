@@ -49,6 +49,13 @@ class TestSavedQueryDetail(unittest.TestCase):
                 latest_version = 56,
                 name = '',
                 num_tables = 56,
+                params = [
+                    hotdata.models.query_param.QueryParam(
+                        default = hotdata.models.default.default(), 
+                        description = '', 
+                        name = 'window_start', 
+                        type = 'timestamp', )
+                    ],
                 sql = '',
                 sql_hash = '',
                 table_size = '',
@@ -64,6 +71,13 @@ class TestSavedQueryDetail(unittest.TestCase):
                 id = '',
                 latest_version = 56,
                 name = '',
+                params = [
+                    hotdata.models.query_param.QueryParam(
+                        default = hotdata.models.default.default(), 
+                        description = '', 
+                        name = 'window_start', 
+                        type = 'timestamp', )
+                    ],
                 sql = '',
                 sql_hash = '',
                 tags = [

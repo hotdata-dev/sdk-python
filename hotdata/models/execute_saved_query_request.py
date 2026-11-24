@@ -27,8 +27,9 @@ class ExecuteSavedQueryRequest(BaseModel):
     """
     Request body for POST /v1/queries/{id}/execute
     """ # noqa: E501
+    params: Optional[Dict[str, Any]] = Field(default=None, description="A value for each parameter the version declares, by name. A parameter you leave out takes its default. `null` passes a null of the parameter's type.")
     version: Optional[StrictInt] = Field(default=None, description="Version to run. Defaults to the latest.")
-    __properties: ClassVar[List[str]] = ["version"]
+    __properties: ClassVar[List[str]] = ["params", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -73,6 +74,11 @@ class ExecuteSavedQueryRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if params (nullable) is None
+        # and model_fields_set contains the field
+        if self.params is None and "params" in self.model_fields_set:
+            _dict['params'] = None
+
         # set to None if version (nullable) is None
         # and model_fields_set contains the field
         if self.version is None and "version" in self.model_fields_set:
@@ -90,6 +96,7 @@ class ExecuteSavedQueryRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "params": obj.get("params"),
             "version": obj.get("version")
         })
         return _obj
