@@ -36,6 +36,7 @@ class TestExecuteSavedQueryRequest(unittest.TestCase):
         model = ExecuteSavedQueryRequest()
         if include_optional:
             return ExecuteSavedQueryRequest(
+                params = None,
                 version = 56
             )
         else:

@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
 from hotdata.models.stream_column import StreamColumn
@@ -34,6 +34,7 @@ class StreamResponse(BaseModel):
     column_hints: Optional[List[StreamColumnHint]] = Field(default=None, description="Columns the stream was created with. Omitted when there are none.")
     columns: Optional[List[StreamColumn]] = Field(default=None, description="The stream's columns, in table order. Omitted until the first request sets them.")
     id: StrictStr = Field(description="Stream ID.")
+    id_index_up_to_date: Optional[StrictBool] = Field(default=None, description="True when the ID index has recorded every stored row for each ID column the server indexes (trace and span IDs, unless configured otherwise). False while it is catching up, or when a column was added to the index after rows were stored. It reports what the index recorded and does not run a lookup. Lookups by an ID column it does not cover return the same rows, more slowly. Omitted when the server does not index IDs.")
     last_flushed_at: Optional[datetime] = Field(default=None, description="When rows were last stored. Null before the first time.")
     oldest_pending_age_ms: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="How long the oldest of those rows has waited, in milliseconds. Null when none waits.")
     pending_bytes: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=None, description="Bytes of accepted rows that the answering server has not stored yet. Null when it holds none.")
@@ -44,7 +45,7 @@ class StreamResponse(BaseModel):
     table: StrictStr = Field(description="Table the stream writes to.")
     time_column: Optional[StrictStr] = Field(default=None, description="Row field that holds each row's time. Null when Hotdata sets the time in `_ingested_at`.")
     time_unit: Optional[StrictStr] = Field(default=None, description="Format of `time_column`: `ns`, `us`, `ms`, `s` or `rfc3339`. Null when `time_column` is null.")
-    __properties: ClassVar[List[str]] = ["column_hints", "columns", "id", "last_flushed_at", "oldest_pending_age_ms", "pending_bytes", "retention_days", "rows", "schema", "status", "table", "time_column", "time_unit"]
+    __properties: ClassVar[List[str]] = ["column_hints", "columns", "id", "id_index_up_to_date", "last_flushed_at", "oldest_pending_age_ms", "pending_bytes", "retention_days", "rows", "schema", "status", "table", "time_column", "time_unit"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -104,6 +105,11 @@ class StreamResponse(BaseModel):
         if self.columns is None and "columns" in self.model_fields_set:
             _dict['columns'] = None
 
+        # set to None if id_index_up_to_date (nullable) is None
+        # and model_fields_set contains the field
+        if self.id_index_up_to_date is None and "id_index_up_to_date" in self.model_fields_set:
+            _dict['id_index_up_to_date'] = None
+
         # set to None if last_flushed_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_flushed_at is None and "last_flushed_at" in self.model_fields_set:
@@ -149,6 +155,7 @@ class StreamResponse(BaseModel):
             "column_hints": [StreamColumnHint.from_dict(_item) for _item in obj["column_hints"]] if obj.get("column_hints") is not None else None,
             "columns": [StreamColumn.from_dict(_item) for _item in obj["columns"]] if obj.get("columns") is not None else None,
             "id": obj.get("id"),
+            "id_index_up_to_date": obj.get("id_index_up_to_date"),
             "last_flushed_at": obj.get("last_flushed_at"),
             "oldest_pending_age_ms": obj.get("oldest_pending_age_ms"),
             "pending_bytes": obj.get("pending_bytes"),

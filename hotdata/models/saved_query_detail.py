@@ -19,8 +19,9 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from hotdata.models.query_param import QueryParam
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -41,12 +42,13 @@ class SavedQueryDetail(BaseModel):
     latest_version: StrictInt
     name: StrictStr
     num_tables: Optional[StrictInt] = None
+    params: List[QueryParam] = Field(description="Parameters the latest version declares.")
     sql: StrictStr
     sql_hash: StrictStr
     table_size: Optional[StrictStr] = None
     tags: List[StrictStr]
     updated_at: datetime
-    __properties: ClassVar[List[str]] = ["category", "created_at", "description", "has_aggregation", "has_group_by", "has_join", "has_limit", "has_order_by", "has_predicate", "id", "latest_version", "name", "num_tables", "sql", "sql_hash", "table_size", "tags", "updated_at"]
+    __properties: ClassVar[List[str]] = ["category", "created_at", "description", "has_aggregation", "has_group_by", "has_join", "has_limit", "has_order_by", "has_predicate", "id", "latest_version", "name", "num_tables", "params", "sql", "sql_hash", "table_size", "tags", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -87,6 +89,13 @@ class SavedQueryDetail(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in params (list)
+        _items = []
+        if self.params:
+            for _item_params in self.params:
+                if _item_params:
+                    _items.append(_item_params.to_dict())
+            _dict['params'] = _items
         # set to None if category (nullable) is None
         # and model_fields_set contains the field
         if self.category is None and "category" in self.model_fields_set:
@@ -157,6 +166,7 @@ class SavedQueryDetail(BaseModel):
             "latest_version": obj.get("latest_version"),
             "name": obj.get("name"),
             "num_tables": obj.get("num_tables"),
+            "params": [QueryParam.from_dict(_item) for _item in obj["params"]] if obj.get("params") is not None else None,
             "sql": obj.get("sql"),
             "sql_hash": obj.get("sql_hash"),
             "table_size": obj.get("table_size"),

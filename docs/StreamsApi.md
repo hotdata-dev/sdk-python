@@ -195,7 +195,7 @@ Get a stream
 
 Get a stream: its table, status, time column and column hints. After the first request, it also lists each column with its type and role: `time`, `large_text`, `normal`, `map_key` or `extra`.
 
-A `map_key` column holds one key of an object field; `from` names the field and key. The `_extra` column keeps, as JSON text, any field that has no column and any value of the wrong type for its column. `pending_bytes` and `oldest_pending_age_ms` describe accepted rows that the answering server has not stored yet; both are null when it holds none.
+A `map_key` column holds one key of an object field; `from` names the field and key. The `_extra` column keeps, as JSON text, any field that has no column and any value of the wrong type for its column. `pending_bytes` and `oldest_pending_age_ms` describe accepted rows that the answering server has not stored yet; both are null when it holds none. `id_index_up_to_date` says whether every stored row is indexed for each ID column the server indexes; it is omitted when the server does not index IDs.
 
 ### Example
 

@@ -34,8 +34,9 @@ class QueryRequest(BaseModel):
     default_catalog: Optional[StrictStr] = Field(default=None, description="Catalog that unqualified table names resolve to. Defaults to the database's default catalog; an unknown catalog fails with 400.")
     default_schema: Optional[StrictStr] = Field(default=None, description="Schema that unqualified table names resolve to. Defaults to the database's `default_schema`; a schema that does not exist makes unqualified tables fail with \"table not found\".")
     dialect: Optional[StrictStr] = Field(default=None, description="SQL dialect of `sql`: `hotsql` (default), `duckdb`, `postgres`, `snowflake` or `clickhouse`. Other dialects are translated to HotSQL before the query runs.")
+    params: Optional[Dict[str, Any]] = Field(default=None, description="Values for the parameters `sql` names as `$name`, by name. A value is bound as a value, never as SQL text, so it cannot change what the statement does. Works in reads and in `INSERT`, `UPDATE` and `DELETE`. Every `$name` in the SQL needs a value and every value must be used, or the request fails with 400.  Each value takes the type the SQL gives its parameter: `ts >= $start` reads `start` as a timestamp string, `id = $id` as the type of `id`, and a value that does not fit that type is refused. Where the SQL gives the parameter no type (`SELECT $x`), a string, number or boolean keeps its own type; write `CAST($x AS ...)` to choose another, and a null needs a typed position. Parameters are not available in other dialects, and cannot be arguments of `vector_search`, `bm25_search` or the vector distance functions.")
     sql: StrictStr
-    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "database_id", "default_catalog", "default_schema", "dialect", "sql"]
+    __properties: ClassVar[List[str]] = ["async", "async_after_ms", "database_id", "default_catalog", "default_schema", "dialect", "params", "sql"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -105,6 +106,11 @@ class QueryRequest(BaseModel):
         if self.dialect is None and "dialect" in self.model_fields_set:
             _dict['dialect'] = None
 
+        # set to None if params (nullable) is None
+        # and model_fields_set contains the field
+        if self.params is None and "params" in self.model_fields_set:
+            _dict['params'] = None
+
         return _dict
 
     @classmethod
@@ -123,6 +129,7 @@ class QueryRequest(BaseModel):
             "default_catalog": obj.get("default_catalog"),
             "default_schema": obj.get("default_schema"),
             "dialect": obj.get("dialect"),
+            "params": obj.get("params"),
             "sql": obj.get("sql")
         })
         return _obj

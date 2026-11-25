@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **description** | **str** |  | [optional] 
 **name** | **str** |  | 
+**params** | [**List[QueryParam]**](QueryParam.md) | Parameters the SQL uses, written in it as &#x60;$name&#x60;. Each value is checked against its type and bound as a value when the query runs, never as SQL text. Every &#x60;$name&#x60; in the SQL must be declared here, and every declared parameter must appear in the SQL. | [optional] 
 **sql** | **str** |  | 
 **tags** | **List[str]** |  | [optional] 
 
