@@ -52,6 +52,13 @@ class TestListSavedQueryVersionsResponse(unittest.TestCase):
                         has_order_by = True, 
                         has_predicate = True, 
                         num_tables = 56, 
+                        params = [
+                            hotdata.models.query_param.QueryParam(
+                                default = hotdata.models.default.default(), 
+                                description = '', 
+                                name = 'window_start', 
+                                type = 'timestamp', )
+                            ], 
                         sql = '', 
                         sql_hash = '', 
                         table_size = '', 
@@ -76,6 +83,13 @@ class TestListSavedQueryVersionsResponse(unittest.TestCase):
                         has_order_by = True, 
                         has_predicate = True, 
                         num_tables = 56, 
+                        params = [
+                            hotdata.models.query_param.QueryParam(
+                                default = hotdata.models.default.default(), 
+                                description = '', 
+                                name = 'window_start', 
+                                type = 'timestamp', )
+                            ], 
                         sql = '', 
                         sql_hash = '', 
                         table_size = '', 

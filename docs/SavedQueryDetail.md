@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **latest_version** | **int** |  | 
 **name** | **str** |  | 
 **num_tables** | **int** |  | [optional] 
+**params** | [**List[QueryParam]**](QueryParam.md) | Parameters the latest version declares. | 
 **sql** | **str** |  | 
 **sql_hash** | **str** |  | 
 **table_size** | **str** |  | [optional] 

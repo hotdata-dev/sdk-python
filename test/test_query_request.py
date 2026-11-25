@@ -42,6 +42,7 @@ class TestQueryRequest(unittest.TestCase):
                 default_catalog = 'default',
                 default_schema = 'public',
                 dialect = 'hotsql',
+                params = None,
                 sql = 'SELECT customer_id, sum(amount) AS total FROM orders GROUP BY customer_id ORDER BY total DESC LIMIT 10'
             )
         else:

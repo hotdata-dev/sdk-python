@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **column_hints** | [**List[StreamColumnHint]**](StreamColumnHint.md) | Columns the stream was created with. Omitted when there are none. | [optional] 
 **columns** | [**List[StreamColumn]**](StreamColumn.md) | The stream&#39;s columns, in table order. Omitted until the first request sets them. | [optional] 
 **id** | **str** | Stream ID. | 
+**id_index_up_to_date** | **bool** | True when the ID index has recorded every stored row for each ID column the server indexes (trace and span IDs, unless configured otherwise). False while it is catching up, or when a column was added to the index after rows were stored. It reports what the index recorded and does not run a lookup. Lookups by an ID column it does not cover return the same rows, more slowly. Omitted when the server does not index IDs. | [optional] 
 **last_flushed_at** | **datetime** | When rows were last stored. Null before the first time. | [optional] 
 **oldest_pending_age_ms** | **int** | How long the oldest of those rows has waited, in milliseconds. Null when none waits. | [optional] 
 **pending_bytes** | **int** | Bytes of accepted rows that the answering server has not stored yet. Null when it holds none. | [optional] 

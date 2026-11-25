@@ -39,6 +39,13 @@ class TestUpdateSavedQueryRequest(unittest.TestCase):
                 category_override = '',
                 description = '',
                 name = '',
+                params = [
+                    hotdata.models.query_param.QueryParam(
+                        default = hotdata.models.default.default(), 
+                        description = '', 
+                        name = 'window_start', 
+                        type = 'timestamp', )
+                    ],
                 sql = '',
                 table_size_override = '',
                 tags = [

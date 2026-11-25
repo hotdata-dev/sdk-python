@@ -51,6 +51,7 @@ class TestStreamResponse(unittest.TestCase):
                         type = '', )
                     ],
                 id = '',
+                id_index_up_to_date = True,
                 last_flushed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 oldest_pending_age_ms = 0,
                 pending_bytes = 0,

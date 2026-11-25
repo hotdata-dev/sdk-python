@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **has_order_by** | **bool** |  | [optional] 
 **has_predicate** | **bool** |  | [optional] 
 **num_tables** | **int** |  | [optional] 
+**params** | [**List[QueryParam]**](QueryParam.md) | Parameters this version declares. | 
 **sql** | **str** |  | 
 **sql_hash** | **str** |  | 
 **table_size** | **str** |  | [optional] 
